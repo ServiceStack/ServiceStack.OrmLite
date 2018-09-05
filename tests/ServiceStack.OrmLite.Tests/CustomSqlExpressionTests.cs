@@ -47,6 +47,12 @@ namespace ServiceStack.OrmLite.Tests
         public bool BoolVirtProperty => false;
 
         [DataAnnotations.Ignore]
+        public bool? NullableTrueBoolVirtProperty => true;
+
+        [DataAnnotations.Ignore]
+        public bool? NullableNullBoolVirtProperty => null;
+
+        [DataAnnotations.Ignore]
         public Guid GuidVirtProperty => Guid.Parse("00000000-0000-0000-0000-000000000000");
 
         [DataAnnotations.Ignore]
@@ -112,6 +118,10 @@ namespace ServiceStack.OrmLite.Tests
                     return null;
                 if (m.Member.Name == nameof(WaybillBase.BoolVirtProperty))
                     return false;
+                if (m.Member.Name == nameof(WaybillBase.NullableTrueBoolVirtProperty))
+                    return true;
+                if (m.Member.Name == nameof(WaybillBase.NullableNullBoolVirtProperty))
+                    return null;
                 if (m.Member.Name == nameof(WaybillBase.GuidVirtProperty))
                     return Guid.Parse("00000000-0000-0000-0000-000000000000");
                 if (m.Member.Name == nameof(WaybillBase.DateVirtProperty))
@@ -598,6 +608,182 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_Where_using_StringLengthVirtualProperty5()
         {
             System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.VirtPropertyNull.Length == 0 && x.Id > 0;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty6()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.BoolVirtProperty != null;//should be always true
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("where null"));
+
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty7()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => null != x.BoolVirtProperty;//should be always true
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("where null"));
+
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty8()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => null != x.BoolVirtProperty && x.Id > 0;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("where null"));
+
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty9()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.BoolVirtProperty == null;//should be always false
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("where not (null)"));
+
+            var target = Db.Select(q);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty10()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => null == x.BoolVirtProperty;//should be always false
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("where not (null)"));
+
+            var target = Db.Select(q);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty11()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.NullableTrueBoolVirtProperty == null;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("where null"));
+
+            var target = Db.Select(q);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty12()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.NullableTrueBoolVirtProperty != null;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("where not (null)"));
+
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty13()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.NullableNullBoolVirtProperty == null;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty14()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.NullableNullBoolVirtProperty != null;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty15()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.NullableNullBoolVirtProperty == true;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty16()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.BoolVirtProperty != false;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("where null"));
+
+            var target = Db.Select(q);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty17()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.VirtPropertyNull == null;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(3, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty18()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.VirtPropertyNull != null;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty19()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.VirtPropertyNull == "null";
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty20()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.VirtProperty == null;
+
+            var q = Db.From<WaybillBase>().Where(filter);
+            var target = Db.Select(q);
+            Assert.AreEqual(0, target.Count);
+        }
+
+        [Test]
+        public void Can_Where_using_StringLengthVirtualProperty21()
+        {
+            System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => x.VirtProperty == "WaybillVirtPropertyValue";
 
             var q = Db.From<WaybillBase>().Where(filter);
             var target = Db.Select(q);
