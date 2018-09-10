@@ -287,6 +287,13 @@
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/servicestack.ormlite.firebird.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
 
+    <!-- Firebird.Core -->
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird.Core/lib/netstandard2.0" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird.Core/lib/netstandard2.0')" />
+    <Copy SourceFiles="%(FirebirdCoreFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird.Core/lib/netstandard2.0" />
+
+    <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird.Core/servicestack.ormlite.firebird.core.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
+          LogStandardErrorAsError="true" />
+
     <!-- VistaDB -->
 
     <MSBuild Projects="$(SrcDir)/ServiceStack.OrmLite.VistaDb/ServiceStack.OrmLite.VistaDB.csproj"
