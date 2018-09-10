@@ -18,7 +18,7 @@
     <language>en-US</language> 
     <copyright>ServiceStack and contributors</copyright>
     <dependencies>
-      <group targetFramework="net45">
+      <group targetFramework="net452">
         <dependency id="ServiceStack.OrmLite" version="5.0.0" />
         <dependency id="FirebirdSql.Data.FirebirdClient" version="6.3.0" />
       </group>

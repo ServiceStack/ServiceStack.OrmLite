@@ -95,8 +95,9 @@
       <PostgreSqlCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/bin/$(Configuration)/netstandard2.0/ServiceStack.OrmLite.PostgreSQL.*"></PostgreSqlCoreFiles>
 
       <OracleFiles Include="$(SrcDir)/ServiceStack.OrmLite.Oracle/bin/$(Configuration)/net45/ServiceStack.OrmLite.Oracle.*"></OracleFiles>
-      
-      <FirebirdFiles Include="$(SrcDir)/ServiceStack.OrmLite.Firebird/bin/$(Configuration)/net45/ServiceStack.OrmLite.Firebird.*"></FirebirdFiles>
+
+      <FirebirdFiles Include="$(SrcDir)/ServiceStack.OrmLite.Firebird/bin/$(Configuration)/net452/ServiceStack.OrmLite.Firebird.*"></FirebirdFiles>
+      <FirebirdCoreFiles Include="$(SrcDir)/ServiceStack.OrmLite.Firebird/bin/$(Configuration)/netstandard2.0/ServiceStack.OrmLite.Firebird.*"></FirebirdCoreFiles>
 
       <VistaDbFiles Include="$(SrcDir)/ServiceStack.OrmLite.VistaDb/bin/$(Configuration)/net45/ServiceStack.OrmLite.VistaDB.*"></VistaDbFiles>
 
@@ -277,9 +278,12 @@
              Targets="Build"
              Properties="Version=$(PackageVersion);Configuration=$(Configuration)" />
 
-    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/lib/net45" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/lib/net45')" />
-    <Copy SourceFiles="%(FirebirdFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/lib/net45" />
-    
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/lib/net452" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/lib/net452')" />
+    <Copy SourceFiles="%(FirebirdFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/lib/net452" />
+
+    <MakeDir Directories="$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/lib/netstandard2.0" Condition="!Exists('$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/lib/netstandard2.0')" />
+    <Copy SourceFiles="%(FirebirdCoreFiles.Identity)" DestinationFolder="$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/lib/netstandard2.0" />
+
     <Exec Command="&quot;$(NuGetPath)&quot; pack &quot;$(NuGetPackageDir)/ServiceStack.OrmLite.Firebird/servicestack.ormlite.firebird.nuspec&quot; -OutputDirectory &quot;$(NuGetPackageDir)&quot; -Version $(PackageVersion) -Symbols"
             LogStandardErrorAsError="true" />
 
