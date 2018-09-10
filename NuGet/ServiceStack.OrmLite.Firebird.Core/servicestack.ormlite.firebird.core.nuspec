@@ -1,14 +1,13 @@
 <?xml version="1.0"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
   <metadata>
-    <id>ServiceStack.OrmLite.Firebird</id>
-    <title>OrmLite.FireBird - Fast, code-first, config-free Poco ORM</title>
+    <id>ServiceStack.OrmLite.Firebird.Core</id>
+    <title>ServiceStack.OrmLite.Firebird .NET Standard 2.0</title>
     <version>5.0.0</version>
     <authors>ServiceStack, Angel Colmenares</authors> 
     <owners>ServiceStack, Angel Colmenares</owners>
     <description>
-        Light, simple and fast convention-based code-first POCO ORM for Firebird. 
-		Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in Firebird.
+      .NET Standard 2.0 version of ServiceStack.OrmLite.Firebird
     </description> 
     <projectUrl>https://github.com/ServiceStack/ServiceStack.OrmLite</projectUrl>
     <licenseUrl>https://servicestack.net/terms</licenseUrl>
@@ -18,10 +17,6 @@
     <language>en-US</language> 
     <copyright>ServiceStack and contributors</copyright>
     <dependencies>
-      <group targetFramework="net45">
-        <dependency id="ServiceStack.OrmLite" version="5.0.0" />
-        <dependency id="FirebirdSql.Data.FirebirdClient" version="6.3.0" />
-      </group>
       <group targetFramework=".netstandard2.0">
         <dependency id="ServiceStack.OrmLite" version="5.0.0" />
         <dependency id="FirebirdSql.Data.FirebirdClient" version="6.3.0" />
