@@ -197,6 +197,30 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         [Test]
+        public void Can_select_using_Equals()
+        {
+            var postfix = "postfix";
+
+            var expected = new TestType()
+            {
+                IntColumn = 7,
+                BoolColumn = true,
+                StringColumn = postfix
+            };
+
+            Init(10, expected);
+
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.StringColumn.Equals(postfix));
+
+                Assert.IsNotNull(actual);
+                Assert.AreEqual(1, actual.Count);
+                CollectionAssert.Contains(actual, expected);
+            }
+        }
+
+        [Test]
         public void Can_select_using_endsWith()
         {
             var postfix = "postfix";

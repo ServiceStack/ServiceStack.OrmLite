@@ -2660,6 +2660,9 @@ namespace ServiceStack.OrmLite
                 case "ToLower":
                     statement = $"lower({quotedColName})";
                     break;
+                case "Equals":
+                    statement = $"{quotedColName}={ConvertToParam(wildcardArg)}";
+                    break;                
                 case "StartsWith":
                     statement = !OrmLiteConfig.StripUpperInLike
                         ? $"upper({quotedColName}) like {ConvertToParam(wildcardArg.ToUpper() + "%")}{escapeSuffix}"
