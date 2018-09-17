@@ -19,11 +19,11 @@
     <copyright>ServiceStack and contributors</copyright>
     <dependencies>
       <group targetFramework="net45">
-        <dependency id="Npgsql" version="[4.0.2, )" />
+        <dependency id="Npgsql" version="[4.0.3, )" />
         <dependency id="ServiceStack.OrmLite" version="5.0.0" />
       </group>
       <group targetFramework=".netstandard2.0">
-        <dependency id="Npgsql" version="[4.0.2, )" />
+        <dependency id="Npgsql" version="[4.0.3, )" />
         <dependency id="ServiceStack.OrmLite" version="5.0.0" />
       </group>
     </dependencies>
