@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
@@ -13,6 +14,28 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public long? ParentId { get; set; }
 
         public DateTime Created { get; set; }
+    }
+    
+    public class AliasedTable
+    {
+        [AutoIncrement]
+        [PrimaryKey]
+        [Alias("MAINID")]
+        public int Id { get; set; }
+
+        [Alias("DESCRIPTION")]
+        public string Description { get; set; }
+    }
+
+    public class AliasedTableAlt
+    {
+        [AutoIncrement]
+        [PrimaryKey]
+        [Alias("ALTID")]
+        public int Id { get; set; }
+
+        [Alias("DESCRIPTION")]
+        public string Description { get; set; }
     }
 
     [TestFixture]
@@ -78,6 +101,22 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
                 Assert.That(results.Count, Is.EqualTo(2));
             }
+        }
+
+        [Test]
+        public async Task Can_get_RowCount_of_duplicate_aliases_in_AliasedTable()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<AliasedTable>();
+                db.DropAndCreateTable<AliasedTableAlt>();
+
+                var q = db.From<AliasedTable>()
+                    .Join<AliasedTable, AliasedTableAlt>((mainTable, altTable) => mainTable.Id == altTable.Id)
+                    .Where(x => x.Id == 1);
+
+                var result = await db.RowCountAsync(q);
+            }            
         }
     }
 }

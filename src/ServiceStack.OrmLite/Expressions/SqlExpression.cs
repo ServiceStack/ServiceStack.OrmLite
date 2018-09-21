@@ -2384,9 +2384,9 @@ namespace ServiceStack.OrmLite
         {
             OnlyFields = null;
             selectDistinct = distinct;
-
+            
             selectExpression = $"SELECT {(selectDistinct ? "DISTINCT " : "")}" +
-                               (string.IsNullOrEmpty(fields) ? DialectProvider.GetColumnNames(modelDef) : fields);
+               (string.IsNullOrEmpty(fields) ? DialectProvider.GetColumnNames(modelDef, PrefixFieldWithTableName).ToSelectString() : fields);
         }
 
         public IList<string> GetAllFields()
