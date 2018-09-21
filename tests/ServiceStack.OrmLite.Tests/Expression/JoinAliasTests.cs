@@ -5,7 +5,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    public class Task
+    public class Tasked
     {
         [AutoIncrement]
         public long Id { get; set; }
@@ -26,16 +26,16 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Task>();
+                db.DropAndCreateTable<Tasked>();
 
-                var parentId = db.Insert(new Task { Created = new DateTime(2000, 01, 01) }, selectIdentity: true);
-                var childId = db.Insert(new Task { ParentId = parentId, Created = new DateTime(2001, 01, 01) }, selectIdentity:true);
+                var parentId = db.Insert(new Tasked { Created = new DateTime(2000, 01, 01) }, selectIdentity: true);
+                var childId = db.Insert(new Tasked { ParentId = parentId, Created = new DateTime(2001, 01, 01) }, selectIdentity:true);
 
                 var fromDateTime = new DateTime(2000, 02, 02);
 
-                var q = db.From<Task>()
-                    .CustomJoin("LEFT JOIN Task history ON (Task.Id = history.ParentId)")
-                    .Where("history.\"Created\" >= {0} OR Task.\"Created\" >= {0}", fromDateTime);
+                var q = db.From<Tasked>()
+                    .CustomJoin("LEFT JOIN Tasked history ON (Tasked.Id = history.ParentId)")
+                    .Where("history.\"Created\" >= {0} OR Tasked.\"Created\" >= {0}", fromDateTime);
 
                 //doesn't work with Self Joins
                 //var q = db.From<Task>()
@@ -56,19 +56,19 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Task>();
+                db.DropAndCreateTable<Tasked>();
 
-                var parentId = db.Insert(new Task { Created = new DateTime(2000, 01, 01) }, selectIdentity: true);
-                var childId = db.Insert(new Task { ParentId = parentId, Created = new DateTime(2001, 01, 01) }, selectIdentity: true);
+                var parentId = db.Insert(new Tasked { Created = new DateTime(2000, 01, 01) }, selectIdentity: true);
+                var childId = db.Insert(new Tasked { ParentId = parentId, Created = new DateTime(2001, 01, 01) }, selectIdentity: true);
 
-                var q = db.From<Task>();
+                var q = db.From<Tasked>();
 
                 var leftJoin = 
-                    $"LEFT JOIN Task history ON ({q.Column<Task>(t => t.Id, prefixTable:true)} = history.{q.Column<Task>(t => t.ParentId)})";
+                    $"LEFT JOIN Tasked history ON ({q.Column<Tasked>(t => t.Id, prefixTable:true)} = history.{q.Column<Tasked>(t => t.ParentId)})";
                 Assert.That(leftJoin, Is.EqualTo(
-                    $"LEFT JOIN Task history ON ({q.Table<Task>()}.{q.Column<Task>(t => t.Id)} = history.{q.Column<Task>(t => t.ParentId)})"));
+                    $"LEFT JOIN Tasked history ON ({q.Table<Tasked>()}.{q.Column<Tasked>(t => t.Id)} = history.{q.Column<Tasked>(t => t.ParentId)})"));
                 Assert.That(leftJoin, Is.EqualTo(
-                    $"LEFT JOIN Task history ON ({q.Table<Task>()}.{q.Column<Task>(nameof(Task.Id))} = history.{q.Column<Task>(nameof(Task.ParentId))})"));
+                    $"LEFT JOIN Tasked history ON ({q.Table<Tasked>()}.{q.Column<Tasked>(nameof(Tasked.Id))} = history.{q.Column<Tasked>(nameof(Tasked.ParentId))})"));
 
                 q.CustomJoin(leftJoin);
 
