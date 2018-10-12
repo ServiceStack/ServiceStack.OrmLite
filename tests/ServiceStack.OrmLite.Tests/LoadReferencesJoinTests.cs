@@ -837,9 +837,6 @@ Customer Address:
             ResetTables();
             AddCustomerWithOrders();
 
-            var sql = "";
-            OrmLiteConfig.BeforeExecFilter = cmd => sql = cmd.GetDebugString();
-
             var q = db.From<Customer>()
                 .Join<Customer, CustomerAddress>();
 
@@ -854,7 +851,7 @@ Customer Address:
                 sb.AppendLine(tuple.Item2.Dump());
             }
 
-            OrmLiteConfig.BeforeExecFilter = null;
+            var sql = db.GetLastSql();
             Assert.That(sql, Does.Contain("SELECT DISTINCT"));
 
             Assert.That(sb.ToString().NormalizeNewLines().Trim(), Is.EqualTo(
