@@ -830,6 +830,47 @@ Customer Address:
 	Country: Australia
 }".NormalizeNewLines()));
         }
+        
+        [Test]
+        public void Can_populate_multiple_POCOs_using_SelectMulti2_Distinct()
+        {
+            ResetTables();
+            AddCustomerWithOrders();
+
+            var sql = "";
+            OrmLiteConfig.BeforeExecFilter = cmd => sql = cmd.GetDebugString();
+
+            var q = db.From<Customer>()
+                .Join<Customer, CustomerAddress>();
+
+            var tuples = db.SelectMulti<Customer, CustomerAddress>(q.SelectDistinct());
+
+            var sb = new StringBuilder();
+            foreach (var tuple in tuples)
+            {
+                sb.AppendLine("Customer:");
+                sb.AppendLine(tuple.Item1.Dump());
+                sb.AppendLine("Customer Address:");
+                sb.AppendLine(tuple.Item2.Dump());
+            }
+
+            OrmLiteConfig.BeforeExecFilter = null;
+            Assert.That(sql, Does.Contain("SELECT DISTINCT"));
+
+            Assert.That(sb.ToString().NormalizeNewLines().Trim(), Is.EqualTo(
+                @"Customer:
+{
+	Id: 1,
+	Name: Customer 1
+}
+Customer Address:
+{
+	Id: 1,
+	CustomerId: 1,
+	AddressLine1: 1 Australia Street,
+	Country: Australia
+}".NormalizeNewLines()));
+        }
 
         [Test]
         public void Can_populate_multiple_POCOs_using_SelectMulti3()

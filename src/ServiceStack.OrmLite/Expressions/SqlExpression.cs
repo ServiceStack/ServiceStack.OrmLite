@@ -107,6 +107,9 @@ namespace ServiceStack.OrmLite
             return Select(string.Empty);
         }
 
+        internal SqlExpression<T> SelectIfDistinct(string selectExpression) => 
+            selectDistinct ? SelectDistinct(selectExpression) : Select(selectExpression);
+
         /// <summary>
         /// set the specified selectExpression.
         /// </summary>
