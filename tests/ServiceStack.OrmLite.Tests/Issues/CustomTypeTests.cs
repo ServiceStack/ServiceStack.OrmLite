@@ -8,33 +8,52 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixture]
     public class CustomTypeTests : OrmLiteTestBase
     {
-        public class PocoWithGuid
+        public class PocoWithCustomTypes
         {
             [AutoIncrement]
             public int Id { get; set; }
 
             [Index]
             public Guid Guid { get; set; }
+            
+            public Uri Uri { get; set; }
         }
 
         [Test]
         public void Can_select_Guid()
         {
-            LogManager.LogFactory = new ConsoleLogFactory();
-            
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<PocoWithGuid>();
+                db.DropAndCreateTable<PocoWithCustomTypes>();
 
-                var dto = new PocoWithGuid
+                var dto = new PocoWithCustomTypes
                 {
                     Guid = Guid.NewGuid()
                 };
 
                 long id = db.Insert(dto, selectIdentity: true);
-                var row = db.Single<PocoWithGuid>(r => r.Id == id);
+                var row = db.Single<PocoWithCustomTypes>(r => r.Id == id);
 
                 Assert.That(row.Guid, Is.EqualTo(dto.Guid));
+            }
+        }
+
+        [Test]
+        public void Can_select_Uri()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PocoWithCustomTypes>();
+
+                var dto = new PocoWithCustomTypes
+                {
+                    Uri = new Uri("http://a.com")
+                };
+
+                long id = db.Insert(dto, selectIdentity: true);
+                var row = db.Single<PocoWithCustomTypes>(r => r.Id == id);
+
+                Assert.That(row.Uri.ToString(), Is.EqualTo(dto.Uri.ToString()));
             }
         }
     }
