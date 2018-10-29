@@ -533,8 +533,8 @@ namespace ServiceStack.OrmLite
 
         private static string WhereExpressionToString(object expression)
         {
-            if (expression is bool)
-                return (bool)expression ? TrueLiteral : FalseLiteral;
+            if (expression is bool b)
+                return b ? TrueLiteral : FalseLiteral;
             return expression.ToString();
         }
 
