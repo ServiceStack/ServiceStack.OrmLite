@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
 		// object to json string
 		public override object ToDbValue(Type fieldType, object value)
 		{
-			if (value.GetType().HasAttribute<SqlJsonAttribute>())
+			if (value.GetType().HasAttributeCached<SqlJsonAttribute>())
 				return JsonSerializer.SerializeToString(value, value.GetType());
 
 			return base.ToDbValue(fieldType, value);
