@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
 		// json string to object
 		public override object FromDbValue(Type fieldType, object value)
 		{
-			if (value is string raw && fieldType.HasAttribute<SqlJsonAttribute>())
+			if (value is string raw && fieldType.HasAttributeCached<SqlJsonAttribute>())
 				return JsonSerializer.DeserializeFromString(raw, fieldType);
 
 			return base.FromDbValue(fieldType, value);
