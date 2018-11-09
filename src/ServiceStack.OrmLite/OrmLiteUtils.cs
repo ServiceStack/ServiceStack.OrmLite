@@ -169,7 +169,7 @@ namespace ServiceStack.OrmLite
                 if (field == null) break;
 
                 var fieldType = field.FieldInfo.FieldType;
-                var converter = dialectProvider.GetConverter(fieldType);
+                var converter = dialectProvider.GetConverterBestMatch(fieldType);
                                 
                 var dbValue = converter.GetValue(reader, i, values);
                 if (dbValue == null)

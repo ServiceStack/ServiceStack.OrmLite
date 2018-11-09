@@ -440,6 +440,22 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(flagsEnum, Is.EqualTo(FlagsEnum.FlagTwo));
             }
         }
+
+        [Test]
+        public void Can_select_enum_using_tuple()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithEnum>();
+
+                db.Insert(new TypeWithEnum { Id = 1, EnumValue = SomeEnum.Value2 });
+
+                var q = db.From<TypeWithEnum>().Select(x => new { x.EnumValue, x.Id });
+                var rows = db.Select<(SomeEnum someEnum, int id)>(q);
+                
+                Assert.That(rows[0].someEnum, Is.EqualTo(SomeEnum.Value2));
+            }
+        }
     }
 
 
