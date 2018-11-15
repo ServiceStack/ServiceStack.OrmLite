@@ -2664,6 +2664,13 @@ namespace ServiceStack.OrmLite
                     statement = $"lower({quotedColName})";
                     break;
                 case "Equals":
+                    var arg = args[0];
+                    var argType = arg?.GetType();
+                    var converter = argType != null ? DialectProvider.GetConverterBestMatch(argType) : null;
+                    if (converter != null)
+                    {
+                        wildcardArg = converter.ToDbValue(argType, arg).ToString();
+                    }
                     statement = $"{quotedColName}={ConvertToParam(wildcardArg)}";
                     break;                
                 case "StartsWith":

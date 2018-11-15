@@ -339,6 +339,24 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Can_use_Equals_in_SqlExpression_with_EnumAsInt()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithEnumAsInt>();
+                db.Save(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value1 });
+                db.Save(new TypeWithEnumAsInt { Id = 2, EnumValue = SomeEnumAsInt.Value2 });
+                db.Save(new TypeWithEnumAsInt { Id = 3, EnumValue = SomeEnumAsInt.Value3 });
+
+                var row = db.Single<TypeWithEnumAsInt>(x => x.EnumValue == SomeEnumAsInt.Value2);
+                Assert.That(row.Id, Is.EqualTo(2));
+
+                row = db.Single<TypeWithEnumAsInt>(x => x.EnumValue.Equals(SomeEnumAsInt.Value2));
+                Assert.That(row.Id, Is.EqualTo(2));
+            }
+        }
+
+        [Test]
         public void Does_save_Enum_with_label_by_default()
         {
             using (var db = OpenDbConnection())
