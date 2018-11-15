@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
@@ -270,6 +271,42 @@ namespace ServiceStack.OrmLite.Tests
                 }
 
                 Assert.That(db.Count<MyTable>(), Is.EqualTo(2));
+            }
+        }
+        
+        public class TestRollback 
+        {
+            [AutoIncrement]
+            public int Id { get; set; }
+
+            [Required]
+            public string Data { get; set; }
+        }
+
+        [Test]
+        public void Does_rollback_Serializable_transaction()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TestRollback>();
+                
+                using (var transaction = db.OpenTransaction(IsolationLevel.Serializable))
+                {
+                    try
+                    {
+                        var test = new TestRollback();
+                        //test.Data = "This is test1";
+                        var saved = db.Save(test); //This will fail because test.Data is required
+                        transaction.Commit();
+                    }
+                    catch (Exception e)
+                    {
+                        transaction.Rollback();
+                    }
+                }
+
+                var rows = db.Select<TestRollback>();
+                Assert.That(rows.Count, Is.EqualTo(0));
             }
         }
 
