@@ -2669,7 +2669,7 @@ namespace ServiceStack.OrmLite
                     var converter = argType != null ? DialectProvider.GetConverterBestMatch(argType) : null;
                     if (converter != null)
                     {
-                        wildcardArg = converter.ToDbValue(argType, arg).ToString();
+                        wildcardArg = converter.ToQuotedString(argType, arg);
                     }
                     statement = $"{quotedColName}={ConvertToParam(wildcardArg)}";
                     break;                
