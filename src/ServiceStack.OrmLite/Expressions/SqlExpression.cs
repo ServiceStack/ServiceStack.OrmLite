@@ -2644,7 +2644,8 @@ namespace ServiceStack.OrmLite
 
             var statement = "";
 
-            var wildcardArg = args.Count > 0 ? DialectProvider.EscapeWildcards(args[0].ToString()) : "";
+            var arg = args.Count > 0 ? args[0] : null;
+            var wildcardArg = arg != null ? DialectProvider.EscapeWildcards(arg.ToString()) : "";
             var escapeSuffix = wildcardArg.IndexOf('^') >= 0 ? " escape '^'" : "";
             switch (m.Method.Name)
             {
@@ -2664,14 +2665,13 @@ namespace ServiceStack.OrmLite
                     statement = $"lower({quotedColName})";
                     break;
                 case "Equals":
-                    var arg = args[0];
                     var argType = arg?.GetType();
-                    var converter = argType != null ? DialectProvider.GetConverterBestMatch(argType) : null;
-                    if (converter != null)
-                    {
-                        wildcardArg = converter.ToQuotedString(argType, arg);
-                    }
-                    statement = $"{quotedColName}={ConvertToParam(wildcardArg)}";
+                    var converter = argType != null && argType != typeof(string) 
+                        ? DialectProvider.GetConverterBestMatch(argType) 
+                        : null;
+                    statement = converter != null
+                        ? $"{quotedColName}={ConvertToParam(converter.ToDbValue(argType, arg))}"
+                        : $"{quotedColName}={ConvertToParam(wildcardArg)}";
                     break;                
                 case "StartsWith":
                     statement = !OrmLiteConfig.StripUpperInLike
