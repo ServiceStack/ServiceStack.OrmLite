@@ -20,7 +20,7 @@ namespace ServiceStack.OrmLite
         {
             try
             {
-                using (var db = DbFactory.Open())
+                using (var db = await DbFactory.OpenDbConnectionAsync(options as Dictionary<string, object>))
                 {
                     var result = await fn(db);
                     return result;

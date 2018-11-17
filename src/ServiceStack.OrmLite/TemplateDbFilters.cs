@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite
         {
             try
             {
-                using (var db = DbFactory.Open())
+                using (var db = DbFactory.OpenDbConnection(options as Dictionary<string, object>))
                 {
                     return fn(db);
                 }
