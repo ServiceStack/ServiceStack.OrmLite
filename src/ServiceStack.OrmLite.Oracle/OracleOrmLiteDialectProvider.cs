@@ -20,6 +20,8 @@ namespace ServiceStack.OrmLite.Oracle
         public const string ManagedProvider = "Oracle.ManagedDataAccess.Client";
         public const string MicrosoftProvider = "System.Data.OracleClient";
 
+        public string AutoIdGuidFunction { get; set; } = "SYS_GUID()";
+
         protected readonly List<string> ReservedNames = new List<string>
         {
             "ACCESS", "DEFAULT", "INTEGER", "ONLINE", "START", "ADD", "DELETE", "INTERSECT", "OPTION", "SUCCESSFUL", "ALL", "DESC",
@@ -626,6 +628,13 @@ namespace ServiceStack.OrmLite.Oracle
 
             var definition = StringBuilderCache.ReturnAndFree(sql);
             return definition;
+        }
+
+        public override string GetAutoIdDefaultValue(FieldDefinition fieldDef)
+        {
+            return fieldDef.FieldType == typeof(Guid)
+                ? AutoIdGuidFunction
+                : null;
         }
 
         public override List<string> ToCreateIndexStatements(Type tableType)
