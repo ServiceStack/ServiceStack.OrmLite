@@ -18,9 +18,6 @@ namespace ServiceStack.OrmLite
 
         public async Task<IDbConnection> OpenDbConnectionAsync(TemplateScopeContext scope, Dictionary<string, object> options)
         {
-            if (scope.PageResult.Args.TryGetValue("__dbinfo", out var oDbInfo) && oDbInfo is ConnectionInfo dbInfo)
-                return await DbFactory.OpenDbConnectionAsync(dbInfo);
-
             if (options != null)
             {
                 if (options.TryGetValue("connectionString", out var connectionString))
@@ -32,7 +29,10 @@ namespace ServiceStack.OrmLite
                     return await DbFactory.OpenDbConnectionAsync((string)namedConnection);
             }
             
-            return await DbFactory.OpenDbConnectionAsync();
+            if (scope.PageResult.Args.TryGetValue("__dbinfo", out var oDbInfo) && oDbInfo is ConnectionInfo dbInfo) // Keywords,DbInfo
+                return await DbFactory.OpenDbConnectionAsync(dbInfo);
+
+            return await DbFactory.OpenAsync();
         }
 
         async Task<object> exec<T>(Func<IDbConnection, Task<T>> fn, TemplateScopeContext scope, object options)

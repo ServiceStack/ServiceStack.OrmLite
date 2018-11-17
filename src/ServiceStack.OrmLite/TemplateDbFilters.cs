@@ -17,9 +17,6 @@ namespace ServiceStack.OrmLite
 
         public IDbConnection OpenDbConnection(TemplateScopeContext scope, Dictionary<string, object> options)
         {
-            if (scope.PageResult.Args.TryGetValue("__dbinfo", out var oDbInfo) && oDbInfo is ConnectionInfo dbInfo)
-                return DbFactory.OpenDbConnection(dbInfo);
-
             if (options != null)
             {
                 if (options.TryGetValue("connectionString", out var connectionString))
@@ -31,6 +28,9 @@ namespace ServiceStack.OrmLite
                     return DbFactory.OpenDbConnection((string)namedConnection);
             }
             
+            if (scope.PageResult.Args.TryGetValue("__dbinfo", out var oDbInfo) && oDbInfo is ConnectionInfo dbInfo) // Keywords,DbInfo
+                return DbFactory.OpenDbConnection(dbInfo);
+
             return DbFactory.OpenDbConnection();
         }
 
