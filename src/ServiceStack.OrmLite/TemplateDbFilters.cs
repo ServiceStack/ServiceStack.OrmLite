@@ -15,11 +15,30 @@ namespace ServiceStack.OrmLite
             set => dbFactory = value;
         }
 
+        public IDbConnection OpenDbConnection(TemplateScopeContext scope, Dictionary<string, object> options)
+        {
+            if (scope.PageResult.Args.TryGetValue("__dbinfo", out var oDbInfo) && oDbInfo is ConnectionInfo dbInfo)
+                return DbFactory.OpenDbConnection(dbInfo);
+
+            if (options != null)
+            {
+                if (options.TryGetValue("connectionString", out var connectionString))
+                    return options.TryGetValue("providerName", out var providerName)
+                       ? DbFactory.OpenDbConnectionString((string)connectionString, (string)providerName) 
+                       : DbFactory.OpenDbConnectionString((string)connectionString);
+                
+                if (options.TryGetValue("namedConnection", out var namedConnection))
+                    return DbFactory.OpenDbConnection((string)namedConnection);
+            }
+            
+            return DbFactory.OpenDbConnection();
+        }
+
         T exec<T>(Func<IDbConnection, T> fn, TemplateScopeContext scope, object options)
         {
             try
             {
-                using (var db = DbFactory.OpenDbConnection(options as Dictionary<string, object>))
+                using (var db = OpenDbConnection(scope, options as Dictionary<string, object>))
                 {
                     return fn(db);
                 }

@@ -16,11 +16,30 @@ namespace ServiceStack.OrmLite
             set => dbFactory = value;
         }
 
+        public async Task<IDbConnection> OpenDbConnectionAsync(TemplateScopeContext scope, Dictionary<string, object> options)
+        {
+            if (scope.PageResult.Args.TryGetValue("__dbinfo", out var oDbInfo) && oDbInfo is ConnectionInfo dbInfo)
+                return await DbFactory.OpenDbConnectionAsync(dbInfo);
+
+            if (options != null)
+            {
+                if (options.TryGetValue("connectionString", out var connectionString))
+                    return options.TryGetValue("providerName", out var providerName)
+                        ? await DbFactory.OpenDbConnectionStringAsync((string)connectionString, (string)providerName) 
+                        : await DbFactory.OpenDbConnectionStringAsync((string)connectionString);
+                
+                if (options.TryGetValue("namedConnection", out var namedConnection))
+                    return await DbFactory.OpenDbConnectionAsync((string)namedConnection);
+            }
+            
+            return await DbFactory.OpenDbConnectionAsync();
+        }
+
         async Task<object> exec<T>(Func<IDbConnection, Task<T>> fn, TemplateScopeContext scope, object options)
         {
             try
             {
-                using (var db = await DbFactory.OpenDbConnectionAsync(options as Dictionary<string, object>))
+                using (var db = await OpenDbConnectionAsync(scope, options as Dictionary<string, object>))
                 {
                     var result = await fn(db);
                     return result;

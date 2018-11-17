@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
+using ServiceStack;
 using ServiceStack.Data;
+using ServiceStack.Templates;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -137,7 +139,7 @@ namespace ServiceStack.OrmLite
             return connection;
         }
 
-        public virtual async Task<IDbConnection> OpenDbConnectionStringAsync(string connectionString)
+        public virtual async Task<IDbConnection> OpenDbConnectionStringAsync(string connectionString, CancellationToken token = default(CancellationToken))
         {
             if (connectionString == null)
                 throw new ArgumentNullException(nameof(connectionString));
@@ -147,7 +149,7 @@ namespace ServiceStack.OrmLite
                 ConnectionString = connectionString
             };
 
-            await connection.OpenAsync();
+            await connection.OpenAsync(token);
 
             return connection;
         }
@@ -167,7 +169,7 @@ namespace ServiceStack.OrmLite
             return dbFactory.OpenDbConnection();
         }
 
-        public virtual async Task<IDbConnection> OpenDbConnectionStringAsync(string connectionString, string providerName)
+        public virtual async Task<IDbConnection> OpenDbConnectionStringAsync(string connectionString, string providerName, CancellationToken token = default(CancellationToken))
         {
             if (connectionString == null)
                 throw new ArgumentNullException(nameof(connectionString));
@@ -179,7 +181,7 @@ namespace ServiceStack.OrmLite
 
             var dbFactory = new OrmLiteConnectionFactory(connectionString, dialectProvider, setGlobalDialectProvider:false);
 
-            return await dbFactory.OpenDbConnectionAsync();
+            return await dbFactory.OpenDbConnectionAsync(token);
         }
 
         public virtual IDbConnection OpenDbConnection(string namedConnection)
@@ -257,6 +259,11 @@ namespace ServiceStack.OrmLite
             return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnection(namedConnection);
         }
 
+        public static Task<IDbConnection> OpenDbConnectionAsync(this IDbConnectionFactory connectionFactory, string namedConnection, CancellationToken token = default(CancellationToken))
+        {
+            return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionAsync(namedConnection, token);
+        }
+
         /// <summary>
         /// Alias for OpenDbConnection
         /// </summary>
@@ -265,14 +272,19 @@ namespace ServiceStack.OrmLite
             return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionString(connectionString);
         }
 
-        public static Task<IDbConnection> OpenDbConnectionStringAsync(this IDbConnectionFactory connectionFactory, string connectionString)
+        public static IDbConnection OpenDbConnectionString(this IDbConnectionFactory connectionFactory, string connectionString, string providerName)
         {
-            return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionStringAsync(connectionString);
+            return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionString(connectionString, providerName);
         }
 
-        public static Task<IDbConnection> OpenDbConnectionStringAsync(this IDbConnectionFactory connectionFactory, string connectionString, string providerName)
+        public static Task<IDbConnection> OpenDbConnectionStringAsync(this IDbConnectionFactory connectionFactory, string connectionString, CancellationToken token = default(CancellationToken))
         {
-            return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionStringAsync(connectionString, providerName);
+            return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionStringAsync(connectionString, token);
+        }
+
+        public static Task<IDbConnection> OpenDbConnectionStringAsync(this IDbConnectionFactory connectionFactory, string connectionString, string providerName, CancellationToken token = default(CancellationToken))
+        {
+            return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionStringAsync(connectionString, providerName, token);
         }
 
         public static IDbConnection ToDbConnection(this IDbConnection db)
@@ -305,41 +317,39 @@ namespace ServiceStack.OrmLite
         {
             ((OrmLiteConnectionFactory)dbFactory).RegisterConnection(namedConnection, connectionFactory);
         }
-
-        public static IDbConnection OpenDbConnection(this IDbConnectionFactory dbFactory, Dictionary<string, object> args)
+        
+        public static IDbConnection OpenDbConnection(this IDbConnectionFactory dbFactory, ConnectionInfo connInfo)
         {            
-            if (dbFactory is IDbConnectionFactoryExtended dbFactoryExt && args != null)
+            if (dbFactory is IDbConnectionFactoryExtended dbFactoryExt && connInfo != null)
             {
-                if (args.TryGetValue("namedConnection", out var namedConnection))
-                    return dbFactoryExt.OpenDbConnection((string) namedConnection);
-                
-                if (args.TryGetValue("connectionString", out var connectionString))
+                if (connInfo.ConnectionString != null)
                 {
-                    if (args.TryGetValue("providerName", out var providerName))
-                        return dbFactoryExt.OpenDbConnectionString((string) connectionString, (string) providerName);
-
-                    return dbFactoryExt.OpenDbConnectionString((string) connectionString);
+                    return connInfo.ProviderName != null 
+                        ? dbFactoryExt.OpenDbConnectionString(connInfo.ConnectionString, connInfo.ProviderName) 
+                        : dbFactoryExt.OpenDbConnectionString(connInfo.ConnectionString);
                 }
+
+                if (connInfo.NamedConnection != null)
+                    return dbFactoryExt.OpenDbConnection(connInfo.NamedConnection);
             }
             return dbFactory.Open();
         }
 
-        public static async Task<IDbConnection> OpenDbConnectionAsync(this IDbConnectionFactory dbFactory, Dictionary<string, object> args)
+        public static async Task<IDbConnection> OpenDbConnectionAsync(this IDbConnectionFactory dbFactory, ConnectionInfo connInfo)
         {            
-            if (dbFactory is IDbConnectionFactoryExtended dbFactoryExt && args != null)
+            if (dbFactory is IDbConnectionFactoryExtended dbFactoryExt && connInfo != null)
             {
-                if (args.TryGetValue("namedConnection", out var namedConnection))
-                    return await dbFactoryExt.OpenAsync((string) namedConnection);
-                
-                if (args.TryGetValue("connectionString", out var connectionString))
+                if (connInfo.ConnectionString != null)
                 {
-                    if (args.TryGetValue("providerName", out var providerName))
-                        return await dbFactoryExt.OpenDbConnectionStringAsync((string) connectionString, (string) providerName);
-
-                    return await dbFactoryExt.OpenDbConnectionStringAsync((string) connectionString);
+                    return connInfo.ProviderName != null 
+                        ? await dbFactoryExt.OpenDbConnectionStringAsync(connInfo.ConnectionString, connInfo.ProviderName) 
+                        : await dbFactoryExt.OpenDbConnectionStringAsync(connInfo.ConnectionString);
                 }
+
+                if (connInfo.NamedConnection != null)
+                    return await dbFactoryExt.OpenDbConnectionAsync(connInfo.NamedConnection);
             }
-            return dbFactory.Open();
+            return await dbFactory.OpenAsync();
         }
     }
 }
