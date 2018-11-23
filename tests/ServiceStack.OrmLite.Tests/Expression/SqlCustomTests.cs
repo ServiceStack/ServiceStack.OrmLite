@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {

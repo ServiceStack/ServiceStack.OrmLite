@@ -46,6 +46,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     statement = DialectProvider.GetQuotedTableName(argDef) + ".*";
                     break;
                 case nameof(Sql.JoinAlias):
+                case nameof(Sql.TableAlias):
                     statement = args[0] + "." + quotedColName.ToString().LastRightPart('.');
                     break;
                 case nameof(Sql.Custom):

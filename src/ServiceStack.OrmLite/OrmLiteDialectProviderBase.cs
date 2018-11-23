@@ -517,12 +517,14 @@ namespace ServiceStack.OrmLite
         
         public virtual string GetColumnNames(ModelDefinition modelDef)
         {
-            return GetColumnNames(modelDef, false).ToSelectString();
+            return GetColumnNames(modelDef, null).ToSelectString();
         }
 
-        public virtual SelectItem[] GetColumnNames(ModelDefinition modelDef, bool tableQualified)
+        public virtual SelectItem[] GetColumnNames(ModelDefinition modelDef, string tablePrefix)
         {
-            var tablePrefix = tableQualified ? GetQuotedTableName(modelDef) : "";
+            var quotedPrefix = tablePrefix != null 
+                ? GetQuotedTableName(tablePrefix, modelDef.Schema) 
+                : "";
 
             var sqlColumns = new SelectItem[modelDef.FieldDefinitions.Count];
             for (var i = 0; i < sqlColumns.Length; ++i)
@@ -535,11 +537,11 @@ namespace ServiceStack.OrmLite
                 }
                 else if (field.IsRowVersion)
                 {
-                    sqlColumns[i] = GetRowVersionSelectColumn(field, tablePrefix);
+                    sqlColumns[i] = GetRowVersionSelectColumn(field, quotedPrefix);
                 }
                 else
                 {
-                    sqlColumns[i] = new SelectItemColumn(this, field.FieldName, null, tablePrefix);
+                    sqlColumns[i] = new SelectItemColumn(this, field.FieldName, null, quotedPrefix);
                 }
             }
 
@@ -816,9 +818,9 @@ namespace ServiceStack.OrmLite
             AddParameter(cmd, fieldDef);
         }
 
-        public virtual bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, IDictionary<string, object> deleteFields)
+        public virtual bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, IDictionary<string, object> deleteFieldValues)
         {
-            if (deleteFields == null || deleteFields.Count == 0)
+            if (deleteFieldValues == null || deleteFieldValues.Count == 0)
                 throw new ArgumentException("DELETE's must have at least 1 criteria");
 
             var sqlFilter = StringBuilderCache.Allocate();
@@ -832,7 +834,7 @@ namespace ServiceStack.OrmLite
                 if (fieldDef.ShouldSkipDelete())
                     continue;
 
-                if (!deleteFields.TryGetValue(fieldDef.Name, out var fieldValue))
+                if (!deleteFieldValues.TryGetValue(fieldDef.Name, out var fieldValue))
                     continue;
 
                 if (fieldDef.IsRowVersion)

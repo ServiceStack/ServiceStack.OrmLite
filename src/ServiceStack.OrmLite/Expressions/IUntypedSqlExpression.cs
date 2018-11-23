@@ -13,6 +13,7 @@ namespace ServiceStack.OrmLite
 
     public interface IUntypedSqlExpression : ISqlExpression
     {
+        string TableAlias { get; set; }
         bool PrefixFieldWithTableName { get; set; }
         bool WhereStatementWithoutWhereString { get; set; }
         IOrmLiteDialectProvider DialectProvider { get; set; }
@@ -109,6 +110,12 @@ namespace ServiceStack.OrmLite
         public UntypedSqlExpressionProxy(SqlExpression<T> q)
         {
             this.q = q;
+        }
+
+        public string TableAlias
+        {
+            get { return q.TableAlias; }
+            set { q.TableAlias = value; }
         }
 
         public bool PrefixFieldWithTableName

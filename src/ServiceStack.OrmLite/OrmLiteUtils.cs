@@ -1088,5 +1088,11 @@ namespace ServiceStack.OrmLite
             var model = factoryFn();
             return model;
         }
+
+        public static JoinFormatDelegate JoinAlias(string alias)
+        {
+            return (dialect, tableDef, expr) =>
+                $"{dialect.GetQuotedTableName(tableDef)} {alias} {expr.Replace(dialect.GetQuotedTableName(tableDef), dialect.GetQuotedTableName(alias))}";
+        }
     }
 }

@@ -69,12 +69,21 @@ namespace ServiceStack.OrmLite
             expr.From(fromExpression);
             return expr;
         }
-
-        public static JoinFormatDelegate JoinAlias(this IDbConnection dbConn, string alias)
+                
+        public static SqlExpression<T> From<T>(this IDbConnection dbConn, TableOptions options)
         {
-            return (dialect, tableDef, expr) =>
-                $"{dialect.GetQuotedTableName(tableDef)} {alias} {expr.Replace(dialect.GetQuotedTableName(tableDef), dialect.GetQuotedTableName(alias))}";
+            var expr = dbConn.GetExecFilter().SqlExpression<T>(dbConn);
+            if (!string.IsNullOrEmpty(options.Expression))
+                expr.From(options.Expression);
+            if (!string.IsNullOrEmpty(options.Alias))
+                expr.SetTableAlias(options.Alias);
+            return expr;
         }
+
+        [Obsolete("Use TableAlias")]
+        public static JoinFormatDelegate JoinAlias(this IDbConnection db, string alias) => OrmLiteUtils.JoinAlias(alias);
+
+        public static TableOptions TableAlias(this IDbConnection db, string alias) => new TableOptions { Alias = alias };
 
         public static string GetTableName<T>(this IDbConnection db)
         {

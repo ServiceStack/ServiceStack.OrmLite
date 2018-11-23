@@ -116,7 +116,29 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     .Where(x => x.Id == 1);
 
                 var result = await db.RowCountAsync(q);
-            }            
+            }
+        }
+
+        [Test]
+        public void Can_use_JoinAlias_on_source_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Tasked>();
+
+                var parentId = db.Insert(new Tasked { Created = new DateTime(2000, 01, 01) }, selectIdentity: true);
+                var childId = db.Insert(new Tasked { ParentId = parentId, Created = new DateTime(2001, 01, 01) }, selectIdentity: true);
+
+                var q = db.From<Tasked>(db.TableAlias("s"))
+                    .Join<Tasked>((t1, t2) => t1.ParentId == t2.Id, db.TableAlias("t"));
+
+                var rows = db.Select(q);
+                rows.PrintDump();
+                
+                Assert.That(rows.Count, Is.EqualTo(1));
+                Assert.That(rows[0].Id, Is.EqualTo(2));
+                Assert.That(rows[0].ParentId, Is.EqualTo(1));
+            }
         }
     }
 }

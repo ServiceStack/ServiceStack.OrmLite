@@ -108,7 +108,7 @@ namespace ServiceStack.OrmLite
 
         string ToSelectStatement(ModelDefinition modelDef, string selectExpression, string bodyExpression, string orderByExpression = null, int? offset = null, int? rows = null);
 
-        string ToInsertRowStatement(IDbCommand cmd, object objWithProperties, ICollection<string> InsertFields = null);
+        string ToInsertRowStatement(IDbCommand cmd, object objWithProperties, ICollection<string> insertFields = null);
 
         void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null);
 
@@ -116,7 +116,7 @@ namespace ServiceStack.OrmLite
         bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null);
 
         /// <returns>If had RowVersion</returns>
-        bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, IDictionary<string, object> delteFieldValues);
+        bool PrepareParameterizedDeleteStatement<T>(IDbCommand cmd, IDictionary<string, object> deleteFieldValues);
 
         void PrepareStoredProcedureStatement<T>(IDbCommand cmd, T obj);
 
@@ -129,7 +129,7 @@ namespace ServiceStack.OrmLite
         object GetFieldValue(FieldDefinition fieldDef, object value);
         object GetFieldValue(Type fieldType, object value);
 
-        void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> UpdateFields = null);
+        void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields = null);
 
         void PrepareUpdateRowStatement<T>(IDbCommand dbCmd, Dictionary<string, object> args, string sqlFilter);
 
@@ -166,7 +166,7 @@ namespace ServiceStack.OrmLite
         bool DoesTableExist(IDbConnection db, string tableName, string schema = null);
         bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null);
         bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null);
-        bool DoesSequenceExist(IDbCommand dbCmd, string sequencName);
+        bool DoesSequenceExist(IDbCommand dbCmd, string sequenceName);
 
         void DropColumn(IDbConnection db, Type modelType, string columnName);
 
@@ -176,7 +176,7 @@ namespace ServiceStack.OrmLite
         string GetRowVersionColumn(FieldDefinition field, string tablePrefix = null);
 
         string GetColumnNames(ModelDefinition modelDef);
-        SelectItem[] GetColumnNames(ModelDefinition modelDef, bool tableQualified);
+        SelectItem[] GetColumnNames(ModelDefinition modelDef, string tablePrefix);
 
         SqlExpression<T> SqlExpression<T>();
 
