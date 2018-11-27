@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
@@ -240,5 +242,32 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
         
+        [Test]
+        public void Does_select_aliases_on_constant_expressions()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+                db.Insert(new LetterFrequency { Letter = "A" });
+
+                var q = db.From<LetterFrequency>()
+                    .Select(x => new
+                    {
+                        param = 1,
+                        descr = x.Letter,
+                        str = "hi",
+                        date = DateTime.Now
+                    });
+
+                var results = db.Select<Dictionary<string,object>>(q)[0];
+                
+                Assert.That(results["param"], Is.EqualTo(1));
+                Assert.That(results["descr"], Is.EqualTo("A"));
+                Assert.That(results["str"], Is.EqualTo("hi"));
+                Assert.That(DateTime.Parse(results["date"].ToString()).Date, Is.EqualTo(DateTime.Now.Date));
+            }
+        }
+
+
     }
 }

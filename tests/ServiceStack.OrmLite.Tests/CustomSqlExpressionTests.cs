@@ -466,7 +466,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_Where_using_constant_coniditionalOrderBy()
+        public void Can_Where_using_constant_conditionalOrderBy()
         {
             System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => !x.BoolVirtProperty &&
                                                                                       x.VirtPropertyEmpty != "WaybillVirtPropertyValue" &&
@@ -502,7 +502,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_Where_using_guid_constant_coniditional()
+        public void Can_Where_using_guid_constant_conditional()
         {
             System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number > 0 ? x.GuidVirtProperty : x.Id1) == Guid.Parse("00000000-0000-0000-0000-000000000000");
             var q = Db.From<WaybillBase>().Where(filter);
@@ -511,7 +511,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_Where_using_null_constant_coniditional()
+        public void Can_Where_using_null_constant_conditional()
         {
             System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number == 0 ? x.VirtPropertyNull : x.Name) == "first";
             var q = Db.From<WaybillBase>().Where(filter);
@@ -520,7 +520,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_Where_using_datetime_constant_coniditional()
+        public void Can_Where_using_datetime_constant_conditional()
         {
             System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number > 0 ? x.DateVirtProperty : x.Date) == DateTime.Parse("2000-01-01");
             var q = Db.From<WaybillBase>().Where(filter);
@@ -529,7 +529,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_Where_using_int_constant_coniditional()
+        public void Can_Where_using_int_constant_conditional()
         {
             System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number > 0 ? x.IntVirtProperty : x.Number) == 5;
             var q = Db.From<WaybillBase>().Where(filter);
@@ -538,7 +538,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_Where_using_decimal_constant_coniditional()
+        public void Can_Where_using_decimal_constant_conditional()
         {
             System.Linq.Expressions.Expression<Func<WaybillBase, bool>> filter = x => (x.Number > 0 ? x.DecimalVirtProperty : x.Amount) == 10M;
             var q = Db.From<WaybillBase>().Where(filter);

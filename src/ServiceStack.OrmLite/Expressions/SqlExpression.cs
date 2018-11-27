@@ -1894,13 +1894,39 @@ namespace ServiceStack.OrmLite
             return CachedExpressionCompiler.Evaluate(nex);
         }
 
+        bool IsLambdaArg(Expression expr)
+        {
+            if (expr is ParameterExpression pe)
+                return IsLambdaArg(pe.Name);
+            if (expr is UnaryExpression ue && ue.Operand is ParameterExpression uepe)
+                return IsLambdaArg(uepe.Name);
+            return false;
+        }
+
+        bool IsLambdaArg(string name)
+        {
+            var args = originalLambda?.Parameters;
+            if (args != null)
+            {
+                foreach (var x in args)
+                {
+                    if (x.Name == name)
+                        return true;
+                }
+            }
+            return false;
+        }
+
         private object SetAnonTypePropertyNamesForSelectExpression(object expr, Expression arg, MemberInfo member)
         {
             // When selecting a column use the anon type property name, rather than the table property name, as the returned column name
+            if (arg is MemberExpression propExpr && IsLambdaArg(propExpr.Expression))
+            {
+                if (propExpr.Member.Name != member.Name)
+                    return new SelectItemExpression(DialectProvider, expr.ToString(), member.Name);
 
-            MemberExpression propertyExpr;
-            if ((propertyExpr = arg as MemberExpression) != null && propertyExpr.Member.Name != member.Name)
-                return new SelectItemExpression(DialectProvider, expr.ToString(), member.Name);
+                return expr;
+            }
 
             // When selecting an entire table use the anon type property name as a prefix for the returned column name
             // to allow the caller to distinguish properties with the same names from different tables
@@ -1933,12 +1959,19 @@ namespace ServiceStack.OrmLite
             var mi = methodCallExpr?.Method;
             var declareType = mi?.DeclaringType;
             if (declareType != null && declareType.Name == "Sql" && mi.Name != "Desc" && mi.Name != "Asc" && mi.Name != "As" && mi.Name != "AllFields") 
-                return new PartialSqlString(expr + " AS " + member.Name); // new { Alias = Sql.Count("*") }
+                return new PartialSqlString(expr + " AS " + member.Name);    // new { Alias = Sql.Count("*") }
 
-            if (arg is ConditionalExpression ||                           // new { Alias = x.Value > 1 ? 1 : x.Value }
-                arg is BinaryExpression)                                  // new { Alias = x.First + " " + x.Last }
+            if (arg is ConditionalExpression ce ||                           // new { Alias = x.Value > 1 ? 1 : x.Value }
+                arg is BinaryExpression      be ||                           // new { Alias = x.First + " " + x.Last }
+                arg is MemberExpression      me ||                           // new { Alias = DateTime.UtcNow }
+                arg is ConstantExpression ct)                                // new { Alias = 1 }
             {
-                return new PartialSqlString(expr + " AS " + member.Name);
+                IOrmLiteConverter converter;
+                var strExpr = !(expr is PartialSqlString) && (converter = DialectProvider.GetConverterBestMatch(expr.GetType())) != null
+                    ? converter.ToQuotedString(expr.GetType(), expr)
+                    : expr.ToString();
+                
+                return new PartialSqlString(strExpr + " AS " + member.Name);
             } 
 
             return expr;
