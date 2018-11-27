@@ -598,7 +598,7 @@ namespace ServiceStack.OrmLite
         {
             dbCmd.Parameters.Clear();
             var dialectProvider = dbCmd.GetDialectProvider();
-            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
+            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, insertFields);
 
             if (string.IsNullOrEmpty(dbCmd.CommandText))
                 return null;
