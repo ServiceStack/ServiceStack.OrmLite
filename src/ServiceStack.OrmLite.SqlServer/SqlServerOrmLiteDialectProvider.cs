@@ -449,9 +449,10 @@ namespace ServiceStack.OrmLite.SqlServer
 
             var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
             strReturning = strReturning.Length > 0 ? "OUTPUT " + strReturning + " " : "";
-            dbCmd.CommandText = $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
-                                strReturning +
-                                $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})";
+            dbCmd.CommandText = sbColumnNames.Length > 0
+                ? $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) {strReturning}" +                                
+                  $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})"
+                : $"INSERT INTO {GetQuotedTableName(modelDef)} {strReturning}DEFAULT VALUES";
         }
  
         public override string ToSelectStatement(ModelDefinition modelDef,
