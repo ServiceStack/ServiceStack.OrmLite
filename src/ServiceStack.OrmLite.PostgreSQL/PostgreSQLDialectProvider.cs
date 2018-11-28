@@ -256,21 +256,16 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
             cmd.Parameters.Clear();
 
-            foreach (var fieldDef in modelDef.FieldDefinitionsArray)
+            var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
+            foreach (var fieldDef in fieldDefs)
             {
-                //insertFields contains Property "Name" of fields to insert
-                var includeField = insertFields == null || insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase);
-
-                if (ShouldReturnOnInsert(modelDef, fieldDef) && (!fieldDef.AutoId || !includeField))
+                if (ShouldReturnOnInsert(modelDef, fieldDef))
                 {
                     sbReturningColumns.Append(sbReturningColumns.Length == 0 ? " RETURNING " : ",");
                     sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (ShouldSkipInsert(fieldDef) && (!fieldDef.AutoId || !includeField))
-                    continue;
-
-                if (!includeField)
+                if (ShouldSkipInsert(fieldDef))
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -292,10 +287,20 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 }
             }
 
+            foreach (var fieldDef in modelDef.AutoIdFields) // need to include any AutoId fields that weren't included 
+            {
+                if (fieldDefs.Contains(fieldDef))
+                    continue;
+
+                sbReturningColumns.Append(sbReturningColumns.Length == 0 ? " RETURNING " : ",");
+                sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
+            }
+
             var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
-            cmd.CommandText = $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
-                              $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})"
-                              + strReturning;
+            cmd.CommandText = sbColumnNames.Length > 0
+                ? $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
+                  $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)}){strReturning}"
+                : $"INSERT INTO {GetQuotedTableName(modelDef)} DEFAULT VALUES{strReturning}";
         }
         
         //Convert xmin into an integer so it can be used in comparisons

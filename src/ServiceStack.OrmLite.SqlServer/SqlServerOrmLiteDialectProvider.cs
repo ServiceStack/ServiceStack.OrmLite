@@ -255,16 +255,14 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override string ToInsertRowStatement(IDbCommand cmd, object objWithProperties, ICollection<string> insertFields = null)
         {
-            if (insertFields == null)
-                insertFields = new List<string>();
-
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
             var sbReturningColumns = StringBuilderCacheAlt.Allocate();
             var tableType = objWithProperties.GetType();
             var modelDef = GetModel(tableType);
 
-            foreach (var fieldDef in modelDef.FieldDefinitionsArray)
+            var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
+            foreach (var fieldDef in fieldDefs)
             {
                 if (ShouldReturnOnInsert(modelDef, fieldDef))
                 {
@@ -274,9 +272,6 @@ namespace ServiceStack.OrmLite.SqlServer
                 }
 
                 if (ShouldSkipInsert(fieldDef))
-                    continue;
-
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -299,11 +294,23 @@ namespace ServiceStack.OrmLite.SqlServer
                 }
             }
 
+            foreach (var fieldDef in modelDef.AutoIdFields) // need to include any AutoId fields that weren't included 
+            {
+                if (fieldDefs.Contains(fieldDef))
+                    continue;
+
+                if (sbReturningColumns.Length > 0)
+                    sbReturningColumns.Append(",");
+                sbReturningColumns.Append("INSERTED." + GetQuotedColumnName(fieldDef.FieldName));
+            }
+
             var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
             strReturning = strReturning.Length > 0 ? "OUTPUT " + strReturning + " " : "";
-            var sql = $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
-                      strReturning +
-                      $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})";
+            var sql = sbColumnNames.Length > 0
+                ? $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
+                  strReturning +
+                  $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})"
+                : $"INSERT INTO {GetQuotedTableName(modelDef)} {strReturning} DEFAULT VALUES";
 
             return sql;
         }
@@ -341,23 +348,17 @@ namespace ServiceStack.OrmLite.SqlServer
 
             cmd.Parameters.Clear();
 
-            foreach (var fieldDef in modelDef.FieldDefinitionsArray)
+            var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
+            foreach (var fieldDef in fieldDefs)
             {
-                //insertFields contains Property "Name" of fields to insert
-                var includeField = insertFields == null || insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase);
-
-                if (ShouldReturnOnInsert(modelDef, fieldDef) && (!fieldDef.AutoId || !includeField))
+                if (ShouldReturnOnInsert(modelDef, fieldDef))
                 {
                     if (sbReturningColumns.Length > 0)
                         sbReturningColumns.Append(",");
                     sbReturningColumns.Append("INSERTED." + GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (ShouldSkipInsert(fieldDef) && (!fieldDef.AutoId || !includeField))
-                    continue;
-
-                //insertFields contains Property "Name" of fields to insert ( that's how expressions work )
-                if (insertFields != null && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
+                if (ShouldSkipInsert(fieldDef) && !fieldDef.AutoId)
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -386,11 +387,22 @@ namespace ServiceStack.OrmLite.SqlServer
                 }
             }
 
+            foreach (var fieldDef in modelDef.AutoIdFields) // need to include any AutoId fields that weren't included 
+            {
+                if (fieldDefs.Contains(fieldDef))
+                    continue;
+
+                if (sbReturningColumns.Length > 0)
+                    sbReturningColumns.Append(",");
+                sbReturningColumns.Append("INSERTED." + GetQuotedColumnName(fieldDef.FieldName));
+            }
+
             var strReturning = StringBuilderCacheAlt.ReturnAndFree(sbReturningColumns);
             strReturning = strReturning.Length > 0 ? "OUTPUT " + strReturning + " " : "";
-            cmd.CommandText = $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) " +
-                              strReturning +
-                              $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})";
+            cmd.CommandText = sbColumnNames.Length > 0
+                ? $"INSERT INTO {GetQuotedTableName(modelDef)} ({StringBuilderCache.ReturnAndFree(sbColumnNames)}) {strReturning}" +                              
+                  $"VALUES ({StringBuilderCacheAlt.ReturnAndFree(sbColumnValues)})"
+                : $"INSERT INTO {GetQuotedTableName(modelDef)}{strReturning} DEFAULT VALUES";
         }
 
         public override void PrepareInsertRowStatement<T>(IDbCommand dbCmd, Dictionary<string, object> args)

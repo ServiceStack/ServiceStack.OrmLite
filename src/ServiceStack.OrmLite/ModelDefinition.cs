@@ -83,6 +83,39 @@ namespace ServiceStack.OrmLite
         private readonly object fieldDefLock = new object();
         private Dictionary<string, FieldDefinition> fieldDefinitionMap;
         private Func<string, string> fieldNameSanitizer;
+        
+        public FieldDefinition[] AutoIdFields { get; private set; }
+
+        public List<FieldDefinition> GetAutoIdFieldDefinitions()
+        {
+            var to = new List<FieldDefinition>();
+            foreach (var fieldDef in FieldDefinitionsArray)
+            {
+                if (fieldDef.AutoId)
+                {
+                    to.Add(fieldDef);
+                }
+            }
+            return to;
+        }
+
+
+        public FieldDefinition[] GetOrderedFieldDefinitions(ICollection<string> fieldNames)
+        {
+            if (fieldNames == null)
+                throw new ArgumentNullException(nameof(fieldNames));
+            
+            var fieldDefs = new FieldDefinition[fieldNames.Count];
+
+            var i = 0;
+            foreach (var fieldName in fieldNames)
+            {
+                var fieldDef = GetFieldDefinition(fieldName);
+                fieldDefs[i++] = fieldDef ?? throw new ArgumentException($"Field '{fieldName}' not found in '{ModelName}'");
+            }
+
+            return fieldDefs;
+        }
 
         public Dictionary<string, FieldDefinition> GetFieldDefinitionMap(Func<string, string> sanitizeFieldName)
         {
@@ -167,6 +200,8 @@ namespace ServiceStack.OrmLite
             var allItems = new List<FieldDefinition>(FieldDefinitions);
             allItems.AddRange(IgnoredFieldDefinitions);
             AllFieldDefinitionsArray = allItems.ToArray();
+
+            AutoIdFields = GetAutoIdFieldDefinitions().ToArray();
 
             OrmLiteConfig.OnModelDefinitionInit?.Invoke(this);
         }
