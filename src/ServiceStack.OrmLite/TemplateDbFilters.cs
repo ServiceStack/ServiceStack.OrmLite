@@ -28,7 +28,7 @@ namespace ServiceStack.OrmLite
                     return DbFactory.OpenDbConnection((string)namedConnection);
             }
             
-            if (scope.PageResult.Args.TryGetValue("__dbinfo", out var oDbInfo) && oDbInfo is ConnectionInfo dbInfo) // Keywords,DbInfo
+            if (scope.PageResult != null && scope.PageResult.Args.TryGetValue("__dbinfo", out var oDbInfo) && oDbInfo is ConnectionInfo dbInfo) // Keywords.DbInfo
                 return DbFactory.OpenDbConnection(dbInfo);
 
             return DbFactory.OpenDbConnection();
