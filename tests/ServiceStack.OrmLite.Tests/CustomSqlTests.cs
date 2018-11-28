@@ -264,11 +264,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(results["param"], Is.EqualTo(1));
                 Assert.That(results["descr"], Is.EqualTo("A"));
                 Assert.That(results["str"], Is.EqualTo("hi"));
-
-                if (Dialect == Dialect.Sqlite)
-                {
-                    Assert.That(DateTime.Parse(results["date"].ToString(), null, DateTimeStyles.AssumeUniversal).Date, Is.EqualTo(DateTime.UtcNow.Date));
-                }
+                Assert.That(results["date"], Is.Not.Empty);
             }
         }
 

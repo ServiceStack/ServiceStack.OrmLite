@@ -57,8 +57,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_use_Save_References_with_ForeignKey()
         {
-            OrmLiteConfig.BeforeExecFilter = cmd => cmd.GetDebugString().Print();
-            
             using (var db = OpenDbConnection())
             {
                 CreateRefTables(db);
@@ -131,8 +129,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_use_Save_References_with_ForeignKey_using_Self_Reference_Id()
         {
-            OrmLiteConfig.BeforeExecFilter = cmd => cmd.GetDebugString().Print();
-            
             using (var db = OpenDbConnection())
             {
                 CreateSelfRefTables(db);
