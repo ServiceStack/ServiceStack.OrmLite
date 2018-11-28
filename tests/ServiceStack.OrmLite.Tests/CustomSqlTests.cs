@@ -256,7 +256,7 @@ namespace ServiceStack.OrmLite.Tests
                         param = 1,
                         descr = x.Letter,
                         str = "hi",
-                        date = DateTime.Now
+                        date = DateTime.UtcNow
                     });
 
                 var results = db.Select<Dictionary<string,object>>(q)[0];
@@ -264,7 +264,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(results["param"], Is.EqualTo(1));
                 Assert.That(results["descr"], Is.EqualTo("A"));
                 Assert.That(results["str"], Is.EqualTo("hi"));
-                Assert.That(DateTime.Parse(results["date"].ToString()).Date, Is.EqualTo(DateTime.Now.Date));
+                Assert.That(DateTime.Parse(results["date"].ToString(), null, DateTimeStyles.AssumeUniversal).Date, Is.EqualTo(DateTime.UtcNow.Date));
             }
         }
 
