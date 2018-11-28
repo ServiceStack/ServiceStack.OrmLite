@@ -92,6 +92,24 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Insert results from SELECT SqlExpression, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
+        /// <para>var id = db.InsertIntoSelect&lt;Contact&gt;(db.From&lt;Person&gt;().Select(x => new { x.Id, Surname == x.LastName }))</para>
+        /// </summary>
+        public static long InsertIntoSelect<T>(this IDbConnection dbConn, ISqlExpression query)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.InsertIntoSelect<T>(query, commandFilter: null));
+        }
+
+        /// <summary>
+        /// Insert results from SELECT SqlExpression, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
+        /// <para>var id = db.InsertIntoSelect&lt;Contact&gt;(db.From&lt;Person&gt;().Select(x => new { x.Id, Surname == x.LastName }))</para>
+        /// </summary>
+        public static long InsertIntoSelect<T>(this IDbConnection dbConn, ISqlExpression query, Action<IDbCommand> commandFilter)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.InsertIntoSelect<T>(query, commandFilter: commandFilter));
+        }
+
+        /// <summary>
         /// Insert a collection of POCOs in a transaction. E.g:
         /// <para>db.InsertAll(new[] { new Person { Id = 9, FirstName = "Biggie", LastName = "Smalls", Age = 24 } })</para>
         /// </summary>

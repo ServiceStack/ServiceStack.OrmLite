@@ -689,6 +689,30 @@ namespace ServiceStack.OrmLite
             dbCmd.InsertAll(objs: objs, commandFilter: commandFilter);
         }
 
+        internal static long InsertIntoSelect<T>(this IDbCommand dbCmd, ISqlExpression query, Action<IDbCommand> commandFilter)
+        {
+            var dialectProvider = dbCmd.GetDialectProvider();
+
+            var sql = query.ToSelectStatement();
+            var selectFields = query.GetUntypedSqlExpression()
+                .SelectExpression
+                .Substring("SELECT ".Length)
+                .ParseCommands();
+
+            var fieldsOrAliases = selectFields
+                .Map(x => x.Name.LastRightPart("AS").Trim().StripQuotes());
+            
+            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, insertFields: fieldsOrAliases);
+
+            dbCmd.SetParameters(query.Params);
+
+            dbCmd.CommandText = dbCmd.CommandText.LeftPart(")") + ")\n" + sql;
+
+            commandFilter?.Invoke(dbCmd); //dbCmd.OnConflictInsert() needs to be applied before last insert id
+
+            return dbCmd.ExecNonQuery();
+        }
+
         internal static void InsertAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs, Action<IDbCommand> commandFilter)
         {
             IDbTransaction dbTrans = null;

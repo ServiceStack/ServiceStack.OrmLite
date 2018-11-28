@@ -375,6 +375,54 @@ namespace ServiceStack.OrmLite.Tests
                 fieldDef.IsComputed = true;
             }
         }
+
+        [Test]
+        public void Can_InsertIntoSelect_using_Custom_Select()
+        {
+            using (var db = OpenDbConnection())
+            {
+                OrmLiteConfig.BeforeExecFilter = cmd => cmd.GetDebugString().Print();
+                db.DropAndCreateTable<UserAuth>();
+                db.DropAndCreateTable<SubUserAuth>();
+
+                var userAuth = new UserAuth {
+                    Id = 1,
+                    UserName = "UserName",
+                    Email = "a@b.com",
+                    PrimaryEmail = "c@d.com",
+                    FirstName = "FirstName",
+                    LastName = "LastName",
+                    DisplayName = "DisplayName",
+                    Salt = "Salt",
+                    PasswordHash = "PasswordHash",
+                    CreatedDate = DateTime.Now,
+                    ModifiedDate = DateTime.UtcNow,
+                };
+                db.Insert(userAuth);
+
+                var q = db.From<UserAuth>()
+                    .Where(x => x.UserName == "UserName")
+                    .Select(x => new {
+                        x.UserName, 
+                        x.Email, 
+                        GivenName = x.FirstName, 
+                        Surname = x.LastName, 
+                        FullName = x.FirstName + " " + x.LastName
+                    });
+
+                var id = db.InsertIntoSelect<SubUserAuth>(q);
+                Assert.That(id, Is.EqualTo(1));
+
+                var result = db.Select<SubUserAuth>()[0];
+                
+                Assert.That(result.Id, Is.GreaterThan(0));
+                Assert.That(result.UserName, Is.EqualTo(userAuth.UserName));
+                Assert.That(result.Email, Is.EqualTo(userAuth.Email));
+                Assert.That(result.GivenName, Is.EqualTo(userAuth.FirstName));
+                Assert.That(result.Surname, Is.EqualTo(userAuth.LastName));
+                Assert.That(result.FullName, Is.EqualTo(userAuth.FirstName + " " + userAuth.LastName));
+            }
+        }
     }
 
     public class Market
@@ -457,5 +505,16 @@ namespace ServiceStack.OrmLite.Tests
         public virtual int? RefId { get; set; }
         public virtual string RefIdStr { get; set; }
         public virtual Dictionary<string, string> Meta { get; set; }
+    }
+
+    public class SubUserAuth
+    {
+        [AutoIncrement]
+        public virtual int Id { get; set; }
+        public virtual string UserName { get; set; }
+        public string Email { get; set; }
+        public string GivenName { get; set; }
+        public string Surname { get; set; }
+        public string FullName { get; set; }
     }
 }
