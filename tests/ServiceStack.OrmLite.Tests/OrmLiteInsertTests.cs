@@ -381,7 +381,6 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                OrmLiteConfig.BeforeExecFilter = cmd => cmd.GetDebugString().Print();
                 db.DropAndCreateTable<UserAuth>();
                 db.DropAndCreateTable<SubUserAuth>();
 
