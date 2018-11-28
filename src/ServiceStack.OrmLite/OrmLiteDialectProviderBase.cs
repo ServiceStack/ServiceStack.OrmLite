@@ -554,7 +554,9 @@ namespace ServiceStack.OrmLite
         public virtual FieldDefinition[] GetInsertFieldDefinitions(ModelDefinition modelDef, ICollection<string> insertFields)
         {
             return insertFields != null 
-                ? modelDef.GetOrderedFieldDefinitions(insertFields) 
+                ? NamingStrategy.GetType() == typeof(OrmLiteNamingStrategyBase) 
+                    ? modelDef.GetOrderedFieldDefinitions(insertFields)
+                    : modelDef.GetOrderedFieldDefinitions(insertFields, name => NamingStrategy.GetColumnName(name)) 
                 : modelDef.FieldDefinitionsArray;
         }
 
