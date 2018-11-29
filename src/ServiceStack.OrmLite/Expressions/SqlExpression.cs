@@ -1922,7 +1922,8 @@ namespace ServiceStack.OrmLite
             // When selecting a column use the anon type property name, rather than the table property name, as the returned column name
             if (arg is MemberExpression propExpr && IsLambdaArg(propExpr.Expression))
             {
-                if (propExpr.Member.Name != member.Name)
+                if (propExpr.Member.Name != member.Name ||           // Use anon property alias when names don't match 
+                    propExpr.Expression.Type != ModelDef.ModelType)  // or when selecting a field from a different table
                     return new SelectItemExpression(DialectProvider, expr.ToString(), member.Name);
 
                 return expr;
@@ -2880,7 +2881,8 @@ namespace ServiceStack.OrmLite
         {
             var text = SelectExpression;
             if (!string.IsNullOrEmpty(Alias)) // Note that even though Alias must be non-empty in the constructor it may be set to null/empty later
-                text += " AS " + DialectProvider.GetQuotedName(Alias);
+                return text + " AS " + DialectProvider.GetQuotedName(Alias);
+
             return text;
         }
     }

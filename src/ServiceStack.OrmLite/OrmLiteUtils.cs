@@ -832,6 +832,9 @@ namespace ServiceStack.OrmLite
             return quotedExpr.Trim(QuotedChars);
         }
 
+        public static void PrintSql() => OrmLiteConfig.BeforeExecFilter = cmd => Console.WriteLine(cmd.GetDebugString());
+
+        public static void UnPrintSql() => OrmLiteConfig.BeforeExecFilter = null;
 
         public static ModelDefinition GetModelDefinition(Type modelType)
         {

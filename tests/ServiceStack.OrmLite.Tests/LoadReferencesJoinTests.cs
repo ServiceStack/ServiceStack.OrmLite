@@ -898,6 +898,34 @@ Customer Address:
             AssertMultiCustomerOrderResults(sb);
         }
 
+        [Test]
+        public void Can_custom_select_from_multiple_joined_tables()
+        {
+            ResetTables();
+            AddCustomerWithOrders();
+
+            var q = db.From<Customer>()
+                .Join<Customer, CustomerAddress>()
+                .Join<Customer, Order>()
+                .Where(x => x.Id == 1)
+                .And<CustomerAddress>(x => x.Country == "Australia")
+                .OrderByDescending<Order>(x => x.Id)
+                .Take(1)
+                .Select<Customer,CustomerAddress,Order>((c,a,o) => new {
+                    o.Id,
+                    c.Name,
+                    CustomerId = c.Id,
+                    AddressId = a.Id,
+                });
+
+            var result = db.Select<(int id, string name, int customerId, int addressId)>(q)[0];
+            
+            Assert.That(result.id, Is.EqualTo(2));
+            Assert.That(result.name, Is.EqualTo("Customer 1"));
+            Assert.That(result.customerId, Is.EqualTo(1));
+            Assert.That(result.addressId, Is.EqualTo(1));
+        }
+
         private static void AssertMultiCustomerOrderResults(StringBuilder sb)
         {
             Assert.That(Regex.Replace(sb.ToString(), @"\.99[0]+",".99").NormalizeNewLines().Trim(), Is.EqualTo(
