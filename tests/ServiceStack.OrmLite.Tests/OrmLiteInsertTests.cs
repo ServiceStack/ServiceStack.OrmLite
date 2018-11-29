@@ -409,8 +409,8 @@ namespace ServiceStack.OrmLite.Tests
                         FullName = x.FirstName + " " + x.LastName
                     });
 
-                var id = db.InsertIntoSelect<SubUserAuth>(q);
-                Assert.That(id, Is.EqualTo(1));
+                var rowsInserted = db.InsertIntoSelect<SubUserAuth>(q);
+                Assert.That(rowsInserted, Is.EqualTo(1));
 
                 var result = db.Select<SubUserAuth>()[0];
                 
