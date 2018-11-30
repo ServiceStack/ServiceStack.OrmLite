@@ -383,7 +383,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<UserAuth>();
                 db.DropAndCreateTable<SubUserAuth>();
-
+                
                 var userAuth = new UserAuth {
                     Id = 1,
                     UserName = "UserName",
@@ -399,14 +399,16 @@ namespace ServiceStack.OrmLite.Tests
                 };
                 db.Insert(userAuth);
 
+//                OrmLiteUtils.PrintSql();
+                
                 var q = db.From<UserAuth>()
                     .Where(x => x.UserName == "UserName")
                     .Select(x => new {
-                        x.UserName, 
-                        x.Email, 
+                        FullName = x.FirstName + " " + x.LastName,
                         GivenName = x.FirstName, 
                         Surname = x.LastName, 
-                        FullName = x.FirstName + " " + x.LastName
+                        x.Email, 
+                        x.UserName, 
                     });
 
                 var rowsInserted = db.InsertIntoSelect<SubUserAuth>(q);
