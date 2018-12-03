@@ -58,6 +58,18 @@ namespace ServiceStack.OrmLite
             return cmd.ExecNonQueryAsync(token);
         }
 
+        internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd,
+            Expression<Func<T>> updateFields,
+            string whereExpression,
+            IEnumerable<IDbDataParameter> sqlParams,
+            Action<IDbCommand> commandFilter,
+            CancellationToken token)
+        {
+            var cmd = dbCmd.InitUpdateOnly(updateFields, whereExpression, sqlParams);
+            commandFilter?.Invoke(cmd);
+            return cmd.ExecNonQueryAsync(token);
+        }
+
         public static Task<int> UpdateAddAsync<T>(this IDbCommand dbCmd,
             Expression<Func<T>> updateFields,
             SqlExpression<T> q,

@@ -159,33 +159,90 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Supports_different_ways_to_UpdateOnly()
         {
+            void Reset(IDbConnection db)
+            {
+                db.DeleteAll<Person>();
+                db.Insert(new Person {Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100});
+            }
+
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Person>();
-                db.Insert(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
+                db.DropAndCreateTable<Person>();                               
 
+                Reset(db);
                 db.UpdateOnly(() => new Person { FirstName = "UpdatedFirst", Age = 27 });
                 var row = db.Select<Person>().First();
                 Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
 
-                db.DeleteAll<Person>();
-                db.Insert(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
-
+                Reset(db);
                 db.UpdateOnly(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => p.FirstName);
                 row = db.Select<Person>().First();
                 Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 100)));
 
-                db.DeleteAll<Person>();
-                db.Insert(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
-
+                Reset(db);
                 db.UpdateOnly(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => new { p.FirstName, p.Age });
                 row = db.Select<Person>().First();
                 Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
 
-                db.DeleteAll<Person>();
-                db.Insert(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
-
+                Reset(db);
                 db.UpdateOnly(new Person { FirstName = "UpdatedFirst", Age = 27 }, new[] { "FirstName", "Age" });
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+
+                Reset(db);
+                db.UpdateOnly(() => new Person { FirstName = "UpdatedFirst", Age = 27 }, db.From<Person>().Where(x => x.Age == 100));
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+
+                Reset(db);
+                var q = db.From<Person>().Where(x => x.Age == 100);
+                db.UpdateOnly(() => new Person { FirstName = "UpdatedFirst", Age = 27 }, q.WhereExpression, q.Params);
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+            }
+        }
+
+        [Test]
+        public async Task Supports_different_ways_to_UpdateOnly_Async()
+        {
+            void Reset(IDbConnection db)
+            {
+                db.DeleteAll<Person>();
+                db.Insert(new Person {Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100});
+            }
+
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();                               
+
+                Reset(db);
+                await db.UpdateOnlyAsync(() => new Person { FirstName = "UpdatedFirst", Age = 27 });
+                var row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+
+                Reset(db);
+                await db.UpdateOnlyAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => p.FirstName);
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 100)));
+
+                Reset(db);
+                await db.UpdateOnlyAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => new { p.FirstName, p.Age });
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+
+                Reset(db);
+                await db.UpdateOnlyAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, new[] { "FirstName", "Age" });
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+
+                Reset(db);
+                await db.UpdateOnlyAsync(() => new Person { FirstName = "UpdatedFirst", Age = 27 }, db.From<Person>().Where(x => x.Age == 100));
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+
+                Reset(db);
+                var q = db.From<Person>().Where(x => x.Age == 100);
+                await db.UpdateOnlyAsync(() => new Person { FirstName = "UpdatedFirst", Age = 27 }, q.WhereExpression, q.Params);
                 row = db.Select<Person>().First();
                 Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
             }
