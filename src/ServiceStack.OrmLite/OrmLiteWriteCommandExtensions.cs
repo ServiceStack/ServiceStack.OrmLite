@@ -689,7 +689,10 @@ namespace ServiceStack.OrmLite
             dbCmd.InsertAll(objs: objs, commandFilter: commandFilter);
         }
 
-        internal static long InsertIntoSelect<T>(this IDbCommand dbCmd, ISqlExpression query, Action<IDbCommand> commandFilter)
+        internal static long InsertIntoSelect<T>(this IDbCommand dbCmd, ISqlExpression query, Action<IDbCommand> commandFilter) => 
+            dbCmd.InsertIntoSelectInternal<T>(query, commandFilter).ExecNonQuery();
+
+        internal static IDbCommand InsertIntoSelectInternal<T>(this IDbCommand dbCmd, ISqlExpression query, Action<IDbCommand> commandFilter)
         {
             var dialectProvider = dbCmd.GetDialectProvider();
 
@@ -701,7 +704,7 @@ namespace ServiceStack.OrmLite
 
             var fieldsOrAliases = selectFields
                 .Map(x => x.Original.ToString().LastRightPart(" AS ").Trim().StripQuotes());
-            
+
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, insertFields: fieldsOrAliases);
 
             dbCmd.SetParameters(query.Params);
@@ -709,8 +712,7 @@ namespace ServiceStack.OrmLite
             dbCmd.CommandText = dbCmd.CommandText.LeftPart(")") + ")\n" + sql;
 
             commandFilter?.Invoke(dbCmd); //dbCmd.OnConflictInsert() needs to be applied before last insert id
-
-            return dbCmd.ExecNonQuery();
+            return dbCmd;
         }
 
         internal static void InsertAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs, Action<IDbCommand> commandFilter)

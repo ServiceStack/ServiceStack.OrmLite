@@ -77,6 +77,35 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Insert 1 or more POCOs in a transaction using Table default values when defined. E.g:
+        /// <para>db.InsertUsingDefaultsAsync(new Person { FirstName = "Tupac", LastName = "Shakur" },</para>
+        /// <para>                            new Person { FirstName = "Biggie", LastName = "Smalls" })</para>
+        /// </summary>
+        public static Task InsertUsingDefaultsAsync<T>(this IDbConnection dbConn, T[] objs, CancellationToken token=default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.InsertUsingDefaultsAsync(objs, token));
+        }
+
+        /// <summary>
+        /// Insert results from SELECT SqlExpression, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
+        /// <para>db.InsertIntoSelectAsync&lt;Contact&gt;(db.From&lt;Person&gt;().Select(x => new { x.Id, Surname == x.LastName }))</para>
+        /// </summary>
+        public static Task<long> InsertIntoSelectAsync<T>(this IDbConnection dbConn, ISqlExpression query, CancellationToken token=default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.InsertIntoSelectAsync<T>(query, commandFilter: null, token:token));
+        }
+
+        /// <summary>
+        /// Insert results from SELECT SqlExpression, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
+        /// <para>db.InsertIntoSelectAsync&lt;Contact&gt;(db.From&lt;Person&gt;().Select(x => new { x.Id, Surname == x.LastName }))</para>
+        /// </summary>
+        public static Task<long> InsertIntoSelectAsync<T>(this IDbConnection dbConn, ISqlExpression query, Action<IDbCommand> commandFilter, CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.InsertIntoSelectAsync<T>(query, commandFilter: commandFilter, token:token));
+        }
+
+        
+        /// <summary>
         /// Insert a collection of POCOs in a transaction. E.g:
         /// <para>db.InsertAllAsync(new[] { new Person { Id = 9, FirstName = "Biggie", LastName = "Smalls", Age = 24 } })</para>
         /// </summary>

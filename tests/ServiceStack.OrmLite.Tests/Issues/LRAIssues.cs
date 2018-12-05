@@ -157,6 +157,35 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 Assert.That(result, Is.EqualTo(numeroRichieste));
             }
         }
+
+        [Test]
+        public async Task Does_InsertIntoSelect_LRARichiesta_Async()
+        {            
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LRARichiesta>();
+                db.DropAndCreateTable<LRARisultato>();
+
+                long numeroRichieste = await db.CountAsync<LRARichiesta>();
+
+                var q = db.From<LRARichiesta>()
+                    .Select(ric => new //LRARisultato
+                    {
+                        AnalisiId = 1,
+                        Commento = ric.Commento,
+                        TipoValore = 1,
+                        Stato = 1,
+                        RisultatoId = 1,
+                        DataOraRicezione = DateTime.UtcNow,
+                        DataModifica = DateTime.UtcNow,
+                        VersioneRecord = 1
+                    });
+
+                long result = await db.InsertIntoSelectAsync<LRARisultato>(q);
+
+                Assert.That(result, Is.EqualTo(numeroRichieste));
+            }
+        }
         
         private static void CreateTables(IDbConnection db)
         {

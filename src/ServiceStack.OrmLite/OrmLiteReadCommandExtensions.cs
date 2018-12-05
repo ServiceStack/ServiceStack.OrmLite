@@ -881,6 +881,8 @@ namespace ServiceStack.OrmLite
             return ToLong(result);
         }
 
+        internal static long ToLong(int result) => result;
+        
         internal static long ToLong(object result)
         {
             if (result is DBNull) return default(long);

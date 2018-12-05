@@ -93,7 +93,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Insert results from SELECT SqlExpression, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
-        /// <para>var id = db.InsertIntoSelect&lt;Contact&gt;(db.From&lt;Person&gt;().Select(x => new { x.Id, Surname == x.LastName }))</para>
+        /// <para>db.InsertIntoSelect&lt;Contact&gt;(db.From&lt;Person&gt;().Select(x => new { x.Id, Surname == x.LastName }))</para>
         /// </summary>
         public static long InsertIntoSelect<T>(this IDbConnection dbConn, ISqlExpression query)
         {
@@ -102,7 +102,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Insert results from SELECT SqlExpression, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
-        /// <para>var id = db.InsertIntoSelect&lt;Contact&gt;(db.From&lt;Person&gt;().Select(x => new { x.Id, Surname == x.LastName }))</para>
+        /// <para>db.InsertIntoSelect&lt;Contact&gt;(db.From&lt;Person&gt;().Select(x => new { x.Id, Surname == x.LastName }))</para>
         /// </summary>
         public static long InsertIntoSelect<T>(this IDbConnection dbConn, ISqlExpression query, Action<IDbCommand> commandFilter)
         {

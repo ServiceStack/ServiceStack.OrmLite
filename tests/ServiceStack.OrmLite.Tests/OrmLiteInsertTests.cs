@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
@@ -424,6 +425,56 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(result.FullName, Is.EqualTo(userAuth.FirstName + " " + userAuth.LastName));
             }
         }
+
+        [Test]
+        public async Task Can_InsertIntoSelect_using_Custom_Select_Async()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<UserAuth>();
+                db.DropAndCreateTable<SubUserAuth>();
+                
+                var userAuth = new UserAuth {
+                    Id = 1,
+                    UserName = "UserName",
+                    Email = "a@b.com",
+                    PrimaryEmail = "c@d.com",
+                    FirstName = "FirstName",
+                    LastName = "LastName",
+                    DisplayName = "DisplayName",
+                    Salt = "Salt",
+                    PasswordHash = "PasswordHash",
+                    CreatedDate = DateTime.Now,
+                    ModifiedDate = DateTime.UtcNow,
+                };
+                await db.InsertAsync(userAuth);
+
+//                OrmLiteUtils.PrintSql();
+                
+                var q = db.From<UserAuth>()
+                    .Where(x => x.UserName == "UserName")
+                    .Select(x => new {
+                        FullName = x.FirstName + " " + x.LastName,
+                        GivenName = x.FirstName, 
+                        Surname = x.LastName, 
+                        x.Email, 
+                        x.UserName, 
+                    });
+
+                var rowsInserted = await db.InsertIntoSelectAsync<SubUserAuth>(q);
+                Assert.That(rowsInserted, Is.EqualTo(1));
+
+                var result = (await db.SelectAsync<SubUserAuth>())[0];
+                
+                Assert.That(result.Id, Is.GreaterThan(0));
+                Assert.That(result.UserName, Is.EqualTo(userAuth.UserName));
+                Assert.That(result.Email, Is.EqualTo(userAuth.Email));
+                Assert.That(result.GivenName, Is.EqualTo(userAuth.FirstName));
+                Assert.That(result.Surname, Is.EqualTo(userAuth.LastName));
+                Assert.That(result.FullName, Is.EqualTo(userAuth.FirstName + " " + userAuth.LastName));
+            }
+        }
+        
     }
 
     public class Market
