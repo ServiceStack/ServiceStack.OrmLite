@@ -43,14 +43,7 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ThrowOnError)
                 throw ex;
 
-            if (message != null)
-            {
-                Log.Error(message, ex);
-            }
-            else
-            {
-                Log.Error(ex);
-            }
+            Log.Error(message ?? ex.Message, ex);
         }
 
         public static void DebugCommand(this ILog log, IDbCommand cmd)
