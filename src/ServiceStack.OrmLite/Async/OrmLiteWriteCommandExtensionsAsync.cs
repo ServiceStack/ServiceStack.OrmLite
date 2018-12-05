@@ -294,10 +294,51 @@ namespace ServiceStack.OrmLite
             return await dbCmd.ExecNonQueryAsync(token).Then(i => (long)i);
         }
 
-        internal static Task InsertAsync<T>(this IDbCommand dbCmd, Action<IDbCommand> commandFilter, CancellationToken token, params T[] objs)
+        internal static Task InsertAsync<T>(this IDbCommand dbCmd, Action<IDbCommand> commandFilter, CancellationToken token, T[] objs)
         {
             return InsertAllAsync(dbCmd, objs, commandFilter, token);
         }
+        
+        internal static Task InsertUsingDefaultsAsync<T>(this IDbCommand dbCmd, T[] objs, CancellationToken token)
+        {
+            IDbTransaction dbTrans = null;
+
+            if (dbCmd.Transaction == null)
+                dbCmd.Transaction = dbTrans = dbCmd.Connection.BeginTransaction();
+
+            var dialectProvider = dbCmd.GetDialectProvider();
+
+            var modelDef = typeof(T).GetModelDefinition();
+            var fieldsWithoutDefaults = modelDef.FieldDefinitionsArray
+                .Where(x => x.DefaultValue == null)
+                .Select(x => x.Name)
+                .ToHashSet(); 
+
+            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
+                insertFields: fieldsWithoutDefaults);
+
+            return objs.EachAsync((obj, i) =>
+                {
+                    OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
+
+                    dialectProvider.SetParameterValues<T>(dbCmd, obj);
+
+                    return dbCmd.ExecNonQueryAsync(token);
+                })
+                .ContinueWith(t =>
+                {
+                    if (dbTrans != null && t.IsSuccess())
+                        dbTrans.Commit();
+
+                    dbTrans?.Dispose();
+
+                    if (t.IsFaulted && t.Exception != null)
+                        throw t.Exception;
+                }, token);
+        }
+
+        internal static Task<long> InsertIntoSelectAsync<T>(this IDbCommand dbCmd, ISqlExpression query, Action<IDbCommand> commandFilter, CancellationToken token) => 
+            dbCmd.InsertIntoSelectInternal<T>(query, commandFilter).ExecNonQueryAsync(token: token).Then(OrmLiteReadCommandExtensions.ToLong);
 
         internal static Task InsertAllAsync<T>(this IDbCommand dbCmd, IEnumerable<T> objs, Action<IDbCommand> commandFilter, CancellationToken token)
         {
@@ -327,11 +368,10 @@ namespace ServiceStack.OrmLite
 
                 dbTrans?.Dispose();
 
-                if (t.IsFaulted)
+                if (t.IsFaulted && t.Exception != null)
                     throw t.Exception;
             }, token);
         }
-
 
         internal static Task<int> SaveAsync<T>(this IDbCommand dbCmd, CancellationToken token, params T[] objs)
         {

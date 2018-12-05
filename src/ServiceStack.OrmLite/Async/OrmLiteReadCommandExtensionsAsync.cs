@@ -235,9 +235,9 @@ namespace ServiceStack.OrmLite
             }, token)
             .Then(x =>
             {
-                var columValues = new List<T>();
-                x.Each(o => columValues.Add((T)o));
-                return columValues;
+                var columnValues = new List<T>();
+                x.Each(o => columnValues.Add((T)o));
+                return columnValues;
             });
         }
 
