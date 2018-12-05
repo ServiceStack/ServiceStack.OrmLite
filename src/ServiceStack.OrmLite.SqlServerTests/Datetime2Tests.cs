@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Data.SqlTypes;
 using System.Linq;
@@ -6,6 +7,7 @@ using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer;
 using ServiceStack.OrmLite.SqlServer.Converters;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServerTests
 {
@@ -21,28 +23,28 @@ namespace ServiceStack.OrmLite.SqlServerTests
             SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTime2Converter());
 
             using (var conn = dbFactory.OpenDbConnection()) {
-				var test_object_ValidForDatetime2 = Table_for_datetime2_tests.get_test_object_ValidForDatetime2();
+				var test_object_ValidForDatetime2 = Datetime2Test.get_test_object_ValidForDatetime2();
 
-				conn.CreateTable<Table_for_datetime2_tests>(true);
+				conn.CreateTable<Datetime2Test>(true);
 
 				//normal insert
                 var insertedId = conn.Insert(test_object_ValidForDatetime2, selectIdentity:true);
 
 				//read back, and verify precision
-                var fromDb = conn.SingleById<Table_for_datetime2_tests>(insertedId);
+                var fromDb = conn.SingleById<Datetime2Test>(insertedId);
 				Assert.AreEqual(test_object_ValidForDatetime2.ToVerifyPrecision, fromDb.ToVerifyPrecision);
 
 				//update
 				fromDb.ToVerifyPrecision = test_object_ValidForDatetime2.ToVerifyPrecision.Value.AddYears(1);
 				conn.Update(fromDb);
-                var fromDb2 = conn.SingleById<Table_for_datetime2_tests>(insertedId);
+                var fromDb2 = conn.SingleById<Datetime2Test>(insertedId);
 				Assert.AreEqual(test_object_ValidForDatetime2.ToVerifyPrecision.Value.AddYears(1), fromDb2.ToVerifyPrecision);
 
 				//check InsertParam
 				conn.Insert(test_object_ValidForDatetime2);
 
                 //check select on datetime2 value
-                var result = conn.Select<Table_for_datetime2_tests>(t => t.ToVerifyPrecision == test_object_ValidForDatetime2.ToVerifyPrecision);
+                var result = conn.Select<Datetime2Test>(t => t.ToVerifyPrecision == test_object_ValidForDatetime2.ToVerifyPrecision);
                 Assert.AreEqual(result.Single().ToVerifyPrecision, test_object_ValidForDatetime2.ToVerifyPrecision);
             }
 		}
@@ -56,16 +58,16 @@ namespace ServiceStack.OrmLite.SqlServerTests
             SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTimeConverter());
 
             using (var conn = dbFactory.OpenDbConnection()) {
-				var test_object_ValidForDatetime2 = Table_for_datetime2_tests.get_test_object_ValidForDatetime2();
-				var test_object_ValidForNormalDatetime = Table_for_datetime2_tests.get_test_object_ValidForNormalDatetime();
+				var test_object_ValidForDatetime2 = Datetime2Test.get_test_object_ValidForDatetime2();
+				var test_object_ValidForNormalDatetime = Datetime2Test.get_test_object_ValidForNormalDatetime();
 
-				conn.CreateTable<Table_for_datetime2_tests>(true);
+				conn.CreateTable<Datetime2Test>(true);
 
 				//normal insert
                 var insertedId = conn.Insert(test_object_ValidForNormalDatetime, selectIdentity:true);
 
 				//insert works, but can't regular datetime's precision is not great enough.
-                var fromDb = conn.SingleById<Table_for_datetime2_tests>(insertedId);
+                var fromDb = conn.SingleById<Datetime2Test>(insertedId);
 				Assert.AreNotEqual(test_object_ValidForNormalDatetime.ToVerifyPrecision, fromDb.ToVerifyPrecision);
 
 				var thrown = Assert.Throws<SqlTypeException>(() => {
@@ -84,7 +86,48 @@ namespace ServiceStack.OrmLite.SqlServerTests
 			}
 		}
 
-		private class Table_for_datetime2_tests
+		[Test]
+		public void Can_Select_DateTime()
+		{
+			var dbFactory = new OrmLiteConnectionFactory(base.ConnectionString, SqlServerOrmLiteDialectProvider.Instance);
+
+			using (var db = dbFactory.OpenDbConnection())
+			{
+				db.DropAndCreateTable<Datetime2Test>();
+				db.Insert(Datetime2Test.get_test_object_ValidForNormalDatetime());
+
+				var now = DateTime.UtcNow;
+				var q = db.From<Datetime2Test>()
+					.Select(x => new { SomeDateTime = now });
+				
+				var result = db.Select(q)[0];
+				
+				Assert.That(result.SomeDateTime, Is.EqualTo(now).Within(TimeSpan.FromSeconds(1)));
+			}
+		}
+
+		[Test]
+		public void Can_Select_DateTime2()
+		{
+			SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTime2Converter());
+			var dbFactory = new OrmLiteConnectionFactory(base.ConnectionString, SqlServerOrmLiteDialectProvider.Instance);
+
+			using (var db = dbFactory.OpenDbConnection())
+			{
+				db.DropAndCreateTable<Datetime2Test>();
+				db.Insert(Datetime2Test.get_test_object_ValidForDatetime2());
+
+				var now = DateTime.UtcNow;
+				var q = db.From<Datetime2Test>()
+					.Select(x => new { SomeDateTime = now });
+				
+				var result = db.Select(q)[0];
+				
+				Assert.That(result.SomeDateTime, Is.EqualTo(now).Within(TimeSpan.FromSeconds(1)));
+			}
+		}
+
+		private class Datetime2Test
 		{
 			[AutoIncrement]
 			public int Id { get; set; }
@@ -97,9 +140,9 @@ namespace ServiceStack.OrmLite.SqlServerTests
 		    /// </summary>
 		    public static readonly DateTime regular_datetime_field_cant_hold_this_exact_moment = new DateTime(2013, 3, 17, 21, 29, 1, 678).AddTicks(1);
 
-			public static Table_for_datetime2_tests get_test_object_ValidForDatetime2() { return new Table_for_datetime2_tests { SomeDateTime = new DateTime(1, 1, 1), ToVerifyPrecision = regular_datetime_field_cant_hold_this_exact_moment }; }
+			public static Datetime2Test get_test_object_ValidForDatetime2() { return new Datetime2Test { SomeDateTime = new DateTime(1, 1, 1), ToVerifyPrecision = regular_datetime_field_cant_hold_this_exact_moment }; }
 
-			public static Table_for_datetime2_tests get_test_object_ValidForNormalDatetime() { return new Table_for_datetime2_tests { SomeDateTime = new DateTime(2001, 1, 1), ToVerifyPrecision = regular_datetime_field_cant_hold_this_exact_moment }; }
+			public static Datetime2Test get_test_object_ValidForNormalDatetime() { return new Datetime2Test { SomeDateTime = new DateTime(2001, 1, 1), ToVerifyPrecision = regular_datetime_field_cant_hold_this_exact_moment }; }
 
 		}
 	}

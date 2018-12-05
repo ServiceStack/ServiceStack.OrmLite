@@ -51,9 +51,8 @@ namespace ServiceStack.OrmLite.Converters
         }
 
         public override object FromDbValue(Type fieldType, object value)
-        {
-            var strValue = value as string;
-            if (strValue != null)
+        {                                                                                                                                                                                                                                                                                                 
+            if (value is string strValue)
             {
                 value = DateTimeSerializer.ParseShortestXsdDateTime(strValue);
             }
