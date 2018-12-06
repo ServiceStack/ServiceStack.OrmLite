@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
@@ -201,8 +202,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             var postfix = "postfix";
 
-            var expected = new TestType()
-            {
+            var expected = new TestType {
                 IntColumn = 7,
                 BoolColumn = true,
                 StringColumn = postfix
@@ -214,9 +214,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
             {
                 var actual = db.Select<TestType>(q => q.StringColumn.Equals(postfix));
 
-                Assert.IsNotNull(actual);
-                Assert.AreEqual(1, actual.Count);
-                CollectionAssert.Contains(actual, expected);
+                Assert.That(actual, Is.Not.Null);
+                Assert.That(actual.Count, Is.EqualTo(1));
+                Assert.That(actual, Is.EquivalentTo(new[]{ expected }));
             }
         }
 

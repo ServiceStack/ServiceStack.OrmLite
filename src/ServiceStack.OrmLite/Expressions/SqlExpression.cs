@@ -2713,7 +2713,7 @@ namespace ServiceStack.OrmLite
                         : null;
                     statement = converter != null
                         ? $"{quotedColName}={ConvertToParam(converter.ToDbValue(argType, arg))}"
-                        : $"{quotedColName}={ConvertToParam(wildcardArg)}";
+                        : $"{quotedColName}={ConvertToParam(arg)}";
                     break;                
                 case "StartsWith":
                     statement = !OrmLiteConfig.StripUpperInLike
