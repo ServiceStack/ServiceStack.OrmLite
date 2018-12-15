@@ -1,13 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <PackageId>ServiceStack.OrmLite.MySql</PackageId>
+    <PackageId>ServiceStack.OrmLite.MySql.Core</PackageId>
     <AssemblyName>ServiceStack.OrmLite.MySql</AssemblyName>
-    <TargetFrameworks>net452;netstandard2.0</TargetFrameworks>
-    <Title>OrmLite.MySql - Fast, code-first, config-free POCO ORM</Title>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <Title>ServiceStack.OrmLite.MySql .NET Standard 2.0</Title>
     <PackageDescription>
-      Light, simple and fast convention-based code-first POCO ORM for MySQL.
-      Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in MySQL.
+      .NET Standard 2.0 version of ServiceStack.OrmLite.MySql
     </PackageDescription>
     <PackageTags>MySQL;OrmLite;RDBMS;SQL;POCO;Code-First;ORM;Schema-less;Blobs</PackageTags>
     <DefineConstants>$(DefineConstants);ASYNC</DefineConstants>

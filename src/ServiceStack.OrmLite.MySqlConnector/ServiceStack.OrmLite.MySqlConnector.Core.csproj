@@ -1,12 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
+    <PackageId>ServiceStack.OrmLite.MySqlConnector.Core</PackageId>
     <AssemblyName>ServiceStack.OrmLite.MySqlConnector</AssemblyName>
-    <PackageId>ServiceStack.OrmLite.MySqlConnector</PackageId>
+    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <RootNamespace>ServiceStack.OrmLite.MySql</RootNamespace>
-    <Title>OrmLite.MySqlConnector - Fast, code-first, config-free POCO ORM</Title>
+    <Title>ServiceStack.OrmLite.MySqlConnector .NET Standard 2.0</Title>
     <PackageDescription>
-      MySQL Adapter for ServiceStack OrmLite using MySqlConnector ADO.NET Provider
+      .NET Standard 2.0 version of ServiceStack.OrmLite.MySqlConnector
     </PackageDescription>
     <PackageTags>MySqlConnector;MySQL;OrmLite;RDBMS;SQL;POCO;Code-First;ORM;Schema-less;Blobs</PackageTags>
     <DefineConstants>$(DefineConstants);ASYNC</DefineConstants>

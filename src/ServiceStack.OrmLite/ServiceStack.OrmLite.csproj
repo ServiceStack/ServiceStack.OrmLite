@@ -1,44 +1,28 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
-    <AssemblyName>ServiceStack.OrmLite</AssemblyName>
     <PackageId>ServiceStack.OrmLite</PackageId>
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
-    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <AssemblyName>ServiceStack.OrmLite</AssemblyName>
+    <TargetFrameworks>net45;netstandard2.0</TargetFrameworks>
+    <Title>OrmLite - Fast, code-first, config-free POCO ORM</Title>
+    <PackageDescription>
+      Common library for the Light, simple and fast convention-based code-first POCO, OrmLite.
+      Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs.
+      OrmLite is a suite extension methods on ADO.NET's underlying IDbConnection providing DRY, typed access for common data usage patterns that map to clean, simple POCOs. Great support for testing where OrmLite methods can be mocked.
+    </PackageDescription>
+    <PackageTags>OrmLite;RDBMS;SQL;POCO;Code-First;ORM;Schema-less;Blobs</PackageTags>
+    <DefineConstants>$(DefineConstants);ASYNC</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(Configuration)' != 'Debug' ">
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Optimize>true</Optimize>
-  </PropertyGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <DefineConstants>$(DefineConstants);NET45;ASYNC</DefineConstants>
-    <SignAssembly>True</SignAssembly>
-    <DelaySign>False</DelaySign>
-    <AssemblyOriginatorKeyFile>../servicestack.snk</AssemblyOriginatorKeyFile>
-  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="System.Memory" Version="4.5.1" />
+    <PackageReference Include="ServiceStack.Common" Version="$(Version)" />
+  </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
     <Reference Include="System.Net" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
-
-    <Reference Include="..\..\lib\net45\ServiceStack.Interfaces.dll" />
-    <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
-    <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
   </ItemGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <DefineConstants>$(DefineConstants);NETSTANDARD2_0;ASYNC</DefineConstants>
-  </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
@@ -50,14 +34,6 @@
     <PackageReference Include="System.ComponentModel.Primitives" Version="4.3.0" />
     <PackageReference Include="System.Data.SqlClient" Version="4.5.1" />
     <PackageReference Include="System.ComponentModel.Annotations" Version="4.5.0" />
-     
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Interfaces.dll" />
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Text.dll" />
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Common.dll" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="System.Memory" Version="4.5.1" />
   </ItemGroup>
 
 </Project>

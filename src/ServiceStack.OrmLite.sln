@@ -9,25 +9,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{6CEB3EDE
 		..\build\build.proj = ..\build\build.proj
 		..\build\build.tasks = ..\build\build.tasks
 		..\README.md = ..\README.md
-		..\NuGet\ServiceStack.OrmLite.Core\servicestack.ormlite.core.nuspec = ..\NuGet\ServiceStack.OrmLite.Core\servicestack.ormlite.core.nuspec
-		..\NuGet\ServiceStack.OrmLite.Firebird\servicestack.ormlite.firebird.nuspec = ..\NuGet\ServiceStack.OrmLite.Firebird\servicestack.ormlite.firebird.nuspec
-		..\NuGet\ServiceStack.OrmLite.MySql.Core\servicestack.ormlite.mysql.core.nuspec = ..\NuGet\ServiceStack.OrmLite.MySql.Core\servicestack.ormlite.mysql.core.nuspec
-		..\NuGet\ServiceStack.OrmLite.MySql\servicestack.ormlite.mysql.nuspec = ..\NuGet\ServiceStack.OrmLite.MySql\servicestack.ormlite.mysql.nuspec
-		..\NuGet\ServiceStack.OrmLite.MySqlConnector.Core\servicestack.ormlite.mysqlconnector.core.nuspec = ..\NuGet\ServiceStack.OrmLite.MySqlConnector.Core\servicestack.ormlite.mysqlconnector.core.nuspec
-		..\NuGet\ServiceStack.OrmLite.MySqlConnector\servicestack.ormlite.mysqlconnector.nuspec = ..\NuGet\ServiceStack.OrmLite.MySqlConnector\servicestack.ormlite.mysqlconnector.nuspec
-		..\NuGet\ServiceStack.OrmLite\servicestack.ormlite.nuspec = ..\NuGet\ServiceStack.OrmLite\servicestack.ormlite.nuspec
-		..\NuGet\ServiceStack.OrmLite.Oracle\servicestack.ormlite.oracle.nuspec = ..\NuGet\ServiceStack.OrmLite.Oracle\servicestack.ormlite.oracle.nuspec
-		..\NuGet\ServiceStack.OrmLite.PostgreSQL.Core\servicestack.ormlite.postgresql.core.nuspec = ..\NuGet\ServiceStack.OrmLite.PostgreSQL.Core\servicestack.ormlite.postgresql.core.nuspec
-		..\NuGet\ServiceStack.OrmLite.PostgreSQL\servicestack.ormlite.postgresql.nuspec = ..\NuGet\ServiceStack.OrmLite.PostgreSQL\servicestack.ormlite.postgresql.nuspec
-		..\NuGet\ServiceStack.OrmLite.Sqlite.Core\servicestack.ormlite.sqlite.core.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite.Core\servicestack.ormlite.sqlite.core.nuspec
-		..\NuGet\ServiceStack.OrmLite.Sqlite\servicestack.ormlite.sqlite.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite\servicestack.ormlite.sqlite.nuspec
-		..\NuGet\ServiceStack.OrmLite.Sqlite.Windows\servicestack.ormlite.sqlite.windows.nuspec = ..\NuGet\ServiceStack.OrmLite.Sqlite.Windows\servicestack.ormlite.sqlite.windows.nuspec
-		..\NuGet\ServiceStack.OrmLite.SqlServer.Converters\servicestack.ormlite.sqlserver.converters.nuspec = ..\NuGet\ServiceStack.OrmLite.SqlServer.Converters\servicestack.ormlite.sqlserver.converters.nuspec
-		..\NuGet\ServiceStack.OrmLite.SqlServer.Core\servicestack.ormlite.sqlserver.core.nuspec = ..\NuGet\ServiceStack.OrmLite.SqlServer.Core\servicestack.ormlite.sqlserver.core.nuspec
-		..\NuGet\ServiceStack.OrmLite.SqlServer\servicestack.ormlite.sqlserver.nuspec = ..\NuGet\ServiceStack.OrmLite.SqlServer\servicestack.ormlite.sqlserver.nuspec
-		..\NuGet\ServiceStack.OrmLite.T4\servicestack.ormlite.t4.nuspec = ..\NuGet\ServiceStack.OrmLite.T4\servicestack.ormlite.t4.nuspec
-		..\lib\copy.bat = ..\lib\copy.bat
-		..\NuGet\ServiceStack.OrmLite.Firebird.Core\servicestack.ormlite.firebird.core.nuspec = ..\NuGet\ServiceStack.OrmLite.Firebird.Core\servicestack.ormlite.firebird.core.nuspec
+		Directory.Build.props = Directory.Build.props
+		ServiceStack.OrmLite\ServiceStack.OrmLite.Core.csproj = ServiceStack.OrmLite\ServiceStack.OrmLite.Core.csproj
+		ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.Core.csproj = ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.Core.csproj
+		ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.Core.csproj = ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.Core.csproj
+		ServiceStack.OrmLite.MySqlConnector\ServiceStack.OrmLite.MySqlConnector.Core.csproj = ServiceStack.OrmLite.MySqlConnector\ServiceStack.OrmLite.MySqlConnector.Core.csproj
+		ServiceStack.OrmLite.PostgreSQL\ServiceStack.OrmLite.PostgreSQL.Core.csproj = ServiceStack.OrmLite.PostgreSQL\ServiceStack.OrmLite.PostgreSQL.Core.csproj
+		ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.Core.csproj = ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.Core.csproj
+		ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.Core.csproj = ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.Core.csproj
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.Sqlite", "ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.csproj", "{CF68A37D-D071-469D-AE04-68594CB95382}"
@@ -78,6 +67,8 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.MySqlConnector", "ServiceStack.OrmLite.MySqlConnector\ServiceStack.OrmLite.MySqlConnector.csproj", "{7ECD23BC-AB3A-4528-AE6F-0F182874AA9B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.MySqlConnector.Tests", "ServiceStack.OrmLite.MySql.Tests\ServiceStack.OrmLite.MySqlConnector.Tests.csproj", "{3F41BD6C-66BE-49B6-B3B3-B27A7A8527B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.T4", "ServiceStack.OrmLite.T4\ServiceStack.OrmLite.T4.csproj", "{196CD5D3-23E5-4C98-83DC-C5397396A574}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -398,6 +389,24 @@ Global
 		{3F41BD6C-66BE-49B6-B3B3-B27A7A8527B4}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{3F41BD6C-66BE-49B6-B3B3-B27A7A8527B4}.Release|x86.ActiveCfg = Release|Any CPU
 		{3F41BD6C-66BE-49B6-B3B3-B27A7A8527B4}.Release|x86.Build.0 = Release|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Debug|x86.Build.0 = Debug|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Default|Any CPU.ActiveCfg = Debug|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Default|Any CPU.Build.0 = Debug|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Default|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Default|Mixed Platforms.Build.0 = Debug|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Default|x86.ActiveCfg = Debug|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Default|x86.Build.0 = Debug|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Release|Any CPU.Build.0 = Release|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Release|x86.ActiveCfg = Release|Any CPU
+		{196CD5D3-23E5-4C98-83DC-C5397396A574}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
