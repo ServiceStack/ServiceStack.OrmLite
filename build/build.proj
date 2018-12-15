@@ -133,6 +133,7 @@
     <!-- Restore for *.Core.csproj -->
     <CallTarget Targets="ClearNuGetRestoreCaches" />
 
+    
     <!-- ServiceStack.OrmLite.Core -->
     <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite/ServiceStack.OrmLite.Core.csproj" Targets="Restore" />
     <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite/ServiceStack.OrmLite.Core.csproj"
@@ -175,6 +176,8 @@
              Targets="Build;Pack"
              Properties="Configuration=$(Configuration)" />
 
+
+    <!-- Copy all *.nupkg to /NuGet -->
     <ItemGroup>
       <NugetPackagesToMove Include="$(BuildSolutionDir)/src/**/bin/$(Configuration)/*.nupkg"/>
     </ItemGroup>
