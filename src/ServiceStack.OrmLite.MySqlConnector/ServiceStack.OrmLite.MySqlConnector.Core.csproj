@@ -28,10 +28,6 @@
     <PackageReference Include="MySqlConnector" Version="0.43.0" />
     <PackageReference Include="ServiceStack.Common" Version="$(Version)" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <Reference Include="System.Net" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-  </ItemGroup>
   <ItemGroup>
     <Folder Include="DataAnnotations\" />
   </ItemGroup>

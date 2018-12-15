@@ -18,9 +18,4 @@
     <PackageReference Include="ServiceStack.Common" Version="$(Version)" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net452' ">
-    <Reference Include="System.Net" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-  </ItemGroup>
-
 </Project>
