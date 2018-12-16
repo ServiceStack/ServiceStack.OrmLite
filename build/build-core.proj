@@ -30,11 +30,11 @@
   </Target>
 
   <Target Name="BuildSolutions">
+    <ItemGroup>
+      <NugetPackageFilesToDelete Include="$(NuGetPackageDir)/*.nupkg"/>
+    </ItemGroup>
+    <Delete Files="@(NugetPackageFilesToDelete)" />
     <CallTarget Targets="ClearNuGetRestoreCaches" />
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.sln" Targets="Restore" />
-
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.sln" Targets="Build"
-             Properties="Configuration=$(Configuration)" />
   </Target>
 
   <!-- need to remove old caches from nuget restore from .Core csproj's -->
@@ -61,64 +61,46 @@
   </Target>
 
   <Target Name="Default" DependsOnTargets="$(DoBuildSolutionsDependsOn)">
-
-    <!-- ServiceStack.OrmLite -->
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite/ServiceStack.OrmLite.csproj"
+    
+    <!-- ServiceStack.OrmLite.Core -->
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite/ServiceStack.OrmLite.Core.csproj" Targets="Restore" />
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite/ServiceStack.OrmLite.Core.csproj"
              Targets="Build;Pack"
              Properties="Configuration=$(Configuration)" />
 
-    <!-- ServiceStack.OrmLite.Firebird -->
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.Firebird/ServiceStack.OrmLite.Firebird.csproj"
+    <!-- ServiceStack.OrmLite.Firebird.Core -->
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.Firebird/ServiceStack.OrmLite.Firebird.Core.csproj" Targets="Restore" />
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.Firebird/ServiceStack.OrmLite.Firebird.Core.csproj"
              Targets="Build;Pack"
              Properties="Configuration=$(Configuration)" />
 
-    <!-- ServiceStack.OrmLite.MySql -->
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.MySql/ServiceStack.OrmLite.MySql.csproj"
+    <!-- ServiceStack.OrmLite.MySql.Core -->
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.MySql/ServiceStack.OrmLite.MySql.Core.csproj" Targets="Restore" />
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.MySql/ServiceStack.OrmLite.MySql.Core.csproj"
              Targets="Build;Pack"
              Properties="Configuration=$(Configuration)" />
 
-    <!-- ServiceStack.OrmLite.MySqlConnector -->
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.MySqlConnector/ServiceStack.OrmLite.MySqlConnector.csproj"
+    <!-- ServiceStack.OrmLite.MySqlConnector.Core -->
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.MySqlConnector/ServiceStack.OrmLite.MySqlConnector.Core.csproj" Targets="Restore" />
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.MySqlConnector/ServiceStack.OrmLite.MySqlConnector.Core.csproj"
              Targets="Build;Pack"
              Properties="Configuration=$(Configuration)" />
 
-    <!-- ServiceStack.OrmLite.Oracle -->
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.Oracle/ServiceStack.OrmLite.Oracle.csproj"
+    <!-- ServiceStack.OrmLite.PostgreSQL.Core -->
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.PostgreSQL/ServiceStack.OrmLite.PostgreSQL.Core.csproj" Targets="Restore" />
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.PostgreSQL/ServiceStack.OrmLite.PostgreSQL.Core.csproj"
              Targets="Build;Pack"
              Properties="Configuration=$(Configuration)" />
 
-    <!-- ServiceStack.OrmLite.PostgreSQL -->
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.PostgreSQL/ServiceStack.OrmLite.PostgreSQL.csproj"
+    <!-- ServiceStack.OrmLite.Sqlite.Core -->
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.Sqlite/ServiceStack.OrmLite.Sqlite.Core.csproj" Targets="Restore" />
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.Sqlite/ServiceStack.OrmLite.Sqlite.Core.csproj"
              Targets="Build;Pack"
              Properties="Configuration=$(Configuration)" />
 
-    <!-- ServiceStack.OrmLite.Sqlite -->
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.Sqlite/ServiceStack.OrmLite.Sqlite.csproj"
-             Targets="Build;Pack"
-             Properties="Configuration=$(Configuration)" />
-
-    <!-- ServiceStack.OrmLite.Sqlite.Windows -->
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.Sqlite.Windows/ServiceStack.OrmLite.Sqlite.Windows.csproj"
-             Targets="Build;Pack"
-             Properties="Configuration=$(Configuration)" />
-
-    <!-- ServiceStack.OrmLite.SqlServer -->
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer/ServiceStack.OrmLite.SqlServer.csproj"
-             Targets="Build;Pack"
-             Properties="Configuration=$(Configuration)" />
-
-    <!-- ServiceStack.OrmLite.SqlServer.Converters -->
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer.Converters/ServiceStack.OrmLite.SqlServer.Converters.csproj"
-             Targets="Build;Pack"
-             Properties="Configuration=$(Configuration)" />
-
-    <!-- ServiceStack.OrmLite.VistaDB -->
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.VistaDB/ServiceStack.OrmLite.VistaDB.csproj"
-             Targets="Build;Pack"
-             Properties="Configuration=$(Configuration)" />
-
-    <!-- ServiceStack.OrmLite.T4 -->
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.T4/ServiceStack.OrmLite.T4.csproj"
+    <!-- ServiceStack.OrmLite.SqlServer.Core -->
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer/ServiceStack.OrmLite.SqlServer.Core.csproj" Targets="Restore" />
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer/ServiceStack.OrmLite.SqlServer.Core.csproj"
              Targets="Build;Pack"
              Properties="Configuration=$(Configuration)" />
 
