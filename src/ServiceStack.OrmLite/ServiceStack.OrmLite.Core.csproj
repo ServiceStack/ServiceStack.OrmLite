@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <PackageReference Include="System.Memory" Version="4.5.1" />
-    <PackageReference Include="ServiceStack.Common" Version="$(Version)" />
+    <PackageReference Include="ServiceStack.Common.Core" Version="$(Version)" />
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">

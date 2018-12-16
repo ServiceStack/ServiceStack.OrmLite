@@ -24,9 +24,9 @@
     <Compile Include="..\ServiceStack.OrmLite.MySql\MySqlExpression.cs" Link="MySqlExpression.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
+    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.Core.csproj" />
+    <PackageReference Include="ServiceStack.Common.Core" Version="$(Version)" />
     <PackageReference Include="MySqlConnector" Version="0.43.0" />
-    <PackageReference Include="ServiceStack.Common" Version="$(Version)" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="DataAnnotations\" />
