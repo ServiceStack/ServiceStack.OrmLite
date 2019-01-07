@@ -154,9 +154,10 @@ namespace ServiceStack.OrmLite
             return GetCountAsync(dbCmd, sql, q.Params, token);
         }
 
-        internal static Task<long> GetCountAsync(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
+        internal static async Task<long> GetCountAsync(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
         {
-            return dbCmd.ColumnAsync<long>(sql, sqlParams, token).Then(x => x.Sum());
+            var ret = await dbCmd.ColumnAsync<long>(sql, sqlParams, token);
+            return ret.Sum();
         }
 
         internal static Task<long> RowCountAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression, CancellationToken token)
