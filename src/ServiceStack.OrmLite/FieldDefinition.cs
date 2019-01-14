@@ -192,12 +192,12 @@ namespace ServiceStack.OrmLite
             if (ForeignKeyName.IsNullOrEmpty())
             {
                 var modelName = modelDef.IsInSchema
-                    ? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
-                    : NamingStrategy.GetTableName(modelDef.ModelName);
+                    ? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef)
+                    : NamingStrategy.GetTableName(modelDef);
 
                 var refModelName = refModelDef.IsInSchema
-                    ? refModelDef.Schema + "_" + NamingStrategy.GetTableName(refModelDef.ModelName)
-                    : NamingStrategy.GetTableName(refModelDef.ModelName);
+                    ? refModelDef.Schema + "_" + NamingStrategy.GetTableName(refModelDef)
+                    : NamingStrategy.GetTableName(refModelDef);
 
                 var fkName = $"FK_{modelName}_{refModelName}_{fieldDef.FieldName}";
                 return NamingStrategy.ApplyNameRestrictions(fkName);

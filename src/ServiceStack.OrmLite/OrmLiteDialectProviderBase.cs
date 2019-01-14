@@ -353,7 +353,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string GetTableName(ModelDefinition modelDef)
         {
-            return GetTableName(modelDef.ModelName, modelDef.Schema);
+            return GetTableName(NamingStrategy.GetTableName(modelDef), modelDef.Schema);
         }
 
         public virtual string GetTableName(string table, string schema = null)
@@ -365,7 +365,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string GetQuotedTableName(ModelDefinition modelDef)
         {
-            return GetQuotedTableName(modelDef.ModelName, modelDef.Schema);
+            return GetQuotedTableName(NamingStrategy.GetTableName(modelDef), modelDef.Schema);
         }
 
         public virtual string GetQuotedTableName(string tableName, string schema = null)
@@ -1396,7 +1396,7 @@ namespace ServiceStack.OrmLite
 
         protected virtual string GetCompositeIndexName(CompositeIndexAttribute compositeIndex, ModelDefinition modelDef)
         {
-            return compositeIndex.Name ?? GetIndexName(compositeIndex.Unique, modelDef.ModelName.SafeVarName(),
+            return compositeIndex.Name ?? GetIndexName(compositeIndex.Unique, NamingStrategy.GetTableName(modelDef).SafeVarName(),
                 string.Join("_", compositeIndex.FieldNames.Map(x => x.LeftPart(' ')).ToArray()));
         }
 
@@ -1510,7 +1510,7 @@ namespace ServiceStack.OrmLite
             var referenceFieldName = referenceMD.GetFieldDefinition(foreignField).FieldName;
 
             string name = GetQuotedName(foreignKeyName.IsNullOrEmpty() ?
-                "fk_" + sourceMD.ModelName + "_" + fieldName + "_" + referenceFieldName :
+                "fk_" + NamingStrategy.GetTableName(sourceMD) + "_" + fieldName + "_" + referenceFieldName :
                 foreignKeyName);
 
             return $"ALTER TABLE {GetQuotedTableName(sourceMD)} " +
@@ -1527,7 +1527,7 @@ namespace ServiceStack.OrmLite
             var fieldName = sourceDef.GetFieldDefinition(field).FieldName;
 
             string name = GetQuotedName(indexName.IsNullOrEmpty() ?
-                (unique ? "uidx" : "idx") + "_" + sourceDef.ModelName + "_" + fieldName :
+                (unique ? "uidx" : "idx") + "_" + NamingStrategy.GetTableName(sourceDef) + "_" + fieldName :
                 indexName);
 
             string command = $"CREATE {(unique ? "UNIQUE" : "")} " +

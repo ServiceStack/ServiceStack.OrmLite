@@ -183,7 +183,7 @@ namespace ServiceStack.OrmLite
             if (refField == null) 
             {
                 if(!isCrossJoin)
-                    throw new ArgumentException($"Could not infer relationship between {sourceDef.ModelName} and {targetDef.ModelName}");
+                    throw new ArgumentException($"Could not infer relationship between {DialectProvider.GetTableName(sourceDef)} and {DialectProvider.GetTableName(targetDef.ModelName)}");
 
                 return string.Empty;
             }
@@ -315,7 +315,7 @@ namespace ServiceStack.OrmLite
                                     }
                                     else
                                     {
-                                        sbSelect.Append(DialectProvider.GetRowVersionSelectColumn(fieldDef, DialectProvider.GetTableName(tableDef.ModelName)));
+                                        sbSelect.Append(DialectProvider.GetRowVersionSelectColumn(fieldDef, DialectProvider.GetTableName(tableDef)));
                                     }
                                 }
                                 else

@@ -118,7 +118,7 @@ namespace ServiceStack.OrmLite
             var provider = dbConn.GetDialectProvider();
             var modelDef = ModelDefinition<T>.Definition;
             var command = string.Format(provider.GetDropForeignKeyConstraints(modelDef),
-                provider.GetQuotedTableName(modelDef.ModelName),
+                provider.GetQuotedTableName(modelDef),
                 provider.GetQuotedName(foreignKeyName));
 
             dbConn.ExecuteSql(command);
@@ -136,7 +136,7 @@ namespace ServiceStack.OrmLite
         public static void DropIndex<T>(this IDbConnection dbConn, string indexName)
         {
             var provider = dbConn.GetDialectProvider();
-            var command = $"ALTER TABLE {provider.GetQuotedTableName(ModelDefinition<T>.Definition.ModelName)} " +
+            var command = $"ALTER TABLE {provider.GetQuotedTableName(ModelDefinition<T>.Definition)} " +
                           $"DROP INDEX  {provider.GetQuotedName(indexName)};";
             dbConn.ExecuteSql(command);
         }
