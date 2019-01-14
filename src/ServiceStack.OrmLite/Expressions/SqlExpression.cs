@@ -2011,7 +2011,7 @@ namespace ServiceStack.OrmLite
         {
             var paramModelDef = p.Type.GetModelDefinition();
             if (paramModelDef != null)
-                return new SelectList(DialectProvider.GetColumnNames(paramModelDef, paramModelDef.ModelName));
+                return new SelectList(DialectProvider.GetColumnNames(paramModelDef, DialectProvider.GetTableName(paramModelDef)));
 
             return p.Name;
         }
@@ -2426,11 +2426,14 @@ namespace ServiceStack.OrmLite
         {
             OnlyFields = null;
             selectDistinct = distinct;
-            
+
             selectExpression = $"SELECT {(selectDistinct ? "DISTINCT " : "")}" +
-               (string.IsNullOrEmpty(fields) 
-                    ? DialectProvider.GetColumnNames(modelDef, PrefixFieldWithTableName ? TableAlias ?? ModelDef.ModelName : null).ToSelectString() 
-                    : fields);
+                               (string.IsNullOrEmpty(fields)
+                                   ? DialectProvider.GetColumnNames(modelDef,
+                                       PrefixFieldWithTableName
+                                           ? TableAlias ?? DialectProvider.NamingStrategy.GetTableName(ModelDef)
+                                           : null).ToSelectString()
+                                   : fields);
         }
 
         public IList<string> GetAllFields()
