@@ -65,6 +65,7 @@ namespace ServiceStack.OrmLite
         IUntypedSqlExpression ThenBy(string orderBy);
         IUntypedSqlExpression ThenBy<Table>(Expression<Func<Table, object>> keySelector);
         IUntypedSqlExpression OrderByDescending<Table>(Expression<Func<Table, object>> keySelector);
+        IUntypedSqlExpression OrderByDescending(string orderBy);
         IUntypedSqlExpression ThenByDescending(string orderBy);
         IUntypedSqlExpression ThenByDescending<Table>(Expression<Func<Table, object>> keySelector);
 
@@ -413,6 +414,12 @@ namespace ServiceStack.OrmLite
         public IUntypedSqlExpression OrderByDescending<Table>(Expression<Func<Table, object>> keySelector)
         {
             q.OrderByDescending(keySelector);
+            return this;
+        }
+
+        public IUntypedSqlExpression OrderByDescending(string orderBy)
+        {
+            q.OrderByDescending(orderBy);
             return this;
         }
 
