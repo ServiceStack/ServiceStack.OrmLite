@@ -215,7 +215,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
         private static void InitAliasTables(IDbConnection db)
         {
-            OrmLiteUtils.PrintSql();
             db.DropTable<LRDProfiloAnalisi>();
             db.DropTable<LRDAnalisi>();
             db.DropTable<LRDContenitore>();
@@ -238,6 +237,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 ProfiloAnalisiId = null
             });
 
+            OrmLiteUtils.PrintSql();
         }
         
         [Test]
@@ -247,7 +247,10 @@ namespace ServiceStack.OrmLite.Tests.Issues
             {
                 InitAliasTables(db);
                 
-                var q = db.From<LRDAnalisi>(db.TableAlias("dana"))
+                var q = db.From<LRDAnalisi>(options => {
+                        options.SetTableAlias("dana");
+                        options.UseSelectPropertiesAsAliases = true;
+                    })
                     .Join<LRDAnalisi, LRDContenitore>((dana, dcont) => dana.ContenitoreId == dcont.Id, db.TableAlias("c"))
                     .Join<LRDAnalisi, LRDProfiloAnalisi>((dana, dprofana) => dana.Id == dprofana.AnalisiId, db.TableAlias("dprofana"))
                     .Where<LRDProfiloAnalisi>(dprofana => Sql.TableAlias(dprofana.ProfiloAnalisiId, "dprofana") == null)
@@ -258,7 +261,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                             AnalisiId = dana.Id,
                             Codice = dana.Codice,
                             Descrizione = dana.Descrizione,
-                            ContenitoreId = Sql.TableAlias(dcont.Id, "c"),
+                            ContenitoreId = dana.ContenitoreId,
                             ContenitoreCodice = Sql.TableAlias(dcont.Codice, "c"),
                             ContenitoreDescrizione = Sql.TableAlias(dcont.Descrizione, "c"),
                             VersioneRecord = Sql.TableAlias(dprofana.VersioneRecord, "dprofana")

@@ -53,6 +53,13 @@ namespace ServiceStack.OrmLite
             return dbConn.GetExecFilter().SqlExpression<T>(dbConn);
         }
 
+        public static SqlExpression<T> From<T>(this IDbConnection dbConn, Action<SqlExpression<T>> options)
+        {
+            var q = dbConn.GetExecFilter().SqlExpression<T>(dbConn);
+            options(q);
+            return q;
+        }
+
         public static SqlExpression<T> From<T, JoinWith>(this IDbConnection dbConn, Expression<Func<T, JoinWith, bool>> joinExpr=null)
         {
             var sql = dbConn.GetExecFilter().SqlExpression<T>(dbConn);
@@ -70,14 +77,22 @@ namespace ServiceStack.OrmLite
             return expr;
         }
                 
-        public static SqlExpression<T> From<T>(this IDbConnection dbConn, TableOptions options)
+        public static SqlExpression<T> From<T>(this IDbConnection dbConn, TableOptions tableOptions)
         {
             var expr = dbConn.GetExecFilter().SqlExpression<T>(dbConn);
-            if (!string.IsNullOrEmpty(options.Expression))
-                expr.From(options.Expression);
-            if (!string.IsNullOrEmpty(options.Alias))
-                expr.SetTableAlias(options.Alias);
+            if (!string.IsNullOrEmpty(tableOptions.Expression))
+                expr.From(tableOptions.Expression);
+            if (!string.IsNullOrEmpty(tableOptions.Alias))
+                expr.SetTableAlias(tableOptions.Alias);
             return expr;
+        }
+
+        public static SqlExpression<T> From<T>(this IDbConnection dbConn, TableOptions tableOptions,
+            Action<SqlExpression<T>> options)
+        {
+            var q = dbConn.From<T>(tableOptions);
+            options(q);
+            return q;
         }
 
         [Obsolete("Use TableAlias")]

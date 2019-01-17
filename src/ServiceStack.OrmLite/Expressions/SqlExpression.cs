@@ -49,6 +49,7 @@ namespace ServiceStack.OrmLite
         public static Action<SqlExpression<T>> SelectFilter { get; set; }
         public int? Rows { get; set; }
         public int? Offset { get; set; }
+        public bool UseSelectPropertiesAsAliases { get; set; }
 
         protected string Sep => sep;
 
@@ -98,6 +99,7 @@ namespace ServiceStack.OrmLite
             to.Offset = Offset;
             to.Rows = Rows;
             to.tableDefs = tableDefs;
+            to.UseSelectPropertiesAsAliases = UseSelectPropertiesAsAliases;
             return to;
         }
 
@@ -1922,7 +1924,8 @@ namespace ServiceStack.OrmLite
             // When selecting a column use the anon type property name, rather than the table property name, as the returned column name
             if (arg is MemberExpression propExpr && IsLambdaArg(propExpr.Expression))
             {
-                if (propExpr.Member.Name != member.Name ||           // Use anon property alias when names don't match 
+                if (UseSelectPropertiesAsAliases ||                    // Use anon property alias when explicitly requested
+                    propExpr.Member.Name != member.Name ||           // or when names don't match 
                     propExpr.Expression.Type != ModelDef.ModelType)  // or when selecting a field from a different table
                     return new SelectItemExpression(DialectProvider, expr.ToString(), member.Name);
 
@@ -1975,7 +1978,9 @@ namespace ServiceStack.OrmLite
                 return new PartialSqlString(strExpr + " AS " + member.Name);
             } 
 
-            return expr;
+            return UseSelectPropertiesAsAliases
+                ? new SelectItemExpression(DialectProvider, expr.ToString(), member.Name)
+                : expr;
         }
 
         private static void StripAliases(SelectList selectList)
