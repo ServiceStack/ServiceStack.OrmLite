@@ -212,7 +212,127 @@ namespace ServiceStack.OrmLite.Tests.Issues
             db.DropTable<LRDLaboratorio>();
             db.DropTable<LRARisultato>();
         }
+
+        private static void InitAliasTables(IDbConnection db)
+        {
+            OrmLiteUtils.PrintSql();
+            db.DropTable<LRDProfiloAnalisi>();
+            db.DropTable<LRDAnalisi>();
+            db.DropTable<LRDContenitore>();
+                
+            db.CreateTable<LRDContenitore>();
+            db.CreateTable<LRDAnalisi>();
+            db.CreateTable<LRDProfiloAnalisi>();
+
+            db.Insert(new LRDAnalisi
+            {
+                Codice = "TEST", 
+                Descrizione = "DESCRIPTION"
+            });
+
+            db.Insert(new LRDProfiloAnalisi
+            {
+                AnalisiId = 1,
+                DataModifica = DateTime.UtcNow,
+                VersioneRecord = 1,
+                ProfiloAnalisiId = null
+            });
+
+        }
+        
+        [Test]
+        public void Table_Alias()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitAliasTables(db);
+                
+                var q = db.From<LRDAnalisi>(db.TableAlias("dana"))
+                    .Join<LRDAnalisi, LRDContenitore>((dana, dcont) => dana.ContenitoreId == dcont.Id, db.TableAlias("c"))
+                    .Join<LRDAnalisi, LRDProfiloAnalisi>((dana, dprofana) => dana.Id == dprofana.AnalisiId, db.TableAlias("dprofana"))
+                    .Where<LRDProfiloAnalisi>(dprofana => Sql.TableAlias(dprofana.ProfiloAnalisiId, "dprofana") == null)
+                    .SelectDistinct<LRDAnalisi, LRDProfiloAnalisi, LRDContenitore>((dana, dprofana, dcont) =>
+                        new //ProfiloAnalisiDTO
+                        {
+                            Id = Sql.TableAlias(dprofana.Id, "dprofana"),
+                            AnalisiId = dana.Id,
+                            Codice = dana.Codice,
+                            Descrizione = dana.Descrizione,
+                            ContenitoreId = Sql.TableAlias(dcont.Id, "c"),
+                            ContenitoreCodice = Sql.TableAlias(dcont.Codice, "c"),
+                            ContenitoreDescrizione = Sql.TableAlias(dcont.Descrizione, "c"),
+                            VersioneRecord = Sql.TableAlias(dprofana.VersioneRecord, "dprofana")
+                        });
+                
+                var result = db.Select<ProfiloAnalisiDTO>(q);
+            }
+        }
+        
+        [Test]
+        public void Join_Alias()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitAliasTables(db);
+
+                var q = db.From<LRDAnalisi>()
+                    .Join<LRDAnalisi, LRDContenitore>((dana, dcont) => dana.ContenitoreId == dcont.Id, db.JoinAlias("c"))
+                    .Join<LRDAnalisi, LRDProfiloAnalisi>((dana, dprofana) => dana.Id == dprofana.AnalisiId, db.JoinAlias("dprofana"))
+                    .Where<LRDProfiloAnalisi>(dprofana => Sql.JoinAlias(dprofana.ProfiloAnalisiId, "dprofana") == null)
+                    .SelectDistinct<LRDAnalisi, LRDProfiloAnalisi, LRDContenitore>((dana, dprofana, dcont) =>
+                        new //ProfiloAnalisiDTO
+                        {
+                            Id = Sql.JoinAlias(dprofana.Id, "dprofana"),
+                            AnalisiId = dana.Id,
+                            Codice = dana.Codice,
+                            Descrizione = dana.Descrizione,
+                            ContenitoreId = Sql.JoinAlias(dcont.Id, "c"),
+                            ContenitoreCodice = Sql.JoinAlias(dcont.Codice, "c"),
+                            ContenitoreDescrizione = Sql.JoinAlias(dcont.Descrizione, "c"),
+                            VersioneRecord = Sql.JoinAlias(dprofana.VersioneRecord, "dprofana")
+                        });
+                
+                var result = db.Select<ProfiloAnalisiDTO>(q);
+            }
+        }        
     }
+    
+    public class ElementoProfiloAnalisiDTO
+    {
+        public int Id { get; set; }
+
+        public int ProfiloAnalisiId { get; set; }
+
+        public int AnalisiId { get; set; }
+
+        public string CodiceAnalisi { get; set; }
+
+        public string DescrizioneAnalisi { get; set; }
+
+        public int VersioneRecord { get; set; }
+    }
+    
+    public class ProfiloAnalisiDTO
+    {
+        public int Id { get; set; }
+
+        public string Codice { get; set; }
+
+        public string Descrizione { get; set; }
+
+        public int ContenitoreId { get; set; }
+
+        public string ContenitoreCodice { get; set; }
+
+        public string ContenitoreDescrizione { get; set; }
+
+        public int VersioneRecord { get; set; }
+
+        public int AnalisiId { get; set; }
+
+        public IEnumerable<ElementoProfiloAnalisiDTO> Elementi { get; set; }
+    }
+    
 
     public class DBObject : ICloneable
     {
@@ -971,4 +1091,135 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Alias("ADELTARISULTATOPRECEDENTEID")]
         public int? DeltaRisultatoPrecedenteId { get; set; }
     }
+    
+    [Alias("LRDPROFILOANALISI")]
+    [CompositeIndex("DPROFILOANALISIID", "DANALISIID", Unique = true, Name = "IDXPROFILO")]
+    public class LRDProfiloAnalisi : DBObject, IHasId<int>
+    {
+        [Alias("IDDPROFILOANALISI")]
+        [AutoIncrement]
+        [PrimaryKey]
+        public int Id { get; set; }
+
+        [ApiMember(Description = "Analisi profilo a cui appartiene l'analisi")]
+        [Alias("DPROFILOANALISIID")]
+        [References(typeof(LRDProfiloAnalisi))]
+        public int? ProfiloAnalisiId { get; set; } // dove NULL allora DANALISIID e' l'analisi profilo
+
+        [ApiMember(Description = "Analisi dal dizionario")]
+        [Alias("DANALISIID")]
+        [References(typeof(LRDAnalisi))]
+        public int AnalisiId { get; set; }
+    }
+    
+    [Alias("LRDCONTENITORI")]
+    public class LRDContenitore : DBObject, IHasId<int>
+    {
+        private const int CColore = 7; // lunghezza colore HTML es. #AABBCC
+        private const int CPrefisso = 5;
+
+        [Alias("IDDCONTENITORE")]
+        [AutoIncrement]
+        [PrimaryKey]
+        public int Id { get; set; }
+
+        [Alias("CODICE")]
+        [Required]
+        [Index(Unique = true)]
+        public string Codice { get; set; }
+
+        [Required]
+        [Alias("DESCRIZIONE")]
+        public string Descrizione { get; set; }
+
+        [Alias("DESCRIZIONEESTESA")]
+        public string DescrizioneEstesa { get; set; }
+
+        [Alias("ORDINE")]
+        [Required]
+        public int Ordine { get; set; }
+
+        [Required]
+        [Alias("TIPOCONTENITORE")]
+        public int TipoContenitore { get; set; }
+
+        [Alias("COLORE")]
+        [StringLength(CColore)]
+        public string Colore { get; set; }
+
+        [Alias("PREFISSO")]
+        [StringLength(CPrefisso)]
+        public string Prefisso { get; set; }
+
+        [Alias("PROGRESSIVOBARCODEMIN")]
+        [DecimalLength(30, 0)]
+        public decimal ProgressivoBarcodeMin { get; set; }
+
+        [Alias("PROGRESSIVOBARCODEMAX")]
+        [DecimalLength(30, 0)]
+        [Default(int.MaxValue)]
+        public decimal ProgressivoBarcodeMax { get; set; }
+
+        [Alias("DMATERIALEID")]
+        public int? MaterialeId { get; set; }
+
+        [Alias("DETICHETTAID")]
+        public int? EtichettaId { get; set; }
+
+        [Required]
+        [Alias("EMATOLOGIA")]
+        public int Ematologia { get; set; }
+
+        [Required]
+        [Alias("URINE")]
+        public int Urine { get; set; }
+    }    
+
+    [Alias("LRDANALISI")]
+    public class LRDAnalisi : DBObject, IHasId<int>
+    {
+        [Alias("IDDANALISI")]
+        [AutoIncrement]
+        [PrimaryKey]
+        public int Id { get; set; }
+
+        [Alias("CODICE")]
+        [Required]
+        [Index(Unique = true)]
+        public string Codice { get; set; }
+
+        [Alias("DESCRIZIONE")]
+        [Required]
+        public string Descrizione { get; set; }
+
+        [Alias("DESCRIZIONEESTESA")]
+        public string DescrizioneEstesa { get; set; }
+
+        [Alias("CODICEREGIONALE")]
+        public string CodiceRegionale { get; set; }
+
+        [Alias("DCONTENITOREID")]
+        public int ContenitoreId { get; set; }
+
+        [Alias("ORDINE")]
+        public int Ordine { get; set; }
+
+        [Alias("DMETODOID")]
+        public int? MetodoId { get; set; }
+
+        [Alias("DPANNELLOANALISIID")]
+        public int? PannelloAnalisiId { get; set; }
+
+        [Alias("DCLASSEANALISIID")]
+        public int? ClasseAnalisiId { get; set; }
+
+        [Alias("QCREGISTRAZIONERISULTATI")]
+        public int QCRegistrazioneRisultati { get; set; }
+
+        [Alias("QCVERIFICA")]
+        public int QCVerifica { get; set; }
+
+        [Alias("QCOREINTERVALLOVERIFICA")]
+        public int? QCOreIntervalloVerifica { get; set; }
+    }    
 }

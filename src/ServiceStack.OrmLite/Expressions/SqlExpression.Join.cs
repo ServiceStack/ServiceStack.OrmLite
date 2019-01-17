@@ -209,9 +209,7 @@ namespace ServiceStack.OrmLite
         {
             PrefixFieldWithTableName = true;
 
-            //Changes how Sql Expressions are generated.
-            useFieldName = true;
-            sep = " ";
+            Reset();
             
             var joinFormat = options?.JoinFormat;
             if (options?.Alias != null) //Set joinAlias
