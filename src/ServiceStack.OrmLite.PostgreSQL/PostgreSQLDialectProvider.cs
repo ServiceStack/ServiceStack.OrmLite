@@ -471,10 +471,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
             if (!modelDef.IsInSchema)
                 return base.GetQuotedTableName(modelDef);
             if (Normalize && !ReservedWords.Contains(modelDef.ModelName) && !ReservedWords.Contains(modelDef.Schema))
-                return modelDef.Schema + "." + base.NamingStrategy.GetTableName(modelDef.ModelName);
+                return NamingStrategy.GetSchemaName(modelDef.Schema) + "." + NamingStrategy.GetTableName(modelDef.ModelName);
 
-            string escapedSchema = modelDef.Schema.Replace(".", "\".\"");
-            return $"\"{escapedSchema}\".\"{base.NamingStrategy.GetTableName(modelDef.ModelName)}\"";
+            string escapedSchema = NamingStrategy.GetSchemaName(modelDef.Schema).Replace(".", "\".\"");
+            return $"\"{escapedSchema}\".\"{NamingStrategy.GetTableName(modelDef.ModelName)}\"";
         }
         
         public override string GetLastInsertIdSqlSuffix<T>()
