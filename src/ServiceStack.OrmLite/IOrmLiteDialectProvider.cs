@@ -74,6 +74,12 @@ namespace ServiceStack.OrmLite
 
         object GetParamValue(object value, Type fieldType);
 
+        // Customize DB Parameters in SELECT or WHERE queries 
+        void InitQueryParam(IDbDataParameter param);
+
+        // Customize UPDATE or INSERT DB Parameters
+        void InitUpdateParam(IDbDataParameter param);
+
         object ToDbValue(object value, Type type);
 
         object FromDbValue(object value, Type type);

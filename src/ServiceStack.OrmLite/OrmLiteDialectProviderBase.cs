@@ -687,7 +687,7 @@ namespace ServiceStack.OrmLite
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(this.AddParam(dbCmd, value, fieldDef).ParameterName);
+                    sbColumnValues.Append(this.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
                 }
                 catch (Exception ex)
                 {
@@ -826,7 +826,7 @@ namespace ServiceStack.OrmLite
 
             var sqlFilter = StringBuilderCache.Allocate();
             var modelDef = typeof(T).GetModelDefinition();
-            var hadRowVesion = false;
+            var hadRowVersion = false;
 
             cmd.Parameters.Clear();
 
@@ -839,7 +839,7 @@ namespace ServiceStack.OrmLite
                     continue;
 
                 if (fieldDef.IsRowVersion)
-                    hadRowVesion = true;
+                    hadRowVersion = true;
 
                 try
                 {
@@ -863,7 +863,7 @@ namespace ServiceStack.OrmLite
 
             cmd.CommandText = $"DELETE FROM {GetQuotedTableName(modelDef)} WHERE {StringBuilderCache.ReturnAndFree(sqlFilter)}";
 
-            return hadRowVesion;
+            return hadRowVersion;
         }
 
         public virtual void PrepareStoredProcedureStatement<T>(IDbCommand cmd, T obj)
@@ -872,10 +872,14 @@ namespace ServiceStack.OrmLite
             cmd.CommandType = CommandType.StoredProcedure;
         }
 
+        /// <summary>
+        /// Used for adding updated DB params in INSERT and UPDATE statements  
+        /// </summary>
         protected IDbDataParameter AddParameter(IDbCommand cmd, FieldDefinition fieldDef)
         {
             var p = cmd.CreateParameter();
             SetParameter(fieldDef, p);
+            InitUpdateParam(p);
             cmd.Parameters.Add(p);
             return p;
         }
@@ -1043,7 +1047,7 @@ namespace ServiceStack.OrmLite
                         sqlFilter
                             .Append(GetQuotedColumnName(fieldDef.FieldName))
                             .Append("=")
-                            .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
+                            .Append(this.AddQueryParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
 
                         continue;
                     }
@@ -1057,7 +1061,7 @@ namespace ServiceStack.OrmLite
                     sql
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
+                        .Append(this.AddUpdateParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
                 }
                 catch (Exception ex)
                 {
@@ -1094,7 +1098,7 @@ namespace ServiceStack.OrmLite
                     sql
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddParam(dbCmd, value, fieldDef).ParameterName);
+                        .Append(this.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
                 }
                 catch (Exception ex)
                 {
@@ -1137,14 +1141,14 @@ namespace ServiceStack.OrmLite
                             .Append("=")
                             .Append(quotedFieldName)
                             .Append("+")
-                            .Append(this.AddParam(dbCmd, value, fieldDef).ParameterName);
+                            .Append(this.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
                     }
                     else
                     {
                         sql
                             .Append(quotedFieldName)
                             .Append("=")
-                            .Append(this.AddParam(dbCmd, value, fieldDef).ParameterName);
+                            .Append(this.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
                     }
                 }
                 catch (Exception ex)
@@ -1572,6 +1576,9 @@ namespace ServiceStack.OrmLite
         {
             return ToDbValue(value, fieldType);
         }
+
+        public virtual void InitQueryParam(IDbDataParameter param) {}
+        public virtual void InitUpdateParam(IDbDataParameter param) {}
 
         public virtual string EscapeWildcards(string value)
         {

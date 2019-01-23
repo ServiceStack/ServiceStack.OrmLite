@@ -206,7 +206,7 @@ namespace ServiceStack.OrmLite
                 var value = setField.CreateGetter()(updateOnly);
                 if (string.IsNullOrEmpty(whereSql) && (fieldDef.IsPrimaryKey || fieldDef.AutoIncrement))
                 {
-                    whereSql = $"WHERE {dialectProvider.GetQuotedColumnName(fieldDef.FieldName)} = {dialectProvider.AddParam(dbCmd, value, fieldDef).ParameterName}";
+                    whereSql = $"WHERE {dialectProvider.GetQuotedColumnName(fieldDef.FieldName)} = {dialectProvider.AddQueryParam(dbCmd, value, fieldDef).ParameterName}";
                     continue;
                 }
 
@@ -216,7 +216,7 @@ namespace ServiceStack.OrmLite
                 sql
                     .Append(dialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(dialectProvider.AddParam(dbCmd, value, fieldDef).ParameterName);
+                    .Append(dialectProvider.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
             }
 
             dbCmd.CommandText = $"UPDATE {dialectProvider.GetQuotedTableName(modelDef)} " +

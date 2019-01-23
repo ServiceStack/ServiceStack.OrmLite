@@ -995,9 +995,11 @@ namespace ServiceStack.OrmLite
             DbType? dbType = null,
             byte? precision = null,
             byte? scale = null,
-            int? size=null)
+            int? size=null, 
+            Action<IDbDataParameter> paramFilter = null)
         {
             var p = dbCmd.CreateParam(name, value, direction, dbType, precision, scale, size);
+            paramFilter?.Invoke(p);
             dbCmd.Parameters.Add(p);
             return p;
         }

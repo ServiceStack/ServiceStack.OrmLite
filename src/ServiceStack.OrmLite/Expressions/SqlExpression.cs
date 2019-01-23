@@ -1132,6 +1132,7 @@ namespace ServiceStack.OrmLite
             var paramValue = value;
 
             var parameter = CreateParam(paramName, paramValue);
+            DialectProvider.InitQueryParam(parameter);
             Params.Add(parameter);
             return parameter;
         }
@@ -1209,7 +1210,7 @@ namespace ServiceStack.OrmLite
                 setFields
                     .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(DialectProvider.AddParam(dbCmd, value, fieldDef).ParameterName);
+                    .Append(DialectProvider.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
             }
 
             if (setFields.Length == 0)
@@ -1248,7 +1249,7 @@ namespace ServiceStack.OrmLite
                 setFields
                     .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(DialectProvider.AddParam(dbCmd, value, fieldDef).ParameterName);
+                    .Append(DialectProvider.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
             }
             
             if (setFields.Length == 0)
@@ -2994,13 +2995,25 @@ namespace ServiceStack.OrmLite
             return to;
         }
 
+        public static IDbDataParameter AddQueryParam(this IOrmLiteDialectProvider dialectProvider,
+            IDbCommand dbCmd,
+            object value,
+            FieldDefinition fieldDef) => dialectProvider.AddParam(dbCmd, value, fieldDef, paramFilter: dialectProvider.InitQueryParam);
+
+        public static IDbDataParameter AddUpdateParam(this IOrmLiteDialectProvider dialectProvider,
+            IDbCommand dbCmd,
+            object value,
+            FieldDefinition fieldDef) => dialectProvider.AddParam(dbCmd, value, fieldDef, paramFilter: dialectProvider.InitUpdateParam);
+
         public static IDbDataParameter AddParam(this IOrmLiteDialectProvider dialectProvider,
             IDbCommand dbCmd,
             object value,
-            FieldDefinition fieldDef)
+            FieldDefinition fieldDef, Action<IDbDataParameter> paramFilter)
         {
             var paramName = dbCmd.Parameters.Count.ToString();
             var parameter = dialectProvider.CreateParam(paramName, value, fieldDef?.ColumnType);
+            
+            paramFilter?.Invoke(parameter);
 
             if (fieldDef != null)
                 dialectProvider.SetParameter(fieldDef, parameter);
