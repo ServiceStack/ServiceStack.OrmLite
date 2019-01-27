@@ -2,6 +2,7 @@
   <PropertyGroup>
     <PackageId>ServiceStack.OrmLite.MySqlConnector.Core</PackageId>
     <AssemblyName>ServiceStack.OrmLite.MySqlConnector</AssemblyName>
+    <RootNamespace>ServiceStack.OrmLite.MySqlConnector</RootNamespace>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <RootNamespace>ServiceStack.OrmLite.MySql</RootNamespace>
     <Title>ServiceStack.OrmLite.MySqlConnector .NET Standard 2.0</Title>

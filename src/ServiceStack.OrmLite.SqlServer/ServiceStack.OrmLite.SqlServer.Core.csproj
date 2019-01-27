@@ -3,6 +3,7 @@
   <PropertyGroup>
     <PackageId>ServiceStack.OrmLite.SqlServer.Core</PackageId>
     <AssemblyName>ServiceStack.OrmLite.SqlServer</AssemblyName>
+    <RootNamespace>ServiceStack.OrmLite.SqlServer</RootNamespace>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <Title>ServiceStack.OrmLite.SqlServer .NET Standard 2.0</Title>
     <PackageDescription>

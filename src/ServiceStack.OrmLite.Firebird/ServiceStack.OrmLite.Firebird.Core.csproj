@@ -3,6 +3,7 @@
   <PropertyGroup>
     <PackageId>ServiceStack.OrmLite.Firebird.Core</PackageId>
     <AssemblyName>ServiceStack.OrmLite.Firebird</AssemblyName>
+    <RootNamespace>ServiceStack.OrmLite.Firebird</RootNamespace>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <Title>ServiceStack.OrmLite.Firebird .NET Standard 2.0</Title>
     <PackageDescription>
