@@ -229,6 +229,12 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        public void RemoveConverter<T>()
+        {
+            if (Converters.TryRemove(typeof(T), out var converter))
+                converter.DialectProvider = null;
+        }
+
         public void RegisterConverter<T>(IOrmLiteConverter converter)
         {
             if (converter == null)

@@ -829,6 +829,24 @@ namespace ServiceStack.OrmLite
 
         public static void UnPrintSql() => OrmLiteConfig.BeforeExecFilter = null;
 
+        public static StringBuilder CaptureSql()
+        {
+            var sb = StringBuilderCache.Allocate();
+            CaptureSql(sb);
+            return sb;
+        }
+        
+        public static void CaptureSql(StringBuilder sb) =>
+            OrmLiteConfig.BeforeExecFilter = cmd => sb.AppendLine(cmd.GetDebugString());
+
+        public static void UnCaptureSql() => OrmLiteConfig.BeforeExecFilter = null;
+
+        public static string UnCaptureSqlAndFree(StringBuilder sb)
+        {
+            OrmLiteConfig.BeforeExecFilter = null;
+            return StringBuilderCache.ReturnAndFree(sb);
+        }
+
         public static ModelDefinition GetModelDefinition(Type modelType)
         {
             return modelType.GetModelDefinition();

@@ -57,7 +57,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
             RegisterConverter<byte[]>(new PostrgreSqlByteArrayConverter());
 
-            //TODO provide support for pgsql native datastructures:
+            //TODO provide support for pgsql native data structures:
             RegisterConverter<string[]>(new PostgreSqlStringArrayConverter());
             RegisterConverter<int[]>(new PostgreSqlIntArrayConverter());
             RegisterConverter<long[]>(new PostgreSqlLongArrayConverter());
@@ -70,6 +70,23 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 { OrmLiteVariables.True, SqlBool(true) },                
                 { OrmLiteVariables.False, SqlBool(false) },                
             };
+        }
+
+        public bool UseHstore
+        {
+            set
+            {
+                if (value)
+                {
+                    RegisterConverter<IDictionary<string, string>>(new PostgreSqlHstoreConverter());
+                    RegisterConverter<Dictionary<string, string>>(new PostgreSqlHstoreConverter());
+                }
+                else
+                {
+                    RemoveConverter<IDictionary<string, string>>();
+                    RemoveConverter<Dictionary<string, string>>();
+                }
+            }
         }
 
         private bool normalize;
