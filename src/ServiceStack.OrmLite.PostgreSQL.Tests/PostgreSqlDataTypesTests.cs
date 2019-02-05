@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using NUnit.Framework;
-using ServiceStack.OrmLite.PostgreSQL;
+using ServiceStack.OrmLite.Tests;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
     public class PostgreSqlTypes
     {
