@@ -1315,7 +1315,7 @@ namespace ServiceStack.OrmLite
         public string FromExpression
         {
             get => string.IsNullOrEmpty(fromExpression)
-                ? " \nFROM " + DialectProvider.GetQuotedTableName(modelDef) + (TableAlias != null ? " AS " + DialectProvider.GetQuotedName(TableAlias) : "")
+                ? " \nFROM " + DialectProvider.GetQuotedTableName(modelDef) + (TableAlias != null ? " " + DialectProvider.GetQuotedName(TableAlias) : "")
                 : fromExpression;
             set => fromExpression = value;
         }

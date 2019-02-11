@@ -244,7 +244,7 @@ namespace ServiceStack.OrmLite
             FromExpression += joinFormat != null
                 ? $" {joinType} {joinFormat(DialectProvider, joinDef, sqlExpr)}"
                 : joinAlias != null
-                    ? $" {joinType} {SqlTable(joinDef)} AS {DialectProvider.GetQuotedName(joinAlias.Alias)} {sqlExpr}"
+                    ? $" {joinType} {SqlTable(joinDef)} {DialectProvider.GetQuotedName(joinAlias.Alias)} {sqlExpr}"
                     : $" {joinType} {SqlTable(joinDef)} {sqlExpr}";
 
 
