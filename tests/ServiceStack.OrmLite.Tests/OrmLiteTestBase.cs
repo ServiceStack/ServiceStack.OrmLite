@@ -157,7 +157,7 @@ namespace ServiceStack.OrmLite.Tests
                 case Dialect.Firebird:
                     return Init(Config.FirebirdDb, FirebirdDialect.Provider);
                 case Dialect.VistaDb:
-                    VistaDbDialect.Provider.UseLibraryFromGac = true;
+                    VistaDbDialect.Instance.UseLibraryFromGac = true;
                     var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["myVDBConnection"];
                     var factory = DbProviderFactories.GetFactory(connectionString.ProviderName);
                     using (var db = factory.CreateConnection())

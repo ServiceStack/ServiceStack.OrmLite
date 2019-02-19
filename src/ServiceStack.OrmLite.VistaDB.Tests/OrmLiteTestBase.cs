@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
         {
             LogManager.LogFactory = new ConsoleLogFactory();
 
-            VistaDbDialect.Provider.UseLibraryFromGac = true;
+            VistaDbDialect.Instance.UseLibraryFromGac = true;
             OrmLiteConfig.DialectProvider = VistaDbDialect.Provider;
 
             DataFileName = TestVistaDb.ExtractTestDatabaseFileToTempFile();
