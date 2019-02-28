@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
 using ServiceStack.Data;
-using ServiceStack.Templates;
+using ServiceStack.Script;
 
 namespace ServiceStack.OrmLite
 {
-    public class TemplateDbFiltersAsync : TemplateFilter
+    [Obsolete("Use DbScriptsAsync")]
+    public class TemplateDbFiltersAsync : DbScriptsAsync {}
+    
+    public class DbScriptsAsync : ScriptMethods
     {
         private IDbConnectionFactory dbFactory;
         public IDbConnectionFactory DbFactory
@@ -16,7 +19,7 @@ namespace ServiceStack.OrmLite
             set => dbFactory = value;
         }
 
-        public async Task<IDbConnection> OpenDbConnectionAsync(TemplateScopeContext scope, Dictionary<string, object> options)
+        public async Task<IDbConnection> OpenDbConnectionAsync(ScriptScopeContext scope, Dictionary<string, object> options)
         {
             if (options != null)
             {
@@ -35,7 +38,7 @@ namespace ServiceStack.OrmLite
             return await DbFactory.OpenAsync();
         }
 
-        async Task<object> exec<T>(Func<IDbConnection, Task<T>> fn, TemplateScopeContext scope, object options)
+        async Task<object> exec<T>(Func<IDbConnection, Task<T>> fn, ScriptScopeContext scope, object options)
         {
             try
             {
@@ -51,43 +54,43 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public Task<object> dbSelect(TemplateScopeContext scope, string sql) => 
+        public Task<object> dbSelect(ScriptScopeContext scope, string sql) => 
             exec(db => db.SqlListAsync<Dictionary<string, object>>(sql), scope, null);
 
-        public Task<object> dbSelect(TemplateScopeContext scope, string sql, Dictionary<string, object> args) => 
+        public Task<object> dbSelect(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
             exec(db => db.SqlListAsync<Dictionary<string, object>>(sql, args), scope, null);
 
-        public Task<object> dbSelect(TemplateScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+        public Task<object> dbSelect(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
             exec(db => db.SqlListAsync<Dictionary<string, object>>(sql, args), scope, options);
 
 
-        public Task<object> dbSingle(TemplateScopeContext scope, string sql) => 
+        public Task<object> dbSingle(ScriptScopeContext scope, string sql) => 
             exec(db => db.SingleAsync<Dictionary<string, object>>(sql), scope, null);
 
-        public Task<object> dbSingle(TemplateScopeContext scope, string sql, Dictionary<string, object> args) =>
+        public Task<object> dbSingle(ScriptScopeContext scope, string sql, Dictionary<string, object> args) =>
             exec(db => db.SingleAsync<Dictionary<string, object>>(sql, args), scope, null);
 
-        public Task<object> dbSingle(TemplateScopeContext scope, string sql, Dictionary<string, object> args, object options) =>
+        public Task<object> dbSingle(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) =>
             exec(db => db.SingleAsync<Dictionary<string, object>>(sql, args), scope, options);
 
 
-        public Task<object> dbScalar(TemplateScopeContext scope, string sql) => 
+        public Task<object> dbScalar(ScriptScopeContext scope, string sql) => 
             exec(db => db.ScalarAsync<object>(sql), scope, null);
 
-        public Task<object> dbScalar(TemplateScopeContext scope, string sql, Dictionary<string, object> args) => 
+        public Task<object> dbScalar(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
             exec(db => db.ScalarAsync<object>(sql, args), scope, null);
 
-        public Task<object> dbScalar(TemplateScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+        public Task<object> dbScalar(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
             exec(db => db.ScalarAsync<object>(sql, args), scope, options);
 
 
-        public Task<object> dbExec(TemplateScopeContext scope, string sql) => 
+        public Task<object> dbExec(ScriptScopeContext scope, string sql) => 
             exec(db => db.ExecuteSqlAsync(sql), scope, null);
 
-        public Task<object> dbExec(TemplateScopeContext scope, string sql, Dictionary<string, object> args) => 
+        public Task<object> dbExec(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
             exec(db => db.ExecuteSqlAsync(sql, args), scope, null);
 
-        public Task<object> dbExec(TemplateScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+        public Task<object> dbExec(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
             exec(db => db.ExecuteSqlAsync(sql, args), scope, options);
 
 

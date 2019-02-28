@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Data;
 using ServiceStack.Data;
-using ServiceStack.Templates;
+using ServiceStack.Script;
 
 namespace ServiceStack.OrmLite
 {
-    public class TemplateDbFilters : TemplateFilter
+    [Obsolete("Use DbScripts")]
+    public class TemplateDbFilters : DbScripts {}
+    
+    public class DbScripts : ScriptMethods
     {
         private IDbConnectionFactory dbFactory;
         public IDbConnectionFactory DbFactory
@@ -15,7 +18,7 @@ namespace ServiceStack.OrmLite
             set => dbFactory = value;
         }
 
-        public IDbConnection OpenDbConnection(TemplateScopeContext scope, Dictionary<string, object> options)
+        public IDbConnection OpenDbConnection(ScriptScopeContext scope, Dictionary<string, object> options)
         {
             if (options != null)
             {
@@ -34,7 +37,7 @@ namespace ServiceStack.OrmLite
             return DbFactory.OpenDbConnection();
         }
 
-        T exec<T>(Func<IDbConnection, T> fn, TemplateScopeContext scope, object options)
+        T exec<T>(Func<IDbConnection, T> fn, ScriptScopeContext scope, object options)
         {
             try
             {
@@ -49,43 +52,43 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public object dbSelect(TemplateScopeContext scope, string sql) => 
+        public object dbSelect(ScriptScopeContext scope, string sql) => 
             exec(db => db.SqlList<Dictionary<string, object>>(sql), scope, null);
 
-        public object dbSelect(TemplateScopeContext scope, string sql, Dictionary<string, object> args) => 
+        public object dbSelect(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
             exec(db => db.SqlList<Dictionary<string, object>>(sql, args), scope, null);
 
-        public object dbSelect(TemplateScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+        public object dbSelect(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
             exec(db => db.SqlList<Dictionary<string, object>>(sql, args), scope, options);
 
 
-        public object dbSingle(TemplateScopeContext scope, string sql) => 
+        public object dbSingle(ScriptScopeContext scope, string sql) => 
             exec(db => db.Single<Dictionary<string, object>>(sql), scope, null);
 
-        public object dbSingle(TemplateScopeContext scope, string sql, Dictionary<string, object> args) =>
+        public object dbSingle(ScriptScopeContext scope, string sql, Dictionary<string, object> args) =>
             exec(db => db.Single<Dictionary<string, object>>(sql, args), scope, null);
 
-        public object dbSingle(TemplateScopeContext scope, string sql, Dictionary<string, object> args, object options) =>
+        public object dbSingle(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) =>
             exec(db => db.Single<Dictionary<string, object>>(sql, args), scope, options);
 
 
-        public object dbScalar(TemplateScopeContext scope, string sql) => 
+        public object dbScalar(ScriptScopeContext scope, string sql) => 
             exec(db => db.Scalar<object>(sql), scope, null);
 
-        public object dbScalar(TemplateScopeContext scope, string sql, Dictionary<string, object> args) => 
+        public object dbScalar(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
             exec(db => db.Scalar<object>(sql, args), scope, null);
 
-        public object dbScalar(TemplateScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+        public object dbScalar(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
             exec(db => db.Scalar<object>(sql, args), scope, options);
 
 
-        public int dbExec(TemplateScopeContext scope, string sql) => 
+        public int dbExec(ScriptScopeContext scope, string sql) => 
             exec(db => db.ExecuteSql(sql), scope, null);
 
-        public int dbExec(TemplateScopeContext scope, string sql, Dictionary<string, object> args) => 
+        public int dbExec(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
             exec(db => db.ExecuteSql(sql, args), scope, null);
 
-        public int dbExec(TemplateScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+        public int dbExec(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
             exec(db => db.ExecuteSql(sql, args), scope, options);
 
 
