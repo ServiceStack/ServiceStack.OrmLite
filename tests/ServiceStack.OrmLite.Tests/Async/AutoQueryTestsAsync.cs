@@ -151,7 +151,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                     }
                     else
                     {
-                        sb.AppendLine(result.first_name + "," + result.last_name + "," + result.name);
+                        sb.AppendLine(result.first_name + "," + result.last_name + "," + result.Name);
                     }
                 }
 
@@ -173,7 +173,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                     }
                     else
                     {
-                        sb.AppendLine(result.name);
+                        sb.AppendLine(result.Name);
                     }
                 }
 

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -135,6 +136,27 @@ namespace ServiceStack.OrmLite.Tests
 
                 var fromDb = db.SingleById<GuidAutoId>(existingGuid);
                 
+                Assert.That(fromDb.Id, Is.EqualTo(existingGuid));
+            }
+        }
+
+        [Test]
+        public void Uses_existing_Guid_Id_if_not_Empty_for_row_inserts()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<GuidAutoId>();
+
+                var existingGuid = Guid.NewGuid();
+                var guidA = new GuidAutoId { Id = existingGuid, Name = "A" };
+
+                db.Exec(cmd => {
+                    cmd.CommandText = db.GetDialectProvider().ToInsertRowStatement(cmd, guidA);
+                    db.GetDialectProvider().SetParameterValues<GuidAutoId>(cmd, guidA);
+                    cmd.ExecuteNonQuery();
+                });
+
+                var fromDb = db.SingleById<GuidAutoId>(existingGuid);
                 Assert.That(fromDb.Id, Is.EqualTo(existingGuid));
             }
         }

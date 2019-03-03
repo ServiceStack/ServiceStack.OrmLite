@@ -288,7 +288,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
                     sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (ShouldSkipInsert(fieldDef))
+                if (ShouldSkipInsert(fieldDef) && !fieldDef.AutoId)
                     continue;
 
                 if (sbColumnNames.Length > 0)

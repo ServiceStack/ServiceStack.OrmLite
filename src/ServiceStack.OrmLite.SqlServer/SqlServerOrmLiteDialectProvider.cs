@@ -271,7 +271,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     sbReturningColumns.Append("INSERTED." + GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (ShouldSkipInsert(fieldDef))
+                if (ShouldSkipInsert(fieldDef) && !fieldDef.AutoId)
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -425,7 +425,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     sbReturningColumns.Append("INSERTED." + GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (ShouldSkipInsert(fieldDef))
+                if (ShouldSkipInsert(fieldDef) && !fieldDef.AutoId)
                     continue;
 
                 var value = entry.Value;

@@ -372,7 +372,7 @@ namespace ServiceStack.OrmLite.Tests
                 foreach (var result in results)
                 {
                     if (Dialect == Dialect.PostgreSql)
-                        sb.AppendLine(result.first_name + "," + result.last_name + "," + result.name);
+                        sb.AppendLine(result.first_name + "," + result.last_name + "," + result.Name);
                     else if (Dialect == Dialect.Firebird)
                         sb.AppendLine(result.FIRSTNAME + "," + result.LASTNAME + "," + result.NAME);
                     else
@@ -392,7 +392,7 @@ namespace ServiceStack.OrmLite.Tests
                 foreach (var result in results)
                 {
                     if (Dialect == Dialect.PostgreSql)
-                        sb.AppendLine(result.name);
+                        sb.AppendLine(result.Name);
                     else if (Dialect == Dialect.Firebird)
                         sb.AppendLine(result.NAME);
                     else
