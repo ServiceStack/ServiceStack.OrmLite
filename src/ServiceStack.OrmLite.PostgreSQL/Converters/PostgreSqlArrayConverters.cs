@@ -43,37 +43,56 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
 
         public override object FromDbValue(Type fieldType, object value)
         {
-            var strVal = value as string;
-            return strVal != null
+            return value is string strVal
                 ? strVal.FromJson<string[]>()
                 : value;
         }
     }
 
-    public class PostgreSqlIntArrayConverter : NativeValueOrmLiteConverter
+    public abstract class PostgreSqlArrayConverterBase<T> : NativeValueOrmLiteConverter
     {
-        public override string ColumnDefinition => "integer[]";
-
         public override DbType DbType => DbType.Object;
 
         public override string ToQuotedString(Type fieldType, object value)
         {
-            var integerArray = (int[])value;
+            var integerArray = (T[])value;
             return this.ToArray(integerArray);
         }
     }
 
-    public class PostgreSqlLongArrayConverter : NativeValueOrmLiteConverter
+    public class PostgreSqlIntArrayConverter : PostgreSqlArrayConverterBase<int>
+    {
+        public override string ColumnDefinition => "integer[]";
+    }
+
+    public class PostgreSqlLongArrayConverter : PostgreSqlArrayConverterBase<long>
     {
         public override string ColumnDefinition => "bigint[]";
+    }
 
-        public override DbType DbType => DbType.Object;
+    public class PostgreSqlFloatArrayConverter : PostgreSqlArrayConverterBase<float>
+    {
+        public override string ColumnDefinition => "real[]";
+    }
 
-        public override string ToQuotedString(Type fieldType, object value)
-        {
-            var longArray = (long[])value;
-            return this.ToArray(longArray);
-        }
+    public class PostgreSqlDoubleArrayConverter : PostgreSqlArrayConverterBase<double>
+    {
+        public override string ColumnDefinition => "double precision[]";
+    }
+
+    public class PostgreSqlDecimalArrayConverter : PostgreSqlArrayConverterBase<decimal>
+    {
+        public override string ColumnDefinition => "numeric[]";
+    }
+
+    public class PostgreSqlDateTimeTimeStampArrayConverter : PostgreSqlArrayConverterBase<DateTime>
+    {
+        public override string ColumnDefinition => "timestamp[]";
+    }
+
+    public class PostgreSqlDateTimeOffsetTimeStampTzArrayConverter : PostgreSqlArrayConverterBase<DateTimeOffset>
+    {
+        public override string ColumnDefinition => "timestamp with time zone[]";
     }
 
 

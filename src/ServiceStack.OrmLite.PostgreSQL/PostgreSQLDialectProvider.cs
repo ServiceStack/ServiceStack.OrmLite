@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -61,6 +62,11 @@ namespace ServiceStack.OrmLite.PostgreSQL
             RegisterConverter<string[]>(new PostgreSqlStringArrayConverter());
             RegisterConverter<int[]>(new PostgreSqlIntArrayConverter());
             RegisterConverter<long[]>(new PostgreSqlLongArrayConverter());
+            RegisterConverter<float[]>(new PostgreSqlFloatArrayConverter());
+            RegisterConverter<double[]>(new PostgreSqlDoubleArrayConverter());
+            RegisterConverter<decimal[]>(new PostgreSqlDecimalArrayConverter());
+            RegisterConverter<DateTime[]>(new PostgreSqlDateTimeTimeStampArrayConverter());
+            RegisterConverter<DateTimeOffset[]>(new PostgreSqlDateTimeOffsetTimeStampTzArrayConverter());
 
             this.Variables = new Dictionary<string, string>
             {
@@ -511,56 +517,44 @@ namespace ServiceStack.OrmLite.PostgreSQL
             return "; " + SelectIdentitySql;
         }
 
+        public static Dictionary<string, NpgsqlDbType> NativeTypes = new Dictionary<string, NpgsqlDbType> {
+            { "json", NpgsqlDbType.Json },
+            { "jsonb", NpgsqlDbType.Jsonb },
+            { "hstore", NpgsqlDbType.Hstore },
+            { "text[]", NpgsqlDbType.Array | NpgsqlDbType.Text },
+            { "integer[]", NpgsqlDbType.Array | NpgsqlDbType.Integer },
+            { "bigint[]", NpgsqlDbType.Array | NpgsqlDbType.Bigint },
+            { "real[]", NpgsqlDbType.Array | NpgsqlDbType.Real },
+            { "double precision[]", NpgsqlDbType.Array | NpgsqlDbType.Double },
+            { "numeric[]", NpgsqlDbType.Array | NpgsqlDbType.Numeric },
+            { "timestamp[]", NpgsqlDbType.Array | NpgsqlDbType.Timestamp },
+            { "timestamp with time zone[]", NpgsqlDbType.Array | NpgsqlDbType.TimestampTz },
+        };
+        
         public override void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
         {
-            if (fieldDef.CustomFieldDefinition == "json")
+            if (fieldDef.CustomFieldDefinition != null &&
+                NativeTypes.TryGetValue(fieldDef.CustomFieldDefinition, out var npgsqlDbType))
             {
                 p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
-                ((NpgsqlParameter) p).NpgsqlDbType = NpgsqlDbType.Json;
-                return;
+                ((NpgsqlParameter) p).NpgsqlDbType = npgsqlDbType;
             }
-            if (fieldDef.CustomFieldDefinition == "jsonb")
+            else
             {
-                p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
-                ((NpgsqlParameter)p).NpgsqlDbType = NpgsqlDbType.Jsonb;
-                return;
+                base.SetParameter(fieldDef, p);
             }
-            if (fieldDef.CustomFieldDefinition == "hstore")
-            {
-                p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
-                ((NpgsqlParameter)p).NpgsqlDbType = NpgsqlDbType.Hstore;
-                return;
-            }
-            if (fieldDef.CustomFieldDefinition == "text[]")
-            {
-                p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
-                ((NpgsqlParameter)p).NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Text;
-                return;
-            }
-            if (fieldDef.CustomFieldDefinition == "integer[]")
-            {
-                p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
-                ((NpgsqlParameter) p).NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Integer;
-                return;
-            }
-            if (fieldDef.CustomFieldDefinition == "bigint[]")
-            {
-                p.ParameterName = this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName));
-                ((NpgsqlParameter) p).NpgsqlDbType = NpgsqlDbType.Array | NpgsqlDbType.Bigint;
-                return;
-            }
-            base.SetParameter(fieldDef, p);
         }
+
+        public virtual bool UseRawValue(string columnDef) => columnDef?.EndsWith("[]") == true;
 
         protected override object GetValue<T>(FieldDefinition fieldDef, object obj)
         {
-            switch (fieldDef.CustomFieldDefinition)
+            if (fieldDef.CustomFieldDefinition != null && NativeTypes.ContainsKey(fieldDef.CustomFieldDefinition)
+                && UseRawValue(fieldDef.CustomFieldDefinition))
             {
-                case "text[]":
-                case "integer[]":
-                case "bigint[]":
-                    return fieldDef.GetValue(obj);
+                return fieldDef.GetValue(obj);
             }
+
             return base.GetValue<T>(fieldDef, obj);
         }
 
