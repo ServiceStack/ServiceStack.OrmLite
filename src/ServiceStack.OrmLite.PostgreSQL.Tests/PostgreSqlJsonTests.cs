@@ -72,12 +72,10 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [PgSqlTextArray]
         public string[] Strings { get; set; }
 
-//        [PgSqlTimestamp]
-        [CustomField("timestamp[]")]
+        [PgSqlTimestamp]
         public DateTime[] DateTimes { get; set; }
         
-//        [PgSqlTimestampTz]
-        [CustomField("timestamp with time zone[]")]
+        [PgSqlTimestampTz]
         public DateTimeOffset[] DateTimeOffsets { get; set; }
 
         [PgSqlIntArray]
@@ -92,11 +90,9 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         public List<decimal> ListDecimals { get; set; }
         [PgSqlTextArray]
         public List<string> ListStrings { get; set; }
-//        [PgSqlTimestamp]
-        [CustomField("timestamp[]")]
+        [PgSqlTimestamp]
         public List<DateTime> ListDateTimes { get; set; }
-//        [PgSqlTimestampTz]
-        [CustomField("timestamp with time zone[]")]
+        [PgSqlTimestampTz]
         public List<DateTimeOffset> ListDateTimeOffsets { get; set; }
     }
 
