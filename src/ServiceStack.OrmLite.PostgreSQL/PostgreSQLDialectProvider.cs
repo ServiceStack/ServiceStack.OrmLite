@@ -373,6 +373,27 @@ namespace ServiceStack.OrmLite.PostgreSQL
             return new NpgsqlParameter();
         }
 
+        public override string ToTableNamesStatement(string schema)
+        {
+            var sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE'";
+
+            return schema != null 
+                ? sql + " AND table_schema = {0}".SqlFmt(this, schema) 
+                : sql + " AND table_schema = 'public'";
+        }
+        
+        /// <summary>
+        /// Fetch table row counts from pg_stat_user_tables (results are not live)
+        /// </summary>
+        public bool UseStatUserTables { get; set; }
+
+        public override string ToTableNamesWithRowCountsStatement(string schema)
+        {
+            return !UseStatUserTables 
+                ? null 
+                : "SELECT relname, n_live_tup FROM pg_stat_user_tables WHERE schemaname = {0}".SqlFmt(this, schema ?? "public");
+        }
+
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = !Normalize || ReservedWords.Contains(tableName)
@@ -475,7 +496,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public override string GetQuotedTableName(string tableName, string schema = null)
         {
-            return !Normalize || ReservedWords.Contains(tableName) || (schema != null && ReservedWords.Contains(schema))
+            return !Normalize || ReservedWords.Contains(tableName) || (schema != null && ReservedWords.Contains(schema)) || tableName.Contains(' ')
                 ? base.GetQuotedTableName(tableName, schema)
                 : schema != null
                     ? schema + "." + tableName
@@ -484,7 +505,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public override string GetQuotedName(string name)
         {
-            return !Normalize || ReservedWords.Contains(name)
+            return !Normalize || ReservedWords.Contains(name) || name.Contains(' ')
                 ? base.GetQuotedName(name)
                 : name;
         }

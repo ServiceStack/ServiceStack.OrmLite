@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -100,9 +102,69 @@ namespace ServiceStack.OrmLite
 
         public static TableOptions TableAlias(this IDbConnection db, string alias) => new TableOptions { Alias = alias };
 
-        public static string GetTableName<T>(this IDbConnection db)
+        public static string GetTableName<T>(this IDbConnection db) => db.GetDialectProvider().GetTableName(ModelDefinition<T>.Definition);
+
+        public static List<string> GetTableNames(this IDbConnection db) => GetTableNames(db, null);
+        public static List<string> GetTableNames(this IDbConnection db, string schema) => db.Column<string>(db.GetDialectProvider().ToTableNamesStatement(schema));
+
+        public static Task<List<string>> GetTableNamesAsync(this IDbConnection db) => GetTableNamesAsync(db, null);
+        public static Task<List<string>> GetTableNamesAsync(this IDbConnection db, string schema) => db.ColumnAsync<string>(db.GetDialectProvider().ToTableNamesStatement(schema));
+
+        public static List<KeyValuePair<string,long>> GetTableNamesWithRowCounts(this IDbConnection db) => GetTableNamesWithRowCounts(db, null);
+        public static List<KeyValuePair<string,long>> GetTableNamesWithRowCounts(this IDbConnection db, string schema)
         {
-            return db.GetDialectProvider().GetTableName(ModelDefinition<T>.Definition);
+            List<KeyValuePair<string, long>> GetResults()
+            {
+                var sql = db.GetDialectProvider().ToTableNamesWithRowCountsStatement(schema);
+                if (sql != null)
+                    return db.KeyValuePairs<string, long>(sql);
+
+                sql = CreateTableRowCountUnionSql(db, schema);
+                return db.KeyValuePairs<string, long>(sql);
+            }
+
+            var results = GetResults();
+            results.Sort((x,y) => y.Value.CompareTo(x.Value)); //sort desc
+            return results;
+        }
+
+        public static Task<List<KeyValuePair<string,long>>> GetTableNamesWithRowCountsAsync(this IDbConnection db) => GetTableNamesWithRowCountsAsync(db, null);
+        public static async Task<List<KeyValuePair<string,long>>> GetTableNamesWithRowCountsAsync(this IDbConnection db, string schema)
+        {
+            Task<List<KeyValuePair<string, long>>> GetResultsAsync()
+            {
+                var sql = db.GetDialectProvider().ToTableNamesWithRowCountsStatement(schema);
+                if (sql != null)
+                    return db.KeyValuePairsAsync<string, long>(sql);
+
+                sql = CreateTableRowCountUnionSql(db, schema);
+                return db.KeyValuePairsAsync<string, long>(sql);
+            }
+
+            var results = await GetResultsAsync();
+            results.Sort((x,y) => y.Value.CompareTo(x.Value)); //sort desc
+            return results;
+        }
+
+        private static string CreateTableRowCountUnionSql(IDbConnection db, string schema)
+        {
+            var sb = StringBuilderCache.Allocate();
+
+            var dialect = db.GetDialectProvider();
+
+            var tableNames = GetTableNames(db, schema);
+            foreach (var tableName in tableNames)
+            {
+                if (sb.Length > 0)
+                    sb.Append(" UNION ");
+                
+                // retain *real* table names and skip using naming strategy
+                sb.AppendLine(
+                    $"SELECT '{tableName}', COUNT(*) FROM {dialect.GetQuotedName(tableName, schema)}");
+            }
+
+            var sql = StringBuilderCache.ReturnAndFree(sb);
+            return sql;
         }
 
         public static string GetQuotedTableName<T>(this IDbConnection db)

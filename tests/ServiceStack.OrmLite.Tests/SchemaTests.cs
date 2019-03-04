@@ -10,14 +10,14 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixture]
     public class SchemaTests : OrmLiteTestBase
     {
-        public class SchemaTest
+        public class Schematest
         {
             public int Id { get; set; }
             public string Name { get; set; }
         }
 
         [Alias("SchemaTest")]
-        public class NewSchemaTest
+        public class NewSchematest
         {
             public int Id { get; set; }
             public string Name { get; set; }
@@ -35,17 +35,16 @@ namespace ServiceStack.OrmLite.Tests
             public string Name { get; set; }
         }
 
-
         [Test]
         public void Does_verify_if_table_exists()
         {
             using (var db = OpenDbConnection())
             {
-                db.DropTable<SchemaTest>();
-                Assert.That(!db.TableExists<SchemaTest>());
+                db.DropTable<Schematest>();
+                Assert.That(!db.TableExists<Schematest>());
 
-                db.CreateTable<SchemaTest>();
-                Assert.That(db.TableExists<SchemaTest>());
+                db.CreateTable<Schematest>();
+                Assert.That(db.TableExists<Schematest>());
 
                 db.DropTable<TestWithSchema>();
                 Assert.That(!db.TableExists<TestWithSchema>());
@@ -60,27 +59,27 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.DropTable<SchemaTest>();
+                db.DropTable<Schematest>();
 
-                Assert.That(!db.ColumnExists<SchemaTest>(x => x.Id));
-                Assert.That(!db.ColumnExists<SchemaTest>(x => x.Name));
-                Assert.That(!db.ColumnExists<NewSchemaTest>(x => x.Int));
-                Assert.That(!db.ColumnExists<NewSchemaTest>(x => x.NInt));
+                Assert.That(!db.ColumnExists<Schematest>(x => x.Id));
+                Assert.That(!db.ColumnExists<Schematest>(x => x.Name));
+                Assert.That(!db.ColumnExists<NewSchematest>(x => x.Int));
+                Assert.That(!db.ColumnExists<NewSchematest>(x => x.NInt));
 
-                db.CreateTable<SchemaTest>();
+                db.CreateTable<Schematest>();
 
-                Assert.That(db.ColumnExists<SchemaTest>(x => x.Id));
-                Assert.That(db.ColumnExists<SchemaTest>(x => x.Name));
-                Assert.That(!db.ColumnExists<NewSchemaTest>(x => x.Int));
-                Assert.That(!db.ColumnExists<NewSchemaTest>(x => x.NInt));
+                Assert.That(db.ColumnExists<Schematest>(x => x.Id));
+                Assert.That(db.ColumnExists<Schematest>(x => x.Name));
+                Assert.That(!db.ColumnExists<NewSchematest>(x => x.Int));
+                Assert.That(!db.ColumnExists<NewSchematest>(x => x.NInt));
 
-                if (!db.ColumnExists<NewSchemaTest>(x => x.Int))
-                    db.AddColumn<NewSchemaTest>(x => x.Int);
-                Assert.That(db.ColumnExists<NewSchemaTest>(x => x.Int));
+                if (!db.ColumnExists<NewSchematest>(x => x.Int))
+                    db.AddColumn<NewSchematest>(x => x.Int);
+                Assert.That(db.ColumnExists<NewSchematest>(x => x.Int));
 
-                if (!db.ColumnExists<NewSchemaTest>(x => x.NInt))
-                    db.AddColumn<NewSchemaTest>(x => x.NInt);
-                Assert.That(db.ColumnExists<NewSchemaTest>(x => x.NInt));
+                if (!db.ColumnExists<NewSchematest>(x => x.NInt))
+                    db.AddColumn<NewSchematest>(x => x.NInt);
+                Assert.That(db.ColumnExists<NewSchematest>(x => x.NInt));
 
                 db.DropTable<TestWithSchema>();
                 Assert.That(!db.ColumnExists<TestWithSchema>(x => x.Id));
@@ -96,27 +95,27 @@ namespace ServiceStack.OrmLite.Tests
 
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<SchemaTest>();
+                db.DropAndCreateTable<Schematest>();
 
-                Assert.That(db.ColumnExists<SchemaTest>(x => x.Id));
-                Assert.That(db.ColumnExists<SchemaTest>(x => x.Name));
+                Assert.That(db.ColumnExists<Schematest>(x => x.Id));
+                Assert.That(db.ColumnExists<Schematest>(x => x.Name));
 
-                db.DropColumn<SchemaTest>(x => x.Name);
-                Assert.That(!db.ColumnExists<SchemaTest>(x => x.Name));
+                db.DropColumn<Schematest>(x => x.Name);
+                Assert.That(!db.ColumnExists<Schematest>(x => x.Name));
 
                 try
                 {
-                    db.DropColumn<SchemaTest>(x => x.Name);
+                    db.DropColumn<Schematest>(x => x.Name);
                     Assert.Fail("Should throw");
                 }
                 catch (Exception) { }
 
-                db.AddColumn<SchemaTest>(x => x.Name);
-                Assert.That(db.ColumnExists<SchemaTest>(x => x.Name));
+                db.AddColumn<Schematest>(x => x.Name);
+                Assert.That(db.ColumnExists<Schematest>(x => x.Name));
 
                 try
                 {
-                    db.AddColumn<SchemaTest>(x => x.Name);
+                    db.AddColumn<Schematest>(x => x.Name);
                     Assert.Fail("Should throw");
                 }
                 catch (Exception) { }

@@ -144,6 +144,15 @@ namespace ServiceStack.OrmLite.Sqlite
 
         protected abstract IDbConnection CreateConnection(string connectionString);
 
+        public override string GetQuotedName(string name, string schema) => GetQuotedName(name); //schema name is embedded in table name in MySql
+
+        public override string ToTableNamesStatement(string schema)
+        {
+            return schema == null 
+                ? "SELECT name FROM sqlite_master WHERE type ='table' AND name NOT LIKE 'sqlite_%'"
+                : "SELECT name FROM sqlite_master WHERE type ='table' AND name LIKE {0}".SqlFmt(this, GetTableName("",schema) + "%");
+        }
+
         public override string GetSchemaName(string schema)
         {
             return schema != null
@@ -151,13 +160,20 @@ namespace ServiceStack.OrmLite.Sqlite
                 : NamingStrategy.GetSchemaName(schema);
         }
 
-        public override string GetTableName(string table, string schema=null)
+        public override string GetTableName(string table, string schema = null) => GetTableName(table, schema, useStrategy: true);
+
+        public override string GetTableName(string table, string schema, bool useStrategy)
         {
+            if (useStrategy)
+            {
+                return schema != null
+                    ? $"{NamingStrategy.GetSchemaName(schema)}_{NamingStrategy.GetTableName(table)}"
+                    : NamingStrategy.GetTableName(table);
+            }
+            
             return schema != null
-                ? string.Format("{0}_{1}", 
-                    NamingStrategy.GetSchemaName(schema),
-                    NamingStrategy.GetTableName(table))
-                : NamingStrategy.GetTableName(table);
+                ? $"{schema}_{table}"
+                : table;
         }
 
         public override string GetQuotedTableName(string tableName, string schema = null)
@@ -189,8 +205,7 @@ namespace ServiceStack.OrmLite.Sqlite
             var columns = db.SqlList<Dictionary<string, object>>(sql);
             foreach (var column in columns)
             {
-                object name;
-                if (column.TryGetValue("name", out name) && name.ToString().EqualsIgnoreCase(columnName))
+                if (column.TryGetValue("name", out var name) && name.ToString().EqualsIgnoreCase(columnName))
                     return true;
             }
             return false;

@@ -842,9 +842,9 @@ namespace ServiceStack.OrmLite.Oracle
             return WillQuote(name) ? string.Format("\"{0}\"", name) : name;
         }
 
-        public override string GetQuotedName(string fieldName)
+        public override string GetQuotedName(string name)
         {
-            return Quote(fieldName);
+            return Quote(name);
         }
 
         public override string GetQuotedTableName(ModelDefinition modelDef)

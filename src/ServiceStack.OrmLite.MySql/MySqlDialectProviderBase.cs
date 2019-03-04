@@ -101,13 +101,20 @@ namespace ServiceStack.OrmLite.MySql
             return base.GetQuotedValue(value, fieldType);
         }
 
-        public override string GetTableName(string table, string schema = null)
+        public override string GetTableName(string table, string schema = null) => GetTableName(table, schema, useStrategy: true);
+
+        public override string GetTableName(string table, string schema, bool useStrategy)
         {
+            if (useStrategy)
+            {
+                return schema != null
+                    ? $"{NamingStrategy.GetSchemaName(schema)}_{NamingStrategy.GetTableName(table)}"
+                    : NamingStrategy.GetTableName(table);
+            }
+            
             return schema != null
-                ? string.Format("{0}_{1}",
-                    NamingStrategy.GetSchemaName(schema),
-                    NamingStrategy.GetTableName(table))
-                : NamingStrategy.GetTableName(table);
+                ? $"{schema}_{table}"
+                : table;
         }
 
         public override string GetQuotedTableName(string tableName, string schema = null)
@@ -115,14 +122,35 @@ namespace ServiceStack.OrmLite.MySql
             return GetQuotedName(GetTableName(tableName, schema));
         }
 
-        public override string GetQuotedName(string name)
-        {
-            return string.Format("`{0}`", name);
-        }
+        public override string GetQuotedName(string name) => $"`{name}`";
 
         public override SqlExpression<T> SqlExpression<T>()
         {
             return new MySqlExpression<T>(this);
+        }
+
+        public override string GetQuotedName(string name, string schema) => GetQuotedName(name); //schema name is embedded in table name in MySql
+
+        public override string ToTableNamesStatement(string schema)
+        {
+            return schema == null 
+                ? "SELECT table_name FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema = DATABASE()"
+                : "SELECT table_name FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema = DATABASE() AND table_name LIKE {0}".SqlFmt(this, GetTableName("",schema) + "%");
+        }
+        
+        /// <summary>
+        /// Fetch table row counts from information_schema (results are not live)
+        /// </summary>
+        public bool UseInformationSchemaStats { get; set; }
+
+        public override string ToTableNamesWithRowCountsStatement(string schema)
+        {
+            if (!UseInformationSchemaStats)
+                return null;
+            
+            return schema == null 
+                ? "SELECT table_name, table_rows FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema = DATABASE()"
+                : "SELECT table_name, table_rows FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema = DATABASE() AND table_name LIKE {0}".SqlFmt(this, GetTableName("",schema) + "%");
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)

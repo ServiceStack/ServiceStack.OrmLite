@@ -92,7 +92,8 @@ namespace ServiceStack.OrmLite
 
         string GetTableName(ModelDefinition modelDef);
 
-        string GetTableName(string tableName, string schema = null);
+        string GetTableName(string table, string schema = null);
+        string GetTableName(string table, string schema, bool useStrategy);
 
         string GetQuotedTableName(ModelDefinition modelDef);
 
@@ -100,7 +101,8 @@ namespace ServiceStack.OrmLite
 
         string GetQuotedColumnName(string columnName);
 
-        string GetQuotedName(string columnName);
+        string GetQuotedName(string name);
+        string GetQuotedName(string name, string schema);
 
         string SanitizeFieldNameForParamName(string fieldName);
 
@@ -220,6 +222,9 @@ namespace ServiceStack.OrmLite
         string ToUpdateStatement<T>(IDbCommand dbCmd, T item, ICollection<string> updateFields = null);
         string ToInsertStatement<T>(IDbCommand dbCmd, T item, ICollection<string> insertFields = null);
         string MergeParamsIntoSql(string sql, IEnumerable<IDbDataParameter> dbParams);
+
+        string ToTableNamesStatement(string schema);
+        string ToTableNamesWithRowCountsStatement(string schema);
 
         string SqlConflict(string sql, string conflictResolution);
 

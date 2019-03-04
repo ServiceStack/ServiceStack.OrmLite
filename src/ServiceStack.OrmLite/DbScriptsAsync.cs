@@ -93,6 +93,17 @@ namespace ServiceStack.OrmLite
         public Task<object> dbExec(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
             exec(db => db.ExecuteSqlAsync(sql, args), scope, options);
 
+        public Task<object> dbTableNames(ScriptScopeContext scope) => dbTableNames(scope, null, null);
+        public Task<object> dbTableNames(ScriptScopeContext scope, Dictionary<string, object> args) => dbTableNames(scope, args, null);
+        public Task<object> dbTableNames(ScriptScopeContext scope, Dictionary<string, object> args, object options) => 
+            exec(db => db.GetTableNamesAsync(args != null && args.TryGetValue("schema", out var oSchema) ? oSchema as string : null), scope, options);
+
+        public Task<object> dbTableNamesWithRowCounts(ScriptScopeContext scope) => 
+            dbTableNamesWithRowCounts(scope, null, null);
+        public Task<object> dbTableNamesWithRowCounts(ScriptScopeContext scope, Dictionary<string, object> args) => 
+            dbTableNamesWithRowCounts(scope, args, null);
+        public Task<object> dbTableNamesWithRowCounts(ScriptScopeContext scope, Dictionary<string, object> args, object options) => 
+            exec(db => db.GetTableNamesWithRowCountsAsync(args != null && args.TryGetValue("schema", out var oSchema) ? oSchema as string : null), scope, options);
 
         public string sqlQuote(string name) => OrmLiteConfig.DialectProvider.GetQuotedName(name);
         public string sqlConcat(IEnumerable<object> values) => OrmLiteConfig.DialectProvider.SqlConcat(values);

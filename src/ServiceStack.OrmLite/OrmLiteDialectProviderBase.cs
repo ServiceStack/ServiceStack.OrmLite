@@ -362,11 +362,21 @@ namespace ServiceStack.OrmLite
             return GetTableName(modelDef.ModelName, modelDef.Schema);
         }
 
-        public virtual string GetTableName(string table, string schema = null)
+        public virtual string GetTableName(string table, string schema = null) =>
+            GetTableName(table, schema, useStrategy: false);
+
+        public virtual string GetTableName(string table, string schema, bool useStrategy)
         {
+            if (useStrategy)
+            {
+                return schema != null
+                    ? $"{NamingStrategy.GetSchemaName(schema)}.{NamingStrategy.GetTableName(table)}"
+                    : NamingStrategy.GetTableName(table);
+            }
+            
             return schema != null
-                ? $"{NamingStrategy.GetSchemaName(schema)}.{NamingStrategy.GetTableName(table)}"
-                : NamingStrategy.GetTableName(table);
+                ? $"{schema}.{table}"
+                : table;
         }
 
         public virtual string GetQuotedTableName(ModelDefinition modelDef)
@@ -395,6 +405,13 @@ namespace ServiceStack.OrmLite
         public virtual string GetQuotedName(string name)
         {
             return $"\"{name}\"";
+        }
+
+        public virtual string GetQuotedName(string name, string schema)
+        {
+            return schema != null
+                ? $"{GetQuotedName(schema)}.{GetQuotedName(name)}"
+                : GetQuotedName(name);
         }
 
         public virtual string SanitizeFieldNameForParamName(string fieldName)
@@ -575,7 +592,7 @@ namespace ServiceStack.OrmLite
             var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
             foreach (var fieldDef in fieldDefs)
             {
-                if (ShouldSkipInsert(fieldDef))
+                if (ShouldSkipInsert(fieldDef) && !fieldDef.AutoId)
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -750,7 +767,7 @@ namespace ServiceStack.OrmLite
             var sql = StringBuilderCache.Allocate();
             var sqlFilter = StringBuilderCacheAlt.Allocate();
             var modelDef = typeof(T).GetModelDefinition();
-            var hadRowVesion = false;
+            var hadRowVersion = false;
             var updateAllFields = updateFields == null || updateFields.Count == 0;
 
             cmd.Parameters.Clear();
@@ -770,7 +787,7 @@ namespace ServiceStack.OrmLite
                         AppendFieldCondition(sqlFilter, fieldDef, cmd);
 
                         if (fieldDef.IsRowVersion)
-                            hadRowVesion = true;
+                            hadRowVersion = true;
 
                         continue;
                     }
@@ -805,7 +822,7 @@ namespace ServiceStack.OrmLite
                 cmd.CommandText = "";
             }
 
-            return hadRowVesion;
+            return hadRowVersion;
         }
 
         public virtual void AppendNullFieldCondition(StringBuilder sqlFilter, FieldDefinition fieldDef)
@@ -1622,6 +1639,10 @@ namespace ServiceStack.OrmLite
             return $"ALTER TABLE {provider.GetQuotedTableName(modelType.GetModelDefinition())} " +
                    $"DROP COLUMN {provider.GetQuotedColumnName(columnName)};";
         }
+        
+        public virtual string ToTableNamesStatement(string schema) => throw new NotSupportedException();
+
+        public virtual string ToTableNamesWithRowCountsStatement(string schema) => null; //returning null Fallsback to slow UNION N+1 COUNT(*) op
 
         public virtual string SqlConflict(string sql, string conflictResolution) => sql; //NOOP
 

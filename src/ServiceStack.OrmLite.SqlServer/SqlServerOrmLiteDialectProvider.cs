@@ -102,6 +102,26 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override IDbDataParameter CreateParam() => new SqlParameter();
 
+        public override string ToTableNamesStatement(string schema)
+        {
+            var sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE'";
+
+            return schema != null 
+                ? sql + " AND TABLE_SCHEMA = {0}".SqlFmt(this, schema) 
+                : sql;
+        }
+
+        public override string ToTableNamesWithRowCountsStatement(string schema)
+        {
+            var schemaSql = schema != null ? " AND s.Name = {0}".SqlFmt(this, schema) : "";
+            
+            var sql = @"SELECT t.NAME, p.rows FROM sys.tables t INNER JOIN sys.schemas s ON t.schema_id = s.schema_id 
+                               INNER JOIN sys.indexes i ON t.OBJECT_ID = i.object_id 
+                               INNER JOIN sys.partitions p ON i.object_id = p.OBJECT_ID AND i.index_id = p.index_id
+                         WHERE t.is_ms_shipped = 0 " + schemaSql + " GROUP BY t.NAME, p.Rows";
+            return sql;
+        }
+
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}"

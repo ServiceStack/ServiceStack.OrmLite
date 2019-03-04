@@ -287,13 +287,20 @@ namespace ServiceStack.OrmLite.VistaDB
             return new OrmLiteVistaDbParameter(new OrmLiteDataParameter());
         }
 
-        public override string GetTableName(string table, string schema = null)
+        public override string GetTableName(string table, string schema = null) => GetTableName(table, schema, useStrategy: true);
+
+        public override string GetTableName(string table, string schema, bool useStrategy)
         {
+            if (useStrategy)
+            {
+                return schema != null
+                    ? $"{NamingStrategy.GetSchemaName(schema)}_{NamingStrategy.GetTableName(table)}"
+                    : NamingStrategy.GetTableName(table);
+            }
+            
             return schema != null
-                ? string.Format("{0}_{1}",
-                    NamingStrategy.GetSchemaName(schema),
-                    NamingStrategy.GetTableName(table))
-                : NamingStrategy.GetTableName(table);
+                ? $"{schema}_{table}"
+                : table;
         }
 
         public override string GetQuotedTableName(ModelDefinition modelDef)
@@ -308,7 +315,7 @@ namespace ServiceStack.OrmLite.VistaDB
         {
             var schemaTableName = GetTableName(tableName, schema);
             dbCmd.CommandText = "SELECT COUNT(*) FROM [database schema] WHERE typeid = 1 AND name = {0}"
-                .SqlFmt(schemaTableName);
+                .SqlFmt(this, schemaTableName);
 
             return dbCmd.LongScalar() > 0;
         }

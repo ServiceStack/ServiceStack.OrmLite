@@ -662,9 +662,9 @@ namespace ServiceStack.OrmLite.Firebird
                 .Replace("%", @"^%");
         }
 
-        public override string GetQuotedName(string fieldName)
+        public override string GetQuotedName(string name)
         {
-            return Quote(fieldName);
+            return Quote(name);
         }
 
         public override string GetTableName(ModelDefinition modelDef)
@@ -672,11 +672,20 @@ namespace ServiceStack.OrmLite.Firebird
             return GetTableName(modelDef.ModelName, modelDef.Schema);
         }
 
-        public override string GetTableName(string table, string schema = null)
+        public override string GetTableName(string table, string schema = null) => GetTableName(table, schema, useStrategy: true);
+
+        public override string GetTableName(string table, string schema, bool useStrategy)
         {
+            if (useStrategy)
+            {
+                return schema != null
+                    ? $"{NamingStrategy.GetSchemaName(schema)}_{NamingStrategy.GetTableName(table)}"
+                    : NamingStrategy.GetTableName(table);
+            }
+            
             return schema != null
-                ? $"{NamingStrategy.GetSchemaName(schema)}_{NamingStrategy.GetTableName(table)}"
-                : NamingStrategy.GetTableName(table);
+                ? $"{schema}_{table}"
+                : table;
         }
 
         public override string GetQuotedTableName(ModelDefinition modelDef)
