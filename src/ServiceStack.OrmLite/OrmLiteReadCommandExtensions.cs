@@ -837,6 +837,28 @@ namespace ServiceStack.OrmLite
             return map;
         }
 
+        internal static List<KeyValuePair<K, V>> KeyValuePairs<K, V>(this IDbCommand dbCmd, string sql, object anonType = null)
+        {
+            if (anonType != null) SetParameters(dbCmd, anonType.ToObjectDictionary(), excludeDefaults: false, sql:ref sql);
+
+            return dbCmd.KeyValuePairs<K, V>(sql);
+        }
+
+        internal static List<KeyValuePair<K, V>> KeyValuePairs<K, V>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
+        {
+            var to = new List<KeyValuePair<K, V>>();
+
+            while (reader.Read())
+            {
+                var key = (K)dialectProvider.FromDbValue(reader, 0, typeof(K));
+                var value = (V)dialectProvider.FromDbValue(reader, 1, typeof(V));
+
+                to.Add(new KeyValuePair<K,V>(key, value));
+            }
+
+            return to;
+        }
+
         internal static bool Exists<T>(this IDbCommand dbCmd, object anonType)
         {
             string sql = null;

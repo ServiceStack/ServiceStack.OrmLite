@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
@@ -134,8 +135,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         {            
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<LRARichiesta>();
-                db.DropAndCreateTable<LRARisultato>();
+                RecreateLRARichiesta(db);
 
                 long numeroRichieste = db.Count<LRARichiesta>();
 
@@ -158,13 +158,33 @@ namespace ServiceStack.OrmLite.Tests.Issues
             }
         }
 
+        private static void RecreateLRARichiesta(IDbConnection db)
+        {
+            db.DropTable<LRAAnalisi>();
+            db.DropTable<LRAContenitore>();
+            db.DropTable<LRARichiesta>();
+            db.DropTable<LRARisultato>();
+            db.DropTable<LRDLaboratorio>();
+            db.DropTable<LRAPaziente>();
+            db.DropTable<LRDReparto>();
+            db.DropTable<LRDPriorita>();
+
+            db.CreateTable<LRDLaboratorio>();
+            db.CreateTable<LRAPaziente>();
+            db.CreateTable<LRDReparto>();
+            db.CreateTable<LRDPriorita>();
+            db.CreateTable<LRARisultato>();
+            db.CreateTable<LRARichiesta>();
+            db.CreateTable<LRAContenitore>();
+            db.CreateTable<LRAAnalisi>();
+        }
+
         [Test]
         public async Task Does_InsertIntoSelect_LRARichiesta_Async()
         {            
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<LRARichiesta>();
-                db.DropAndCreateTable<LRARisultato>();
+                RecreateLRARichiesta(db);
 
                 long numeroRichieste = await db.CountAsync<LRARichiesta>();
 

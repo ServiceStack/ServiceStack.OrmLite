@@ -286,6 +286,26 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        internal static Task<List<KeyValuePair<K, V>>> KeyValuePairsAsync<K, V>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
+        {
+            return dbCmd.SetParameters(sqlParams).KeyValuePairsAsync<K, V>(sql, token);
+        }
+
+        internal static async Task<List<KeyValuePair<K, V>>> KeyValuePairsAsync<K, V>(this IDbCommand dbCmd, string sql, CancellationToken token)
+        {
+            if (sql != null)
+                dbCmd.CommandText = sql;
+
+            if (OrmLiteConfig.ResultsFilter != null)
+                return OrmLiteConfig.ResultsFilter.GetKeyValuePairs<K, V>(dbCmd);
+
+            var dialectProvider = dbCmd.GetDialectProvider();
+            using (var reader = await dbCmd.ExecReaderAsync(dbCmd.CommandText, token))
+            {
+                return await reader.KeyValuePairsAsync<K, V>(dialectProvider, token);
+            }
+        }
+
         internal static Task<Dictionary<K, List<V>>> LookupAsync<K, V>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
         {
             return dbCmd.SetParameters(sqlParams).LookupAsync<K, V>(sql, token);

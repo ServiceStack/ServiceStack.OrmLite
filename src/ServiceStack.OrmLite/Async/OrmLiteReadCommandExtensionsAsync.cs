@@ -305,6 +305,26 @@ namespace ServiceStack.OrmLite
             }, map, token);
         }
 
+        internal static Task<List<KeyValuePair<K, V>>> KeyValuePairsAsync<K, V>(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
+        {
+            if (anonType != null) 
+                dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false, sql:ref sql);
+
+            return dbCmd.KeyValuePairsAsync<K, V>(sql, token);
+        }
+
+        internal static Task<List<KeyValuePair<K, V>>> KeyValuePairsAsync<K, V>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
+        {
+            var to = new List<KeyValuePair<K, V>>();
+
+            return dialectProvider.ReaderEach(reader, () =>
+            {
+                var key = (K)dialectProvider.FromDbValue(reader, 0, typeof(K));
+                var value = (V)dialectProvider.FromDbValue(reader, 1, typeof(V));
+                to.Add(new KeyValuePair<K, V>(key, value));
+            }, to, token);
+        }
+
         internal static async Task<bool> ExistsAsync<T>(this IDbCommand dbCmd, object anonType, CancellationToken token)
         {
             string sql = null;

@@ -322,6 +322,33 @@ namespace ServiceStack.OrmLite
             }
         }
 
+        internal static List<KeyValuePair<K, V>> KeyValuePairs<K, V>(this IDbCommand dbCmd, string sql = null)
+        {
+            if (sql != null)
+                dbCmd.CommandText = sql;
+
+            if (OrmLiteConfig.ResultsFilter != null)
+                return OrmLiteConfig.ResultsFilter.GetKeyValuePairs<K, V>(dbCmd);
+
+            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
+            {
+                return reader.KeyValuePairs<K, V>(dbCmd.GetDialectProvider());
+            }
+        }
+
+        internal static List<KeyValuePair<K, V>> KeyValuePairs<K, V>(this IDbCommand dbCmd, ISqlExpression expression)
+        {
+            dbCmd.PopulateWith(expression);
+
+            if (OrmLiteConfig.ResultsFilter != null)
+                return OrmLiteConfig.ResultsFilter.GetKeyValuePairs<K,V>(dbCmd);
+
+            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
+            {
+                return reader.KeyValuePairs<K, V>(dbCmd.GetDialectProvider());
+            }
+        }
+
         internal static Dictionary<K, List<V>> Lookup<K, V>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
         {
             return dbCmd.SetParameters(sqlParams).Lookup<K, V>(sql);
