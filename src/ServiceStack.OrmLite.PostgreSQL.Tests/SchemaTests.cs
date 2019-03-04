@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.Tests
     {
         public SchemaTests() : base(Dialect.PostgreSql){}
 
-        [Alias("Users")]
+        [Alias("TestSchemaUser")]
         [Schema("TestSchema")]
         public class User
         {
