@@ -2,6 +2,7 @@ using System;
 using System.Data;
 using System.Data.Common;
 using System.IO;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Logging;
 #if !NETCORE
@@ -195,6 +196,21 @@ namespace ServiceStack.OrmLite.Tests
             }
 
             return DbFactory.OpenDbConnection();
+        }
+
+        public virtual Task<IDbConnection> OpenDbConnectionAsync()
+        {
+            if (ConnectionString == ":memory:")
+            {
+                if (InMemoryDbConnection == null || DbFactory.AutoDisposeConnection)
+                {
+                    InMemoryDbConnection = new OrmLiteConnection(DbFactory);
+                    InMemoryDbConnection.Open();
+                }
+                return Task.FromResult(InMemoryDbConnection);
+            }
+
+            return DbFactory.OpenDbConnectionAsync();
         }
 
         protected void SuppressIfOracle(string reason, params object[] args)

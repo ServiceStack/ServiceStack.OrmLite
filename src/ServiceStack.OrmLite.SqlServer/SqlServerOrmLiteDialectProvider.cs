@@ -129,6 +129,8 @@ namespace ServiceStack.OrmLite.SqlServer
 
             if (schema != null)
                 sql += " AND TABLE_SCHEMA = {0}".SqlFmt(this, schema);
+            else
+                sql += " AND TABLE_SCHEMA <> 'Security'";
 
             var result = dbCmd.ExecLongScalar(sql);
 
