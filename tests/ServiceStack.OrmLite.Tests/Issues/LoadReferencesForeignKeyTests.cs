@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
@@ -44,6 +46,89 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 db.Save(root, references: true);
 
                 Assert.That(root.Items[0].RootId, Is.EqualTo(root.RootId));
+            }
+        }
+        
+        [Alias("Users")]
+        public class User
+        {
+            [AutoId]
+            public Guid Id { get; set; }
+
+            [Reference]
+            public List<UserBranch> Branches { get; set; }
+
+            [Reference]
+            public UserMeta Meta { get; set; }
+
+            [Reference]
+            public List<UserAddress> Addresses { get; set; }
+        }
+
+        [Alias("UserMetas")]
+        public class UserMeta
+        {
+            [PrimaryKey]
+            [ForeignKey(typeof(User), OnDelete = "CASCADE", OnUpdate = "CASCADE")]
+            [References(typeof(User))]
+            public Guid UserId { get; set; }
+        }
+
+        [Alias("UserBranches")]
+        public class UserBranch
+        {
+            [AutoId]
+            public Guid Id { get; set; }
+
+            [ForeignKey(typeof(User), OnDelete = "CASCADE", OnUpdate = "CASCADE")]
+            public Guid UserId { get; set; }
+
+            public string Details { get; set; }
+        }
+
+        [Alias("UserAddresses")]
+        public class UserAddress
+        {
+            [AutoId]
+            public Guid Id { get; set; }
+
+            [ForeignKey(typeof(User), OnDelete = "CASCADE", OnUpdate = "CASCADE")]
+            public Guid UserId { get; set; }
+
+            public string Details { get; set; }
+        }
+
+        [Test]
+        public async Task Can_create_tables_with_multiple_references()
+        {
+            using (var db = await OpenDbConnectionAsync())
+            {
+                db.DropTable<UserMeta>();
+                db.DropTable<UserAddress>();
+                db.DropTable<UserBranch>();
+                db.DropTable<User>();
+                
+                db.CreateTable<User>();
+                db.CreateTable<UserBranch>();
+                db.CreateTable<UserAddress>();
+                db.CreateTable<UserMeta>();
+            }
+            
+            var userMeta = new UserMeta();
+            var user = new User
+            {
+                Meta = userMeta
+            };
+
+            using (var db = await OpenDbConnectionAsync())
+            {
+                user.Branches = new List<UserBranch> { new UserBranch { UserId = user.Id }};
+                user.Addresses = new List<UserAddress> { new UserAddress { UserId = user.Id }};
+
+                await db.SaveAsync(user, references: true);
+
+                var fromDb = await db.LoadSingleByIdAsync<User>(user.Id);
+                fromDb.Dump().Print();
             }
         }
     }
