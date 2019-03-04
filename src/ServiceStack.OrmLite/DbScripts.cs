@@ -101,8 +101,12 @@ namespace ServiceStack.OrmLite
         public List<KeyValuePair<string, long>> dbTableNamesWithRowCounts(ScriptScopeContext scope, Dictionary<string, object> args) => 
             dbTableNamesWithRowCounts(scope, args, null);
         public List<KeyValuePair<string, long>> dbTableNamesWithRowCounts(ScriptScopeContext scope, Dictionary<string, object> args, object options) => 
-            exec(db => db.GetTableNamesWithRowCounts(args != null && args.TryGetValue("schema", out var oSchema) ? oSchema as string : null), scope, options);
-
+            exec(db => args == null 
+                    ? db.GetTableNamesWithRowCounts() 
+                    : db.GetTableNamesWithRowCounts(
+                        live: args.TryGetValue("live", out var oLive) && oLive is bool b && b,
+                        schema: args.TryGetValue("schema", out var oSchema) ? oSchema as string : null), 
+                scope, options);
 
         public string sqlQuote(string name) => OrmLiteConfig.DialectProvider.GetQuotedName(name);
         public string sqlConcat(IEnumerable<object> values) => OrmLiteConfig.DialectProvider.SqlConcat(values);

@@ -224,7 +224,14 @@ namespace ServiceStack.OrmLite
         string MergeParamsIntoSql(string sql, IEnumerable<IDbDataParameter> dbParams);
 
         string ToTableNamesStatement(string schema);
-        string ToTableNamesWithRowCountsStatement(string schema);
+
+        /// <summary>
+        /// Return table, row count SQL for listing all tables with their row counts
+        /// </summary>
+        /// <param name="live">If true returns live current rowc ounts of each table (slower), otherwise returns cached row counts from RDBMS table stats</param>
+        /// <param name="schema">The table schema if any</param>
+        /// <returns></returns>
+        string ToTableNamesWithRowCountsStatement(bool live, string schema);
 
         string SqlConflict(string sql, string conflictResolution);
 

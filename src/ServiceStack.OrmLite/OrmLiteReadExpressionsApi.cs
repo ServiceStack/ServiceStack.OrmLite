@@ -110,12 +110,11 @@ namespace ServiceStack.OrmLite
         public static Task<List<string>> GetTableNamesAsync(this IDbConnection db) => GetTableNamesAsync(db, null);
         public static Task<List<string>> GetTableNamesAsync(this IDbConnection db, string schema) => db.ColumnAsync<string>(db.GetDialectProvider().ToTableNamesStatement(schema));
 
-        public static List<KeyValuePair<string,long>> GetTableNamesWithRowCounts(this IDbConnection db) => GetTableNamesWithRowCounts(db, null);
-        public static List<KeyValuePair<string,long>> GetTableNamesWithRowCounts(this IDbConnection db, string schema)
+        public static List<KeyValuePair<string,long>> GetTableNamesWithRowCounts(this IDbConnection db, bool live=false, string schema=null)
         {
             List<KeyValuePair<string, long>> GetResults()
             {
-                var sql = db.GetDialectProvider().ToTableNamesWithRowCountsStatement(schema);
+                var sql = db.GetDialectProvider().ToTableNamesWithRowCountsStatement(live, schema);
                 if (sql != null)
                     return db.KeyValuePairs<string, long>(sql);
 
@@ -128,12 +127,11 @@ namespace ServiceStack.OrmLite
             return results;
         }
 
-        public static Task<List<KeyValuePair<string,long>>> GetTableNamesWithRowCountsAsync(this IDbConnection db) => GetTableNamesWithRowCountsAsync(db, null);
-        public static async Task<List<KeyValuePair<string,long>>> GetTableNamesWithRowCountsAsync(this IDbConnection db, string schema)
+        public static async Task<List<KeyValuePair<string,long>>> GetTableNamesWithRowCountsAsync(this IDbConnection db, bool live = false, string schema = null)
         {
             Task<List<KeyValuePair<string, long>>> GetResultsAsync()
             {
-                var sql = db.GetDialectProvider().ToTableNamesWithRowCountsStatement(schema);
+                var sql = db.GetDialectProvider().ToTableNamesWithRowCountsStatement(live, schema);
                 if (sql != null)
                     return db.KeyValuePairsAsync<string, long>(sql);
 

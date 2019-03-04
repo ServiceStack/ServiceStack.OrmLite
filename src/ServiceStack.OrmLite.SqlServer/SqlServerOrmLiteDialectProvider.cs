@@ -111,7 +111,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 : sql;
         }
 
-        public override string ToTableNamesWithRowCountsStatement(string schema)
+        public override string ToTableNamesWithRowCountsStatement(bool live, string schema)
         {
             var schemaSql = schema != null ? " AND s.Name = {0}".SqlFmt(this, schema) : "";
             

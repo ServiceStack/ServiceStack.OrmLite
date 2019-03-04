@@ -381,15 +381,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 ? sql + " AND table_schema = {0}".SqlFmt(this, schema) 
                 : sql + " AND table_schema = 'public'";
         }
-        
-        /// <summary>
-        /// Fetch table row counts from pg_stat_user_tables (results are not live)
-        /// </summary>
-        public bool UseStatUserTables { get; set; }
 
-        public override string ToTableNamesWithRowCountsStatement(string schema)
+        public override string ToTableNamesWithRowCountsStatement(bool live, string schema)
         {
-            return !UseStatUserTables 
+            return live
                 ? null 
                 : "SELECT relname, n_live_tup FROM pg_stat_user_tables WHERE schemaname = {0}".SqlFmt(this, schema ?? "public");
         }

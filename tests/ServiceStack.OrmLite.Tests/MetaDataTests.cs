@@ -89,7 +89,7 @@ namespace ServiceStack.OrmLite.Tests
                 3.Times(i => db.Insert(new Table1 {Id = i + 1, Field1 = $"Field{i+1}"}) );
                 1.Times(i => db.Insert(new Table2 {Id = i + 1, Field2 = $"Field{i+1}"}) );
                 
-                var tableNames = db.GetTableNamesWithRowCounts();
+                var tableNames = db.GetTableNamesWithRowCounts(live:true);
                 tableNames.TextDump().Print();
                 Assert.That(tableNames.Count, Is.GreaterThan(0));
 
@@ -100,6 +100,10 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(table2Pos, Is.GreaterThanOrEqualTo(0));
                 
                 Assert.That(table1Pos < table2Pos); //is sorted desc
+
+                tableNames = db.GetTableNamesWithRowCounts(live:false);
+                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(Table1))));
+                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(Table2))));
             }
         }
 
@@ -114,7 +118,7 @@ namespace ServiceStack.OrmLite.Tests
                 3.Times(i => db.Insert(new Table1 {Id = i + 1, Field1 = $"Field{i+1}"}) );
                 1.Times(i => db.Insert(new Table2 {Id = i + 1, Field2 = $"Field{i+1}"}) );
                 
-                var tableNames = await db.GetTableNamesWithRowCountsAsync();
+                var tableNames = await db.GetTableNamesWithRowCountsAsync(live:true);
                 tableNames.TextDump().Print();
                 Assert.That(tableNames.Count, Is.GreaterThan(0));
 
@@ -125,6 +129,10 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(table2Pos, Is.GreaterThanOrEqualTo(0));
                 
                 Assert.That(table1Pos < table2Pos); //is sorted desc
+                
+                tableNames = await db.GetTableNamesWithRowCountsAsync(live:false);
+                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(Table1))));
+                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(Table2))));
             }
         }
 
@@ -140,7 +148,7 @@ namespace ServiceStack.OrmLite.Tests
                 3.Times(i => db.Insert(new Schematable1 {Id = i + 1, Field1 = $"Field{i+1}"}) );
                 1.Times(i => db.Insert(new Schematable2 {Id = i + 1, Field2 = $"Field{i+1}"}) );
                 
-                var tableNames = db.GetTableNamesWithRowCounts(schema);
+                var tableNames = db.GetTableNamesWithRowCounts(live:true,schema:schema);
                 tableNames.TextDump().Print();
                 Assert.That(tableNames.Count, Is.GreaterThan(0));
 
@@ -151,6 +159,10 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(table2Pos, Is.GreaterThanOrEqualTo(0));
                 
                 Assert.That(table1Pos < table2Pos); //is sorted desc
+                
+                tableNames = db.GetTableNamesWithRowCounts(live:true,schema:schema);
+                Assert.That(tableNames.Any(x => x.Key.IndexOf(nameof(Schematable1), StringComparison.OrdinalIgnoreCase) >= 0));
+                Assert.That(tableNames.Any(x => x.Key.IndexOf(nameof(Schematable2), StringComparison.OrdinalIgnoreCase) >= 0));
             }
         }
     }

@@ -137,15 +137,10 @@ namespace ServiceStack.OrmLite.MySql
                 ? "SELECT table_name FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema = DATABASE()"
                 : "SELECT table_name FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema = DATABASE() AND table_name LIKE {0}".SqlFmt(this, GetTableName("",schema) + "%");
         }
-        
-        /// <summary>
-        /// Fetch table row counts from information_schema (results are not live)
-        /// </summary>
-        public bool UseInformationSchemaStats { get; set; }
 
-        public override string ToTableNamesWithRowCountsStatement(string schema)
+        public override string ToTableNamesWithRowCountsStatement(bool live, string schema)
         {
-            if (!UseInformationSchemaStats)
+            if (live)
                 return null;
             
             return schema == null 

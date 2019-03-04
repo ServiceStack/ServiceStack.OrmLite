@@ -1642,7 +1642,7 @@ namespace ServiceStack.OrmLite
         
         public virtual string ToTableNamesStatement(string schema) => throw new NotSupportedException();
 
-        public virtual string ToTableNamesWithRowCountsStatement(string schema) => null; //returning null Fallsback to slow UNION N+1 COUNT(*) op
+        public virtual string ToTableNamesWithRowCountsStatement(bool live, string schema) => null; //returning null Fallsback to slow UNION N+1 COUNT(*) op
 
         public virtual string SqlConflict(string sql, string conflictResolution) => sql; //NOOP
 
