@@ -131,8 +131,6 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_get_GetTableNamesWithRowCounts_in_Schema()
         {
-            OrmLiteUtils.PrintSql();
-            
             var schema = "Schema";
             using (var db = OpenDbConnection())
             {
