@@ -386,7 +386,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
         {
             return live
                 ? null 
-                : "SELECT relname, n_live_tup FROM pg_stat_user_tables WHERE schemaname = {0}".SqlFmt(this, schema ?? "public");
+                : "SELECT relname, reltuples FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE nspname = {0}".SqlFmt(this, schema ?? "public");
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
