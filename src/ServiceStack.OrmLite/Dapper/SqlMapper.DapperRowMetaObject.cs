@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+
 namespace ServiceStack.OrmLite.Dapper
 {
     public static partial class SqlMapper
