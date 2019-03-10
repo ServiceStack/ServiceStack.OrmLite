@@ -31,3 +31,7 @@ $> docker-compose down
 |Postgres|11.x|48303|test|test|test|
 |Oracle XE|11.x|48401|SID: xe|system|test|
 |MS SQL Server Express|2017.x|48501|master|sa|Test!tesT|
+
+## What it looks like in action...
+
+![Example](ormlite-docker.gif)
