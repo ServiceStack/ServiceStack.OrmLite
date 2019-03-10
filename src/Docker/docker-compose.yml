@@ -23,7 +23,51 @@ services:
     networks:
       - servicestack_test
     ports:
-     - "48102:3306"
+     - "48201:3306"
+    environment:
+     MYSQL_DATABASE: "test"
+     MYSQL_USER: "test"
+     MYSQL_ROOT_PASSWORD: "test"
+
+  mysql10.1:
+    image: mariadb:10.1
+    networks:
+      - servicestack_test
+    ports:
+     - "48202:3306"
+    environment:
+     MYSQL_DATABASE: "test"
+     MYSQL_USER: "test"
+     MYSQL_ROOT_PASSWORD: "test"
+
+  mysql10.2:
+    image: mariadb:10.2
+    networks:
+      - servicestack_test
+    ports:
+     - "48203:3306"
+    environment:
+     MYSQL_DATABASE: "test"
+     MYSQL_USER: "test"
+     MYSQL_ROOT_PASSWORD: "test"
+
+  mysql10.3:
+    image: mariadb:10.3
+    networks:
+      - servicestack_test
+    ports:
+     - "48204:3306"
+    environment:
+     MYSQL_DATABASE: "test"
+     MYSQL_USER: "test"
+     MYSQL_ROOT_PASSWORD: "test"
+
+  mysql10.4:
+    image: mariadb:10.4
+    networks:
+      - servicestack_test
+    ports:
+     - "48205:3306"
     environment:
      MYSQL_DATABASE: "test"
      MYSQL_USER: "test"
@@ -34,11 +78,53 @@ services:
     networks:
       - servicestack_test
     ports:
-     - "48103:5432"
+     - "48301:5432"
     environment:
      POSTGRES_USER: "test"
      POSTGRES_DB: "test"
      POSTGRES_PASSWORD: "test"
+
+  postgres10:
+    image: postgres:10-alpine
+    networks:
+      - servicestack_test
+    ports:
+     - "48302:5432"
+    environment:
+     POSTGRES_USER: "test"
+     POSTGRES_DB: "test"
+     POSTGRES_PASSWORD: "test"
+
+  postgres11:
+    image: postgres:11-alpine
+    networks:
+      - servicestack_test
+    ports:
+     - "48303:5432"
+    environment:
+     POSTGRES_USER: "test"
+     POSTGRES_DB: "test"
+     POSTGRES_PASSWORD: "test"   
+
+  oracle11:
+    image: epiclabs/docker-oracle-xe-11g
+    networks:
+      - servicestack_test
+    ports:
+     - "48401:1521"
+    environment:
+     ORACLE_ALLOW_REMOTE: "true"
+     ORACLE_PASSWORD : "test"
  
+  MSSqlServer2017:
+    image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+    networks:
+      - servicestack_test
+    ports:
+     - "48501:1433"
+    environment:
+     MSSQL_PID: "Express"
+     ACCEPT_EULA: "Y"
+     SA_PASSWORD : "Test!tesT"
 networks:
   servicestack_test:
