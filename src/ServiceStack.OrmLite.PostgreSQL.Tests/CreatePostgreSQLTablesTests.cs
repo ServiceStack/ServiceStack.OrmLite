@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
 
         [Test]
-        public void can_create_tables_after_UseUnicode_or_DefaultStringLenght_changed()
+        public void can_create_tables_after_UseUnicode_or_DefaultStringLength_changed()
         {
             //first one passes
             _reCreateTheTable();
