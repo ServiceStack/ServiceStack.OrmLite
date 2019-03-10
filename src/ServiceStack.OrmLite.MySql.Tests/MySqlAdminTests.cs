@@ -25,7 +25,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
             {
                 db.DropAndCreateTable<Author>();
 
-                var info = db.SqlList<Describe>("DESCRIBE author");
+                var info = db.SqlList<Describe>("DESCRIBE Author");
 
                 info.PrintDump();
             }
