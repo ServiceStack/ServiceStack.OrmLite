@@ -334,11 +334,7 @@ namespace ServiceStack.OrmLite.Firebird
             if (sbPk.Length != 0)
                 sbColumns.AppendFormat(", \n  PRIMARY KEY({0})", sbPk);
 
-            var sql = string.Format(
-                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n",
-                GetQuotedTableName(modelDef),
-                StringBuilderCache.ReturnAndFree(sbColumns),
-                StringBuilderCacheAlt.ReturnAndFree(sbConstraints));
+            var sql = $"RECREATE TABLE {GetQuotedTableName(modelDef)} \n(\n  {StringBuilderCache.ReturnAndFree(sbColumns)}{StringBuilderCacheAlt.ReturnAndFree(sbConstraints)} \n); \n";
 
             return sql;
         }
@@ -421,7 +417,7 @@ namespace ServiceStack.OrmLite.Firebird
         protected override string GetIndexName(bool isUnique, string modelName, string fieldName)
         {
             return NamingStrategy.ApplyNameRestrictions(
-                string.Format("{0}idx_{1}_{2}", isUnique ? "u" : "", modelName, fieldName).ToLower());
+                $"{(isUnique ? "u" : "")}idx_{modelName}_{fieldName}".ToLower());
         }
 
         protected override string ToCreateIndexStatement(bool isUnique, string indexName, ModelDefinition modelDef, string fieldName,
@@ -430,11 +426,7 @@ namespace ServiceStack.OrmLite.Firebird
             var fieldNames = fieldName.Split(',')
                 .Map(x => NamingStrategy.GetColumnName(x.LeftPart(' ')));
 
-            return string.Format("CREATE {0} INDEX {1} ON {2} ({3}); \n",
-                isUnique ? "UNIQUE" : "",
-                indexName,
-                GetQuotedTableName(modelDef),
-                string.Join(",", fieldNames.ToArray()));
+            return $"CREATE {(isUnique ? "UNIQUE" : "")} INDEX {indexName} ON {GetQuotedTableName(modelDef)} ({string.Join(",", fieldNames.ToArray())}); \n";
         }
 
         public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
@@ -566,14 +558,14 @@ namespace ServiceStack.OrmLite.Firebird
                 sbColumnValues.Append(fieldDef.GetQuotedValue(fromObjWithProperties));
             }
 
-            var columnVaues = StringBuilderCache.ReturnAndFree(sbColumnValues);
+            var columnValues = StringBuilderCache.ReturnAndFree(sbColumnValues);
             var sql = StringBuilderCache.Allocate();
             sql.AppendFormat("SELECT {0} \nFROM {1} {2}{3}{4} \n",
                 GetColumnNames(GetModel(outputModelType)),
                 GetQuotedTableName(modelDef),
-                columnVaues.Length > 0 ? "(" : "",
-                columnVaues,
-                columnVaues.Length > 0 ? ")" : "");
+                columnValues.Length > 0 ? "(" : "",
+                columnValues,
+                columnValues.Length > 0 ? ")" : "");
 
             if (!string.IsNullOrEmpty(sqlFilter))
             {
@@ -605,11 +597,8 @@ namespace ServiceStack.OrmLite.Firebird
             }
 
             var columnValues = StringBuilderCache.ReturnAndFree(sbColumnValues);
-            var sql = string.Format("EXECUTE PROCEDURE {0} {1}{2}{3};",
-                GetQuotedTableName(modelDef),
-                columnValues.Length > 0 ? "(" : "",
-                columnValues,
-                columnValues.Length > 0 ? ")" : "");
+            var sql =
+                $"EXECUTE PROCEDURE {GetQuotedTableName(modelDef)} {(columnValues.Length > 0 ? "(" : "")}{columnValues}{(columnValues.Length > 0 ? ")" : "")};";
 
             return sql;
         }
@@ -634,7 +623,7 @@ namespace ServiceStack.OrmLite.Firebird
 
             }
 
-            dbCmd.CommandText = string.Format("select next value for {0} from RDB$DATABASE", Quote(sequence));
+            dbCmd.CommandText = $"select next value for {Quote(sequence)} from RDB$DATABASE";
             long result = (long)dbCmd.ExecuteScalar();
             LastInsertId = result;
             return result;
@@ -645,19 +634,15 @@ namespace ServiceStack.OrmLite.Firebird
         private string Quote(string name)
         {
             return QuoteNames
-                ? string.Format("\"{0}\"", name)
+                ? $"\"{name}\""
                 : RESERVED.Contains(name.ToUpper())
-                    ? string.Format("\"{0}\"", name)
+                    ? $"\"{name}\""
                     : name;
         }
 
         public override string EscapeWildcards(string value)
         {
-            if (value == null)
-                return null;
-
-            return value
-                .Replace("^", @"^^")
+            return value?.Replace("^", @"^^")
                 .Replace("_", @"^_")
                 .Replace("%", @"^%");
         }
@@ -814,9 +799,8 @@ namespace ServiceStack.OrmLite.Firebird
         public override void DropColumn(IDbConnection db, Type modelType, string columnName)
         {
             var provider = db.GetDialectProvider();
-            var command = string.Format("ALTER TABLE {0} DROP {1};",
-                provider.GetQuotedTableName(modelType.GetModelMetadata().ModelName),
-                provider.GetQuotedColumnName(columnName));
+            var command =
+                $"ALTER TABLE {provider.GetQuotedTableName(modelType.GetModelMetadata().ModelName)} DROP {provider.GetQuotedColumnName(columnName)};";
 
             db.ExecuteSql(command);
         }
