@@ -20,3 +20,4 @@ $> docker-compose down
 |--------|-------|----|------|------|-----|
 |Firebird|3.0.4|48101|test|test|test|masterkey|
 |MySql (mariaDb)|5.5.x|48102|test|test|test|
+|Postgres|9.x|48103|test|test|test|

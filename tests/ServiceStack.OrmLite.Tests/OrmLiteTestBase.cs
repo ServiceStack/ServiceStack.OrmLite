@@ -24,9 +24,9 @@ namespace ServiceStack.OrmLite.Tests
         //public static string SqlServerBuildDb = "Data Source=localhost;Initial Catalog=TestDb;Integrated Security=SSPI;Connect Timeout=120;MultipleActiveResultSets=True";
 
         public static string OracleDb = "Data Source=localhost:1521/ormlite;User ID=test;Password=test";
-        public static string MySqlDb = "Server=localhost;Database=test;UID=root;Password=test;SslMode=none";
-        public static string PostgreSqlDb = "Server=localhost;Port=5432;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
-        public static string FirebirdDb = @"User=SYSDBA;Password=masterkey;Database=C:\src\ServiceStack.OrmLite\tests\ServiceStack.OrmLite.Tests\App_Data\TEST.FDB;DataSource=localhost;Dialect=3;charset=ISO8859_1;";
+        public static string MySqlDb = "Server=localhost;Port=48102;Database=test;UID=root;Password=test;SslMode=none";
+        public static string PostgreSqlDb = "Server=localhost;Port=48103;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
+        public static string FirebirdDb = @"User=SYSDBA;Password=masterkey;Database=/firebird/data/test.gdb;DataSource=localhost;Port=48101;Dialect=3;charset=ISO8859_1;MinPoolSize=0;MaxPoolSize=100;";
 
 
         public static IOrmLiteDialectProvider DefaultProvider = SqlServerDialect.Provider;

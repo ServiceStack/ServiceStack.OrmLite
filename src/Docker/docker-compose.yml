@@ -17,7 +17,7 @@ services:
      FIREBIRD_USER: "test"
      ISC_PASSWORD: "masterkey"
      EnableWireCrypt: "true"
-     
+
   mysql5.5:
     image: mariadb:5.5
     networks:
@@ -28,6 +28,17 @@ services:
      MYSQL_DATABASE: "test"
      MYSQL_USER: "test"
      MYSQL_ROOT_PASSWORD: "test"
+
+  postgres9:
+    image: postgres:9-alpine
+    networks:
+      - servicestack_test
+    ports:
+     - "48103:5432"
+    environment:
+     POSTGRES_USER: "test"
+     POSTGRES_DB: "test"
+     POSTGRES_PASSWORD: "test"
  
 networks:
   servicestack_test:
