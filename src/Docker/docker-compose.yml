@@ -1,0 +1,23 @@
+# this file creates docker instances of all the db engines required for running integration tests 
+# before running tests, from a commandline in this directory type `docker-compose up -d` to start database engines
+# to remove all db engines after tesing, type `docker-compose down`
+
+version: '3'
+
+services:
+
+  firebird:
+    image: "jacobalberty/firebird:3.0.4"
+    networks:
+      - servicestack_test
+    ports: 
+      - "48101:3050"
+    environment: 
+     FIREBIRD_DATABASE: "test.gdb"
+     FIREBIRD_USER: "test"
+     ISC_PASSWORD: "masterkey"
+     EnableWireCrypt: "true"
+
+   
+networks:
+  servicestack_test:
