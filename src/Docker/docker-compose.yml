@@ -6,7 +6,7 @@ version: '3'
 
 services:
 
-  firebird:
+  firebird3:
     image: "jacobalberty/firebird:3.0.4"
     networks:
       - servicestack_test
@@ -17,7 +17,17 @@ services:
      FIREBIRD_USER: "test"
      ISC_PASSWORD: "masterkey"
      EnableWireCrypt: "true"
-
-   
+     
+  mysql5.5:
+    image: mariadb:5.5
+    networks:
+      - servicestack_test
+    ports:
+     - "48102:3306"
+    environment:
+     MYSQL_DATABASE: "test"
+     MYSQL_USER: "test"
+     MYSQL_ROOT_PASSWORD: "test"
+ 
 networks:
   servicestack_test:
