@@ -109,9 +109,11 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
                 //Any other character matches itself or its lower/upper case equivalent (i.e. case-insensitive matching).
                 //case-sensitivity matching depends on PostgreSQL underlying OS.
 
-                // detects Postgres OS platform
-                var isLinux = db.Scalar<string>("SELECT version()").Contains("linux");
-                expected = isLinux ? 1 : 3;
+#if NETCORE 
+                expected = 1;
+#else
+                expected = 3;
+#endif
 
                 ev.Where().Where(rn => rn.Name.EndsWith("garzon"));
                 result = db.Select(ev);

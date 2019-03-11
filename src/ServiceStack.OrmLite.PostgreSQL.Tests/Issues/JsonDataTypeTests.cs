@@ -11,6 +11,10 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Issues
     [TestFixture]
     public class JsonDataTypeTests : OrmLiteTestBase
     {
+        public JsonDataTypeTests() : base(Dialect.PostgreSql)
+        {
+        }
+        
         [Test]
         public void Can_save_and_restore_JSON_property()
         {
