@@ -306,20 +306,8 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
                     //    Console.WriteLine("**************  FAILED *************** " + e.Message);
                 }
 
-
-
                 // Tests for predicate overloads that make use of the expression visitor
                 author = db.Single<Author>(q => q.Name == "Jorge Garzon");
-
-                try
-                {
-                    author = db.Single<Author>(q => q.Name == "Does not exist");
-                    Assert.Fail();
-                }
-                catch
-                {
-                    //"Expected exception thrown, OK? True"
-                }
 
                 author = db.Single<Author>(q => q.Name == "Does not exist");
                 Assert.IsNull(author);
