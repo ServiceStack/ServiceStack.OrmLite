@@ -16,15 +16,16 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public virtual void TestFixtureSetUp()
         {
             LogManager.LogFactory = new ConsoleLogFactory();
-
+            ConnectionString = GetConnectionString();
             OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
-            ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
         }
 
         public void Log(string text)
         {
             Console.WriteLine(text);
         }
+
+        public string GetConnectionString() => ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
 
         public virtual IDbConnection OpenDbConnection(string connString = null, IOrmLiteDialectProvider dialectProvider = null)
         {

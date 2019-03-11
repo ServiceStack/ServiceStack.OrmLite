@@ -15,6 +15,8 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [OneTimeSetUp]
         public override void TestFixtureSetUp()
         {
+            base.TestFixtureSetUp();
+            
             OrmLiteConfig.SanitizeFieldNameForParamNameFn = s =>
                 (s ?? "").Replace(" ", "").Replace("°", "");
         }
