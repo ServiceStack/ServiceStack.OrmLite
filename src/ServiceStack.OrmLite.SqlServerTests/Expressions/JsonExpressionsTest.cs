@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
 					State = "NV"
 				};
 
-	[OneTimeSetUp]
+		[OneTimeSetUp]
 		public override void TestFixtureSetUp()
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();
@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
 			OrmLiteConfig.DialectProvider.RegisterConverter<string>(new SqlServerJsonStringConverter());
 			OrmLiteConfig.DialectProvider.RegisterConverter<Address>(new SqlServerJsonStringConverter());
 
-			ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
+			ConnectionString = GetConnectionString();
 
 			Db = OpenDbConnection();
 
