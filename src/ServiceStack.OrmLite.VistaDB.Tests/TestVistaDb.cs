@@ -65,7 +65,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
             }
             catch
             {
-                Assert.Fail("VistaDB library should be copied locally or installed into GAC.");
+                Assert.Ignore("VistaDB library should be copied locally or installed into GAC.");
             }
 
             try

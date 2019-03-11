@@ -8,15 +8,8 @@ using ServiceStack.DataAnnotations;
 namespace ServiceStack.OrmLite.VistaDB.Tests.UseCase
 {
     [TestFixture]
-    public class SimpleUseCase
+    public class SimpleUseCase : OrmLiteTestBase
     {
-        [OneTimeSetUp]
-        public void TestFixtureSetUp()
-        {
-            //Inject your database provider here
-            OrmLiteConfig.DialectProvider = new VistaDbDialectProvider();
-        }
-
         public class User
         {
             public long Id { get; set; }
@@ -40,12 +33,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.UseCase
         [Test]
         public void Simple_CRUD_example()
         {
-            //using (IDbConnection db = ":memory:".OpenDbConnection())
-            
-            var connStr = ConfigurationManager.ConnectionStrings["TestDb"].ConnectionString;
-            var sqlServerFactory = new OrmLiteConnectionFactory(connStr, VistaDbDialectProvider.Instance);
-
-            using (IDbConnection db = sqlServerFactory.OpenDbConnection())
+            using (IDbConnection db = OpenDbConnection())
             {
                 db.CreateTable<Dual>(true);
                 db.CreateTable<User>(true);
@@ -79,7 +67,5 @@ namespace ServiceStack.OrmLite.VistaDB.Tests.UseCase
                 Assert.That(rowsLeft[0].Name, Is.EqualTo("A"));
             }
         }
-
     }
-
 }
