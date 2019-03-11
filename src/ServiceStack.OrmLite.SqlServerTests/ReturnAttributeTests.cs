@@ -1,11 +1,9 @@
-﻿using System;
-using System.Data;
-using System.Configuration;
-using System.Runtime.InteropServices.ComTypes;
+﻿using System.Data;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite;
 using NUnit.Framework;
 using ServiceStack.Logging;
+using ServiceStack.OrmLite.SqlServerTests;
 
 namespace ReturnAttributeTests
 {
@@ -59,11 +57,11 @@ namespace ReturnAttributeTests
         }
     }
 
-    public class ReturnAttributeTests: TestsBase
+    public class ReturnAttributeTests : TestsBase
     {
-        public ReturnAttributeTests(): base()
+        public ReturnAttributeTests()
         {
-            ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
+            ConnectionString = OrmLiteTestBase.GetConnectionString();
             DialectProvider = SqlServer2012Dialect.Provider;
         }
 

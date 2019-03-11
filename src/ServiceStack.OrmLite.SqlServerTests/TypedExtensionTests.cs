@@ -22,7 +22,8 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void Setup()
         {
             provider = new SqlServer2014OrmLiteDialectProvider();
-            factory = new OrmLiteConnectionFactory(ConfigurationManager.ConnectionStrings["testDb"].ConnectionString, provider, false);
+            var connectionString = OrmLiteTestBase.GetConnectionString();
+            factory = new OrmLiteConnectionFactory(connectionString, provider, false);
         }
 
         [OneTimeTearDown]
