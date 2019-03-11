@@ -108,11 +108,10 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
                 //An underscore ("_") in the LIKE pattern matches any single character in the string. 
                 //Any other character matches itself or its lower/upper case equivalent (i.e. case-insensitive matching).
                 //case-sensitivity matching depends on PostgreSQL underlying OS.
-#if NETCORE
-                expected = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux)? 1 : 3;
-#else
-                expected = 3;
-#endif
+
+                // detects Postgres OS platform
+                var isLinux = db.Scalar<string>("SELECT version()").Contains("linux");
+                expected = isLinux ? 1 : 3;
 
                 ev.Where().Where(rn => rn.Name.EndsWith("garzon"));
                 result = db.Select(ev);
@@ -317,16 +316,6 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 
                 // Tests for predicate overloads that make use of the expression visitor
                 author = db.Single<Author>(q => q.Name == "Jorge Garzon");
-
-                try
-                {
-                    author = db.Single<Author>(q => q.Name == "Does not exist");
-                    Assert.Fail();
-                }
-                catch
-                {
-                    //"Expected exception thrown, OK? True"
-                }
 
                 author = db.Single<Author>(q => q.Name == "Does not exist");
                 Assert.IsNull(author);

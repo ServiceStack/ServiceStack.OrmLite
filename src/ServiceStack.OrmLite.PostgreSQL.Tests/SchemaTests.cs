@@ -25,7 +25,7 @@ namespace ServiceStack.OrmLite.Tests
             public DateTime CreatedDate { get; set; }
         }
 
-        private void CreateSchemaIfNotExists(System.Data.IDbConnection db)
+        private void CreateSchemaIfNotExists()
         {
             const string createSchemaSQL = @"DO $$
 BEGIN
@@ -41,22 +41,25 @@ BEGIN
 
 END
 $$;";
-            db.ExecuteSql(createSchemaSQL);
+            using (var db = OpenDbConnection())
+            {
+                db.ExecuteSql(createSchemaSQL);
+            }
         }
 
         [Test]
         public void Can_Create_Tables_With_Schema_in_PostgreSQL()
         {
             using (var db = OpenDbConnection())
-            using (var dbCmd = db.CreateCommand())
             {
-                CreateSchemaIfNotExists(db);
+                CreateSchemaIfNotExists();
                 db.DropAndCreateTable<User>();
 
-                var tables = db.Column<string>(@"SELECT '[' || n.nspname || '].[' || c.relname ||']' FROM pg_class c LEFT JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relname = 'users' AND n.nspname = 'TestSchema'");
+                var tables = db.Single<string>(@"SELECT '[' || n.nspname || '].[' || c.relname ||']' FROM pg_class c LEFT JOIN pg_namespace n ON n.oid = c.relnamespace WHERE c.relname = 'test_schema_user' AND n.nspname = 'TestSchema'");
                 
-                //PostgreSQL dialect should create the table in the schema
-                Assert.That(tables.Contains("[TestSchema].[users]"));
+                // PostgreSQL dialect should create the table in the schema
+                Assert.
+                    That(tables.Contains("[TestSchema].[test_schema_user]"));
             }
         }
 
@@ -66,7 +69,7 @@ $$;";
             using (var db = OpenDbConnection())
             using (var dbCmd = db.CreateCommand())
             {
-                CreateSchemaIfNotExists(db);
+                CreateSchemaIfNotExists();
                 db.CreateTable<User>(true);
 
                 db.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });

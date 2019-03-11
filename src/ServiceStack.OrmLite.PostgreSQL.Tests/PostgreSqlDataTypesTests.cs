@@ -17,7 +17,15 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     {
         public PostgreSqlDataTypesTests() : base(Dialect.PostgreSql) {}
         
-        [OneTimeSetUp] public void OneTimeSetup() => PostgreSqlDialectProvider.Instance.UseHstore = true;
+        [OneTimeSetUp] 
+        public void OneTimeSetup()
+        {
+            PostgreSqlDialectProvider.Instance.UseHstore = true;
+            using (var db = OpenDbConnection())
+            {
+                db.ExecuteSql("CREATE EXTENSION IF NOT EXISTS hstore;");
+            }
+        }
 
         [OneTimeTearDown] public void OneTimeTearDown() => PostgreSqlDialectProvider.Instance.UseHstore = false;
 
