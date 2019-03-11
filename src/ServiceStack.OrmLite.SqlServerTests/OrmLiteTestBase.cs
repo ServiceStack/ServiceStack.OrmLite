@@ -25,7 +25,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
             Console.WriteLine(text);
         }
 
-        public string GetConnectionString() => ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
+        public static string GetConnectionString() => "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;";
 
         public virtual IDbConnection OpenDbConnection(string connString = null, IOrmLiteDialectProvider dialectProvider = null)
         {

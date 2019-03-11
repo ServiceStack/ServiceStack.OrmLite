@@ -5,9 +5,9 @@ using ServiceStack.Common.Tests.Models;
 
 namespace ServiceStack.OrmLite.SqlServerTests
 {
-    public class DialectProviderTests 
+    public class DialectProviderTests
     {
-        public string ConnectionString => ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
+        public string ConnectionString => OrmLiteTestBase.GetConnectionString();
 
         public void DbPocoTest(IDbConnection db)
         {
@@ -20,8 +20,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Can_use_SqlServerDialectProvider()
         {
-            var dbFactory = new OrmLiteConnectionFactory(ConnectionString,
-                SqlServerDialect.Provider);
+            var dbFactory = new OrmLiteConnectionFactory(ConnectionString, SqlServerDialect.Provider);
 
             using (var db = dbFactory.Open())
             {
@@ -32,9 +31,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Can_use_SqlServer2008DialectProvider()
         {
-            var dbFactory = new OrmLiteConnectionFactory(ConnectionString,
-                SqlServer2008Dialect.Provider);
-
+            var dbFactory = new OrmLiteConnectionFactory(ConnectionString, SqlServer2008Dialect.Provider);
             using (var db = dbFactory.Open())
             {
                 DbPocoTest(db);
@@ -44,9 +41,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Can_use_SqlServer2012DialectProvider()
         {
-            var dbFactory = new OrmLiteConnectionFactory(ConnectionString,
-                SqlServer2012Dialect.Provider);
-
+            var dbFactory = new OrmLiteConnectionFactory(ConnectionString, SqlServer2012Dialect.Provider);
             using (var db = dbFactory.Open())
             {
                 DbPocoTest(db);
@@ -56,9 +51,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Can_use_SqlServer2014DialectProvider()
         {
-            var dbFactory = new OrmLiteConnectionFactory(ConnectionString,
-                SqlServer2014Dialect.Provider);
-
+            var dbFactory = new OrmLiteConnectionFactory(ConnectionString, SqlServer2014Dialect.Provider);
             using (var db = dbFactory.Open())
             {
                 DbPocoTest(db);
@@ -68,9 +61,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Can_use_SqlServer2016DialectProvider()
         {
-            var dbFactory = new OrmLiteConnectionFactory(ConnectionString,
-                SqlServer2016Dialect.Provider);
-
+            var dbFactory = new OrmLiteConnectionFactory(ConnectionString, SqlServer2016Dialect.Provider);
             using (var db = dbFactory.Open())
             {
                 DbPocoTest(db);
@@ -80,9 +71,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         [Test]
         public void Can_use_SqlServer2017DialectProvider()
         {
-            var dbFactory = new OrmLiteConnectionFactory(ConnectionString,
-                SqlServer2017Dialect.Provider);
-
+            var dbFactory = new OrmLiteConnectionFactory(ConnectionString, SqlServer2017Dialect.Provider);
             using (var db = dbFactory.Open())
             {
                 DbPocoTest(db);

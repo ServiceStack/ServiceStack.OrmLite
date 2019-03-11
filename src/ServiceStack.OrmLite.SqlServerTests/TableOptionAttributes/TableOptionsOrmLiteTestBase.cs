@@ -11,21 +11,14 @@ namespace ServiceStack.OrmLite.SqlServerTests.TableOptions
         [OneTimeSetUp]
         public override void TestFixtureSetUp()
         {
-            try
-            {
-                LogManager.LogFactory = new ConsoleLogFactory();
+            LogManager.LogFactory = new ConsoleLogFactory();
 
-                // Sql Server In-Memory OLTP does not support MARS
-                ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString.Replace("MultipleActiveResultSets=True;", "");
+            // Sql Server In-Memory OLTP does not support MARS
+            ConnectionString = GetConnectionString().Replace("MultipleActiveResultSets=True;", "");
 
-                var dialectProvider = SqlServerConverters.Configure(SqlServer2012Dialect.Provider);
+            var dialectProvider = SqlServerConverters.Configure(SqlServer2012Dialect.Provider);
 
-                Db = new OrmLiteConnectionFactory(ConnectionString, dialectProvider).OpenDbConnection();                
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            Db = new OrmLiteConnectionFactory(ConnectionString, dialectProvider).OpenDbConnection();
         }
     }
 
@@ -34,21 +27,14 @@ namespace ServiceStack.OrmLite.SqlServerTests.TableOptions
         [OneTimeSetUp]
         public override void TestFixtureSetUp()
         {
-            try
-            {
-                LogManager.LogFactory = new ConsoleLogFactory();
+            LogManager.LogFactory = new ConsoleLogFactory();
 
-                // Sql Server In-Memory OLTP does not support MARS
-                ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString.Replace("MultipleActiveResultSets=True;", "");
+            // Sql Server In-Memory OLTP does not support MARS
+            ConnectionString = GetConnectionString().Replace("MultipleActiveResultSets=True;", "");
 
-                var dialectProvider = SqlServerConverters.Configure(SqlServer2014Dialect.Provider);
+            var dialectProvider = SqlServerConverters.Configure(SqlServer2014Dialect.Provider);
 
-                Db = new OrmLiteConnectionFactory(ConnectionString, dialectProvider).OpenDbConnection();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            Db = new OrmLiteConnectionFactory(ConnectionString, dialectProvider).OpenDbConnection();
         }
     }
 
@@ -57,21 +43,14 @@ namespace ServiceStack.OrmLite.SqlServerTests.TableOptions
         [OneTimeSetUp]
         public override void TestFixtureSetUp()
         {
-            try
-            {
-                LogManager.LogFactory = new ConsoleLogFactory();
+            LogManager.LogFactory = new ConsoleLogFactory();
 
-                // Sql Server In-Memory OLTP does not support MARS
-                ConnectionString = ConfigurationManager.ConnectionStrings["testDb"].ConnectionString.Replace("MultipleActiveResultSets=True;", "");
+            // Sql Server In-Memory OLTP does not support MARS
+            ConnectionString = GetConnectionString().Replace("MultipleActiveResultSets=True;", "");
 
-                var dialectProvider = SqlServerConverters.Configure(SqlServer2016Dialect.Provider);
+            var dialectProvider = SqlServerConverters.Configure(SqlServer2016Dialect.Provider);
 
-                Db = new OrmLiteConnectionFactory(ConnectionString, dialectProvider).OpenDbConnection();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            Db = new OrmLiteConnectionFactory(ConnectionString, dialectProvider).OpenDbConnection();
         }
     }
 }
