@@ -40,7 +40,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.MySql.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.PostgreSQL", "ServiceStack.OrmLite.PostgreSQL\ServiceStack.OrmLite.PostgreSQL.csproj", "{3220F088-BDD0-6979-AC0C-8C541C2E7DE5}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.PostgreSQL.Tests", "ServiceStack.OrmLite.PostgreSQL.Tests\ServiceStack.OrmLite.PostgreSQL.Tests.csproj", "{E692B423-82E9-46DE-AA80-F4E36A4B4D56}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.PostgreSQL.Tests", "..\tests\ServiceStack.OrmLite.PostgreSQL.Tests\ServiceStack.OrmLite.PostgreSQL.Tests.csproj", "{E692B423-82E9-46DE-AA80-F4E36A4B4D56}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.Oracle", "ServiceStack.OrmLite.Oracle\ServiceStack.OrmLite.Oracle.csproj", "{517B64BA-D7A6-4A15-8719-821B38147C61}"
 EndProject

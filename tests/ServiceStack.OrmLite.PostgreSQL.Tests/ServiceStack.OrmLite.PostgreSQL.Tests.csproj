@@ -15,9 +15,9 @@
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
-    <ProjectReference Include="..\ServiceStack.OrmLite.PostgreSQL\ServiceStack.OrmLite.PostgreSQL.csproj" />
-    <ProjectReference Include="..\..\tests\ServiceStack.OrmLite.Tests\ServiceStack.OrmLite.Tests.csproj" />
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.PostgreSQL\ServiceStack.OrmLite.PostgreSQL.csproj" />
+    <ProjectReference Include="..\ServiceStack.OrmLite.Tests\ServiceStack.OrmLite.Tests.csproj" />
     <PackageReference Include="ServiceStack" Version="$(Version)" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
