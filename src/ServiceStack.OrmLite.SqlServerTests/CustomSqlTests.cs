@@ -84,12 +84,21 @@ namespace ServiceStack.OrmLite.SqlServerTests
         }
 
         [Test]
-        public void Can_execute_stored_proceduce_returning_scalars()
+        public void Can_execute_stored_procedure_returning_scalars()
         {
+            var dropSP = @"IF OBJECT_ID('TestGetIds') IS NOT NULL
+                    DROP PROCEDURE TestGetIds";
+            var createSP = @"CREATE PROCEDURE TestGetIds
+            AS
+                SELECT 1 as Id
+                UNION ALL
+                SELECT 2;";
+            
             using (var db = OpenDbConnection())
             {
-                using (var cmd = db.SqlProc(
-                    "GetUserIdsFromEmailAddresses", new { EmailAddresses = "as@if.com" }))
+                db.ExecuteSql(dropSP);
+                db.ExecuteSql(createSP);
+                using (var cmd = db.SqlProc("TestGetIds"))
                 {
                     var userIds = cmd.ConvertToList<int>();
 
