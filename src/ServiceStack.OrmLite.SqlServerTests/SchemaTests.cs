@@ -59,6 +59,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
         {
             using (var db = OpenDbConnection())
             {
+                db.ExecuteSql("CREATE SCHEMA [Schema]");
                 db.DropAndCreateTable<SchemaTest>();
 
                 Assert.That(db.ColumnExists<SchemaTest>(x => x.Id));
