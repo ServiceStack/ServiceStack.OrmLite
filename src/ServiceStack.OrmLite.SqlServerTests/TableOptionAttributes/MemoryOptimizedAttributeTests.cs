@@ -12,6 +12,18 @@ namespace ServiceStack.OrmLite.SqlServerTests.TableOptions
         public void Setup()
         {
             base.TestFixtureSetUp();
+            
+            // memory optimised tables can't be created in system databases, create new db
+            var dbName = "MemOptTest";
+            Db.ExecuteSql($"IF DB_ID (N'{dbName}') IS NOT NULL DROP DATABASE {dbName};");
+            Db.ExecuteSql($"CREATE DATABASE {dbName};");
+            Db.ExecuteSql($"ALTER DATABASE {dbName} SET AUTO_CLOSE OFF;");
+            Db.ExecuteSql($"ALTER DATABASE {dbName} ADD FILEGROUP imoltp_mod CONTAINS MEMORY_OPTIMIZED_DATA");
+            Db.ExecuteSql($"ALTER DATABASE {dbName} ADD FILE (name='imoltp_mod1', filename='.\\imoltp_mod1') TO FILEGROUP imoltp_mod");
+            Db.ExecuteSql($"ALTER DATABASE {dbName} SET MEMORY_OPTIMIZED_ELEVATE_TO_SNAPSHOT=ON");
+            Db.ExecuteSql($"USE {dbName};");
+
+            ConnectionString = ConnectionString.Replace("master", dbName);
 
             if (Db.TableExists<TypeWithMemTableNoDurability>())
                 Db.DropTable<TypeWithMemTableNoDurability>();
