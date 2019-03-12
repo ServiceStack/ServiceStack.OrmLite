@@ -11,23 +11,16 @@ namespace ServiceStack.OrmLite.SqlServerTests.Converters
         [OneTimeSetUp]
         public override void TestFixtureSetUp()
         {
-            try
-            {
-                LogManager.LogFactory = new ConsoleLogFactory();
+            LogManager.LogFactory = new ConsoleLogFactory();
 
-                // Appending the Sql Server Type System Version to use SqlServerSpatial110.dll (2012) assembly
-                // Sql Server defaults to SqlServerSpatial100.dll (2008 R2) even for versions greater
-                // https://msdn.microsoft.com/en-us/library/system.data.sqlclient.sqlconnection.connectionstring.aspx
-                ConnectionString = GetConnectionString() + "Type System Version=SQL Server 2012;";
+            // Appending the Sql Server Type System Version to use SqlServerSpatial110.dll (2012) assembly
+            // Sql Server defaults to SqlServerSpatial100.dll (2008 R2) even for versions greater
+            // https://msdn.microsoft.com/en-us/library/system.data.sqlclient.sqlconnection.connectionstring.aspx
+            ConnectionString = GetConnectionString() + "Type System Version=SQL Server 2012;";
 
-                var dialectProvider = SqlServerConverters.Configure(SqlServer2012Dialect.Provider);
+            var dialectProvider = SqlServerConverters.Configure(SqlServer2012Dialect.Provider);
 
-                Db = new OrmLiteConnectionFactory(ConnectionString, dialectProvider).OpenDbConnection();                
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            Db = new OrmLiteConnectionFactory(ConnectionString, dialectProvider).OpenDbConnection();
         }
     }
 
@@ -36,23 +29,16 @@ namespace ServiceStack.OrmLite.SqlServerTests.Converters
         [OneTimeSetUp]
         public override void TestFixtureSetUp()
         {
-            try
-            {
-                LogManager.LogFactory = new ConsoleLogFactory();
+            LogManager.LogFactory = new ConsoleLogFactory();
 
-                // Appending the Sql Server Type System Version to use SqlServerSpatial110.dll (2012) assembly
-                // Sql Server defaults to SqlServerSpatial100.dll (2008 R2) even for versions greater
-                // https://msdn.microsoft.com/en-us/library/system.data.sqlclient.sqlconnection.connectionstring.aspx
-                ConnectionString = GetConnectionString() + "Type System Version=SQL Server 2012;";
+            // Appending the Sql Server Type System Version to use SqlServerSpatial110.dll (2012) assembly
+            // Sql Server defaults to SqlServerSpatial100.dll (2008 R2) even for versions greater
+            // https://msdn.microsoft.com/en-us/library/system.data.sqlclient.sqlconnection.connectionstring.aspx
+            ConnectionString = GetConnectionString() + "Type System Version=SQL Server 2012;";
 
-                var dialectProvider = SqlServerConverters.Configure(SqlServer2014Dialect.Provider);
+            var dialectProvider = SqlServerConverters.Configure(SqlServer2014Dialect.Provider);
 
-                Db = new OrmLiteConnectionFactory(ConnectionString, dialectProvider).OpenDbConnection();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            Db = new OrmLiteConnectionFactory(ConnectionString, dialectProvider).OpenDbConnection();
         }
     }
 
@@ -61,23 +47,16 @@ namespace ServiceStack.OrmLite.SqlServerTests.Converters
         [OneTimeSetUp]
         public override void TestFixtureSetUp()
         {
-            try
-            {
-                LogManager.LogFactory = new ConsoleLogFactory();
+            LogManager.LogFactory = new ConsoleLogFactory();
 
-                // Appending the Sql Server Type System Version to use SqlServerSpatial110.dll (2012) assembly
-                // Sql Server defaults to SqlServerSpatial100.dll (2008 R2) even for versions greater
-                // https://msdn.microsoft.com/en-us/library/system.data.sqlclient.sqlconnection.connectionstring.aspx
-                ConnectionString = GetConnectionString() + "Type System Version=SQL Server 2012;";
+            // Appending the Sql Server Type System Version to use SqlServerSpatial110.dll (2012) assembly
+            // Sql Server defaults to SqlServerSpatial100.dll (2008 R2) even for versions greater
+            // https://msdn.microsoft.com/en-us/library/system.data.sqlclient.sqlconnection.connectionstring.aspx
+            ConnectionString = GetConnectionString() + "Type System Version=SQL Server 2012;";
 
-                var dialectProvider = SqlServerConverters.Configure(SqlServer2016Dialect.Provider);
+            var dialectProvider = SqlServerConverters.Configure(SqlServer2016Dialect.Provider);
 
-                Db = new OrmLiteConnectionFactory(ConnectionString, dialectProvider).OpenDbConnection();
-            }
-            catch (Exception ex)
-            {
-                throw ex;
-            }
+            Db = new OrmLiteConnectionFactory(ConnectionString, dialectProvider).OpenDbConnection();
         }
     }
 }
