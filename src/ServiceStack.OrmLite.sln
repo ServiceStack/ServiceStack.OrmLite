@@ -44,7 +44,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.Postgr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.Oracle", "ServiceStack.OrmLite.Oracle\ServiceStack.OrmLite.Oracle.csproj", "{517B64BA-D7A6-4A15-8719-821B38147C61}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.Oracle.Tests", "ServiceStack.OrmLite.Oracle.Tests\ServiceStack.OrmLite.Oracle.Tests.csproj", "{DE5CA3EB-010D-492A-A0B7-501D7941FA51}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.Oracle.Tests", "..\tests\ServiceStack.OrmLite.Oracle.Tests\ServiceStack.OrmLite.Oracle.Tests.csproj", "{DE5CA3EB-010D-492A-A0B7-501D7941FA51}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "T4", "T4", "{ACB237F8-B931-4945-9533-FA2207510F75}"
 	ProjectSection(SolutionItems) = preProject
