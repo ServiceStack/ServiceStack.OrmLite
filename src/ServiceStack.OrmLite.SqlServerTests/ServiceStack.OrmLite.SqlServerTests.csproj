@@ -5,15 +5,12 @@
     <PackageId>ServiceStack.OrmLite.SqlServerTests</PackageId>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
-    <ProjectReference Include="..\ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.csproj" />
     <ProjectReference Include="..\ServiceStack.OrmLite.SqlServer.Converters\ServiceStack.OrmLite.SqlServer.Converters.csproj" />
     <ProjectReference Include="..\..\tests\ServiceStack.OrmLite.Tests\ServiceStack.OrmLite.Tests.csproj" />
     <PackageReference Include="ServiceStack" Version="$(Version)" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
     <PackageReference Include="NUnit" Version="3.10.1" />
-    <PackageReference Include="Microsoft.SqlServer.Types" Version="14.0.314.76" />
   </ItemGroup>
   <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
     <Reference Include="System" />
