@@ -28,7 +28,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.SqlSer
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.Tests", "..\tests\ServiceStack.OrmLite.Tests\ServiceStack.OrmLite.Tests.csproj", "{9B64F4A7-C008-46A8-AD6F-99626DCFEFBD}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.SqlServerTests", "ServiceStack.OrmLite.SqlServerTests\ServiceStack.OrmLite.SqlServerTests.csproj", "{96793C11-2A99-4217-8946-3E0DB9534A4D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.SqlServer.Tests", "..\tests\ServiceStack.OrmLite.SqlServer.Tests\ServiceStack.OrmLite.SqlServer.Tests.csproj", "{96793C11-2A99-4217-8946-3E0DB9534A4D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.Firebird", "ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.csproj", "{317B64BA-D7A6-4A15-8719-821B38147C63}"
 EndProject
