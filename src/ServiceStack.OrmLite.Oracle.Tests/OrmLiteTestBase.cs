@@ -30,11 +30,6 @@ namespace ServiceStack.OrmLite.Tests
             return ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
         }
 
-		protected void CreateNewDatabase()
-		{
-			ConnectionString = GetFileConnectionString();
-		}
-
 		[OneTimeSetUp]
 		public void TestFixtureSetUp()
 		{
