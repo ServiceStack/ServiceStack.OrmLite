@@ -11,18 +11,26 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServerTests
 {
-	public class Datetime2Tests : SqlServerTests.OrmLiteTestBase
+	public class Datetime2Tests : OrmLiteTestBase
 	{
+		private OrmLiteConnectionFactory dbFactory;
+
+		[OneTimeSetUp]
+		public void TestFixtureSetUp()
+		{
+			base.TestFixtureSetUp();
+			//change to datetime2 - check for higher range and precision
+			//default behaviour: normal datetime can't hold DateTime values of year 1.
+			dbFactory = new OrmLiteConnectionFactory(base.ConnectionString, SqlServerOrmLiteDialectProvider.Instance);
+			var dp2 = new SqlServerOrmLiteDialectProvider();
+			dp2.RegisterConverter<DateTime>(new SqlServerDateTime2Converter());
+			dbFactory.RegisterConnection("dt2", base.ConnectionString, dp2);
+		}
+		
 		[Test]
 		public void datetime_tests__can_use_datetime2()
 		{
-			var dbFactory = new OrmLiteConnectionFactory(base.ConnectionString, SqlServerOrmLiteDialectProvider.Instance);
-
-            //change to datetime2 - check for higher range and precision
-            //SqlServerOrmLiteDialectProvider.Instance.UseDatetime2(true);
-            SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTime2Converter());
-
-            using (var conn = dbFactory.OpenDbConnection()) {
+            using (var conn = dbFactory.OpenDbConnection("dt2")) {
 				var test_object_ValidForDatetime2 = Datetime2Test.get_test_object_ValidForDatetime2();
 
 				conn.CreateTable<Datetime2Test>(true);
@@ -48,25 +56,20 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 Assert.AreEqual(result.Single().ToVerifyPrecision, test_object_ValidForDatetime2.ToVerifyPrecision);
             }
 		}
+		
 		[Test]
 		public void datetime_tests__check_default_behaviour()
 		{
-			var dbFactory = new OrmLiteConnectionFactory(base.ConnectionString, SqlServerOrmLiteDialectProvider.Instance);
-
-            //default behaviour: normal datetime can't hold DateTime values of year 1.
-            //(SqlServerOrmLiteDialectProvider.Instance as SqlServerOrmLiteDialectProvider).UseDatetime2(false);
-            SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTimeConverter());
-
             using (var conn = dbFactory.OpenDbConnection()) {
 				var test_object_ValidForDatetime2 = Datetime2Test.get_test_object_ValidForDatetime2();
 				var test_object_ValidForNormalDatetime = Datetime2Test.get_test_object_ValidForNormalDatetime();
 
 				conn.CreateTable<Datetime2Test>(true);
 
-				//normal insert
+				// normal insert
                 var insertedId = conn.Insert(test_object_ValidForNormalDatetime, selectIdentity:true);
 
-				//insert works, but can't regular datetime's precision is not great enough.
+				// insert works, but can't regular datetime's precision is not great enough.
                 var fromDb = conn.SingleById<Datetime2Test>(insertedId);
 				Assert.AreNotEqual(test_object_ValidForNormalDatetime.ToVerifyPrecision, fromDb.ToVerifyPrecision);
 
@@ -76,9 +79,9 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 Assert.That(thrown.Message.Contains("SqlDateTime overflow"));
 
 				
-				//check InsertParam
+				// check InsertParam
 				conn.Insert(test_object_ValidForNormalDatetime);
-				//InsertParam fails differently:
+				// InsertParam fails differently:
 				var insertParamException = Assert.Throws<System.Data.SqlTypes.SqlTypeException>(() => {
 					conn.Insert(test_object_ValidForDatetime2);
 				});
@@ -89,9 +92,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
 		[Test]
 		public void Can_Select_DateTime()
 		{
-			var dbFactory = new OrmLiteConnectionFactory(base.ConnectionString, SqlServerOrmLiteDialectProvider.Instance);
-
-			using (var db = dbFactory.OpenDbConnection())
+			using (var db = dbFactory.OpenDbConnection("dt2"))
 			{
 				db.DropAndCreateTable<Datetime2Test>();
 				db.Insert(Datetime2Test.get_test_object_ValidForNormalDatetime());
@@ -107,23 +108,21 @@ namespace ServiceStack.OrmLite.SqlServerTests
 		}
 
 		[Test]
+		[NonParallelizable]
 		public void Can_Select_DateTime2()
 		{
-			SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTime2Converter());
-			var dbFactory = new OrmLiteConnectionFactory(base.ConnectionString, SqlServerOrmLiteDialectProvider.Instance);
-
-			using (var db = dbFactory.OpenDbConnection())
+			using (var db = dbFactory.OpenDbConnection("dt2"))
 			{
 				db.DropAndCreateTable<Datetime2Test>();
 				db.Insert(Datetime2Test.get_test_object_ValidForDatetime2());
 
-				var now = DateTime.UtcNow;
+				var now = DateTime.Parse("2019-03-12 09:10:48.3477082");
 				var q = db.From<Datetime2Test>()
 					.Select(x => new { SomeDateTime = now });
 				
 				var result = db.Select(q)[0];
 				
-				Assert.That(result.SomeDateTime, Is.EqualTo(now).Within(TimeSpan.FromSeconds(1)));
+				Assert.That(result.SomeDateTime, Is.EqualTo(now));
 			}
 		}
 
