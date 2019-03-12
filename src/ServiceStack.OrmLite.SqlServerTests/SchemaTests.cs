@@ -62,7 +62,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 db.ExecuteSql(
 @"IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = 'Schema')
 BEGIN
-    EXEC( 'CREATE SCHEMA [Schema' );
+    EXEC( 'CREATE SCHEMA [Schema]' );
 END");
                 db.DropAndCreateTable<SchemaTest>();
 
