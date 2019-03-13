@@ -1,13 +1,11 @@
 using System;
+using System.Collections;
 using System.Data;
 using System.Data.Common;
 using System.IO;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Logging;
-#if !NETCORE
-using ServiceStack.OrmLite.Oracle;
-#endif
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -34,9 +32,9 @@ namespace ServiceStack.OrmLite.Tests
         public static string PostgresDb_11 = "Server=localhost;Port=48303;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
         public static string FirebirdDb_3 = Environment.GetEnvironmentVariable("FIREBIRD_CONNECTION") ?? @"User=SYSDBA;Password=masterkey;Database=/firebird/data/test.gdb;DataSource=localhost;Port=48101;Dialect=3;charset=ISO8859_1;MinPoolSize=0;MaxPoolSize=100;";
 
-
         public static IOrmLiteDialectProvider DefaultProvider = SqlServerDialect.Provider;
         public static string DefaultConnection = SqlServerBuildDb;
+        
         public static string GetDefaultConnection()
         {
             OrmLiteConfig.DialectProvider = DefaultProvider;
@@ -159,11 +157,12 @@ namespace ServiceStack.OrmLite.Tests
                     return Init(Config.PostgresDb_9, PostgreSqlDialect.Provider);
                 case Dialect.SqlServerMdf:
                     return Init(Config.SqlServerDb, SqlServerDialect.Provider);
-#if !NETCORE                    
                 case Dialect.Oracle:
                     return Init(Config.OracleDb, OracleDialect.Provider);
                 case Dialect.Firebird:
                     return Init(Config.FirebirdDb_3, FirebirdDialect.Provider);
+
+#if !NETCORE                    
                 case Dialect.VistaDb:
                     VistaDbDialect.Instance.UseLibraryFromGac = true;
                     var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["myVDBConnection"];

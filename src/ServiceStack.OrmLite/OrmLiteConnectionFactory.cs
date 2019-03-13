@@ -220,7 +220,7 @@ namespace ServiceStack.OrmLite
     public static class OrmLiteConnectionFactoryExtensions
     {
         /// <summary>
-        /// Alias for OpenDbConnection
+        /// Alias for <see cref="OpenDbConnection(ServiceStack.Data.IDbConnectionFactory,string)"/>
         /// </summary>
         public static IDbConnection Open(this IDbConnectionFactory connectionFactory)
         {

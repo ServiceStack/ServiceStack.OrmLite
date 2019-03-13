@@ -348,9 +348,15 @@ namespace ServiceStack.OrmLite.Firebird
             {
                 if (fieldDef.AutoIncrement || !fieldDef.Sequence.IsNullOrEmpty())
                 {
-                    var sequence = Sequence(modelDef.ModelName, fieldDef.FieldName, fieldDef.Sequence);
-                    gens.Add("CREATE GENERATOR {0};".Fmt(sequence));
-                    gens.Add("SET GENERATOR {0} TO 0;".Fmt(sequence));
+                    // https://firebirdsql.org/refdocs/langrefupd21-ddl-sequence.html
+                    var sequence = Sequence(modelDef.ModelName, fieldDef.FieldName, fieldDef.Sequence).ToUpper();
+                    gens.Add($@"
+EXECUTE BLOCK AS BEGIN
+    if (not exists(select 1 FROM RDB$GENERATORS WHERE RDB$GENERATOR_NAME = '{sequence}')) then
+    begin
+        execute statement 'CREATE SEQUENCE {sequence};';
+    end
+END");
                 }
             }
             return gens;
@@ -605,10 +611,9 @@ namespace ServiceStack.OrmLite.Firebird
 
         private object GetNextValue(IDbCommand dbCmd, string sequence, object value)
         {
-            Object retObj;
-
             if (value.ToString() != "0")
             {
+                object retObj;
                 if (long.TryParse(value.ToString(), out var nv))
                 {
                     LastInsertId = nv;
@@ -620,7 +625,6 @@ namespace ServiceStack.OrmLite.Firebird
                     retObj = value;
                 }
                 return retObj;
-
             }
 
             dbCmd.CommandText = $"select next value for {Quote(sequence)} from RDB$DATABASE";
@@ -707,15 +711,13 @@ namespace ServiceStack.OrmLite.Firebird
         {
             tableName = GetTableName(tableName, schema);
 
-            if (!QuoteNames & !RESERVED.Contains(tableName.ToUpper()))
-                tableName = tableName.ToUpper();
+//            if (!QuoteNames & !RESERVED.Contains(tableName.ToUpper()))
+//                tableName = tableName.ToUpper();
 
-            var sql = "SELECT count(*) FROM rdb$relations " +
-                "WHERE rdb$system_flag = 0 AND rdb$view_blr IS NULL AND rdb$relation_name ={0}"
-                .SqlFmt(tableName);
+            var sql = $"SELECT 1 FROM rdb$relations WHERE rdb$system_flag = 0 AND rdb$view_blr IS NULL AND rdb$relation_name = '{tableName}'";
 
             var result = dbCmd.ExecLongScalar(sql);
-            return result > 0;
+            return result == 1;
         }
 
         public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)

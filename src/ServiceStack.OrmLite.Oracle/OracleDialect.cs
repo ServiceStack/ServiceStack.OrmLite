@@ -1,4 +1,6 @@
-﻿namespace ServiceStack.OrmLite.Oracle
+﻿using ServiceStack.OrmLite.Oracle;
+
+namespace ServiceStack.OrmLite
 {
     public class OracleDialect
     {

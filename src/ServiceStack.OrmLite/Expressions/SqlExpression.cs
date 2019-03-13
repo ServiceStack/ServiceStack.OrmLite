@@ -2215,7 +2215,7 @@ namespace ServiceStack.OrmLite
             {
                 return CachedExpressionCompiler.Evaluate(m);
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
                 if (originalLambda == null)
                     throw;

@@ -123,6 +123,7 @@ namespace ServiceStack.OrmLite.MySql
         }
 
         public override string GetQuotedName(string name) => $"`{name}`";
+        public override string GetQuotedColumnName(string columnName) => $"`{columnName}`";
 
         public override SqlExpression<T> SqlExpression<T>()
         {
@@ -184,6 +185,12 @@ namespace ServiceStack.OrmLite.MySql
                 if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
 
                 sbColumns.Append(GetColumnDefinition(fieldDef));
+                
+                var sqlConstraint = GetCheckConstraint(modelDef, fieldDef);
+                if (sqlConstraint != null)
+                {
+                    sbConstraints.Append(",\n" + sqlConstraint);
+                }
 
                 if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
                     continue;

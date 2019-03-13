@@ -2535,7 +2535,9 @@ namespace ServiceStack.OrmLite.Dapper
                 {
                     // need to be a little careful about adding; use a utility method
                     il.Emit(OpCodes.Ldstr, prop.Name); // stack is now [parameters] [parameters] [command] [name]
+#pragma warning disable 618
                     il.EmitCall(OpCodes.Call, typeof(SqlMapper).GetMethod(nameof(SqlMapper.FindOrAddParameter)), null); // stack is [parameters] [parameter]
+#pragma warning restore 618
                 }
                 else
                 {

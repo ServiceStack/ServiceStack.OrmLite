@@ -1276,7 +1276,7 @@ namespace ServiceStack.OrmLite
 
                 sbColumns.Append(columnDefinition);
 
-                var sqlConstraint = GetCheckConstraint(fieldDef);
+                var sqlConstraint = GetCheckConstraint(modelDef, fieldDef);
                 if (sqlConstraint != null)
                 {
                     sbConstraints.Append(",\n" + sqlConstraint);
@@ -1320,12 +1320,12 @@ namespace ServiceStack.OrmLite
         protected virtual string GetUniqueConstraintName(UniqueConstraintAttribute constraint, string tableName) =>
             constraint.Name ?? $"UC_{tableName}_{constraint.FieldNames.Join("_")}";
 
-        public virtual string GetCheckConstraint(FieldDefinition fieldDef)
+        public virtual string GetCheckConstraint(ModelDefinition modelDef, FieldDefinition fieldDef)
         {
             if (fieldDef.CheckConstraint == null)
                 return null;
 
-            return $"CONSTRAINT CHK_{fieldDef.FieldName} CHECK ({fieldDef.CheckConstraint})";
+            return $"CONSTRAINT CHK_{modelDef.Schema}_{modelDef.ModelName}_{fieldDef.FieldName} CHECK ({fieldDef.CheckConstraint})";
         }
 
         public virtual string ToPostCreateTableStatement(ModelDefinition modelDef)

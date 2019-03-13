@@ -33,7 +33,7 @@ namespace ServiceStack.OrmLite.Firebird
 
         public override string GetSequenceName(string modelName, string fieldName)
         {
-            var seqName = ApplyNameRestrictions("gen_" + modelName + "_" + fieldName).ToLower();
+            var seqName = ApplyNameRestrictions($"GEN_{modelName}_{fieldName}").ToUpper();
             return seqName;
         }
 

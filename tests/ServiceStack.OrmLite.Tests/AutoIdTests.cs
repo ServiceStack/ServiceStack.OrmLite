@@ -14,12 +14,13 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
-    public class AutoIdTests : OrmLiteTestBase
+    [TestFixtureSource(typeof(ProvidersFixtureData), ProvidersFixtureData.SupportedAll)]
+    public class AutoIdTests : OrmLiteProvidersTestBase
     {
-        //PostgreSQL / psql on db run: CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-//        public AutoIdTests() : base(Dialect.SqlServer) {}
+        public AutoIdTests(Dialect dialect) : base(dialect)
+        {
+        }
         
-
         [Test]
         public void Does_populate_and_return_new_guid_on_insert()
         {

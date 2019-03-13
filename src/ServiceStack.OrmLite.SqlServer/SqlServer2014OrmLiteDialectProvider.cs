@@ -125,6 +125,12 @@ namespace ServiceStack.OrmLite.SqlServer
                         sbColumns.Append(", \n  ");
 
                     sbColumns.Append(columnDefinition);
+                    
+                    var sqlConstraint = GetCheckConstraint(modelDef, fieldDef);
+                    if (sqlConstraint != null)
+                    {
+                        sbConstraints.Append(",\n" + sqlConstraint);
+                    }
 
                     if (fieldDef.ForeignKey == null || OrmLiteConfig.SkipForeignKeys)
                         continue;

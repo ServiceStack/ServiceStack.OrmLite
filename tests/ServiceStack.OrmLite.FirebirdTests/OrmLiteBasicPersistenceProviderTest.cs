@@ -23,13 +23,13 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			{
 				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
 
-				var basicProvider = new OrmLitePersistenceProvider(db);
+				//var basicProvider = new OrmLitePersistenceProvider(db);
 
 				var row = ModelWithFieldsOfDifferentTypes.Create(1);
 
 				db.Insert(row);
 
-				var providerRow = basicProvider.GetById<ModelWithFieldsOfDifferentTypes>(1);
+				var providerRow = db.SingleById<ModelWithFieldsOfDifferentTypes>(1);
 
 				ModelWithFieldsOfDifferentTypes.AssertIsEqual(providerRow, row);
 			}

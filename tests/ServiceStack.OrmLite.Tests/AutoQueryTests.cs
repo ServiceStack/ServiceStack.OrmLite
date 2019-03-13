@@ -22,7 +22,6 @@ namespace ServiceStack.OrmLite.Tests
 
     public class RockstarAlbum
     {
-        //[AutoIncrement]
         public int Id { get; set; }
         public int RockstarId { get; set; }
         public string Name { get; set; }
@@ -74,8 +73,14 @@ namespace ServiceStack.OrmLite.Tests
     }
 
 
-    public class AutoQueryTests : OrmLiteTestBase
+    [TestFixtureSource(typeof(ProvidersFixtureData), ProvidersFixtureData.SupportedAll)]
+    [NonParallelizable]
+    public class AutoQueryTests : OrmLiteProvidersTestBase
     {
+        public AutoQueryTests(Dialect dialect) : base(dialect)
+        {
+        }
+        
         public static Rockstar[] SeedRockstars = new[] {
             new Rockstar { Id = 1, FirstName = "Jimi", LastName = "Hendrix", LivingStatus = LivingStatus.Dead, Age = 27, DateOfBirth = new DateTime(1942, 11, 27), DateDied = new DateTime(1970, 09, 18), },
             new Rockstar { Id = 2, FirstName = "Jim", LastName = "Morrison", Age = 27, LivingStatus = LivingStatus.Dead, DateOfBirth = new DateTime(1943, 12, 08), DateDied = new DateTime(1971, 07, 03),  },
@@ -126,11 +131,13 @@ namespace ServiceStack.OrmLite.Tests
                     .Where("Id < {0}", 3)
                     .Or("Age = {0}", 27);
                 results = db.Select(q);
+                db.GetLastSql().Print();
                 Assert.That(results.Count, Is.EqualTo(3));
                 Assert.That(q.Params.Count, Is.EqualTo(2));
 
-                q = db.From<Rockstar>().Where("FirstName".SqlColumn() + " = {0}", "Kurt");
+                q = db.From<Rockstar>().Where("FirstName".SqlColumn(DialectProvider) + " = {0}", "Kurt");
                 results = db.Select(q);
+                db.GetLastSql().Print();
                 Assert.That(results.Count, Is.EqualTo(1));
                 Assert.That(q.Params.Count, Is.EqualTo(1));
                 Assert.That(results[0].LastName, Is.EqualTo("Cobain"));
@@ -146,7 +153,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.InsertAll(SeedRockstars);
 
                 var q = db.From<Rockstar>()
-                    .Where("FirstName".SqlColumn() + " LIKE {0}", "Jim%");
+                    .Where("FirstName".SqlColumn(DialectProvider) + " LIKE {0}", "Jim%");
 
                 var results = db.Select(q);
                 db.GetLastSql().Print();
@@ -164,7 +171,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.InsertAll(SeedRockstars);
 
                 var q = db.From<Rockstar>()
-                    .Where("FirstName".SqlColumn() + " IN ({0})", new SqlInValues(new[] { "Jimi", "Kurt", "Jim" }));
+                    .Where("FirstName".SqlColumn(DialectProvider) + " IN ({0})", new SqlInValues(new[] { "Jimi", "Kurt", "Jim" }, DialectProvider));
 
                 var results = db.Select(q);
                 db.GetLastSql().Print();
@@ -208,7 +215,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.InsertAll(SeedDepartments);
                 db.InsertAll(SeedEmployees);
 
-                var q = db.From<DeptEmployee>().Select(new[] { "FirstName" }).Take(2);
+                var q = db.From<DeptEmployee>().Select(new[] {  "FirstName".SqlColumn(DialectProvider) }).Take(2);
 
                 var resultsMap = db.Select<Dictionary<string, object>>(q);
                 Assert.That(resultsMap.Count, Is.EqualTo(2));
@@ -391,9 +398,9 @@ namespace ServiceStack.OrmLite.Tests
                 sb.Length = 0;
                 foreach (var result in results)
                 {
-                    if (Dialect == Dialect.PostgreSql)
+                    if (Dialect.HasFlag(Dialect.PostgreSql))
                         sb.AppendLine(result.Name);
-                    else if (Dialect == Dialect.Firebird)
+                    else if (Dialect.HasFlag(Dialect.Firebird))
                         sb.AppendLine(result.NAME);
                     else
                         sb.AppendLine(result.Name);
@@ -471,7 +478,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<Rockstar>();
                 db.InsertAll(SeedRockstars);
-                //Add another Michael Rockstar
+                // Add another Michael Rockstar
                 db.Insert(new Rockstar { Id = 8, FirstName = "Michael", LastName = "Bolton", Age = 64, LivingStatus = LivingStatus.Alive, DateOfBirth = new DateTime(1953,02,26) });
 
                 var q = db.From<Rockstar>();

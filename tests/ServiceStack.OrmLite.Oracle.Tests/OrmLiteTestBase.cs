@@ -7,38 +7,49 @@ using ServiceStack.OrmLite.Oracle;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class Config
-    {
-        public static IDbConnection OpenDbConnection()
-        {
-            var testBase = new OrmLiteTestBase
-            {
-                DbFactory = new OrmLiteConnectionFactory(
-                    ConfigurationManager.ConnectionStrings["testDb"].ConnectionString,
-                    OracleDialect.Provider)
-            };
-            return testBase.OpenDbConnection();
-        }
-    }
+	public class Config
+	{
+		public static IDbConnection OpenDbConnection()
+		{
+			var testBase = new OrmLiteTestBase
+			{
+				DbFactory = new OrmLiteConnectionFactory(
+					GetFileConnectionString(),
+					OracleDialect.Provider)
+			};
+			return testBase.OpenDbConnection();
+		}
 
-    public class OrmLiteTestBase
+		public static string GetFileConnectionString()
+		{
+#if NETCORE
+			return ConfigurationManager.OpenExeConfiguration(System.Reflection.Assembly.GetExecutingAssembly().Location).ConnectionStrings.ConnectionStrings["testDb"].ConnectionString;
+#else
+			return ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
+#endif
+		}
+	}
+
+	public class OrmLiteTestBase
 	{		
 		protected virtual string ConnectionString { get; set; }
 
-		protected virtual string GetFileConnectionString()
+
+
+		protected void CreateNewDatabase()
 		{
-            return ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
-        }
+			ConnectionString = Config.GetFileConnectionString();
+		}
 
 		[OneTimeSetUp]
 		public void TestFixtureSetUp()
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();
 
-            OrmLiteConfig.DialectProvider = OracleDialect.Provider;
-            OrmLiteConfig.ClearCache();
-			ConnectionString = GetFileConnectionString();
-            DbFactory = new OrmLiteConnectionFactory(ConnectionString, OracleDialect.Provider);
+			OrmLiteConfig.DialectProvider = OracleDialect.Provider;
+			OrmLiteConfig.ClearCache();
+			ConnectionString = Config.GetFileConnectionString();
+			DbFactory = new OrmLiteConnectionFactory(ConnectionString, OracleDialect.Provider);
 		}
 
 		public void Log(string text)
@@ -46,17 +57,17 @@ namespace ServiceStack.OrmLite.Tests
 			Console.WriteLine(text);
 		}
 
-        public Dialect Dialect = Dialect.Oracle;
-        public OrmLiteConnectionFactory DbFactory;
+		//public Dialect Dialect = Dialect.Oracle;
+		public OrmLiteConnectionFactory DbFactory;
 
-        public virtual IDbConnection OpenDbConnection()
-        {
-            return DbFactory.OpenDbConnection();
-        }
+		public virtual IDbConnection OpenDbConnection()
+		{
+			return DbFactory.OpenDbConnection();
+		}
 
-        protected void SuppressIfOracle(string reason, params object[] args)
-        {
-            Assert.Ignore(reason, args);
-        }
-    }
+		protected void SuppressIfOracle(string reason, params object[] args)
+		{
+			Assert.Ignore(reason, args);
+		}
+	}
 }
