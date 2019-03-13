@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Legacy;
 using ServiceStack.OrmLite.Tests.Shared;
-
+#pragma warning disable 618  
 namespace ServiceStack.OrmLite.Tests.Async.Legacy
 {
     public class ApiMySqlLegacyTestsAsync
@@ -101,4 +101,5 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
         }
     }
 }
+#pragma warning restore 618
 #endif
