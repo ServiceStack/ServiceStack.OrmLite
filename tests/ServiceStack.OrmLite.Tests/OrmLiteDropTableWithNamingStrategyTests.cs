@@ -3,13 +3,17 @@ using ServiceStack.Common.Tests.Models;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class OrmLiteDropTableWithNamingStrategyTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteDropTableWithNamingStrategyTests : OrmLiteProvidersTestBase
     {
-        [Test]
-        public void Can_drop_TableWithNamigStrategy_table_prefix()
+        public OrmLiteDropTableWithNamingStrategyTests(Dialect dialect) : base(dialect)
         {
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+        }
+
+        [Test]
+        public void Can_drop_TableWithNamingStrategy_table_prefix()
+        {
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -23,7 +27,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_drop_TableWithNamigStrategy_table_lowered()
         {
-            using (new TemporaryNamingStrategy(new LowercaseNamingStrategy()))
+            using (new TemporaryNamingStrategy(DialectProvider, new LowercaseNamingStrategy()))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -38,7 +42,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_drop_TableWithNamigStrategy_table_nameUnderscoreCompound()
         {
-            using (new TemporaryNamingStrategy(new UnderscoreSeparatedCompoundNamingStrategy()))
+            using (new TemporaryNamingStrategy(DialectProvider, new UnderscoreSeparatedCompoundNamingStrategy()))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);

@@ -4,9 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
-using ServiceStack.OrmLite.Tests.Expression;
 using ServiceStack.OrmLite.Tests.Shared;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -14,7 +12,7 @@ namespace ServiceStack.OrmLite.Tests
     {
         public int ReplayTimes { get; set; }
 
-        public override T Exec<T>(IDbConnection dbConn, System.Func<IDbCommand, T> filter)
+        public override T Exec<T>(IDbConnection dbConn, Func<IDbCommand, T> filter)
         {
             var dbCmd = CreateCommand(dbConn);
             try
@@ -35,7 +33,7 @@ namespace ServiceStack.OrmLite.Tests
 
     public class MockStoredProcExecFilter : OrmLiteExecFilter
     {
-        public override T Exec<T>(IDbConnection dbConn, System.Func<IDbCommand, T> filter)
+        public override T Exec<T>(IDbConnection dbConn, Func<IDbCommand, T> filter)
         {
             try
             {
@@ -70,15 +68,17 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
-    [TestFixture]
-    public class OrmLiteExecFilterTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteExecFilterTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteExecFilterTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
+        [IgnoreProvider(Dialect.AnyOracle, "Can't run this with Oracle until use trigger for AutoIncrement primary key insertion")]
         public void Can_add_replay_logic()
         {
-            SuppressIfOracle("Can't run this with Oracle until use trigger for AutoIncrement primary key insertion");
-
             var holdExecFilter = OrmLiteConfig.DialectProvider.ExecFilter;
             OrmLiteConfig.DialectProvider.ExecFilter = new ReplayOrmLiteExecFilter { ReplayTimes = 3 };
 
@@ -112,7 +112,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public async System.Threading.Tasks.Task Can_mock_store_procedure_Async()
+        public async Task Can_mock_store_procedure_Async()
         {
             var holdExecFilter = OrmLiteConfig.DialectProvider.ExecFilter;
             OrmLiteConfig.DialectProvider.ExecFilter = new MockStoredProcExecFilter();

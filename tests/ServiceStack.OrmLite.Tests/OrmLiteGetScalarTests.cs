@@ -6,9 +6,12 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrmLiteGetScalarTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteGetScalarTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteGetScalarTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Test]
         public void Can_get_scalar_value()
