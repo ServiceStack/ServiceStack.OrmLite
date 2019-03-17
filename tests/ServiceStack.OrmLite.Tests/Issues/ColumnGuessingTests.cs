@@ -3,9 +3,13 @@ using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    [TestFixture]
-    public class ColumnGuessingTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ColumnGuessingTests : OrmLiteProvidersTestBase
     {
+        public ColumnGuessingTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private class Person
         {
             public string Name { get; set; }

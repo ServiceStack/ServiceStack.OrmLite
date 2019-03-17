@@ -14,9 +14,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public PareInfo Pare { get; set; }
     }
 
-    public class LoadReferencesFKandSelfRefIssue
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class LoadReferencesFKandSelfRefIssue : OrmLiteProvidersTestBase
     {
+        public LoadReferencesFKandSelfRefIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Does_not_populate_both_FK_and_self_reference()
         {

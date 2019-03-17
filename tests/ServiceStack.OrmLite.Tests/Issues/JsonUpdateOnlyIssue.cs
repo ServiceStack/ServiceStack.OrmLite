@@ -1,19 +1,19 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.PostgreSQL;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    [TestFixture]
-    public class JsonUpdateOnlyIssue : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(TestDialect.PostgreSql)]
+    public class JsonUpdateOnlyIssue : OrmLiteProvidersTestBase
     {
+        public JsonUpdateOnlyIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_Update_Answer_CustomField_json()
         {
-            if (Dialect != Dialect.PostgreSql) return;
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Question>();
@@ -51,7 +51,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public int Id { get; set; }
         public string Text { get; set; }
 
-        //[CustomField("json")]
         [PgSqlJson]
         public List<Answer> Answers { get; set; }
     }

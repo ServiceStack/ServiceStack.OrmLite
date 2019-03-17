@@ -3,8 +3,13 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class SqlExpressionIssues : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SqlExpressionIssues : OrmLiteProvidersTestBase
     {
+        public SqlExpressionIssues(Dialect dialect) : base(dialect)
+        {
+        }
+
         public class MetadataEntity
         {
             [AutoIncrement]

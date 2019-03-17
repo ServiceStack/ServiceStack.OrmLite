@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -35,8 +34,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public string SomeCProperty { get; set; }
     }
 
-    public class BelongsToIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class BelongsToIssue : OrmLiteProvidersTestBase
     {
+        public BelongsToIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Does_use_BelongsTo_to_specify_Attribute()
         {

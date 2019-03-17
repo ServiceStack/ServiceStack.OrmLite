@@ -2,8 +2,13 @@
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class SaveAllIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SaveAllIssue : OrmLiteProvidersTestBase
     {
+        public SaveAllIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         class UserRole
         {
             public string Name { get; set; }

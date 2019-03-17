@@ -35,8 +35,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public string RegionName { get; set; }
     }
 
-    public class LoadReferencesCaseSensitiveTest : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(TestDialect.SqlServer)]
+    public class LoadReferencesCaseSensitiveTest : OrmLiteProvidersTestBase
     {
+        public LoadReferencesCaseSensitiveTest(Dialect dialect) : base(dialect)
+        {
+        }
+
         const string regionCode = "West";
         const string regionName = "Western Region";
 
@@ -47,7 +52,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void LoadReference_with_Case_Variance()
         {
-            if (Dialect != Dialect.SqlServer) return;
             OrmLiteConfig.IsCaseInsensitive = true;
 
             using (var db = OpenDbConnection())
@@ -80,19 +84,19 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     Assert.That(
                         dbCustomer.RegionId,
                         Is.Not.Null,
-                        string.Format("Region code missing for {0}", customer.Name));
+                        $"Region code missing for {customer.Name}");
                     Assert.That(
                         dbCustomer.RegionId.ToLower() == regionCode.ToLower(),
-                        string.Format("Region code incorrect for {0}", customer.Name));
+                        $"Region code incorrect for {customer.Name}");
 
                     // The following assertion will fail because LoadSelect considers CustomWithRegion.RegionCode of "WEST" != to Region.RegionCode of "West".
                     Assert.That(
                         dbCustomer.RegionDetail,
                         Is.Not.Null,
-                        string.Format("Region detail record missing for {0}", customer.Name));
+                        $"Region detail record missing for {customer.Name}");
                     Assert.That(
                         dbCustomer.RegionDetail.RegionName == regionName,
-                        string.Format("Region name incorrect for {0}", customer.Name));
+                        $"Region name incorrect for {customer.Name}");
                 }
             }
 

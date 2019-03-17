@@ -4,9 +4,13 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    [Explicit]
-    public class MultiThreadedUpdateTransactionIssue : OrmLiteTestBase
+    [TestFixtureOrmLite, Explicit]
+    public class MultiThreadedUpdateTransactionIssue : OrmLiteProvidersTestBase
     {
+        public MultiThreadedUpdateTransactionIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         public class ModelWithIdAndName
         {
             [AutoIncrement]

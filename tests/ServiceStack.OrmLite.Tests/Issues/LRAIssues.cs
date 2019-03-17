@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Net;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
@@ -11,8 +10,13 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class AdhocJoinIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class AdhocJoinIssue : OrmLiteProvidersTestBase
     {
+        public AdhocJoinIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_run_LRA_Query()
         {

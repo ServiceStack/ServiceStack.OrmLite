@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
@@ -32,10 +31,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public string Name2 { get; set; }
     }
 
-    [TestFixture]
-    public class SelectDistinctTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SelectDistinctTests : OrmLiteProvidersTestBase
     {
+        public SelectDistinctTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_Select_Multiple_Distinct_Columns()
         {

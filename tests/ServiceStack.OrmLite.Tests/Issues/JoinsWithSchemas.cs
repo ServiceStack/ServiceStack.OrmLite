@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -25,8 +24,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public int Entity2Id { get; set; }
     }
 
-    public class JoinsWithSchemas : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class JoinsWithSchemas : OrmLiteProvidersTestBase
     {
+        public JoinsWithSchemas(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_detect_if_table_with_schema_exists()
         {

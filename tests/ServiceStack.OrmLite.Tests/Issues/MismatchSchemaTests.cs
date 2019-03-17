@@ -28,10 +28,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         }
     }
 
-    [TestFixture]
-    public class MismatchSchemaTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class MismatchSchemaTests : OrmLiteProvidersTestBase
     {
+        public MismatchSchemaTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Does_allow_reading_from_table_with_mismatched_nullable_int_type()
         {

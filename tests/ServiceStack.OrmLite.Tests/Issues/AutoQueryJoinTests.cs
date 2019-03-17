@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -41,9 +40,14 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Reference]
         public Product Product { get; set; }
     }
-
-    public class AutoQueryJoinTests : OrmLiteTestBase
+    
+    [TestFixtureOrmLite]
+    public class AutoQueryJoinTests : OrmLiteProvidersTestBase
     {
+        public AutoQueryJoinTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_select_references_with_join()
         {

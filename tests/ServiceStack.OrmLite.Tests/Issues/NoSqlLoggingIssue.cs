@@ -4,8 +4,13 @@ using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class NoSqlLoggingIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class NoSqlLoggingIssue : OrmLiteProvidersTestBase
     {
+        public NoSqlLoggingIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Does_log_SQL_Insert_for_Saves()
         {

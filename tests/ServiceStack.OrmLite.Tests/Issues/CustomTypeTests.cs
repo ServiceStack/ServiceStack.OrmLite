@@ -1,13 +1,16 @@
 ﻿using System;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    [TestFixture]
-    public class CustomTypeTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class CustomTypeTests : OrmLiteProvidersTestBase
     {
+        public CustomTypeTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         public class PocoWithCustomTypes
         {
             [AutoIncrement]

@@ -61,8 +61,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
     public class DataTransferObject { }
 
-    public class RowVersionJoinIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class RowVersionJoinIssue : OrmLiteProvidersTestBase
     {
+        public RowVersionJoinIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_join_on_table_with_RowVersion()
         {

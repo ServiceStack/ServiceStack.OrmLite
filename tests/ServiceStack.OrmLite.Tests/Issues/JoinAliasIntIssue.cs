@@ -1,10 +1,14 @@
 ﻿using NUnit.Framework;
-using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class JoinAliasIntIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class JoinAliasIntIssue : OrmLiteProvidersTestBase
     {
+        public JoinAliasIntIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         class Team
         {
             public int Id { get; set; }

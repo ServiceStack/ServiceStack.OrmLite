@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -22,10 +21,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public UserAuth Manager { get; set; }
     }
 
-    [TestFixture]
-    public class LoadReferencesNullReferenceIssue
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class LoadReferencesNullReferenceIssue : OrmLiteProvidersTestBase
     {
+        public LoadReferencesNullReferenceIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Does_not_load_references_when_RefId_is_null()
         {

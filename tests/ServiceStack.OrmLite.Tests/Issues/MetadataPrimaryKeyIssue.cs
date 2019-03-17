@@ -4,16 +4,21 @@ using ServiceStack.OrmLite.Tests.Expression;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class MetadataPrimaryKeyIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class MetadataPrimaryKeyIssue : OrmLiteProvidersTestBase
     {
+        public MetadataPrimaryKeyIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Should_generate_select_statement_multi_threaded()
         {
             typeof(LetterFrequency).GetModelMetadata();
 
-            Task<string> task1 = System.Threading.Tasks.Task.Run(() => SelectStatement());
-            Task<string> task2 = System.Threading.Tasks.Task.Run(() => SelectStatement());
-            System.Threading.Tasks.Task.WaitAll(task1, task2);
+            Task<string> task1 = Task.Run(() => SelectStatement());
+            Task<string> task2 = Task.Run(() => SelectStatement());
+            Task.WaitAll(task1, task2);
 
             Assert.AreEqual(task1.Result, task2.Result);
         }

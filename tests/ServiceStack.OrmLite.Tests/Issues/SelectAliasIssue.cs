@@ -15,9 +15,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public int AddressId { get; set; }
     }
 
-    [TestFixture]
-    public class SelectAliasIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SelectAliasIssue : OrmLiteProvidersTestBase
     {
+        public SelectAliasIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Does_populate_table_with_Aliases_having_same_name_as_alternative_field()
         {
