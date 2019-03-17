@@ -13,13 +13,18 @@ using System.Threading.Tasks;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class LoadReferencesJoinTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    [NonParallelizable]
+    public class LoadReferencesJoinTests : OrmLiteProvidersTestBase
     {
+        public LoadReferencesJoinTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private IDbConnection db;
 
         [OneTimeSetUp]
-        public new void TestFixtureSetUp()
+        public void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
             ResetTables();
@@ -697,9 +702,6 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_load_select_with_join_and_same_name_columns()
         {
-            //Doesn't have Schema dbo.
-            if (Dialect == Dialect.PostgreSql) return;
-
             // Drop tables in order that FK allows
             db.DropTable<ProjectTask>();
             db.DropTable<Project>();
@@ -724,7 +726,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_load_references_with_OrderBy_and_Paging()
         {
             //This version of MariaDB doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
-            if (Dialect == Dialect.MySql)
+            if (Dialect == Dialect.AnyMySql)
                 return;
             if ((Dialect & Dialect.AnySqlServer) == Dialect) //Only one expression can be specified in the select list when the subquery is not introduced with EXISTS.
                 return;
@@ -763,10 +765,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreProvider(Tests.Dialect.AnyPostgreSql, "Dapper doesn't know about pgsql naming conventions")]
         public void Can_populate_multiple_POCOs_using_Dappers_QueryMultiple()
         {
-            if (Dialect == Dialect.PostgreSql) return; //Dapper doesn't know about pgsql naming conventions
-
             ResetTables();
             AddCustomerWithOrders();
 
@@ -830,7 +831,7 @@ Customer Address:
 	Country: Australia
 }".NormalizeNewLines()));
         }
-        
+
         [Test]
         public void Can_populate_multiple_POCOs_using_SelectMulti2_Distinct()
         {

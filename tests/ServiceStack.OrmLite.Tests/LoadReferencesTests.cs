@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests.UseCase;
@@ -182,9 +181,13 @@ namespace ServiceStack.OrmLite.Tests
     }
 
 
-    public class LoadReferencesTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class LoadReferencesTests : OrmLiteProvidersTestBase
     {
+        public LoadReferencesTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private IDbConnection db;
 
         [OneTimeSetUp]

@@ -10,9 +10,13 @@ using ServiceStack.Text;
 namespace ServiceStack.OrmLite.Tests
 {
     [Ignore("Run manually")]
-    [TestFixture]
+    [TestFixtureOrmLite]
     public class FreeLicenseUsageTests : LicenseUsageTests
     {
+        public FreeLicenseUsageTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [SetUp]
         public void SetUp()
         {
@@ -50,9 +54,13 @@ namespace ServiceStack.OrmLite.Tests
     }
 
     [Ignore("Run manually")]
-    [TestFixture]
+    [TestFixtureOrmLite]
     public class RegisteredLicenseUsageTests : LicenseUsageTests
     {
+        public RegisteredLicenseUsageTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Allows_creation_of_11_tables()
         {
@@ -80,9 +88,12 @@ namespace ServiceStack.OrmLite.Tests
     class T10 { public int Id { get; set; } }
     class T11 { public int Id { get; set; } }
 
-    public abstract class LicenseUsageTests
-        : OrmLiteTestBase
+    public abstract class LicenseUsageTests : OrmLiteProvidersTestBase
     {
+        protected LicenseUsageTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         protected IDbConnection db;
 
         [OneTimeSetUp]
