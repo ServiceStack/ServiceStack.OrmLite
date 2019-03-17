@@ -4,9 +4,13 @@ using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class DbExtensionTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class DbExtensionTests : OrmLiteProvidersTestBase
     {
+        public DbExtensionTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_get_TableName()
         {

@@ -2,35 +2,17 @@
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
-using ServiceStack.OrmLite.SqlServer;
-using ServiceStack.OrmLite.SqlServer.Converters;
 using ServiceStack.OrmLite.Tests.Models;
 using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class DefaultValueTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class DefaultValueTests : OrmLiteProvidersTestBase
     {
-        [OneTimeSetUp]
-        public void SetUp()
+        public DefaultValueTests(Dialect dialect) : base(dialect)
         {
-            if (OrmLiteConfig.DialectProvider == SqlServerOrmLiteDialectProvider.Instance
-                || OrmLiteConfig.DialectProvider == SqlServer2012OrmLiteDialectProvider.Instance
-                || OrmLiteConfig.DialectProvider == SqlServer2014OrmLiteDialectProvider.Instance
-                || OrmLiteConfig.DialectProvider == SqlServer2016OrmLiteDialectProvider.Instance)
-                SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTime2Converter());
-        }
-
-        [OneTimeTearDown]
-        public void TearDown()
-        {
-            if (OrmLiteConfig.DialectProvider == SqlServerOrmLiteDialectProvider.Instance
-                || OrmLiteConfig.DialectProvider == SqlServer2012OrmLiteDialectProvider.Instance
-                || OrmLiteConfig.DialectProvider == SqlServer2014OrmLiteDialectProvider.Instance
-                || OrmLiteConfig.DialectProvider == SqlServer2016OrmLiteDialectProvider.Instance)
-                SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTimeConverter());
         }
 
         [Test]
@@ -40,7 +22,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 var row = CreateAndInitialize(db);
 
-                var expectedDate = Dialect != Dialect.MySql && Dialect != Dialect.Firebird
+                var expectedDate = Dialect.HasFlag(Dialect.AnyMySql) && !Dialect.HasFlag(Dialect.Firebird)
                     ? DateTime.UtcNow.Date
                     : DateTime.Now.Date; //MySql CURRENT_TIMESTAMP == LOCAL_TIME
 
@@ -128,7 +110,7 @@ namespace ServiceStack.OrmLite.Tests
             var row = db.SingleById<DefaultValues>(id);
             row.PrintDump();
 
-            if (Dialect != Dialect.MySql) //not returning UTC
+            if (!Dialect.HasFlag(Dialect.AnyMySql)) //not returning UTC
                 Assert.That(row.UpdatedDateUtc, Is.GreaterThan(DateTime.UtcNow - TimeSpan.FromMinutes(5)));
         }
 
@@ -289,7 +271,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public void Can_filter_updateAdd_sqlexpression_to_insert_date()
+        public void Can_filter_updateAdd_SqlExpression_to_insert_date()
         {
             using (var db = OpenDbConnection())
             {

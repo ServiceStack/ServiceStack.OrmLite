@@ -3,22 +3,26 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class DateTimeOffsetTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class DateTimeOffsetTests : OrmLiteProvidersTestBase
     {
+        public DateTimeOffsetTests(Dialect dialect) : base(dialect)
+        {
+        }
+        
         private IDbConnection db;
 
         [OneTimeSetUp]
-        public new void TestFixtureSetUp()
+        public void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
         }
 
         [OneTimeTearDown]
-        public new void TestFixtureTearDown()
+        public void TestFixtureTearDown()
         {
             db.Dispose();
         }
