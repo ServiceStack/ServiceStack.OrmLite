@@ -4,7 +4,6 @@ namespace ServiceStack.OrmLite.Tests
 {
     [TestFixture]
     public class OrmLiteUtilsTests
-        : OrmLiteTestBase
     {
         [Test]
         public void ParseTokens()

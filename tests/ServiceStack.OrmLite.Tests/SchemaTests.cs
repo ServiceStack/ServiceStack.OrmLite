@@ -1,15 +1,16 @@
 ﻿using System;
-using System.Collections.Generic;
 using NUnit.Framework;
-using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class SchemaTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SchemaTests : OrmLiteProvidersTestBase
     {
+        public SchemaTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         public class Schematest
         {
             public int Id { get; set; }
