@@ -43,7 +43,7 @@ public class DbFeatures1 : OrmLiteProvidersTestBase
 ```
 
 By default, the tests will run against in-memory instances of Sqlite.
-This is set in `Config.DefaultDialects` and can be overridden either by changing
+This is set in `TestConfig.DefaultDialects` and can be overridden either by changing
 the value assigned or by setting an Environment Variable of the same name.
 
 The accepted values come from the enum `TestDialect` and correspond to properties 
