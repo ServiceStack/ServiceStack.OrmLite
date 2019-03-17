@@ -4,7 +4,6 @@ using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
 using ServiceStack.Model;
 using ServiceStack.Text;
 

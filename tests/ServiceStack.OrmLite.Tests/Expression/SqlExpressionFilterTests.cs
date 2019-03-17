@@ -1,7 +1,5 @@
 ﻿using NUnit.Framework;
-using ServiceStack.Logging;
 using ServiceStack.OrmLite.Tests.Shared;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {

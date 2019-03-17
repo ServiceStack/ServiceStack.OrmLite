@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Data;
-using System.IO;
 using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {

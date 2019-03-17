@@ -4,7 +4,6 @@ using System.Data;
 using System.Linq.Expressions;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {

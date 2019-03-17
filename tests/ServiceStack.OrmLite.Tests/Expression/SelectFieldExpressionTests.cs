@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Logging;
 using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 

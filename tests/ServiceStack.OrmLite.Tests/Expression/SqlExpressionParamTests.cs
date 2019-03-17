@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression

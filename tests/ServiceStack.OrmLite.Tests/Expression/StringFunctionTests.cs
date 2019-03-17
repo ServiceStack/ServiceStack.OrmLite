@@ -1,5 +1,4 @@
 ﻿using NUnit.Framework;
-using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {

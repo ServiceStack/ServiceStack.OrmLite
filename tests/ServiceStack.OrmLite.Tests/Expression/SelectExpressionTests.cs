@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
