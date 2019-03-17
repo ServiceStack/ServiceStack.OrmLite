@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 

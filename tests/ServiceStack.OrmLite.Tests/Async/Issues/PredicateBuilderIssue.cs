@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using NUnit.Framework;
-using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Async.Issues
 {

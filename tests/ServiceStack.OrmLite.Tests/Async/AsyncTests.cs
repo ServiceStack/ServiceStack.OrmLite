@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
 using ServiceStack.Text;
 
 using ServiceStack.OrmLite.Tests.Shared;

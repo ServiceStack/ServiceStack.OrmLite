@@ -1,5 +1,4 @@
-﻿using System.Data;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Legacy;
 using ServiceStack.OrmLite.Tests.Shared;

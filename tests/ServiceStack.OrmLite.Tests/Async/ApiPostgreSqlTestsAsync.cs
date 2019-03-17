@@ -1,8 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using ServiceStack.Logging;
 using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Async

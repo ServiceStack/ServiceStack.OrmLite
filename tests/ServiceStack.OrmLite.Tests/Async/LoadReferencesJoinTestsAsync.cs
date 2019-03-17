@@ -6,7 +6,6 @@ using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 using System.Text.RegularExpressions;
-using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
