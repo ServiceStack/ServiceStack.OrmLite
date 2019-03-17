@@ -116,28 +116,19 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         public decimal UnitPrice { get; set; }
     }
 
-    [TestFixture]
-    public class CustomerOrdersUseCase : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class CustomerOrdersUseCase : OrmLiteProvidersTestBase
     {
+        public CustomerOrdersUseCase(Dialect dialect) : base(dialect)
+        {
+        }
+
         //Stand-alone class, No other configs, nothing but POCOs.
         [Test]
         public void Run()
         {
-            LogManager.LogFactory = new ConsoleLogFactory();
-
-            //var dbFactory = new OrmLiteConnectionFactory(
-            //    @"Data Source=.\SQLEXPRESS;AttachDbFilename=|DataDirectory|\App_Data\Database1.mdf;Integrated Security=True;User Instance=True",
-            //    SqlServerDialect.Provider);
-
-            //Use in-memory Sqlite DB instead
-            //var dbFactory = new OrmLiteConnectionFactory(
-            //    ":memory:", false, SqliteDialect.Provider);
-            
-            //If you are trying to get this to build as a standalone example, use one of the dbFactory methods
-            //  above, instead of Config.OpenDbConnection in the using statement below.
-
             //Non-intrusive: All extension methods hang off System.Data.* interfaces
-            using (IDbConnection db = Config.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 //Re-Create all table schemas:
                 RecreateTables(db);
@@ -170,7 +161,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 Assert.That(customer.Id, Is.EqualTo(customerId));
 
                 //Direct access to System.Data.Transactions:
-                using (IDbTransaction trans = db.OpenTransaction(IsolationLevel.ReadCommitted))
+                using (var trans = db.OpenTransaction(IsolationLevel.ReadCommitted))
                 {
                     var order = new Order {
                         CustomerId = customer.Id,

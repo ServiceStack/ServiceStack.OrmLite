@@ -40,9 +40,13 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         public string AttributeValue { get; set; }
     }
 
-    [TestFixture]
-    public class FieldFromInterfaceImplementationUseCase : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class FieldFromInterfaceImplementationUseCase : OrmLiteProvidersTestBase
     {
+        public FieldFromInterfaceImplementationUseCase(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_select_on_generic_interface_implementation_properties_with_PrefixFieldWithTableName()
         {

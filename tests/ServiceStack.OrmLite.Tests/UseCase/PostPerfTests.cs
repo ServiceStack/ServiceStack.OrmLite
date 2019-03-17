@@ -28,13 +28,17 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
     }
 
-    [Explicit, NUnit.Framework.Ignore("Integration Test")]
-    public class PostPerfTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(TestDialect.SqlServer), Explicit, NUnit.Framework.Ignore("Integration Test")]
+    public class PostPerfTests : OrmLiteProvidersTestBase
     {
-        public PostPerfTests()
+        public PostPerfTests(Dialect dialect) : base(dialect)
         {
-            Dialect = Dialect.SqlServer2012;
         }
+        
+//        public PostPerfTests()
+//        {
+//            Dialect = Dialect.SqlServer2012;
+//        }
 
         private void EnsureDBSetup()
         {
@@ -140,18 +144,28 @@ end
         }
     }
 
-    [Explicit, NUnit.Framework.Ignore("Integration Test")]
-    public class AdventureWorksPerfTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(TestDialect.SqlServer), Explicit, NUnit.Framework.Ignore("Integration Test")]
+    public class AdventureWorksPerfTests : OrmLiteProvidersTestBase
     {
+        public AdventureWorksPerfTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private IDbConnection db;
 
-        public AdventureWorksPerfTests()
-        {
-            var dbFactory = new OrmLiteConnectionFactory(
-                "data source=localhost;initial catalog=AdventureWorks;integrated security=SSPI;persist security info=False;packet size=4096",
-                SqlServer2012Dialect.Provider);
+//        public AdventureWorksPerfTests()
+//        {
+//            var dbFactory = new OrmLiteConnectionFactory(
+//                "data source=localhost;initial catalog=AdventureWorks;integrated security=SSPI;persist security info=False;packet size=4096",
+//                SqlServer2012Dialect.Provider);
+//
+//            db = dbFactory.Open();
+//        }
 
-            db = dbFactory.Open();
+        [SetUp]
+        public void Setup()
+        {
+            db = OpenDbConnection();
         }
 
         [TearDown]

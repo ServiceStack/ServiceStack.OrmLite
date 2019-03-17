@@ -6,9 +6,13 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
 {
-    [TestFixture]
-    public class AliasedFieldUseCase : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class AliasedFieldUseCase : OrmLiteProvidersTestBase
     {
+        public AliasedFieldUseCase(Dialect dialect) : base(dialect)
+        {
+        }
+
         public class Foo
         {
             [Alias("SOME_COLUMN_NAME")]
@@ -36,7 +40,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         [Test]
         public void CanResolveAliasedFieldNameInAnonymousType()
         {
-            using (IDbConnection db = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<Foo>(true);
 
@@ -59,7 +63,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         [Test]
         public void CanResolveAliasedFieldNameInJoinedTable()
         {
-            using (IDbConnection db = OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Bar>();
                 db.DropAndCreateTable<User>();
