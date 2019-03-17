@@ -61,16 +61,6 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
         [Required]
         public int EstimatedHours { get; set; }
 
-        //[References(typeof(Employee))]
-        //public int? AssignedToId { get; set; }
-        //[Reference]
-        //public Employee AssignedTo { get; set; }
-
-        //[References(typeof(Employee))]
-        //public int? RequestedById { get; set; }
-        //[Reference]
-        //public Employee RequestedBy { get; set; }
-
         [References(typeof(ProjectTaskStatus))]
         public int? ProjectTaskStatusId { get; set; }
         [Reference]
@@ -94,9 +84,13 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
         public string Description { get; set; }
     }
     
-    [TestFixture]
-    public class LoadSelectAmbiguousColumnIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class LoadSelectAmbiguousColumnIssue : OrmLiteProvidersTestBase
     {
+        public LoadSelectAmbiguousColumnIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         public class DeptEmployee //Ref of External Table
         {
             [PrimaryKey]

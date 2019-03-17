@@ -6,12 +6,17 @@ using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 using System.Text.RegularExpressions;
+using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    public class LoadReferencesJoinTestsAsync
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class LoadReferencesJoinTestsAsync : OrmLiteProvidersTestBase
     {
+        public LoadReferencesJoinTestsAsync(Dialect dialect) : base(dialect)
+        {
+        }
+
         private IDbConnection db;
 
         [OneTimeSetUp]

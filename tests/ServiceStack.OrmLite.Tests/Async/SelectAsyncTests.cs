@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
 using ServiceStack.Model;
 
 namespace ServiceStack.OrmLite.Tests.Async
@@ -17,10 +18,13 @@ namespace ServiceStack.OrmLite.Tests.Async
         public string ContentType { get; set; }
     }
 
-    [TestFixture]
-    public class SelectAsyncTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SelectAsyncTests : OrmLiteProvidersTestBase
     {
+        public SelectAsyncTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public async Task Can_SELECT_SingleAsync()
         {

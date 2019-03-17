@@ -4,16 +4,20 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
 using ServiceStack.Text;
 
 using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    [TestFixture]
-    public class AsyncTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class AsyncTests : OrmLiteProvidersTestBase
     {
+        public AsyncTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public async Task Can_Insert_and_SelectAsync()
         {

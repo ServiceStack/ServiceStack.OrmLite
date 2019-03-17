@@ -2,14 +2,19 @@
 using System.Data;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using ServiceStack.Logging;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    public class SqlExpressionTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SqlExpressionTests : OrmLiteProvidersTestBase
     {
+        public SqlExpressionTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         public static void InitLetters(IDbConnection db)
         {
             db.DropAndCreateTable<LetterFrequency>();
@@ -78,16 +83,10 @@ namespace ServiceStack.OrmLite.Tests.Async
         }
 
         [Test]
+        [IgnoreProvider(Tests.Dialect.AnyMySql, "doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery")]
+        [IgnoreProvider(Tests.Dialect.AnySqlServer, "generates Windowing function \"... WHERE CustomerId IN (SELECT * FROM ...)\" when should generate \"... WHERE CustomerId IN (SELECT Id FROM ...)\"")]
         public void Can_select_limit_on_Table_with_References()
         {
-            if (Dialect == Dialect.MySql)
-                return; //= This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
-
-            if ((Dialect & Dialect.AnySqlServer) == Dialect)
-                return; // generates Windowing function "... WHERE CustomerId IN (SELECT * FROM ...)" 
-                        // when should generate "... WHERE CustomerId IN (SELECT Id FROM ...)" 
-                        // both on .NET and .NET Core
-
             using (var db = OpenDbConnection())
             {
                 CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table
@@ -127,16 +126,10 @@ namespace ServiceStack.OrmLite.Tests.Async
         }
 
         [Test]
+        [IgnoreProvider(Tests.Dialect.AnyMySql, "doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery")]
+        [IgnoreProvider(Tests.Dialect.AnySqlServer, "generates Windowing function \"... WHERE CustomerId IN (SELECT * FROM ...)\" when should generate \"... WHERE CustomerId IN (SELECT Id FROM ...)\"")]
         public async Task Can_select_limit_on_Table_with_References_Async()
         {
-            if (Dialect == Dialect.MySql)
-                return; //= This version of MySQL doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
-
-            if ((Dialect & Dialect.AnySqlServer) == Dialect)
-                return; // generates Windowing function "... WHERE CustomerId IN (SELECT * FROM ...)" 
-                        // when should generate "... WHERE CustomerId IN (SELECT Id FROM ...)" 
-                        // both on .NET and .NET Core
-
             using (var db = OpenDbConnection())
             {
                 CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table

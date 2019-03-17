@@ -5,14 +5,19 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    public class LoadReferencesTestsAsync
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class LoadReferencesTestsAsync : OrmLiteProvidersTestBase
     {
+        public LoadReferencesTestsAsync(Dialect dialect) : base(dialect)
+        {
+        }
+
         private IDbConnection db;
 
         [OneTimeSetUp]

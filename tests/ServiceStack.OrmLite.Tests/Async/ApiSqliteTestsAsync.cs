@@ -2,19 +2,24 @@
 using System.Data;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using ServiceStack.Logging;
 using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    public class ApiSqliteTestsAsync
-        : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(TestDialect.Sqlite)]
+    public class ApiSqliteTestsAsync : OrmLiteProvidersTestBase
     {
+        public ApiSqliteTestsAsync(Dialect dialect) : base(dialect)
+        {
+        }
+
         private IDbConnection db;
 
         [SetUp]
         public void SetUp()
         {
-            db = CreateSqliteMemoryDbFactory().OpenDbConnection();
+            db = OpenDbConnection();
             db.DropAndCreateTable<Person>();
             db.DropAndCreateTable<PersonWithAutoId>();
         }

@@ -45,7 +45,7 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
         public void TestFixtureSetUp()
         {
             OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
-            db = Config.SqlServerBuildDb.OpenDbConnection();
+            db = TestConfig.SqlServerBuildDb.OpenDbConnection();
         }
 
         [OneTimeTearDown]

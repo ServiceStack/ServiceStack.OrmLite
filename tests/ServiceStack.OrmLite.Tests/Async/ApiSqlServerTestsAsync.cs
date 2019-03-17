@@ -2,20 +2,24 @@
 using System.Data;
 using System.Threading.Tasks;
 using NUnit.Framework;
+using ServiceStack.Logging;
 using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    public class ApiSqlServerTestsAsync
-        : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(TestDialect.SqlServer)]
+    public class ApiSqlServerTestsAsync : OrmLiteProvidersTestBase
     {
+        public ApiSqlServerTestsAsync(Dialect dialect) : base(dialect)
+        {
+        }
+
         private IDbConnection db;
 
         [SetUp]
         public void SetUp()
         {
-            SuppressIfOracle("SQL Server tests");
-            db = CreateSqlServerDbFactory().OpenDbConnection();
+            db = OpenDbConnection();
             db.DropAndCreateTable<Person>();
             db.DropAndCreateTable<PersonWithAutoId>();
         }
@@ -41,10 +45,27 @@ namespace ServiceStack.OrmLite.Tests.Async
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" > @0)"));
 
             await db.SingleAsync<Person>(x => x.Age == 42);
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0)"));
+            
+            if (Dialect.HasFlag(Dialect.SqlServer2012) | Dialect.HasFlag(Dialect.SqlServer2014) |
+                Dialect.HasFlag(Dialect.SqlServer2016) | Dialect.HasFlag(Dialect.SqlServer2017))
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0) ORDER BY 1 OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY"));
+            }
+            else
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0)"));
+            }
 
             await db.SingleAsync(db.From<Person>().Where(x => x.Age == 42));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0)"));
+            if (Dialect.HasFlag(Dialect.SqlServer2012) | Dialect.HasFlag(Dialect.SqlServer2014) |
+                Dialect.HasFlag(Dialect.SqlServer2016) | Dialect.HasFlag(Dialect.SqlServer2017))
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0) ORDER BY 1 OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY"));
+            }
+            else
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0)"));
+            }
 
             await db.ScalarAsync<Person, int>(x => Sql.Max(x.Age));
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Max(\"Age\") \nFROM \"Person\""));
@@ -167,10 +188,26 @@ namespace ServiceStack.OrmLite.Tests.Async
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Id, LastName FROM Person WHERE Age < @age"));
 
             await db.ExistsAsync<Person>(x => x.Age < 50);
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
+            if (Dialect.HasFlag(Dialect.SqlServer2012) | Dialect.HasFlag(Dialect.SqlServer2014) |
+                Dialect.HasFlag(Dialect.SqlServer2016) | Dialect.HasFlag(Dialect.SqlServer2017))
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0) ORDER BY 1 OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY"));
+            }
+            else
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
+            }
 
             await db.ExistsAsync(db.From<Person>().Where(x => x.Age < 50));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
+            if (Dialect.HasFlag(Dialect.SqlServer2012) | Dialect.HasFlag(Dialect.SqlServer2014) |
+                Dialect.HasFlag(Dialect.SqlServer2016) | Dialect.HasFlag(Dialect.SqlServer2017))
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0) ORDER BY 1 OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY"));
+            }
+            else
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
+            }
 
             await db.ExistsAsync<Person>(new { Age = 42 });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE \"Age\" = @Age"));
