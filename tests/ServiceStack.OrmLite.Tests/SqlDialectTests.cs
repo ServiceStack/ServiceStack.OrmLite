@@ -2,7 +2,6 @@
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -14,9 +13,12 @@ namespace ServiceStack.OrmLite.Tests
         public bool Bool { get; set; }
     }
 
-    public class SqlDialectTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(TestDialect.SqlServer)]
+    public class SqlDialectTests : OrmLiteProvidersTestBase
     {
-//        public SqlDialectTests() : base(Dialect.SqlServer2008) {}
+        public SqlDialectTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Test]
         public void Does_concat_values()

@@ -7,9 +7,13 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class SqlBuilderTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SqlBuilderTests : OrmLiteProvidersTestBase
     {
+        public SqlBuilderTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Alias("Users")]
         public class User 
         {
@@ -24,7 +28,7 @@ namespace ServiceStack.OrmLite.Tests
         [SetUp]
         public void SetUp()
         {
-            db = Config.OpenDbConnection();
+            db = OpenDbConnection();
             db.DropAndCreateTable<User>();
         }
 

@@ -22,10 +22,13 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
-    [TestFixture]
-    public class StringSerializerTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class StringSerializerTests : OrmLiteProvidersTestBase
     {
+        public StringSerializerTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private static void InsertModelWithComplexType(IDbConnection db)
         {
             db.DropAndCreateTable<ModelWithComplexType>();
@@ -38,7 +41,7 @@ namespace ServiceStack.OrmLite.Tests
 
         public string TestSql
         {
-            get { return "SELECT {0} from {1}".Fmt("ComplexType".SqlColumn(), "ModelWithComplexType".SqlTable()); }
+            get { return "SELECT {0} from {1}".Fmt("ComplexType".SqlColumn(DialectProvider), "ModelWithComplexType".SqlTable(DialectProvider)); }
         }
 
         [Test]
