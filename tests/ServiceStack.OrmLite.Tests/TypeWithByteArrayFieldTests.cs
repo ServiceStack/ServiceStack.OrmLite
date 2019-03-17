@@ -5,8 +5,13 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class TypeWithByteArrayFieldTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class TypeWithByteArrayFieldTests : OrmLiteProvidersTestBase
     {
+        public TypeWithByteArrayFieldTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void CanInsertAndSelectByteArray()
         {

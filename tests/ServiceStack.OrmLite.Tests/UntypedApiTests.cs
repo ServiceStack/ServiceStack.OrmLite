@@ -13,9 +13,13 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
-    [TestFixture]
-    public class UntypedApiTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class UntypedApiTests : OrmLiteProvidersTestBase
     {
+        public UntypedApiTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_create_table_and_insert_with_untyped_Api()
         {

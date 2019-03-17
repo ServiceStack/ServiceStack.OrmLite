@@ -1,7 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -36,10 +35,12 @@ namespace ServiceStack.OrmLite.Tests
         public string Field6 { get; set; }
     }
 
-    public class UniqueConstraintTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class UniqueConstraintTests : OrmLiteProvidersTestBase
     {
-        //public UniqueConstraintTests() : base(Dialect.Sqlite) {}
-        //[OneTimeSetUp] public void OneTimeSetUp() => LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: true);
+        public UniqueConstraintTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Test]
         public void Does_add_individual_Constraints()
