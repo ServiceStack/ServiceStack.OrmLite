@@ -15,16 +15,16 @@ using ServiceStack.Logging;
 namespace ServiceStack.OrmLite.Tests
 {
     /// <summary>
-    /// Use this base class in conjunction with one or more <seealso cref="TestFixtureAttribute"/>
+    /// Use this base class in conjunction with one or more <seealso cref="TestFixtureOrmLiteAttribute"/>
     /// attributes to repeat tests for each db dialect.
-    /// Alternatively, specify <seealso cref="TestFixtureSourceAttribute"/>
+    /// Alternatively, specify <seealso cref="TestFixtureOrmLiteDialectsAttribute"/>
     /// to repeat tests for pre-defined sets of <seealso cref="FixtureDataProvider" /> 
     /// </summary>
     /// <example>
     /// <code>
     /// // example
     /// [TestFixtureOrmLite] // all configured dialects
-    /// [TestFixtureDialects(TestDialect.Supported)] // all base versions of supported dialects
+    /// [TestFixtureOrmLiteDialects(TestDialect.Supported)] // all base versions of supported dialects
     /// public TestClass : OrmLiteProvidersTestBase {
     ///   public TestClass(Dialect dialect) : base(dialect) {}
     ///

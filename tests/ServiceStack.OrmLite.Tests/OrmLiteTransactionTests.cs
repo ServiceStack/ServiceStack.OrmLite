@@ -3,15 +3,17 @@ using System.Data;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.Sqlite;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrmLiteTransactionTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteTransactionTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteTransactionTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Transaction_commit_persists_data_to_the_db()
         {
@@ -222,12 +224,12 @@ namespace ServiceStack.OrmLite.Tests
                         if (Dialect != Dialect.Firebird)
                         {
                             dbCmd.CommandText = "INSERT INTO {0} ({1}) VALUES ('From OrmLite DB Command')"
-                                .Fmt("MyTable".SqlTable(), "SomeTextField".SqlColumn());
+                                .Fmt("MyTable".SqlTable(DialectProvider), "SomeTextField".SqlColumn(DialectProvider));
                         }
                         else
                         {
                             dbCmd.CommandText = "INSERT INTO {0} ({1},{2}) VALUES (2,'From OrmLite DB Command')"
-                                .Fmt("MyTable".SqlTable(), "Id".SqlColumn(), "SomeTextField".SqlColumn());
+                                .Fmt("MyTable".SqlTable(DialectProvider), "Id".SqlColumn(DialectProvider), "SomeTextField".SqlColumn(DialectProvider));
                         }
 
                         dbCmd.ExecuteNonQuery();
@@ -256,12 +258,12 @@ namespace ServiceStack.OrmLite.Tests
                         if (Dialect != Dialect.Firebird)
                         {
                             dbCmd.CommandText = "INSERT INTO {0} ({1}) VALUES ('From OrmLite DB Command')"
-                                .Fmt("MyTable".SqlTable(), "SomeTextField".SqlColumn());
+                                .Fmt("MyTable".SqlTable(DialectProvider), "SomeTextField".SqlColumn(DialectProvider));
                         }
                         else
                         {
                             dbCmd.CommandText = "INSERT INTO {0} ({1},{2}) VALUES (2,'From OrmLite DB Command')"
-                                .Fmt("MyTable".SqlTable(), "Id".SqlColumn(), "SomeTextField".SqlColumn());
+                                .Fmt("MyTable".SqlTable(DialectProvider), "Id".SqlColumn(DialectProvider), "SomeTextField".SqlColumn(DialectProvider));
                         }
 
                         dbCmd.ExecuteNonQuery();

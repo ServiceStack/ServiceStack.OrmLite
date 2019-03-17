@@ -11,10 +11,13 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrmLiteUpdateTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteUpdateTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteUpdateTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private ModelWithFieldsOfDifferentTypes CreateModelWithFieldsOfDifferentTypes(IDbConnection db)
         {
             db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();

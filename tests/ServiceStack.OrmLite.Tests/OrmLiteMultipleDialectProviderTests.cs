@@ -22,15 +22,15 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_open_multiple_dialectprovider_with_execfilter() {
             //global
             OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
-            var factory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb);
+            var factory = new OrmLiteConnectionFactory(TestConfig.SqliteMemoryDb);
 
             var sqlServerDialectProvider = SqlServerDialect.Provider;
             sqlServerDialectProvider.ExecFilter = new MockExecFilter1();
-            factory.RegisterConnection("sqlserver", Config.SqlServerBuildDb, sqlServerDialectProvider);
+            factory.RegisterConnection("sqlserver", TestConfig.SqlServerBuildDb, sqlServerDialectProvider);
 
             var sqliteDialectProvider = SqliteDialect.Provider;
             sqliteDialectProvider.ExecFilter = new MockExecFilter2();
-            factory.RegisterConnection("sqlite-file", Config.SqliteFileDb, sqliteDialectProvider);
+            factory.RegisterConnection("sqlite-file", TestConfig.SqliteFileDb, sqliteDialectProvider);
 
             var results = new List<Person>();
             using (var db = factory.OpenDbConnection()) {
