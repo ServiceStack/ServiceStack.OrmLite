@@ -3,8 +3,13 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
+    [TestFixtureOrmLite]
     public class StringFunctionTests : ExpressionsTestBase
     {
+        public StringFunctionTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_select_using_contains()
         {

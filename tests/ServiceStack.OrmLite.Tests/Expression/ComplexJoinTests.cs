@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
 using ServiceStack.Model;
 using ServiceStack.Text;
 
@@ -126,9 +127,13 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public string ManufacturerName { get; set; }
     }
 
-    [TestFixture]
-    public class ComplexJoinTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ComplexJoinTests : OrmLiteProvidersTestBase
     {
+        public ComplexJoinTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private static int _baz1Id;
         private static int _baz2Id;
         private static int _fooBar1Id;

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
@@ -38,15 +39,17 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public string Description { get; set; }
     }
 
-    [TestFixture]
-    public class JoinAliasTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class JoinAliasTests : OrmLiteProvidersTestBase
     {
+        public JoinAliasTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
+        [IgnoreProvider(Tests.Dialect.AnyPostgreSql | Tests.Dialect.AnyMySql, "Invalid Custom SQL for provider naming convention")]
         public void Can_use_JoinAlias_in_condition()
         {
-            if (Dialect == Dialect.PostgreSql || Dialect == Dialect.MySql)
-                return; //Invalid Custom SQL for pgsql naming convention 
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Tasked>();

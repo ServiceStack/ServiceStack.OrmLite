@@ -1,10 +1,15 @@
 ﻿using NUnit.Framework;
+using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    [TestFixture]
-    public class ExpressionTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ExpressionTests : OrmLiteProvidersTestBase
     {
+        public ExpressionTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         public class Person
         {
             public Person() {}

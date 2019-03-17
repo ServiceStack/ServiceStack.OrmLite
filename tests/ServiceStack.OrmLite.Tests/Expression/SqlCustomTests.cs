@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
@@ -29,12 +30,17 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public string Field4 { get; set; }
     }
 
-    public class SqlCustomTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SqlCustomTests : OrmLiteProvidersTestBase
     {
+        public SqlCustomTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_use_CustomSelect_field_in_Typed_Query()
         {
-            if (Dialect == Dialect.PostgreSql || Dialect == Dialect.SqlServer || Dialect == Dialect.SqlServer2012 || Dialect == Dialect.MySql) return;
+            if (Dialect == Dialect.AnyPostgreSql || Dialect == Dialect.SqlServer || Dialect == Dialect.SqlServer2012 || Dialect == Dialect.AnyMySql) return;
 
             using (var db = OpenDbConnection())
             {

@@ -1,4 +1,5 @@
 ﻿using NUnit.Framework;
+using ServiceStack.Logging;
 using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Expression
@@ -9,9 +10,13 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public int PersonId { get; set; }
     }
 
-    [TestFixture]
-    public class SqlExpressionDeleteTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SqlExpressionDeleteTests : OrmLiteProvidersTestBase
     {
+        public SqlExpressionDeleteTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_delete_entity_with_join_expression()
         {

@@ -1,12 +1,17 @@
 ﻿using System;
 using NUnit.Framework;
+using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    [TestFixture]
-    public class LimitExpressionTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class LimitExpressionTests : OrmLiteProvidersTestBase
     {
+        public LimitExpressionTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_Skip_and_Take_UserAuth_Join()
         {
@@ -39,7 +44,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     .Where<UserAuthRole>(r => "role" == r.Role)
                     .Skip(2)
                     .Take(2)
-                    .OrderBy("displayName".SqlColumn())
+                    .OrderBy("displayName".SqlColumn(DialectProvider))
                     .SelectDistinct();
 
                 var results = db.Select(query);

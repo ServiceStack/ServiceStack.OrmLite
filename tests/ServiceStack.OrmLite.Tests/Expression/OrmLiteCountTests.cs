@@ -4,13 +4,18 @@ using System.Data;
 using System.Linq.Expressions;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
 using ServiceStack.Model;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    [TestFixture]
-    public class OrmLiteCountTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteCountTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteCountTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void CanDoCountWithInterface()
         {

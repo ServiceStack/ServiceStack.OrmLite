@@ -1,11 +1,16 @@
 ﻿using NUnit.Framework;
+using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    [TestFixture]
-    public class SqlExpressionParamTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SqlExpressionParamTests : OrmLiteProvidersTestBase
     {
+        public SqlExpressionParamTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_add_DbParam_to_SqlExpression()
         {

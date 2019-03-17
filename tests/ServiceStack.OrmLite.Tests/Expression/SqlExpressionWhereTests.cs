@@ -1,12 +1,18 @@
 ﻿using System.Data;
 using NUnit.Framework;
+using ServiceStack.Logging;
 using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    public class SqlExpressionWhereTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SqlExpressionWhereTests : OrmLiteProvidersTestBase
     {
+        public SqlExpressionWhereTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private static void Init(IDbConnection db)
         {
             db.DropAndCreateTable<Table1>();

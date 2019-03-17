@@ -4,8 +4,13 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
+    [TestFixtureOrmLite]
     public class ConditionalExpressionTest : ExpressionsTestBase
     {
+        public ConditionalExpressionTest(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_select_conditional_and_expression()
         {
@@ -183,7 +188,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     Assert.That(results.Map(x => x.Id), Is.EquivalentTo(new[]{ 2, 3 }));
                 }
                 
-                if ((Dialect & Dialect.AnySqlServer) == Dialect || Dialect == Dialect.MySql)
+                if ((Dialect & Dialect.AnySqlServer) == Dialect || Dialect == Dialect.AnyMySql)
                 {
                     results = db.Select<TestType>(x => (x.Id ^ 2) == 3);
                     Assert.That(results.Map(x => x.Id), Is.EquivalentTo(new[]{ 1 }));
