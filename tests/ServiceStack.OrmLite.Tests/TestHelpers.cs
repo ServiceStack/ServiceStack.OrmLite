@@ -8,27 +8,52 @@ namespace ServiceStack.OrmLite.Tests
     public enum Dialect
     {
         Sqlite         = 1,
+        
         SqlServer = 1 << 1,
-        SqlServer2008 = 1 << 2,
-        SqlServer2012 = 1 << 3,
-        PostgreSql9 = 1 << 4,
-        PostgreSql10 = 1 << 5,
-        PostgreSql11 = 1 << 6,
-        MySql5_5 = 1 << 7,
-        MySql10_1 = 1 << 8,
-        MySql10_2 = 1 << 9,
-        MySql10_3 = 1 << 10,
-        MySql10_4 = 1 << 11,
-        SqlServerMdf = 1 << 12,
-        Oracle = 1 << 13,
-        Firebird = 1 << 14,
-        VistaDb = 1 << 15,
-        SqlServer2014 = 1 << 16,
-        SqlServer2016 = 1 << 17,
-        SqlServer2017 = 1 << 18,
-        PostgreSql = PostgreSql9 | PostgreSql10 | PostgreSql11,
-        MySql = MySql5_5 | MySql10_1 | MySql10_2 | MySql10_3 | MySql10_4,
+        SqlServerMdf = 1 << 2,
+        SqlServer2008 = 1 << 3,
+        SqlServer2012 = 1 << 4,
+        SqlServer2014 = 1 << 5,
+        SqlServer2016 = 1 << 6,
+        SqlServer2017 = 1 << 7,
+        
+        PostgreSql9 = 1 << 8,
+        PostgreSql10 = 1 << 9,
+        PostgreSql11 = 1 << 10,
+        
+        MySql5_5 = 1 << 11,
+        MySql10_1 = 1 << 12,
+        MySql10_2 = 1 << 13,
+        MySql10_3 = 1 << 14,
+        MySql10_4 = 1 << 15,
+        
+        Oracle10 = 1 << 16,
+        Oracle11 = 1 << 17,
+        Oracle12 = 1 << 18,
+        Oracle18 = 1 << 19,
+        
+        Firebird = 1 << 20,
+        
+        VistaDb = 1 << 21,
+        
+        // base versions 
+        MySql = MySql5_5,
+        Oracle = Oracle10,
+        PostgreSql = PostgreSql9,
+        
+        // any versions
+        AnyPostgreSql = PostgreSql9 | PostgreSql10 | PostgreSql11,
+        AnyMySql = MySql5_5 | MySql10_1 | MySql10_2 | MySql10_3 | MySql10_4,
         AnySqlServer = SqlServer | SqlServer2008 | SqlServer2012 | SqlServer2014 | SqlServer2016 | SqlServer2017 | SqlServerMdf,
+        AnyOracle = Oracle10 | Oracle11 | Oracle12 | Oracle18,
+        
+        // db groups
+        Supported = Sqlite | AnySqlServer | AnyPostgreSql | AnyMySql,
+        Community = Firebird | AnyOracle | VistaDb,
+        DockerDb =  AnySqlServer | AnyPostgreSql | AnyMySql | Community,
+        
+        // all
+        All = Supported | Community
     }
 
     public static class TestHelpers
