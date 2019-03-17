@@ -1,14 +1,16 @@
 using NUnit.Framework;
 using ServiceStack.Text;
 using ServiceStack.Common.Tests.Models;
-using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrmLiteCreateTableWithIndexesTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteCreateTableWithIndexesTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteCreateTableWithIndexesTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_create_ModelWithIndexFields_table()
         {
@@ -21,7 +23,7 @@ namespace ServiceStack.OrmLite.Tests
                 var indexName = "idx_modelwithindexfields_name";
                 var uniqueName = "uidx_modelwithindexfields_uniquename";
 
-                if (Dialect == Dialect.Oracle || Dialect == Dialect.Firebird)
+                if (Dialect == Dialect.AnyOracle || Dialect == Dialect.Firebird)
                 {
                     indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
                     uniqueName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(uniqueName);
@@ -45,7 +47,7 @@ namespace ServiceStack.OrmLite.Tests
                 var indexName = "idx_modelwithcompositeindexfields_name";
                 var compositeName = "idx_modelwithcompositeindexfields_composite1_composite2";
 
-                if (Dialect == Dialect.Oracle || Dialect == Dialect.Firebird)
+                if (Dialect == Dialect.AnyOracle || Dialect == Dialect.Firebird)
                 {
                     indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
                     compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName);
@@ -69,7 +71,7 @@ namespace ServiceStack.OrmLite.Tests
                 var indexName = "idx_modelwithcompositeindexfieldsdesc_name";
                 var compositeName = "idx_modelwithcompositeindexfieldsdesc_composite1_composite2";
 
-                if (Dialect == Dialect.Oracle || Dialect == Dialect.Firebird)
+                if (Dialect == Dialect.AnyOracle || Dialect == Dialect.Firebird)
                 {
                     indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName).ToLower();
                     compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName).ToLower();
@@ -94,7 +96,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var compositeName = "idx_modelwithcompositeindexonfieldspacesdesc_field_field";
 
-                if (Dialect == Dialect.Oracle || Dialect == Dialect.Firebird)
+                if (Dialect == Dialect.AnyOracle || Dialect == Dialect.Firebird)
                     compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName).ToLower();
 
                 Assert.That(sql, Does.Contain(compositeName));
@@ -113,7 +115,7 @@ namespace ServiceStack.OrmLite.Tests
                 var indexName = "idx_modelwithnamedcompositeindex_name";
                 var compositeName = "uidx_modelwithnamedcompositeindexfields_composite1_composite2";
 
-                if (Dialect == Dialect.Oracle || Dialect == Dialect.Firebird)
+                if (Dialect == Dialect.AnyOracle || Dialect == Dialect.Firebird)
                 {
                     indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
                     compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName);

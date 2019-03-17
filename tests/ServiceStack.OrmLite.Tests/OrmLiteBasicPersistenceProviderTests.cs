@@ -5,10 +5,13 @@ using ServiceStack.Common.Tests.Models;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrmLiteBasicPersistenceProviderTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteBasicPersistenceProviderTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteBasicPersistenceProviderTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_GetById_from_basic_persistence_provider()
         {

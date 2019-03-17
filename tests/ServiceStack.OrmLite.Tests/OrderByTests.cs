@@ -1,15 +1,16 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Logging;
 using ServiceStack.OrmLite.Tests.Expression;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrderByTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrderByTests : OrmLiteProvidersTestBase
     {
+        public OrderByTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_order_by_random()
         {

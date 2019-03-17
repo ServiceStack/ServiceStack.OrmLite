@@ -10,10 +10,13 @@ namespace ServiceStack.OrmLite.Tests
 {
     using System.Collections.Generic;
 
-    [TestFixture]
-    public class OrmLiteComplexTypesTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteComplexTypesTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteComplexTypesTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_insert_into_ModelWithComplexTypes_table()
         {
@@ -82,14 +85,14 @@ namespace ServiceStack.OrmLite.Tests
 
                 db.Insert(item);
 
-                var tbl = "WithAListOfGuids".SqlTable();
-                var savedGuidOne = db.Select<Guid>("SELECT {0} FROM {1}".Fmt("GuidOne".SqlColumn(), tbl)).First();
+                var tbl = "WithAListOfGuids".SqlTable(DialectProvider);
+                var savedGuidOne = db.Select<Guid>("SELECT {0} FROM {1}".Fmt("GuidOne".SqlColumn(DialectProvider), tbl)).First();
                 Assert.That(savedGuidOne, Is.EqualTo(new Guid("32cb0acb-db43-4061-a6aa-7f4902a7002a")));
 
-                var savedGuidTwo = db.Select<Guid>("SELECT {0} FROM {1}".Fmt("GuidTwo".SqlColumn(), tbl)).First();
+                var savedGuidTwo = db.Select<Guid>("SELECT {0} FROM {1}".Fmt("GuidTwo".SqlColumn(DialectProvider), tbl)).First();
                 Assert.That(savedGuidTwo, Is.EqualTo(new Guid("13083231-b005-4ff4-ab62-41bdc7f50a4d")));
 
-                var savedGuidList = db.Select<string>("SELECT {0} FROM {1}".Fmt("TheGuids".SqlColumn(), tbl)).First();
+                var savedGuidList = db.Select<string>("SELECT {0} FROM {1}".Fmt("TheGuids".SqlColumn(DialectProvider), tbl)).First();
                 Assert.That(savedGuidList, Is.EqualTo("[18176030-7a1c-4288-82df-a52f71832381,017f986b-f7be-4b6f-b978-ff05fba3b0aa]"));
 
                 JsConfig.Reset();
@@ -105,8 +108,8 @@ namespace ServiceStack.OrmLite.Tests
 
                 var contact = new Contact
                 {
-                    FullName = new NameDetail("Sinéad", "O'Connor"),
-                    Email = "Sinéad@O'Connor.com",
+                    FullName = new NameDetail("SinÃ©ad", "O'Connor"),
+                    Email = "SinÃ©ad@O'Connor.com",
                     Age = 10
                 };
                 db.Save(contact);
