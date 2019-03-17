@@ -1,12 +1,16 @@
 ﻿using System;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class MaxDataTypeTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class MaxDataTypeTests : OrmLiteProvidersTestBase
     {
+        public MaxDataTypeTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_insert_and_select_max_values()
         {
@@ -18,10 +22,10 @@ namespace ServiceStack.OrmLite.Tests
                 Int = int.MaxValue,
                 Long = long.MaxValue,
                 Double = double.MaxValue,
-                Decimal = !isSqlServer && Dialect != Dialect.Sqlite && Dialect != Dialect.PostgreSql
+                Decimal = !isSqlServer && Dialect != Dialect.Sqlite && Dialect != Dialect.AnyPostgreSql
                     ? Decimal.MaxValue
                     : long.MaxValue,
-                DateTime = Dialect != Dialect.MySql 
+                DateTime = Dialect != Dialect.AnyMySql 
                     ? DateTime.MaxValue
                     : DateTime.MaxValue.AddYears(-1),
                 TimeSpan = TimeSpan.MaxValue,

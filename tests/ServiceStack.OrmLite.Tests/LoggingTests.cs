@@ -17,17 +17,19 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
-    [NUnit.Framework.Ignore("Initializing LogFactory needs to run stand-alone")]
-    [TestFixture]
-    public class LoggingTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite, NUnit.Framework.Ignore("Initializing LogFactory needs to run stand-alone")]
+    public class LoggingTests : OrmLiteProvidersTestBase
     {
+        public LoggingTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Does_log_all_statements()
         {
             var sbLogFactory = new StringBuilderLogFactory();
-            LogManager.LogFactory = sbLogFactory;
-
+            var testLogger = TestLogger.GetLogs().Count;
+           
             using (var db = OpenDbConnection())
             {
                 db.DropTable<LogTest>();
@@ -51,6 +53,8 @@ namespace ServiceStack.OrmLite.Tests
 
                 var logs = sbLogFactory.GetLogs();
                 logs.Print();
+
+                //var logs = TestLogger.GetLogs();
 
                 Assert.That(logs, Does.Contain("CREATE TABLE"));
                 Assert.That(logs, Does.Contain("INSERT INTO"));

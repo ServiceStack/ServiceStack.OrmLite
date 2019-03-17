@@ -8,8 +8,14 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class MetaDataTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    [NonParallelizable]
+    public class MetaDataTests : OrmLiteProvidersTestBase
     {
+        public MetaDataTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_get_TableNames()
         {
