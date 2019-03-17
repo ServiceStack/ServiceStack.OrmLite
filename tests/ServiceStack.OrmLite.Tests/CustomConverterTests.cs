@@ -2,7 +2,6 @@
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer.Converters;
-using ServiceStack.OrmLite.Tests.Expression;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -14,10 +13,14 @@ namespace ServiceStack.OrmLite.Tests
 
         public TimeSpan TimeSpan { get; set; }
     }
-
-    [TestFixture]
-    public class CustomConverterTests : OrmLiteTestBase
+    
+    [TestFixtureOrmLite]
+    public class CustomConverterTests : OrmLiteProvidersTestBase
     {
+        public CustomConverterTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_override_SqlServer_Time_Converter()
         {

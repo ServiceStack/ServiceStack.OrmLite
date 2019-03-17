@@ -7,15 +7,19 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class ConverterTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ConverterTests : OrmLiteProvidersTestBase
     {
+        public ConverterTests(Dialect dialect) : base(dialect)
+        {
+        }
+   
         private struct TestStruct {}
 
         [Test]
         public void FromDbValue_does_not_throw_Exception()
         {
-            var dialectProvider = OrmLiteConfig.DialectProvider;
+            var dialectProvider = DialectProvider;
             var convertedValue = dialectProvider.FromDbValue(12345, typeof(TestStruct));
             Assert.That(convertedValue, Is.Null);
         }

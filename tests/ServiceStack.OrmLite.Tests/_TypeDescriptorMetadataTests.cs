@@ -2,25 +2,28 @@
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.Converters;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class _TypeDescriptorMetadataTests //Needs to be run first
-        : OrmLiteTestBase
+    // Needs to be run first
+    [TestFixtureOrmLite]
+    public class _TypeDescriptorMetadataTests : OrmLiteProvidersTestBase
     {
+        public _TypeDescriptorMetadataTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private IDbConnection db;
 
-        [OneTimeSetUp]
-        public new void TestFixtureSetUp()
+        [SetUp]
+        public void TestFixtureSetUp()
         {
             db = OpenDbConnection();
         }
 
-        [OneTimeTearDown]
-        public new void TestFixtureTearDown()
+        [TearDown]
+        public void TestFixtureTearDown()
         {
             db.Dispose();
         }
@@ -47,11 +50,10 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreProvider(Dialect.Oracle, "Test assert fails with Oracle because Oracle does not allow 64000 character fields and uses VARCHAR2 not VARCHAR")]
+        [IgnoreProvider(Dialect.PostgreSql, "Uses 'text' for strings by default")]
         public void Can_change_column_definition()
         {
-            SuppressIfOracle("Test assert fails with Oracle because Oracle does not allow 64000 character fields and uses VARCHAR2 not VARCHAR");
-            if (Dialect == Dialect.PostgreSql) return; //Uses 'text' for strings by default
-
             typeof(DynamicCacheEntry)
                 .GetProperty("Data")
                 .AddAttributes(new StringLengthAttribute(7000));
@@ -82,15 +84,15 @@ namespace ServiceStack.OrmLite.Tests
             {
                 Assert.That(sql, Does.Contain(" VARCHAR(1000000)"));
             }
-            else if (Dialect == Dialect.PostgreSql)
+            else if (Dialect == Dialect.AnyPostgreSql)
             {
                 Assert.That(sql, Does.Contain(" TEXT"));
             }
-            else if (Dialect == Dialect.MySql)
+            else if (Dialect == Dialect.AnyMySql)
             {
                 Assert.That(sql, Does.Contain(" LONGTEXT"));
             }
-            else if (Dialect == Dialect.Oracle)
+            else if (Dialect == Dialect.AnyOracle)
             {
                 Assert.That(sql, Does.Contain(" VARCHAR2(4000)"));
             }
@@ -103,7 +105,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_Create_Table_with_MaxText_column_Unicode()
         {
-            var stringConverter = db.GetDialectProvider().GetStringConverter();
+            var stringConverter = DialectProvider.GetStringConverter();
             var hold = stringConverter.UseUnicode;
             stringConverter.UseUnicode = true;
 
@@ -122,24 +124,24 @@ namespace ServiceStack.OrmLite.Tests
 
             var sql = db.GetLastSql();
             sql.Print();
-
-            if (Dialect == Dialect.Sqlite)
+            
+            if (Dialect.HasFlag(Dialect.Sqlite))
             {
                 Assert.That(sql, Does.Contain(" NVARCHAR(1000000)"));
             }
-            else if (Dialect == Dialect.PostgreSql)
+            else if (Dialect.HasFlag( Dialect.AnyPostgreSql))
             {
                 Assert.That(sql, Does.Contain(" TEXT"));
             }
-            else if (Dialect == Dialect.MySql)
+            else if (Dialect.HasFlag(Dialect.AnyMySql))
             {
                 Assert.That(sql, Does.Contain(" LONGTEXT"));
             }
-            else if (Dialect == Dialect.Oracle)
+            else if (Dialect.HasFlag( Dialect.AnyOracle))
             {
                 Assert.That(sql, Does.Contain(" NVARCHAR2(4000)"));
             }
-            else if (Dialect == Dialect.Firebird)
+            else if (Dialect.HasFlag(Dialect.Firebird))
             {
                 Assert.That(sql, Does.Contain(" VARCHAR(10000)"));
             }
@@ -147,6 +149,10 @@ namespace ServiceStack.OrmLite.Tests
             {
                 Assert.That(sql, Does.Contain(" NVARCHAR(MAX)"));
             }
+            
         }
     }
+
+
 }
+
