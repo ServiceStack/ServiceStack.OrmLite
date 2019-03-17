@@ -15,6 +15,10 @@ and use the `TestFixtureOrmLiteAttribute` class.
 [TestFixtureOrmLite]
 public class DbFeatures1 : OrmLiteProvidersTestBase 
 {
+    // Required Ctor, Dialects will be injected by TestFixture
+    public DbFeatures1(Dialect dialect) : base(dialect)
+    {
+    }
     
     // Tests can be repeated for one or more providers
     [Test]
@@ -53,10 +57,12 @@ To run tests against specific providers, use `TestFixtureOrmLiteDialectsAttribut
 [TestFixtureOrmLiteDialects(TestDialect.SqlServer)]
 public class SqlDbFeatures1 : OrmLiteProvidersTestBase 
 {
+    ...
+    
     [Test]
     public void Test1() 
     {
-        // Will execute for SqlServer provider and dialect version
+        // Will execute for SqlServer provider and dialect versions
 
         // Current test dialect
         var dialect = base.Dialect;
