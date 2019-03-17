@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -14,7 +15,8 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
-    [TestFixtureSource(typeof(ProvidersFixtureData), ProvidersFixtureData.SupportedAll)]
+    [TestFixtureOrmLite]
+    [NonParallelizable]
     public class AutoIdTests : OrmLiteProvidersTestBase
     {
         public AutoIdTests(Dialect dialect) : base(dialect)

@@ -19,8 +19,7 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
-    [TestFixtureSource(typeof(ProvidersFixtureData), ProvidersFixtureData.SupportedAll)]
-    [NonParallelizable]
+    [TestFixtureOrmLite]
     public class CheckConstraintTests : OrmLiteProvidersTestBase
     {
         public CheckConstraintTests(Dialect dialect) : base(dialect)
@@ -28,13 +27,9 @@ namespace ServiceStack.OrmLite.Tests
         }
         
         [Test]
+        [IgnoreProvider(Dialect.MySql5_5 | Dialect.MySql10_1, "Check constraints supported from MariaDb 10.2.1 onwards")]
         public void Does_create_table_with_CheckConstraints()
         {
-            if (Dialect == Dialect.MySql5_5 || Dialect == Dialect.MySql10_1) {
-                //parsed but not supported http://stackoverflow.com/a/2115641/85785
-                Assert.Ignore("Check constraints supported from MariaDb 10.2.1 onwards"); 
-            }
-            
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<CheckConstraintTest>();

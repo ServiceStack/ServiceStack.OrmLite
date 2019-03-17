@@ -5,6 +5,7 @@ using System.Text;
 using NUnit.Framework;
 using NUnit.Framework.Internal;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -73,7 +74,7 @@ namespace ServiceStack.OrmLite.Tests
     }
 
 
-    [TestFixtureSource(typeof(ProvidersFixtureData), ProvidersFixtureData.SupportedAll)]
+    [TestFixtureOrmLite]
     [NonParallelizable]
     public class AutoQueryTests : OrmLiteProvidersTestBase
     {
@@ -220,8 +221,8 @@ namespace ServiceStack.OrmLite.Tests
                 var resultsMap = db.Select<Dictionary<string, object>>(q);
                 Assert.That(resultsMap.Count, Is.EqualTo(2));
                 var row = new Dictionary<string, object>(resultsMap[0], StringComparer.OrdinalIgnoreCase);
-                Assert.That(row.ContainsKey("FirstName".SqlTableRaw()));
-                Assert.That(!row.ContainsKey("Id".SqlTableRaw()));
+                Assert.That(row.ContainsKey("FirstName".SqlTableRaw(DialectProvider)));
+                Assert.That(!row.ContainsKey("Id".SqlTableRaw(DialectProvider)));
 
                 var resultsList = db.Select<List<object>>(q);
                 Assert.That(resultsList.Count, Is.EqualTo(2));
@@ -230,14 +231,14 @@ namespace ServiceStack.OrmLite.Tests
                 var resultsDynamic = db.Select<dynamic>(q);
                 Assert.That(resultsDynamic.Count, Is.EqualTo(2));
                 var map = (IDictionary<string, object>)resultsDynamic[0];
-                Assert.That(map.ContainsKey("FirstName".SqlTableRaw()));
-                Assert.That(!map.ContainsKey("Id".SqlTableRaw()));
+                Assert.That(map.ContainsKey("FirstName".SqlTableRaw(DialectProvider)));
+                Assert.That(!map.ContainsKey("Id".SqlTableRaw(DialectProvider)));
 
                 resultsDynamic = db.Select<dynamic>(q.ToSelectStatement());
                 Assert.That(resultsDynamic.Count, Is.EqualTo(2));
                 map = (IDictionary<string, object>)resultsDynamic[0];
-                Assert.That(map.ContainsKey("FirstName".SqlTableRaw()));
-                Assert.That(!map.ContainsKey("Id".SqlTableRaw()));
+                Assert.That(map.ContainsKey("FirstName".SqlTableRaw(DialectProvider)));
+                Assert.That(!map.ContainsKey("Id".SqlTableRaw(DialectProvider)));
             }
         }
 
@@ -378,7 +379,7 @@ namespace ServiceStack.OrmLite.Tests
                 var sb = new StringBuilder();
                 foreach (var result in results)
                 {
-                    if (Dialect == Dialect.PostgreSql)
+                    if (Dialect == Dialect.AnyPostgreSql)
                         sb.AppendLine(result.first_name + "," + result.last_name + "," + result.Name);
                     else if (Dialect == Dialect.Firebird)
                         sb.AppendLine(result.FIRSTNAME + "," + result.LASTNAME + "," + result.NAME);
@@ -398,7 +399,7 @@ namespace ServiceStack.OrmLite.Tests
                 sb.Length = 0;
                 foreach (var result in results)
                 {
-                    if (Dialect.HasFlag(Dialect.PostgreSql))
+                    if (Dialect.HasFlag(Dialect.AnyPostgreSql))
                         sb.AppendLine(result.Name);
                     else if (Dialect.HasFlag(Dialect.Firebird))
                         sb.AppendLine(result.NAME);
