@@ -38,8 +38,7 @@ namespace ServiceStack.OrmLite.Tests
 
         static double Measure(Action fn, int times = 10, int runfor = 2000, Action setup = null, Action warmup = null, Action teardown = null)
         {
-            if (setup != null)
-                setup();
+            setup?.Invoke();
 
             // Warmup for at least 100ms. Discard result.
             if (warmup == null)
@@ -54,8 +53,7 @@ namespace ServiceStack.OrmLite.Tests
                         fn();
                 }, runfor);
 
-            if (teardown != null)
-                teardown();
+            teardown?.Invoke();
 
             return result;
         }
