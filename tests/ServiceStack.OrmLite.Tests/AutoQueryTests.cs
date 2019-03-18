@@ -73,7 +73,6 @@ namespace ServiceStack.OrmLite.Tests
 
 
     [TestFixtureOrmLite]
-    [NonParallelizable]
     public class AutoQueryTests : OrmLiteProvidersTestBase
     {
         public AutoQueryTests(Dialect dialect) : base(dialect)
@@ -214,7 +213,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.InsertAll(SeedDepartments);
                 db.InsertAll(SeedEmployees);
 
-                var q = db.From<DeptEmployee>().Select(new[] {  "FirstName".SqlColumn(DialectProvider) }).Take(2);
+                var q = db.From<DeptEmployee>().Select(new[] {  "FirstName" }).Take(2);
 
                 var resultsMap = db.Select<Dictionary<string, object>>(q);
                 Assert.That(resultsMap.Count, Is.EqualTo(2));
@@ -377,9 +376,9 @@ namespace ServiceStack.OrmLite.Tests
                 var sb = new StringBuilder();
                 foreach (var result in results)
                 {
-                    if (Dialect == Dialect.AnyPostgreSql)
+                    if (Dialect.AnyPostgreSql.HasFlag(Dialect))
                         sb.AppendLine(result.first_name + "," + result.last_name + "," + result.Name);
-                    else if (Dialect == Dialect.Firebird)
+                    else if (Dialect.Firebird.HasFlag(Dialect))
                         sb.AppendLine(result.FIRSTNAME + "," + result.LASTNAME + "," + result.NAME);
                     else
                         sb.AppendLine(result.FirstName + "," + result.LastName + "," + result.Name);
