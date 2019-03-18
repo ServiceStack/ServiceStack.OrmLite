@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public bool HasC { get; set; }
     }
 
-    [TestFixtureOrmLiteDialects(TestDialect.Sqlite)]
+    [TestFixtureOrmLiteDialects(Dialect.Sqlite)]
     public class MergingNestedSqlExpressionIssue : OrmLiteProvidersTestBase
     {
         public MergingNestedSqlExpressionIssue(Dialect dialect) : base(dialect)

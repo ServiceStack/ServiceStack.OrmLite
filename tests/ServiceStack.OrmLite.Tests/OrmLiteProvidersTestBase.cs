@@ -1,5 +1,4 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -10,6 +9,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using NUnit.Framework.Interfaces;
 using NUnit.Framework.Internal;
+using NUnit.Framework.Internal.Builders;
 using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests
@@ -18,13 +18,13 @@ namespace ServiceStack.OrmLite.Tests
     /// Use this base class in conjunction with one or more <seealso cref="TestFixtureOrmLiteAttribute"/>
     /// attributes to repeat tests for each db dialect.
     /// Alternatively, specify <seealso cref="TestFixtureOrmLiteDialectsAttribute"/>
-    /// to repeat tests for pre-defined sets of <seealso cref="FixtureDataProvider" /> 
+    /// to repeat tests for each flag of <seealso cref="Dialect" /> 
     /// </summary>
     /// <example>
     /// <code>
     /// // example
     /// [TestFixtureOrmLite] // all configured dialects
-    /// [TestFixtureOrmLiteDialects(TestDialect.Supported)] // all base versions of supported dialects
+    /// [TestFixtureOrmLiteDialects(Dialect.Supported)] // all base versions of supported dialects
     /// public TestClass : OrmLiteProvidersTestBase {
     ///   public TestClass(Dialect dialect) : base(dialect) {}
     ///
@@ -50,6 +50,8 @@ namespace ServiceStack.OrmLite.Tests
         /// </summary>
         public readonly Dialect Dialect;
 
+        public readonly DialectFeatures DialectFeatures;
+
         /// <summary>
         /// The current DialogProvider instance
         /// </summary>
@@ -69,6 +71,7 @@ namespace ServiceStack.OrmLite.Tests
         public OrmLiteProvidersTestBase(Dialect dialect)
         {
             Dialect = dialect;
+            DialectFeatures = new DialectFeatures(Dialect);
             DialectProvider = DbFactory.Open(dialect.ToString()).GetDialectProvider();
 
             if (OrmLiteConfig.DialectProvider == null) OrmLiteConfig.DialectProvider = DialectProvider;
@@ -76,6 +79,19 @@ namespace ServiceStack.OrmLite.Tests
 
         public virtual IDbConnection OpenDbConnection() => DbFactory.OpenDbConnection(Dialect.ToString());
         public virtual Task<IDbConnection> OpenDbConnectionAsync() => DbFactory.OpenDbConnectionAsync(Dialect.ToString());
+    }
+
+    /// <summary>
+    /// Holds dialect flags applicable to specific SQL language features
+    /// </summary>
+    public class DialectFeatures
+    {
+        public readonly bool RowOffset;
+        
+        public DialectFeatures(Dialect dialect)
+        {
+            RowOffset = (Dialect.SqlServer2012 | Dialect.SqlServer2014 | Dialect.SqlServer2016 | Dialect.SqlServer2017).HasFlag(dialect);
+        }
     }
 
     [SetUpFixture]
@@ -108,13 +124,11 @@ namespace ServiceStack.OrmLite.Tests
             // init DbFactory, should be mainly ignored in tests as they should always ask for a provider specific named connection
             var dbFactory = new OrmLiteConnectionFactory(TestConfig.DefaultConnection, TestConfig.DefaultProvider);
 
-            dbFactory.RegisterConnection(Dialect.PostgreSql.ToString(), TestConfig.PostgresDb_9, PostgreSqlDialect.Provider);
             dbFactory.RegisterConnection(Dialect.PostgreSql9.ToString(), TestConfig.PostgresDb_9, PostgreSqlDialect.Provider);
             dbFactory.RegisterConnection(Dialect.PostgreSql10.ToString(), TestConfig.PostgresDb_10, PostgreSqlDialect.Provider);
             dbFactory.RegisterConnection(Dialect.PostgreSql11.ToString(), TestConfig.PostgresDb_11, PostgreSqlDialect.Provider);
 
-            dbFactory.RegisterConnection(Dialect.MySql.ToString(), TestConfig.MySqlDb_5_5, MySqlDialect.Provider);
-            dbFactory.RegisterConnection(Dialect.MySql5_5.ToString(), TestConfig.MySqlDb_5_5, MySqlDialect.Provider);
+            dbFactory.RegisterConnection(Dialect.MySql5_5.ToString(), TestConfig.MySqlDb_5_5, MySql55Dialect.Provider);
             dbFactory.RegisterConnection(Dialect.MySql10_1.ToString(), TestConfig.MySqlDb_10_1, MySqlDialect.Provider);
             dbFactory.RegisterConnection(Dialect.MySql10_2.ToString(), TestConfig.MySqlDb_10_2, MySqlDialect.Provider);
             dbFactory.RegisterConnection(Dialect.MySql10_3.ToString(), TestConfig.MySqlDb_10_3, MySqlDialect.Provider);
@@ -124,7 +138,6 @@ namespace ServiceStack.OrmLite.Tests
 
             dbFactory.RegisterConnection(Dialect.SqlServer.ToString(), TestConfig.SqlServerBuildDb, SqlServerDialect.Provider);
 
-            dbFactory.RegisterConnection(Dialect.Oracle.ToString(), TestConfig.OracleDb, OracleDialect.Provider);
             dbFactory.RegisterConnection(Dialect.Oracle10.ToString(), TestConfig.OracleDb, OracleDialect.Provider);
             dbFactory.RegisterConnection(Dialect.Oracle11.ToString(), TestConfig.OracleDb, OracleDialect.Provider);
             dbFactory.RegisterConnection(Dialect.Oracle12.ToString(), TestConfig.OracleDb, OracleDialect.Provider);
@@ -207,7 +220,7 @@ namespace ServiceStack.OrmLite.Tests
     }
 
     /// <summary>
-    /// Repeats tests for all dialect versions from <see cref="TestConfig"/>.DefaultDialects.
+    /// Repeats tests for all dialect versions from <see cref="TestConfig.DefaultDialects"/>
     /// To restrict tests to specific dialects use <see cref="TestFixtureOrmLiteDialectsAttribute"/>
     /// To filter tests for specific dialects use <see cref="IgnoreProviderAttribute"/>
     /// </summary>
@@ -222,10 +235,10 @@ namespace ServiceStack.OrmLite.Tests
     }
 
     /// <summary>
-    /// Repeats tests for all Dialect specified.
+    /// Repeats tests for all Dialect flags specified.
     /// Also sets nunit categories for each dialect flag which 
-    /// enables skipping of tests by using Dialect enum flag values
-    /// as exclude category names in the test runner
+    /// enables adhoc filtering of tests by using Dialect enum flag values
+    /// as category names in the test runner
     /// </summary>
     /// <example>
     /// Use Dialect flags enum values to filter out one or more dialects from test runs
@@ -234,33 +247,72 @@ namespace ServiceStack.OrmLite.Tests
     /// dotnet test --filter TestCategory=MySql5_5 // filters MySql tests for db version v5.5 
     /// </code>
     /// </example>
-    public class TestFixtureOrmLiteDialectsAttribute : TestFixtureSourceAttribute, IApplyToTest
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
+    public class TestFixtureOrmLiteDialectsAttribute : NUnitAttribute, IFixtureBuilder2
     {
-        public static IEnumerable<Dialect> DialectValues = EnumUtils.GetValues<Dialect>();
-        public static IEnumerable<Dialect> GetAllFlags(Dialect dialect)  
+        private static readonly IEnumerable<Dialect> DialectValues = EnumUtils.GetValues<Dialect>();
+ 
+        public static IEnumerable<Dialect> GetAllFlags(Dialect dialect)
         {
             return DialectValues.Where(x => x.HasFlag(dialect)).ToArray();
         }
         
-        public TestFixtureOrmLiteDialectsAttribute(TestDialect testDialect) : base(typeof(FixtureDataProvider), testDialect.ToString())
+        private readonly Dialect _dialect;
+        private readonly NUnitTestFixtureBuilder _builder = new NUnitTestFixtureBuilder();
+
+        public TestFixtureOrmLiteDialectsAttribute(Dialect dialect)
         {
+            _dialect = dialect;
         }
 
-        public void ApplyToTest(Test test)
+        public IEnumerable<TestSuite> BuildFrom(ITypeInfo typeInfo)
         {
-            // Each dialect argument will set the category
-            // this enables filtering of tests using nunit category filters
-            // or dotnet test --filter category=<dialect> enum flag values
-            var cats = test.Arguments.OfType<Dialect>().SelectMany(GetAllFlags).Distinct();
-            cats.Each(e => test.Properties.Add(PropertyNames.Category, e.ToString()));
+            return BuildFrom(typeInfo, null);
+        }
+        
+        public IEnumerable<TestSuite> BuildFrom(ITypeInfo typeInfo, IPreFilter filter)
+        {
+            var dialectArgs = new List<TestFixtureData>();
+            
+            if(_dialect.HasFlag(Dialect.Sqlite)) dialectArgs.Add(new TestFixtureData(Dialect.Sqlite));
+            if(_dialect.HasFlag(Dialect.MySql5_5)) dialectArgs.Add(new TestFixtureData(Dialect.MySql5_5));
+            if(_dialect.HasFlag(Dialect.MySql10_1)) dialectArgs.Add(new TestFixtureData(Dialect.MySql10_1));
+            if(_dialect.HasFlag(Dialect.MySql10_2)) dialectArgs.Add(new TestFixtureData(Dialect.MySql10_2));
+            if(_dialect.HasFlag(Dialect.MySql10_3)) dialectArgs.Add(new TestFixtureData(Dialect.MySql10_3));
+            if(_dialect.HasFlag(Dialect.MySql10_4)) dialectArgs.Add(new TestFixtureData(Dialect.MySql10_4));
+            if(_dialect.HasFlag(Dialect.PostgreSql9)) dialectArgs.Add(new TestFixtureData(Dialect.PostgreSql9));
+            if(_dialect.HasFlag(Dialect.PostgreSql10)) dialectArgs.Add(new TestFixtureData(Dialect.PostgreSql10));
+            if(_dialect.HasFlag(Dialect.PostgreSql11)) dialectArgs.Add(new TestFixtureData(Dialect.PostgreSql11));
+            if(_dialect.HasFlag(Dialect.SqlServer)) dialectArgs.Add(new TestFixtureData(Dialect.SqlServer));
+            if(_dialect.HasFlag(Dialect.SqlServer2008)) dialectArgs.Add(new TestFixtureData(Dialect.SqlServer2008));
+            if(_dialect.HasFlag(Dialect.SqlServer2012)) dialectArgs.Add(new TestFixtureData(Dialect.SqlServer2012));
+            if(_dialect.HasFlag(Dialect.SqlServer2014)) dialectArgs.Add(new TestFixtureData(Dialect.SqlServer2014));
+            if(_dialect.HasFlag(Dialect.SqlServer2016)) dialectArgs.Add(new TestFixtureData(Dialect.SqlServer2016));
+            if(_dialect.HasFlag(Dialect.SqlServer2017)) dialectArgs.Add(new TestFixtureData(Dialect.SqlServer2017));
+            if(_dialect.HasFlag(Dialect.Firebird)) dialectArgs.Add(new TestFixtureData(Dialect.Firebird));
+            if(_dialect.HasFlag(Dialect.Oracle10)) dialectArgs.Add(new TestFixtureData(Dialect.Oracle10));
+            if(_dialect.HasFlag(Dialect.Oracle11)) dialectArgs.Add(new TestFixtureData(Dialect.Oracle11));
+            if(_dialect.HasFlag(Dialect.Oracle12)) dialectArgs.Add(new TestFixtureData(Dialect.Oracle12));
+            if(_dialect.HasFlag(Dialect.Oracle18)) dialectArgs.Add(new TestFixtureData(Dialect.Oracle18));
+            if(_dialect.HasFlag(Dialect.VistaDb)) dialectArgs.Add(new TestFixtureData(Dialect.VistaDb));
+
+            foreach (var parms in dialectArgs)
+            {
+                // ignore test if not in TestConfig but add as ignored to explain why
+                if (!TestConfig.DefaultDialects.HasFlag((Dialect)parms.Arguments[0]))
+                    parms.Ignore($"Dialect not included in TestConfig.DefaultDialects value {TestConfig.DefaultDialects}");
+
+                parms.Properties.Add(PropertyNames.Category, parms.Arguments[0].ToString());
+                yield return _builder.BuildFrom(typeInfo, filter, parms);
+            }
         }
     }
 
     /// <summary>
     /// Can be applied to a test to skip for specific dialects
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
-    public class IgnoreProviderAttribute : NUnitAttribute, IApplyToContext
+    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
+    public class IgnoreProviderAttribute : NUnitAttribute, ITestAction
     {
         private readonly Dialect _dialect;
         private readonly string _reason;
@@ -271,228 +323,24 @@ namespace ServiceStack.OrmLite.Tests
             _reason = reason;
         }
 
-        public void ApplyToContext(TestExecutionContext context)
+        public void BeforeTest(ITest test)
         {
-            if (context.TestObject?.GetType()?.GetField("Dialect")?.GetValue(context.TestObject) is Dialect currentDialect)
+            // get the dialect from either the class or method parent
+            // and if dialect matches, ignore test
+            var dialects = test.TestType == "TestMethod" ? test.Parent.Arguments.OfType<Dialect>() : test.Arguments.OfType<Dialect>();
+            foreach (var dialect in dialects)
             {
-                if (_dialect.HasFlag(currentDialect) && context.CurrentTest.RunState != RunState.NotRunnable)
+                if (_dialect.HasFlag(dialect) && test.RunState != RunState.NotRunnable)
                 {
-                    // dialect match, skip test
-                    var message = $"Ignoring for {currentDialect}: {_reason}";
-                    context.CurrentTest.RunState = RunState.Skipped;
-                    context.CurrentTest.Properties.Set(PropertyNames.SkipReason, message);
-                    Assert.Ignore(message);
-
-                    return;
+                    Assert.Ignore($"Ignoring for {dialect}: {_reason}");
                 }
-
-                return;
-            }
-            
-            //context.OutWriter.WriteLine("IgnoreProviderAttribute usage invalid, will only work if class has 'Dialect' field set");
-        }
-    }
-
-    /// <summary>
-    /// Each enum value represents a property in <see cref="FixtureDataProvider"/>
-    /// </summary>
-    public enum TestDialect
-    {
-        Supported = 0,
-        SupportedAllVersions = 1,
-        Community = 2,
-        CommunityAllVersions = 3,
-        All = 4,
-        Sqlite = 5,
-        SqlServer = 6,
-        MySql = 7,
-        PostgreSql = 8,
-        Firebird = 9,
-        Oracle = 10,
-        VistaDb
-    }
-
-    /// <summary>
-    /// Predefined sets of dialects and versions for db integration testing, for use with <seealso cref="OrmLiteProvidersTestBase"/>
-    /// Can be used with <seealso cref="TestFixtureOrmLiteDialectsAttribute"/>
-    /// To set the default for <seealso cref="TestFixtureOrmLiteAttribute"/> change <see cref="TestConfig" />.DefaultDialects 
-    /// </summary>
-    public class FixtureDataProvider
-    {
-        /// <summary>
-        /// All versions of all providers
-        /// </summary>
-        public static IEnumerable All
-        {
-            get
-            {
-                yield return new TestFixtureData(Dialect.Sqlite);
-                yield return new TestFixtureData(Dialect.MySql5_5);
-                yield return new TestFixtureData(Dialect.MySql10_1);
-                yield return new TestFixtureData(Dialect.MySql10_2);
-                yield return new TestFixtureData(Dialect.MySql10_3);
-                yield return new TestFixtureData(Dialect.MySql10_4);
-                yield return new TestFixtureData(Dialect.PostgreSql9);
-                yield return new TestFixtureData(Dialect.PostgreSql10);
-                yield return new TestFixtureData(Dialect.PostgreSql11);
-                yield return new TestFixtureData(Dialect.SqlServer);
-                yield return new TestFixtureData(Dialect.SqlServer2008);
-                yield return new TestFixtureData(Dialect.SqlServer2012);
-                yield return new TestFixtureData(Dialect.SqlServer2014);
-                yield return new TestFixtureData(Dialect.SqlServer2016);
-                yield return new TestFixtureData(Dialect.SqlServer2017);
-                yield return new TestFixtureData(Dialect.Firebird);
-                yield return new TestFixtureData(Dialect.Oracle10);
-                yield return new TestFixtureData(Dialect.Oracle11);
-                yield return new TestFixtureData(Dialect.Oracle12);
-                yield return new TestFixtureData(Dialect.Oracle18);
-                yield return new TestFixtureData(Dialect.VistaDb);
             }
         }
 
-        public static IEnumerable VistaDb
+        public void AfterTest(ITest test)
         {
-            get { yield return new TestFixtureData(Dialect.VistaDb); }
-        }
-        
-        public static IEnumerable Sqlite
-        {
-            get { yield return new TestFixtureData(Dialect.Sqlite); }
         }
 
-        /// <summary>
-        /// All versions of all providers
-        /// </summary>
-        public static IEnumerable Oracle
-        {
-            get
-            {
-                yield return new TestFixtureData(Dialect.Oracle10);
-                yield return new TestFixtureData(Dialect.Oracle11);
-                yield return new TestFixtureData(Dialect.Oracle12);
-                yield return new TestFixtureData(Dialect.Oracle18);
-            }
-        }
-
-        /// <summary>
-        /// All versions of progres providers
-        /// </summary>
-        public static IEnumerable PostgreSql
-        {
-            get
-            {
-                yield return new TestFixtureData(Dialect.PostgreSql9);
-                yield return new TestFixtureData(Dialect.PostgreSql10);
-                yield return new TestFixtureData(Dialect.PostgreSql11);
-            }
-        }
-
-        /// <summary>
-        /// All versions of mysql providers
-        /// </summary>
-        public static IEnumerable MySql
-        {
-            get
-            {
-                yield return new TestFixtureData(Dialect.MySql5_5);
-                yield return new TestFixtureData(Dialect.MySql10_1);
-                yield return new TestFixtureData(Dialect.MySql10_2);
-                yield return new TestFixtureData(Dialect.MySql10_3);
-                yield return new TestFixtureData(Dialect.MySql10_4);
-            }
-        }
-
-        /// <summary>
-        /// All versions of sqlserver providers
-        /// </summary>
-        public static IEnumerable SqlServer
-        {
-            get
-            {
-                yield return new TestFixtureData(Dialect.SqlServer);
-                yield return new TestFixtureData(Dialect.SqlServer2008);
-                yield return new TestFixtureData(Dialect.SqlServer2012);
-                yield return new TestFixtureData(Dialect.SqlServer2014);
-                yield return new TestFixtureData(Dialect.SqlServer2016);
-                yield return new TestFixtureData(Dialect.SqlServer2017);
-            }
-        }
-        
-        // <summary>
-        /// All versions of all providers
-        /// </summary>
-        public static IEnumerable Firebird
-        {
-            get { yield return new TestFixtureData(Dialect.Firebird); }
-        }
-
-        /// <summary>
-        /// base versions of support providers
-        /// </summary>
-        public static IEnumerable Supported
-        {
-            get
-            {
-                yield return new TestFixtureData(Dialect.Sqlite);
-                yield return new TestFixtureData(Dialect.MySql5_5);
-                yield return new TestFixtureData(Dialect.PostgreSql9);
-                yield return new TestFixtureData(Dialect.SqlServer);
-            }
-        }
-
-        /// <summary>
-        /// All versions of supported OrmLite providers
-        /// </summary>
-        public static IEnumerable SupportedAllVersions
-        {
-            get
-            {
-                yield return new TestFixtureData(Dialect.Sqlite);
-                yield return new TestFixtureData(Dialect.MySql5_5);
-                yield return new TestFixtureData(Dialect.MySql10_1);
-                yield return new TestFixtureData(Dialect.MySql10_2);
-                yield return new TestFixtureData(Dialect.MySql10_3);
-                yield return new TestFixtureData(Dialect.MySql10_4);
-                yield return new TestFixtureData(Dialect.PostgreSql9);
-                yield return new TestFixtureData(Dialect.PostgreSql10);
-                yield return new TestFixtureData(Dialect.PostgreSql11);
-                yield return new TestFixtureData(Dialect.SqlServer2008);
-                yield return new TestFixtureData(Dialect.SqlServer2012);
-                yield return new TestFixtureData(Dialect.SqlServer2014);
-                yield return new TestFixtureData(Dialect.SqlServer2016);
-                yield return new TestFixtureData(Dialect.SqlServer2017);
-            }
-        }
-
-        /// <summary>
-        /// All base versions of community OrmLite providers
-        /// </summary>
-        public static IEnumerable Community
-        {
-            get
-            {
-                yield return new TestFixtureData(Dialect.Firebird);
-                yield return new TestFixtureData(Dialect.Oracle10);
-                yield return new TestFixtureData(Dialect.VistaDb);
-            }
-        }
-
-        /// <summary>
-        /// All versions of community OrmLite providers
-        /// </summary>
-        public static IEnumerable CommunityAllVersions
-        {
-            get
-            {
-                yield return new TestFixtureData(Dialect.Firebird);
-                yield return new TestFixtureData(Dialect.Oracle10);
-                yield return new TestFixtureData(Dialect.Oracle11);
-                yield return new TestFixtureData(Dialect.Oracle12);
-                yield return new TestFixtureData(Dialect.Oracle18);
-                yield return new TestFixtureData(Dialect.VistaDb);
-            }
-        }
-
-        
+        public ActionTargets Targets { get; }
     }
 }

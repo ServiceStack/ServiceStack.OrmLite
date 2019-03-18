@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite.Tests
         /// <summary>
         /// This value controls which providers are tested for all <see cref="TestFixtureOrmLiteAttribute"/> tests where dialects are not explicitly set
         /// </summary>
-        public static TestDialect DefaultDialects = EnvironmentVariable("DefaultDialects", TestDialect.Sqlite);
+        public static Dialect DefaultDialects = EnvironmentVariable("DefaultDialects", Dialect.Sqlite);
         
         public const bool EnableDebugLogging = false;
 

@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
-    [TestFixtureOrmLiteDialects(TestDialect.SqlServer)]
+    [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
     public class SqlServerProviderTests : OrmLiteProvidersTestBase
     {
         public SqlServerProviderTests(Dialect dialect) : base(dialect)

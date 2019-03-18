@@ -5,7 +5,7 @@ using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    [TestFixtureOrmLiteDialects(TestDialect.PostgreSql)]
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class ApiPostgreSqlTestsAsync : OrmLiteProvidersTestBase
     {
         public ApiPostgreSqlTestsAsync(Dialect dialect) : base(dialect)

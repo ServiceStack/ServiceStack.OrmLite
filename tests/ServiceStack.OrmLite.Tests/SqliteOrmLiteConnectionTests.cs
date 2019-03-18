@@ -5,7 +5,7 @@ using ServiceStack.Common.Tests.Models;
 
 namespace ServiceStack.OrmLite.Tests
 {
-	[TestFixtureOrmLiteDialects(TestDialect.Sqlite)]
+	[TestFixtureOrmLiteDialects(Dialect.Sqlite)]
 	public class SqliteOrmLiteConnectionTests : OrmLiteProvidersTestBase
 	{
 		public SqliteOrmLiteConnectionTests(Dialect dialect) : base(dialect)

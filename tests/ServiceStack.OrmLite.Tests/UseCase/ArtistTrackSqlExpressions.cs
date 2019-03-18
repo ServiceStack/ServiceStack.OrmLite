@@ -6,7 +6,7 @@ using System.Collections.Generic;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
 {
-    [TestFixtureOrmLiteDialects(TestDialect.SqlServer)]
+    [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
     public class ArtistTrackSqlExpressions : OrmLiteProvidersTestBase
     {
         public ArtistTrackSqlExpressions(Dialect dialect) : base(dialect)

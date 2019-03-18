@@ -5,7 +5,7 @@ using ServiceStack.OrmLite.Tests.Shared;
 #pragma warning disable 618  
 namespace ServiceStack.OrmLite.Tests.Async.Legacy
 {
-    [TestFixtureOrmLiteDialects(TestDialect.MySql)]
+    [TestFixtureOrmLiteDialects(Dialect.AnyMySql)]
     public class ApiMySqlLegacyTestsAsync : OrmLiteProvidersTestBase
     {
         public ApiMySqlLegacyTestsAsync(Dialect dialect) : base(dialect)

@@ -50,8 +50,8 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Dialect.Oracle, "Test assert fails with Oracle because Oracle does not allow 64000 character fields and uses VARCHAR2 not VARCHAR")]
-        [IgnoreProvider(Dialect.PostgreSql, "Uses 'text' for strings by default")]
+        [IgnoreProvider(Dialect.AnyOracle, "Test assert fails with Oracle because Oracle does not allow 64000 character fields and uses VARCHAR2 not VARCHAR")]
+        [IgnoreProvider(Dialect.AnyPostgreSql, "Uses 'text' for strings by default")]
         public void Can_change_column_definition()
         {
             typeof(DynamicCacheEntry)

@@ -5,7 +5,7 @@ using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Async.Legacy
 {
-    [TestFixtureOrmLiteDialects(TestDialect.SqlServer)]
+    [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
     public class ApiSqlServerLegacyTestsAsync : OrmLiteProvidersTestBase
     {
         public ApiSqlServerLegacyTestsAsync(Dialect dialect) : base(dialect)
@@ -29,8 +29,7 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
 
             await db.SingleAsync<Person>(q => q.Where(x => x.Age == 42));
 
-            if (Dialect.HasFlag(Dialect.SqlServer2012) | Dialect.HasFlag(Dialect.SqlServer2014) |
-                Dialect.HasFlag(Dialect.SqlServer2016) | Dialect.HasFlag(Dialect.SqlServer2017))
+            if (DialectFeatures.RowOffset)
             {
                 Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0) ORDER BY 1 OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY"));
             }

@@ -4,7 +4,7 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    [TestFixtureOrmLiteDialects(TestDialect.PostgreSql)]
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class JsonUpdateOnlyIssue : OrmLiteProvidersTestBase
     {
         public JsonUpdateOnlyIssue(Dialect dialect) : base(dialect)

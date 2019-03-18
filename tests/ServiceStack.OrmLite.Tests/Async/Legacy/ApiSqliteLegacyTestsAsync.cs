@@ -5,7 +5,7 @@ using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Async.Legacy
 {
-    [TestFixtureOrmLiteDialects(TestDialect.Sqlite)]
+    [TestFixtureOrmLiteDialects(Dialect.Sqlite)]
     public class ApiSqliteLegacyTestsAsync : OrmLiteProvidersTestBase
     {
         public ApiSqliteLegacyTestsAsync(Dialect dialect) : base(dialect)

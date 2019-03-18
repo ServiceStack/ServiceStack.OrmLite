@@ -5,7 +5,7 @@ using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    [TestFixtureOrmLiteDialects(TestDialect.MySql)]
+    [TestFixtureOrmLiteDialects(Dialect.AnyMySql)]
     public class ApiMySqlTestsAsync : OrmLiteProvidersTestBase
     {
         public ApiMySqlTestsAsync(Dialect dialect) : base(dialect)

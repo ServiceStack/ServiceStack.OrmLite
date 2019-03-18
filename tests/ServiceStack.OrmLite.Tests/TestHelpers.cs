@@ -36,11 +36,6 @@ namespace ServiceStack.OrmLite.Tests
         
         VistaDb = 1 << 21,
         
-        // base versions 
-        MySql = MySql5_5,
-        Oracle = Oracle10,
-        PostgreSql = PostgreSql9,
-        
         // any versions
         AnyPostgreSql = PostgreSql9 | PostgreSql10 | PostgreSql11,
         AnyMySql = MySql5_5 | MySql10_1 | MySql10_2 | MySql10_3 | MySql10_4,
@@ -48,7 +43,9 @@ namespace ServiceStack.OrmLite.Tests
         AnyOracle = Oracle10 | Oracle11 | Oracle12 | Oracle18,
         
         // db groups
+        BaseSupported = MySql5_5 | PostgreSql9 | SqlServer | Sqlite,
         Supported = Sqlite | AnySqlServer | AnyPostgreSql | AnyMySql,
+        BaseCommunity = Firebird | Oracle10 | VistaDb,
         Community = Firebird | AnyOracle | VistaDb,
         DockerDb =  AnySqlServer | AnyPostgreSql | AnyMySql | Community,
         

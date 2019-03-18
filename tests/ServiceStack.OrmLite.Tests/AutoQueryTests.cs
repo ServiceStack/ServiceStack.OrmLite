@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using NUnit.Framework;
-using NUnit.Framework.Internal;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -399,9 +397,9 @@ namespace ServiceStack.OrmLite.Tests
                 sb.Length = 0;
                 foreach (var result in results)
                 {
-                    if (Dialect.HasFlag(Dialect.AnyPostgreSql))
+                    if (Dialect.AnyPostgreSql.HasFlag(Dialect))
                         sb.AppendLine(result.Name);
-                    else if (Dialect.HasFlag(Dialect.Firebird))
+                    else if (Dialect.Firebird.HasFlag(Dialect))
                         sb.AppendLine(result.NAME);
                     else
                         sb.AppendLine(result.Name);
