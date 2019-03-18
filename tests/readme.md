@@ -44,7 +44,7 @@ public class DbFeatures1 : OrmLiteProvidersTestBase
 
 By default, the tests will run against in-memory instances of Sqlite.
 This is set in `TestConfig.DefaultDialects` and can be overridden either by changing
-the value assigned or by setting an *Environment Variable* of the same name.
+the value assigned or by setting an Environment Variable named `DefaultDialects` to one of the Dialect enum values.
 
 The accepted values come from the enum `Dialect` which is injected into the class constructor.
 
@@ -86,7 +86,7 @@ To exclude testing specific providers for all tests in a fixture, use the `Ignor
 
 ```csharp
 [TestFixtureOrmLite()]
-[IgnoreProvider(Dialects.AnyMySql | Dialects.PostgreSql9)]
+[IgnoreProvider(Dialects.AnyMySql | Dialects.PostgreSql9, "Not supported by database")]
 public class SqlDbFeatures1 : OrmLiteProvidersTestBase 
 {
 }
