@@ -99,7 +99,6 @@ namespace ServiceStack.OrmLite.Tests
 
     public class CustomSqlExpression<T> : SqliteExpression<T>
     {
-
         public CustomSqlExpression(IOrmLiteDialectProvider dialectProvider) : base(dialectProvider)
         {
         }
@@ -181,15 +180,17 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
-    [TestFixtureOrmLite]
+    [TestFixtureOrmLiteDialects(Dialect.Sqlite)]
     public class CustomSqlExpressionTests : OrmLiteProvidersTestBase
     {
         public CustomSqlExpressionTests(Dialect dialect) : base(dialect)
         {
             // override the sqlite provider with the custom one
-            DbFactory.RegisterConnection(Dialect.Sqlite.ToString(), TestConfig.SqliteMemoryDb, new CustomSqlServerDialectProvider());
+            var customSqlServerDialectProvider = new CustomSqlServerDialectProvider();
+            DialectProvider = customSqlServerDialectProvider;
+            DbFactory.RegisterConnection(Dialect.Sqlite.ToString(), TestConfig.SqliteMemoryDb, customSqlServerDialectProvider);
         }
-
+        
         private IDbConnection Db;
         
         [SetUp]
