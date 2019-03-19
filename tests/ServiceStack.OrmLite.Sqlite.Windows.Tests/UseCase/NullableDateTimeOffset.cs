@@ -31,7 +31,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         [Test]
         public void Can_Insert_RecordWithNullable_DateTimeOffset()
         {
-            var path = Config.SqliteFileDb;
+            var path = TestConfig.SqliteFileDb;
             if (File.Exists(path))
                 File.Delete(path);
             
@@ -48,7 +48,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         [Test]
         public void Can_Update_RecordWithNullable_DateTimeOffset()
         {
-            var path = Config.SqliteFileDb;
+            var path = TestConfig.SqliteFileDb;
             if (File.Exists(path))
                 File.Delete(path);
 
@@ -70,7 +70,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         [Test]
         public void Can_UpdateWithNull_RecordWithNullable_DateTimeOffset()
         {
-            var path = Config.SqliteFileDb;
+            var path = TestConfig.SqliteFileDb;
             if (File.Exists(path))
                 File.Delete(path);
 
