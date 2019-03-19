@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
@@ -21,29 +21,29 @@ namespace ServiceStack.OrmLite.MySql
 
         public MySqlDialectProviderBase()
         {
-            base.AutoIncrementDefinition = "AUTO_INCREMENT";
-            base.DefaultValueFormat = " DEFAULT {0}";
+            AutoIncrementDefinition = "AUTO_INCREMENT";
+            DefaultValueFormat = " DEFAULT {0}";
             base.SelectIdentitySql = "SELECT LAST_INSERT_ID()";
 
-            base.InitColumnTypeMap();
+            InitColumnTypeMap();
 
-            base.RegisterConverter<string>(new MySqlStringConverter());
-            base.RegisterConverter<char[]>(new MySqlCharArrayConverter());
-            base.RegisterConverter<bool>(new MySqlBoolConverter());
+            RegisterConverter<string>(new MySqlStringConverter());
+            RegisterConverter<char[]>(new MySqlCharArrayConverter());
+            RegisterConverter<bool>(new MySqlBoolConverter());
 
-            base.RegisterConverter<byte>(new MySqlByteConverter());
-            base.RegisterConverter<sbyte>(new MySqlSByteConverter());
-            base.RegisterConverter<short>(new MySqlInt16Converter());
-            base.RegisterConverter<ushort>(new MySqlUInt16Converter());
-            base.RegisterConverter<int>(new MySqlInt32Converter());
-            base.RegisterConverter<uint>(new MySqlUInt32Converter());
+            RegisterConverter<byte>(new MySqlByteConverter());
+            RegisterConverter<sbyte>(new MySqlSByteConverter());
+            RegisterConverter<short>(new MySqlInt16Converter());
+            RegisterConverter<ushort>(new MySqlUInt16Converter());
+            RegisterConverter<int>(new MySqlInt32Converter());
+            RegisterConverter<uint>(new MySqlUInt32Converter());
 
-            base.RegisterConverter<decimal>(new MySqlDecimalConverter());
+            RegisterConverter<decimal>(new MySqlDecimalConverter());
 
-            base.RegisterConverter<Guid>(new MySqlGuidConverter());
-            base.RegisterConverter<DateTimeOffset>(new MySqlDateTimeOffsetConverter());
+            RegisterConverter<Guid>(new MySqlGuidConverter());
+            RegisterConverter<DateTimeOffset>(new MySqlDateTimeOffsetConverter());
 
-            this.Variables = new Dictionary<string, string>
+            Variables = new Dictionary<string, string>
             {
                 { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
                 { OrmLiteVariables.MaxText, "LONGTEXT" },
@@ -216,10 +216,7 @@ namespace ServiceStack.OrmLite.MySql
                 sbConstraints.Append(",\n" + uniqueConstraints);
             }
 
-            var sql = string.Format(
-                "CREATE TABLE {0} \n(\n  {1}{2} \n); \n", GetQuotedTableName(modelDef),
-                StringBuilderCache.ReturnAndFree(sbColumns),
-                StringBuilderCacheAlt.ReturnAndFree(sbConstraints));
+            var sql = $"CREATE TABLE {GetQuotedTableName(modelDef)} \n(\n  {StringBuilderCache.ReturnAndFree(sbColumns)}{StringBuilderCacheAlt.ReturnAndFree(sbConstraints)} \n); \n";
 
             return sql;
         }
@@ -236,7 +233,7 @@ namespace ServiceStack.OrmLite.MySql
 
             var ret = base.GetColumnDefinition(fieldDef);
             if (fieldDef.IsRowVersion)
-                return ret + " DEFAULT 1";
+                return $"{ret} DEFAULT 1";
 
             return ret;
         }
