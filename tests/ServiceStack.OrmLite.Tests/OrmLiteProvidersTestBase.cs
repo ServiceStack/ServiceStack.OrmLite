@@ -55,7 +55,7 @@ namespace ServiceStack.OrmLite.Tests
         /// <summary>
         /// The current DialogProvider instance
         /// </summary>
-        protected readonly IOrmLiteDialectProvider DialectProvider;
+        protected IOrmLiteDialectProvider DialectProvider;
         
         // The Database Factory
         protected OrmLiteConnectionFactory DbFactory { get; } = DbFactorySetup.Instance.CreateCopy();
@@ -128,6 +128,8 @@ namespace ServiceStack.OrmLite.Tests
             dbFactory.RegisterConnection(Dialect.PostgreSql10.ToString(), TestConfig.PostgresDb_10, PostgreSqlDialect.Provider);
             dbFactory.RegisterConnection(Dialect.PostgreSql11.ToString(), TestConfig.PostgresDb_11, PostgreSqlDialect.Provider);
 
+            dbFactory.RegisterConnection(Dialect.MySqlConnector.ToString(), TestConfig.MySqlDb_5_5, MySqlConnectorDialect.Provider);
+            
             dbFactory.RegisterConnection(Dialect.MySql5_5.ToString(), TestConfig.MySqlDb_5_5, MySql55Dialect.Provider);
             dbFactory.RegisterConnection(Dialect.MySql10_1.ToString(), TestConfig.MySqlDb_10_1, MySqlDialect.Provider);
             dbFactory.RegisterConnection(Dialect.MySql10_2.ToString(), TestConfig.MySqlDb_10_2, MySqlDialect.Provider);

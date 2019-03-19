@@ -26,24 +26,25 @@ namespace ServiceStack.OrmLite.Tests
         MySql10_2 = 1 << 13,
         MySql10_3 = 1 << 14,
         MySql10_4 = 1 << 15,
+        MySqlConnector = 1 << 16,
         
-        Oracle10 = 1 << 16,
-        Oracle11 = 1 << 17,
-        Oracle12 = 1 << 18,
-        Oracle18 = 1 << 19,
+        Oracle10 = 1 << 17,
+        Oracle11 = 1 << 18,
+        Oracle12 = 1 << 19,
+        Oracle18 = 1 << 20,
         
-        Firebird = 1 << 20,
+        Firebird = 1 << 21,
         
-        VistaDb = 1 << 21,
+        VistaDb = 1 << 22,
         
         // any versions
         AnyPostgreSql = PostgreSql9 | PostgreSql10 | PostgreSql11,
-        AnyMySql = MySql5_5 | MySql10_1 | MySql10_2 | MySql10_3 | MySql10_4,
+        AnyMySql = MySql5_5 | MySql10_1 | MySql10_2 | MySql10_3 | MySql10_4 | MySqlConnector, 
         AnySqlServer = SqlServer | SqlServer2008 | SqlServer2012 | SqlServer2014 | SqlServer2016 | SqlServer2017 | SqlServerMdf,
         AnyOracle = Oracle10 | Oracle11 | Oracle12 | Oracle18,
         
         // db groups
-        BaseSupported = MySql5_5 | PostgreSql9 | SqlServer | Sqlite,
+        BaseSupported = MySql5_5 | MySqlConnector | PostgreSql9 | SqlServer | Sqlite,
         Supported = Sqlite | AnySqlServer | AnyPostgreSql | AnyMySql,
         BaseCommunity = Firebird | Oracle10 | VistaDb,
         Community = Firebird | AnyOracle | VistaDb,
