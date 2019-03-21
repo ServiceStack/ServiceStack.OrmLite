@@ -179,7 +179,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 results = db.Select<TestType>(x => (x.Id & 2) == 2);
                 Assert.That(results.Map(x => x.Id), Is.EquivalentTo(new[]{ 2, 3 }));
 
-                if ((Dialect & Dialect.AnySqlServer) != Dialect)
+                if (!Dialect.AnySqlServer.HasFlag(Dialect))
                 {
                     results = db.Select<TestType>(x => (x.Id << 1) == 4);
                     Assert.That(results.Map(x => x.Id), Is.EquivalentTo(new[]{ 2 }));
@@ -188,7 +188,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     Assert.That(results.Map(x => x.Id), Is.EquivalentTo(new[]{ 2, 3 }));
                 }
                 
-                if ((Dialect & Dialect.AnySqlServer) == Dialect || Dialect == Dialect.AnyMySql)
+                if ((Dialect.AnySqlServer | Dialect.AnyMySql).HasFlag(Dialect))
                 {
                     results = db.Select<TestType>(x => (x.Id ^ 2) == 3);
                     Assert.That(results.Map(x => x.Id), Is.EquivalentTo(new[]{ 1 }));

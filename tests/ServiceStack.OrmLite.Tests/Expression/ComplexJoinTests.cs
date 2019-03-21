@@ -202,7 +202,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 InitTables(db);
 
                 /* This gives the expected values for BazId */
-                var jn = new JoinSqlBuilder<JoinResult, FooBar>()
+                var jn = new JoinSqlBuilder<JoinResult, FooBar>(DialectProvider)
                     .Join<FooBar, BarJoin>(
                         sourceColumn: dp => dp.BarId,
                         destinationColumn: p => p.Id,

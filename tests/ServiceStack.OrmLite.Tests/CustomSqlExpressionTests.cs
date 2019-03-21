@@ -188,7 +188,7 @@ namespace ServiceStack.OrmLite.Tests
             // override the sqlite provider with the custom one
             var customSqlServerDialectProvider = new CustomSqlServerDialectProvider();
             DialectProvider = customSqlServerDialectProvider;
-            DbFactory.RegisterConnection(Dialect.Sqlite.ToString(), TestConfig.SqliteMemoryDb, customSqlServerDialectProvider);
+            OrmLiteConnectionFactory.NamedConnections[Dialect.Sqlite.ToString()] = new OrmLiteConnectionFactory(TestConfig.SqliteMemoryDb, customSqlServerDialectProvider, false);
         }
         
         private IDbConnection Db;

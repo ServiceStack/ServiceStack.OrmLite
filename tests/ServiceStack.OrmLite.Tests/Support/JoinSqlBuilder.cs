@@ -28,7 +28,7 @@ namespace ServiceStack.OrmLite
 
         public JoinSqlBuilder(IOrmLiteDialectProvider dialectProvider=null)
         {
-            this.dialectProvider = dialectProvider ?? OrmLiteConfig.DialectProvider;
+            this.dialectProvider = dialectProvider.ThrowIfNull(nameof(dialectProvider));
             basePocoType = typeof(TBasePoco);
             baseSchema = GetSchema(basePocoType);
             baseTableName = basePocoType.GetModelMetadata().ModelName;
@@ -59,9 +59,9 @@ namespace ServiceStack.OrmLite
             foreach (var item in pocoType.GetModelMetadata().FieldDefinitions)
             {
                 if (withTablePrefix)
-                    result.Add(string.Format("{0}.{1}", dialectProvider.GetQuotedTableName(tableName), dialectProvider.GetQuotedColumnName(item.FieldName)));
+                    result.Add($"{dialectProvider.GetQuotedTableName(tableName)}.{dialectProvider.GetQuotedColumnName(item.FieldName)}");
                 else
-                    result.Add(string.Format("{0}", dialectProvider.GetQuotedColumnName(item.FieldName)));
+                    result.Add($"{dialectProvider.GetQuotedColumnName(item.FieldName)}");
             }
             return result;
         }
@@ -91,9 +91,9 @@ namespace ServiceStack.OrmLite
                 alias = string.IsNullOrEmpty(alias) ? string.Empty : string.Format(" AS {0}", dialectProvider.GetQuotedColumnName(alias));
 
                 if (withTablePrefix)
-                    lst.Add(string.Format("{0}.{1}{2}", dialectProvider.GetQuotedTableName(tableName), dialectProvider.GetQuotedColumnName(fieldName), alias));
+                    lst.Add($"{dialectProvider.GetQuotedTableName(tableName)}.{dialectProvider.GetQuotedColumnName(fieldName)}{alias}");
                 else
-                    lst.Add(string.Format("{0}{1}", dialectProvider.GetQuotedColumnName(fieldName), alias));
+                    lst.Add($"{dialectProvider.GetQuotedColumnName(fieldName)}{alias}");
                 return;
             }
             throw new Exception("Only Members are allowed");
@@ -208,7 +208,7 @@ namespace ServiceStack.OrmLite
             {
                 throw new Exception("Expression should select only one Column ");
             }
-            this.columnList.Add(string.Format(" {0}({1}) ", functionName.ToUpper(), columns[0]));
+            this.columnList.Add($" {functionName.ToUpper()}({columns[0]}) ");
             return this;
         }
 
@@ -305,12 +305,6 @@ namespace ServiceStack.OrmLite
         {
             return JoinInternal<Join, TSourceTable, TDestinationTable>(JoinType.FULLOUTER, joinList, sourceColumn, destinationColumn, sourceTableColumnSelection, destinationTableColumnSelection, sourceWhere, destinationWhere);
         }
-
-        //Not ready yet
-        //public JoinSqlBuilder<TNewPoco, TBasePoco> SelfJoin<TSourceTable>(Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TSourceTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TSourceTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TSourceTable, bool>> destinationWhere = null)
-        //{
-        //    return JoinInternal<Join, TSourceTable, TSourceTable>(JoinType.SELF, joinList, sourceColumn, destinationColumn, sourceTableColumnSelection, destinationTableColumnSelection, sourceWhere, destinationWhere);
-        //}
 
         public JoinSqlBuilder<TNewPoco, TBasePoco> CrossJoin<TSourceTable, TDestinationTable>(Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null)
         {

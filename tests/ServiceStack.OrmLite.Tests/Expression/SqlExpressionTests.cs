@@ -363,7 +363,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
 #pragma warning disable 618
                 var joinFn = new Func<JoinSqlBuilder<LetterFrequency, LetterWeighting>>(() =>
-                    new JoinSqlBuilder<LetterFrequency, LetterWeighting>()
+                    new JoinSqlBuilder<LetterFrequency, LetterWeighting>(DialectProvider)
                         .Join<LetterFrequency, LetterWeighting>(x => x.Id, x => x.LetterFrequencyId)
                     );
 #pragma warning restore 618
