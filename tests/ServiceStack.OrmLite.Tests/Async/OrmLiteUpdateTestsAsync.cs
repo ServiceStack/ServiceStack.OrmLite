@@ -59,11 +59,11 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db, 2);
 
-                ResetUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
                 await db.UpdateAsync(cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider),
                     new DefaultValues { Id = 1, DefaultInt = 45 }, new DefaultValues { Id = 2, DefaultInt = 72 });
-                VerifyUpdateDateAsync(db);
-                VerifyUpdateDateAsync(db, id: 2);
+                await VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db, 2);
             }
         }
 
@@ -94,13 +94,13 @@ namespace ServiceStack.OrmLite.Tests.Async
             return firstRow;
         }
 
-        private static async void ResetUpdateDateAsync(IDbConnection db)
+        private async Task ResetUpdateDateAsync(IDbConnection db)
         {
             var updateTime = new DateTime(2011, 1, 1, 1, 1, 1, DateTimeKind.Utc);
             await db.UpdateAsync<DefaultValues>(new { UpdatedDateUtc = updateTime }, p => p.Id == 1);
         }
 
-        private static async void VerifyUpdateDateAsync(IDbConnection db, int id = 1)
+        private async Task VerifyUpdateDateAsync(IDbConnection db, int id = 1)
         {
             var row = await db.SingleByIdAsync<DefaultValues>(id);
             row.PrintDump();
@@ -114,10 +114,10 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
                 await db.UpdateAsync(new DefaultValues { Id = 1, DefaultInt = 2342 }, p => p.Id == 1,
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db);
             }
         }
 
@@ -129,12 +129,12 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
                 var row = await db.SingleByIdAsync<DefaultValues>(1);
                 row.DefaultInt = 3245;
                 row.DefaultDouble = 978.423;
                 await db.UpdateAsync(row, cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db);
             }
         }
 
@@ -146,10 +146,10 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
                 await db.UpdateAsync<DefaultValues>(new { DefaultInt = 765 }, p => p.Id == 1,
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db);
             }
         }
 
@@ -161,11 +161,11 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db, 2);
 
-                ResetUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
                 db.UpdateAll(new[] { new DefaultValues { Id = 1, DefaultInt = 45 }, new DefaultValues { Id = 2, DefaultInt = 72 } },
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDateAsync(db);
-                VerifyUpdateDateAsync(db, id: 2);
+                await VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db, 2);
             }
         }
 
@@ -177,10 +177,10 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
                 db.UpdateOnly(() => new DefaultValues { DefaultInt = 345 }, p => p.Id == 1,
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db);
             }
         }
 
@@ -192,73 +192,73 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
                 await db.UpdateOnlyAsync(() => new DefaultValues { DefaultInt = 345 }, db.From<DefaultValues>().Where(p => p.Id == 1),
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db);
             }
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.AnyMySql, "Default UtcDateTime value not supported")]
+        [IgnoreProvider(Dialect.AnyMySql, "Default UtcDateTime value not supported")]
         public async Task Can_filter_updateOnly_method3_to_insert_date()
         {
             using (var db = OpenDbConnection())
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
                 var row = await db.SingleByIdAsync<DefaultValues>(1);
                 row.DefaultDouble = 978.423;
                 await db.UpdateOnlyAsync(row, db.From<DefaultValues>().Update(p => p.DefaultDouble),
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db);
             }
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.AnyMySql, "Default UtcDateTime value not supported")]
+        [IgnoreProvider(Dialect.AnyMySql, "Default UtcDateTime value not supported")]
         public async Task Can_filter_updateOnly_method4_to_insert_date()
         {
             using (var db = OpenDbConnection())
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
                 var row = await db.SingleByIdAsync<DefaultValues>(1);
                 row.DefaultDouble = 978.423;
                 await db.UpdateOnlyAsync(row, p => p.DefaultDouble, p => p.Id == 1,
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db);
             }
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.AnyMySql, "Default UtcDateTime value not supported")]
+        [IgnoreProvider(Dialect.AnyMySql, "Default UtcDateTime value not supported")]
         public async Task Can_filter_updateOnly_method5_to_insert_date()
         {
             using (var db = OpenDbConnection())
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
                 var row = await db.SingleByIdAsync<DefaultValues>(1);
                 row.DefaultDouble = 978.423;
                 await db.UpdateOnlyAsync(row, new[] { nameof(DefaultValues.DefaultDouble) }, p => p.Id == 1,
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db);
             }
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.AnyMySql, "Default UtcDateTime value not supported")]
+        [IgnoreProvider(Dialect.AnyMySql, "Default UtcDateTime value not supported")]
         public async Task Can_filter_updateAdd_expression_to_insert_date()
         {
             using (var db = OpenDbConnection())
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
 
                 var count = await db.UpdateAddAsync(() => new DefaultValues { DefaultInt = 5, DefaultDouble = 7.2 }, p => p.Id == 1,
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
@@ -267,19 +267,19 @@ namespace ServiceStack.OrmLite.Tests.Async
                 var row = await db.SingleByIdAsync<DefaultValues>(1);
                 Assert.That(row.DefaultInt, Is.EqualTo(6));
                 Assert.That(row.DefaultDouble, Is.EqualTo(8.3).Within(0.1));
-                VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db);
             }
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.AnyMySql, "Default UtcDateTime value not supported")]
+        [IgnoreProvider(Dialect.AnyMySql, "Default UtcDateTime value not supported")]
         public async Task Can_filter_updateAdd_SqlExpression_to_insert_date()
         {
             using (var db = OpenDbConnection())
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
 
                 var where = db.From<DefaultValues>().Where(p => p.Id == 1);
                 var count = await db.UpdateAddAsync(() => new DefaultValues { DefaultInt = 5, DefaultDouble = 7.2 }, where,
@@ -289,7 +289,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                 var row = await db.SingleByIdAsync<DefaultValues>(1);
                 Assert.That(row.DefaultInt, Is.EqualTo(6));
                 Assert.That(row.DefaultDouble, Is.EqualTo(8.3).Within(0.1));
-                VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db);
             }
         }
     }
