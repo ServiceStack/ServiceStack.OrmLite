@@ -18,15 +18,15 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.CreateTable<ModelWithIndexFields>(true);
 
-                var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithIndexFields)).Join();
+                var sql = DialectProvider.ToCreateIndexStatements(typeof(ModelWithIndexFields)).Join();
 
                 var indexName = "idx_modelwithindexfields_name";
                 var uniqueName = "uidx_modelwithindexfields_uniquename";
 
-                if (Dialect == Dialect.AnyOracle || Dialect == Dialect.Firebird)
+                if ((Dialect.AnyOracle | Dialect.Firebird).HasFlag(Dialect))
                 {
-                    indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
-                    uniqueName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(uniqueName);
+                    indexName = DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
+                    uniqueName = DialectProvider.NamingStrategy.ApplyNameRestrictions(uniqueName);
                 }
 
                 Assert.That(sql, Does.Contain(indexName));
@@ -42,15 +42,15 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.CreateTable<ModelWithCompositeIndexFields>(true);
 
-                var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexFields)).Join();
+                var sql = DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexFields)).Join();
 
                 var indexName = "idx_modelwithcompositeindexfields_name";
                 var compositeName = "idx_modelwithcompositeindexfields_composite1_composite2";
 
-                if (Dialect == Dialect.AnyOracle || Dialect == Dialect.Firebird)
+                if ((Dialect.AnyOracle | Dialect.Firebird).HasFlag(Dialect))
                 {
-                    indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
-                    compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName);
+                    indexName = DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
+                    compositeName = DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName);
                 }
 
                 Assert.That(sql, Does.Contain(indexName));
@@ -66,15 +66,15 @@ namespace ServiceStack.OrmLite.Tests
                 db.CreateTable<ModelWithCompositeIndexFieldsDesc>(true);
                 db.GetLastSql().Print();
 
-                var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexFieldsDesc)).Join();
+                var sql = DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexFieldsDesc)).Join();
 
                 var indexName = "idx_modelwithcompositeindexfieldsdesc_name";
                 var compositeName = "idx_modelwithcompositeindexfieldsdesc_composite1_composite2";
 
-                if (Dialect == Dialect.AnyOracle || Dialect == Dialect.Firebird)
+                if ((Dialect.AnyOracle | Dialect.Firebird).HasFlag(Dialect))
                 {
-                    indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName).ToLower();
-                    compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName).ToLower();
+                    indexName = DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName).ToLower();
+                    compositeName = DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName).ToLower();
                 }
 
                 Assert.That(sql, Does.Contain(indexName));
@@ -83,21 +83,20 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreProvider(Tests.Dialect.Firebird, "Too long, not supported")]
         public void Can_create_ModelWithCompositeIndexOnFieldSpacesDesc_table()
         {
-            if (Dialect == Dialect.Firebird) return; //Too long, not supported
-
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithCompositeIndexOnFieldSpacesDesc>(true);
                 db.GetLastSql().Print();
 
-                var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexOnFieldSpacesDesc)).Join();
+                var sql = DialectProvider.ToCreateIndexStatements(typeof(ModelWithCompositeIndexOnFieldSpacesDesc)).Join();
 
                 var compositeName = "idx_modelwithcompositeindexonfieldspacesdesc_field_field";
 
-                if (Dialect == Dialect.AnyOracle || Dialect == Dialect.Firebird)
-                    compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName).ToLower();
+                if ((Dialect.AnyOracle | Dialect.Firebird).HasFlag(Dialect))
+                    compositeName = DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName).ToLower();
 
                 Assert.That(sql, Does.Contain(compositeName));
             }
@@ -110,15 +109,15 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.CreateTable<ModelWithNamedCompositeIndex>(true);
 
-                var sql = OrmLiteConfig.DialectProvider.ToCreateIndexStatements(typeof(ModelWithNamedCompositeIndex)).Join();
+                var sql = DialectProvider.ToCreateIndexStatements(typeof(ModelWithNamedCompositeIndex)).Join();
 
                 var indexName = "idx_modelwithnamedcompositeindex_name";
                 var compositeName = "uidx_modelwithnamedcompositeindexfields_composite1_composite2";
 
                 if (Dialect == Dialect.AnyOracle || Dialect == Dialect.Firebird)
                 {
-                    indexName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
-                    compositeName = OrmLiteConfig.DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName);
+                    indexName = DialectProvider.NamingStrategy.ApplyNameRestrictions(indexName);
+                    compositeName = DialectProvider.NamingStrategy.ApplyNameRestrictions(compositeName);
                 }
 
                 Assert.That(sql, Does.Contain(indexName));
