@@ -13,8 +13,6 @@ namespace ServiceStack.OrmLite.Tests
         /// </summary>
         public static Dialect DefaultDialects = EnvironmentVariable("DefaultDialects", Dialect.Sqlite);
         
-        public const bool EnableDebugLogging = false;
-
         public static string SqliteMemoryDb = EnvironmentVariable("SQLITE_CONNECTION", ":memory:");
         public static string SqlServerBuildDb = EnvironmentVariable("MSSQL_CONNECTION", "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;");
         public static string OracleDb = EnvironmentVariable("ORACLE_CONNECTION", "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=48401))(CONNECT_DATA=(SID=XE)));User Id=system;Password=test;");

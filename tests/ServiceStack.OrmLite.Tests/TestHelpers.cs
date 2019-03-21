@@ -44,11 +44,11 @@ namespace ServiceStack.OrmLite.Tests
         AnyOracle = Oracle10 | Oracle11 | Oracle12 | Oracle18,
         
         // db groups
-        BaseSupported = MySql5_5 | MySqlConnector | PostgreSql9 | SqlServer | Sqlite,
-        Supported = Sqlite | AnySqlServer | AnyPostgreSql | AnyMySql,
+        BaseSupported = Sqlite | MySql5_5 | MySqlConnector | PostgreSql9 | SqlServer,
+        Supported = Sqlite | AnyMySql | AnyPostgreSql | AnySqlServer,
         BaseCommunity = Firebird | Oracle10 | VistaDb,
         Community = Firebird | AnyOracle | VistaDb,
-        DockerDb =  AnySqlServer | AnyPostgreSql | AnyMySql | Community,
+        DockerDb =  AnyMySql | AnyPostgreSql | AnySqlServer | Community,
         
         // all
         All = Supported | Community
