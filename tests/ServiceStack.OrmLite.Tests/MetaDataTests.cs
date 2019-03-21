@@ -9,11 +9,22 @@ using ServiceStack.Text;
 namespace ServiceStack.OrmLite.Tests
 {
     [TestFixtureOrmLite]
-    [NonParallelizable]
     public class MetaDataTests : OrmLiteProvidersTestBase
     {
         public MetaDataTests(Dialect dialect) : base(dialect)
         {
+        }
+
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            if (!Dialect.Sqlite.HasFlag(Dialect))
+            {
+                using (var db = OpenDbConnection())
+                {
+                    db.CreateSchema<Schematable1>();
+                }
+            }
         }
 
         [Test]
