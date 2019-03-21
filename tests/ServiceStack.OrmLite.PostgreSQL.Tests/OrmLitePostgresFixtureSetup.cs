@@ -5,12 +5,7 @@ using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
-    
-    public class LoggerSetup : LogSetup
-    {
-    }
-
-    public class DbSetup : DbFactorySetup
+    public class OrmLitePostgresFixtureSetup : OrmLiteFixtureSetup
     {
     }
 }
