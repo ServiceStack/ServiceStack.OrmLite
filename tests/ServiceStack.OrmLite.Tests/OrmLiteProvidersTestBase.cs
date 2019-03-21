@@ -58,7 +58,7 @@ namespace ServiceStack.OrmLite.Tests
         protected IOrmLiteDialectProvider DialectProvider;
         
         // The Database Factory
-        protected OrmLiteConnectionFactory DbFactory { get; } = DbFactorySetup.Instance.CreateCopy();
+        protected OrmLiteConnectionFactory DbFactory { get; }
 
         protected TestLogFactory Log => LogSetup.Instance; 
 
@@ -72,13 +72,14 @@ namespace ServiceStack.OrmLite.Tests
         {
             Dialect = dialect;
             DialectFeatures = new DialectFeatures(Dialect);
-            DialectProvider = DbFactory.Open(dialect.ToString()).GetDialectProvider();
+            DbFactory = OrmLiteConnectionFactory.NamedConnections[Dialect.ToString()].CreateCopy();
+            DialectProvider = DbFactory.DialectProvider;
 
             if (OrmLiteConfig.DialectProvider == null) OrmLiteConfig.DialectProvider = DialectProvider;
         }
 
-        public virtual IDbConnection OpenDbConnection() => DbFactory.OpenDbConnection(Dialect.ToString());
-        public virtual Task<IDbConnection> OpenDbConnectionAsync() => DbFactory.OpenDbConnectionAsync(Dialect.ToString());
+        public virtual IDbConnection OpenDbConnection() => DbFactory.OpenDbConnection();
+        public virtual Task<IDbConnection> OpenDbConnectionAsync() => DbFactory.OpenDbConnectionAsync();
     }
 
     /// <summary>
@@ -110,13 +111,11 @@ namespace ServiceStack.OrmLite.Tests
     [SetUpFixture]
     public class DbFactorySetup
     {
-        public static OrmLiteConnectionFactory Instance { get; private set; }
-
         [OneTimeSetUp]
         public void RunBeforeAnyTests()
         {
             var dbFactory = InitDbFactory();
-            Instance = InitDbScripts(dbFactory);
+            InitDbScripts(dbFactory);
         }
 
         private OrmLiteConnectionFactory InitDbFactory()
@@ -173,7 +172,7 @@ namespace ServiceStack.OrmLite.Tests
             return dbFactory;
         }
 
-        private OrmLiteConnectionFactory InitDbScripts(OrmLiteConnectionFactory dbFactory)
+        private void InitDbScripts(OrmLiteConnectionFactory dbFactory)
         {
             var pgInit = @"CREATE EXTENSION IF NOT EXISTS ""uuid-ossp""";
             using (var pg9 = dbFactory.OpenDbConnection(Dialect.PostgreSql9.ToString()))
@@ -216,8 +215,6 @@ namespace ServiceStack.OrmLite.Tests
                     dbFactory.RegisterConnection(version.DbName, connStr.ToString(), version.Provider);
                 }
             }
-
-            return dbFactory;
         }
     }
 
