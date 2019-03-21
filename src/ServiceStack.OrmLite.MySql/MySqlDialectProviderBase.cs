@@ -220,6 +220,23 @@ namespace ServiceStack.OrmLite.MySql
 
             return sql;
         }
+        
+        public override bool DoesSchemaExist(IDbCommand dbCmd, string schemaName)
+        {
+            // to maintain existing schema table prefixing behaviour, all schema will exist
+            return true;
+            dbCmd.CommandText = $"SELECT EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{schemaName.SqlParam()}')";
+            var query = dbCmd.ExecuteScalar();
+            return query as bool? ?? false;
+        }
+
+        public override string ToCreateSchemaStatement(string schemaName)
+        {
+            // to maintain existing table prefixing behaviour, just return 1;
+            return "SELECT 1";
+            var sql = $"CREATE SCHEMA {GetSchemaName(schemaName)}";
+            return sql;
+        }
 
         public override string GetColumnDefinition(FieldDefinition fieldDef)
         {

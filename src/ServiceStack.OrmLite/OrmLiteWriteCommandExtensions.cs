@@ -15,15 +15,50 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using ServiceStack.Data;
+using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
 using ServiceStack.OrmLite.Converters;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
     public static class OrmLiteWriteCommandExtensions
     {
         private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteCommandExtensions));
+
+        internal static bool CreateSchema<T>(this IDbCommand dbCmd)
+        {
+            var schemaName = typeof(T).FirstAttribute<SchemaAttribute>()?.Name;
+            if(schemaName == null) throw new InvalidOperationException($"Type {typeof(T).Name} does not have a schema attribute, just CreateSchema(string schemaName) instead"); 
+            return CreateSchema(dbCmd, schemaName);
+        }
+        
+        internal static bool CreateSchema(this IDbCommand dbCmd, string schemaName)
+        {
+            schemaName.ThrowIfNullOrEmpty(nameof(schemaName));
+            var dialectProvider = dbCmd.GetDialectProvider();
+            var schema = dialectProvider.NamingStrategy.GetSchemaName(schemaName);
+            var schemaExists = dialectProvider.DoesSchemaExist(dbCmd, schema);
+            if (schemaExists)
+            {
+                return true;
+            }
+
+            try
+            {
+                ExecuteSql(dbCmd, dialectProvider.ToCreateSchemaStatement(schema));
+                return true;
+            }
+            catch (Exception ex)
+            {
+                if (IgnoreAlreadyExistsError(ex))
+                {
+                    Log.DebugFormat("Ignoring existing schema '{0}': {1}", schema, ex.Message);
+                    return false;
+                }
+                throw;
+            }
+            return false;
+        }
 
         internal static void CreateTables(this IDbCommand dbCmd, bool overwrite, params Type[] tableTypes)
         {

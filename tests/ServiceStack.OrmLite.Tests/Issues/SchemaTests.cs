@@ -13,6 +13,20 @@ namespace ServiceStack.OrmLite.Tests.Issues
         {
         }
 
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            // sqlite doesn't support schemas
+            if (!Dialect.Sqlite.HasFlag(Dialect))
+            {
+                using (var db = OpenDbConnection())
+                {
+                    db.CreateSchema<Editable>();
+                    db.CreateSchema<SchemaTable1>();
+                }
+            }
+        }
+
         [Schema("Schema")]
         public class SchemaTable1
         {

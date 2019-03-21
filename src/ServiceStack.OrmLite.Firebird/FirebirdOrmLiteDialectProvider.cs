@@ -706,6 +706,19 @@ END");
         {
             return new FbParameter();
         }
+        
+        public override bool DoesSchemaExist(IDbCommand dbCmd, string schemaName)
+        {
+            dbCmd.CommandText = $"SELECT 1 FROM sys.schemas WHERE name = {schemaName.Quoted()}";
+            var query = dbCmd.ExecuteNonQuery();
+            return query == 1;
+        }
+
+        public override string ToCreateSchemaStatement(string schemaName)
+        {
+            var sql = $"CREATE SCHEMA {GetSchemaName(schemaName)}";
+            return sql;
+        }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {

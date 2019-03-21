@@ -1255,6 +1255,10 @@ namespace ServiceStack.OrmLite
 
         public static List<FieldDefinition> GetFieldDefinitions(ModelDefinition modelDef) => modelDef.FieldDefinitions;
 
+        public abstract string ToCreateSchemaStatement(string schemaName);
+
+        public abstract bool DoesSchemaExist(IDbCommand dbCmd, string schemaName);
+
         public virtual string ToCreateTableStatement(Type tableType)
         {
             var sbColumns = StringBuilderCache.Allocate();

@@ -11,6 +11,20 @@ namespace ServiceStack.OrmLite.Tests
         {
         }
 
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            // sqlite doesn't support schemas
+            if (!Dialect.Sqlite.HasFlag(Dialect))
+            {
+                using (var db = OpenDbConnection())
+                {
+                    db.CreateSchema<TestWithSchema>();
+                    db.CreateSchema("SchemaTest");
+                }
+            }
+        }
+
         public class Schematest
         {
             public int Id { get; set; }
@@ -74,6 +88,8 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(!db.ColumnExists<NewSchematest>(x => x.Int));
                 Assert.That(!db.ColumnExists<NewSchematest>(x => x.NInt));
 
+                db.CreateTable<NewSchematest>();
+                
                 if (!db.ColumnExists<NewSchematest>(x => x.Int))
                     db.AddColumn<NewSchematest>(x => x.Int);
                 Assert.That(db.ColumnExists<NewSchematest>(x => x.Int));
@@ -90,10 +106,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreProvider(Dialect.Sqlite, "DROP COLUMN Not supported")]
         public void Can_drop_and_add_column()
         {
-            if (Dialect == Dialect.Sqlite) return; //DROP COLUMN Not supported
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Schematest>();

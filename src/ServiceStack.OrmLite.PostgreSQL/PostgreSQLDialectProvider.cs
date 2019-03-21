@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -414,6 +414,19 @@ namespace ServiceStack.OrmLite.PostgreSQL
             var result = dbCmd.ExecLongScalar(sql);
 
             return result > 0;
+        }
+        
+        public override bool DoesSchemaExist(IDbCommand dbCmd, string schemaName)
+        {
+            dbCmd.CommandText = $"SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = '{GetSchemaName(schemaName).SqlParam()}');";
+            var query = dbCmd.ExecuteScalar();
+            return query as bool? ?? false;
+        }
+
+        public override string ToCreateSchemaStatement(string schemaName)
+        {
+            var sql = $"CREATE SCHEMA {GetSchemaName(schemaName)}";
+            return sql;
         }
 
         public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)

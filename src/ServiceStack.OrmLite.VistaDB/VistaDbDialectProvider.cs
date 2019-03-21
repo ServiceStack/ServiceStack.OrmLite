@@ -429,6 +429,16 @@ namespace ServiceStack.OrmLite.VistaDB
         {
             return String.Format("\nFETCH NEXT {0} ROWS ONLY", rows);
         }
+        
+        public override bool DoesSchemaExist(IDbCommand dbCmd, string schemaName)
+        {
+            throw new NotSupportedException();
+        }
+
+        public override string ToCreateSchemaStatement(string schemaName)
+        {
+            throw new NotSupportedException();
+        }
 
         //should create CLR-trigger assembly
         /*public override string ToPostDropTableStatement(ModelDefinition modelDef)

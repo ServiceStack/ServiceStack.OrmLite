@@ -49,6 +49,24 @@ namespace ServiceStack.OrmLite
             var fieldName = dialectProvider.NamingStrategy.GetColumnName(fieldDef.FieldName);
             return dialectProvider.DoesColumnExist(dbConn, fieldName, tableName, modelDef.Schema);
         }
+        
+        /// <summary>
+        /// Create a DB Schema from the Schema attribute on the generic type. E.g:
+        /// <para>db.CreateSchema&lt;Person&gt;() //default</para> 
+        /// </summary>
+        public static void CreateSchema<T>(this IDbConnection dbConn)
+        {
+            dbConn.Exec(dbCmd => dbCmd.CreateSchema<T>());
+        }
+
+        /// <summary>
+        /// Create a DB Schema. E.g:
+        /// <para>db.CreateSchema("schemaName")</para> 
+        /// </summary>
+        public static bool CreateSchema(this IDbConnection dbConn, string schemaName)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.CreateSchema(schemaName));
+        }
 
         /// <summary>
         /// Create DB Tables from the schemas of runtime types. E.g:
