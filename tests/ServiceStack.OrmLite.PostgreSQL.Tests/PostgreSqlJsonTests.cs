@@ -96,10 +96,12 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         public List<DateTimeOffset> ListDateTimeOffsets { get; set; }
     }
 
-    [TestFixture]
-    public class PostgreSqlJsonTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class PostgreSqlJsonTests : OrmLiteProvidersTestBase
     {
-        public PostgreSqlJsonTests() : base(Dialect.PostgreSql) {}
+        public PostgreSqlJsonTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Test]
         public void Can_save_complex_types_as_JSON()

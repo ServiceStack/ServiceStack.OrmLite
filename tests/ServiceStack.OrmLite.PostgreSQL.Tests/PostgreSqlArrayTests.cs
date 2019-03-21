@@ -18,10 +18,12 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         public long[] BigIntegerArray { get; set; }
     }
 
-    [TestFixture]
-    public class PostgreSqlArrayTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class PostgreSqlArrayTests : OrmLiteProvidersTestBase
     {
-        public PostgreSqlArrayTests() : base(Dialect.PostgreSql) {}
+        public PostgreSqlArrayTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Test]
         public void Can_save_integer_array()

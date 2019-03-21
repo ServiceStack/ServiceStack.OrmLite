@@ -3,9 +3,13 @@ using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
-    public class TypeWithByteArrayFieldTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class TypeWithByteArrayFieldTests : OrmLiteProvidersTestBase
     {
-        public TypeWithByteArrayFieldTests() : base(Dialect.PostgreSql) { }
+        public TypeWithByteArrayFieldTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         TypeWithByteArrayField getSampleObject()
         {
             var testByteArray = new byte[256];
@@ -33,6 +37,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         }
 
         [Test]
+        [NonParallelizable]
         public void CanInsertAndSelectByteArray__manual_insert__manual_select()
         {
             var orig = getSampleObject();

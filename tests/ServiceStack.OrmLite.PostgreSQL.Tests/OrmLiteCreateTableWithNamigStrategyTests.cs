@@ -1,21 +1,21 @@
-using System;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.OrmLite.Tests;
 
-
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
 
-    [TestFixture]
-    public class OrmLiteCreateTableWithNamigStrategyTests 
-        : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class OrmLiteCreateTableWithNamingStrategyTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteCreateTableWithNamigStrategyTests() : base(Dialect.PostgreSql) { }
+        public OrmLiteCreateTableWithNamingStrategyTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Test]
         public void Can_create_TableWithNamigStrategy_table_prefix()
         {
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -25,7 +25,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_TableWithNamigStrategy_table_lowered()
         {
-            using (new TemporaryNamingStrategy(new LowercaseNamingStrategy()))
+            using (new TemporaryNamingStrategy(DialectProvider, new LowercaseNamingStrategy()))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -34,9 +34,9 @@ namespace ServiceStack.OrmLite.Tests
 
 
         [Test]
-        public void Can_create_TableWithNamigStrategy_table_nameUnderscoreCoumpound()
+        public void Can_create_TableWithNamigStrategy_table_nameUnderscoreCompound()
         {
-            using (new TemporaryNamingStrategy(new UnderscoreSeparatedCompoundNamingStrategy()))
+            using (new TemporaryNamingStrategy(DialectProvider, new UnderscoreSeparatedCompoundNamingStrategy()))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_get_data_from_TableWithNamigStrategy_with_GetById()
         {
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -63,7 +63,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_get_data_from_TableWithNamigStrategy_with_query_by_example()
         {
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -80,7 +80,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_get_data_from_TableWithNamigStrategy_AfterChangingNamingStrategy()
         {
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -110,7 +110,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.AreEqual(m.Name, modelFromDb.Name);	
             }
             
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);

@@ -4,15 +4,17 @@ using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
-    public class OrmLiteDropTableWithNamingStrategyTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]    
+    public class OrmLiteDropTableWithNamingStrategyTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteDropTableWithNamingStrategyTests() : base(Dialect.PostgreSql) { }
+        public OrmLiteDropTableWithNamingStrategyTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Test]
-        public void Can_drop_TableWithNamigStrategy_table_PostgreSqlNamingStrategy()
+        public void Can_drop_TableWithNamingStrategy_table_PostgreSqlNamingStrategy()
         {
-            using (new TemporaryNamingStrategy(new PostgreSqlNamingStrategy()))
+            using (new TemporaryNamingStrategy(DialectProvider, new PostgreSqlNamingStrategy()))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);

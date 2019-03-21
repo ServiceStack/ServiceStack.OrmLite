@@ -6,27 +6,157 @@ using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 {
-    public class AuthorUseCase : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class AuthorUseCase : OrmLiteProvidersTestBase
     {
-        private List<Author> authors; 
+        private List<Author> authors;
 
-        public AuthorUseCase() : base(Dialect.PostgreSql)
+        public AuthorUseCase(Dialect dialect) : base(dialect)
         {
-            authors = new List<Author>();
-            authors.Add(new Author() { Name = "Demis Bellot", Birthday = DateTime.Today.AddYears(-20), Active = true, Earnings = 99.9m, Comments = "CSharp books", Rate = 10, City = "London" });
-            authors.Add(new Author() { Name = "Angel Colmenares", Birthday = DateTime.Today.AddYears(-25), Active = true, Earnings = 50.0m, Comments = "CSharp books", Rate = 5, City = "Bogota" });
-            authors.Add(new Author() { Name = "Adam Witco", Birthday = DateTime.Today.AddYears(-20), Active = true, Earnings = 80.0m, Comments = "Math Books", Rate = 9, City = "London" });
-            authors.Add(new Author() { Name = "Claudia Espinel", Birthday = DateTime.Today.AddYears(-23), Active = true, Earnings = 60.0m, Comments = "Cooking books", Rate = 10, City = "Bogota" });
-            authors.Add(new Author() { Name = "Libardo Pajaro", Birthday = DateTime.Today.AddYears(-25), Active = true, Earnings = 80.0m, Comments = "CSharp books", Rate = 9, City = "Bogota" });
-            authors.Add(new Author() { Name = "Jorge Garzon", Birthday = DateTime.Today.AddYears(-28), Active = true, Earnings = 70.0m, Comments = "CSharp books", Rate = 9, City = "Bogota" });
-            authors.Add(new Author() { Name = "Alejandro Isaza", Birthday = DateTime.Today.AddYears(-20), Active = true, Earnings = 70.0m, Comments = "Java books", Rate = 0, City = "Bogota" });
-            authors.Add(new Author() { Name = "Wilmer Agamez", Birthday = DateTime.Today.AddYears(-20), Active = true, Earnings = 30.0m, Comments = "Java books", Rate = 0, City = "Cartagena" });
-            authors.Add(new Author() { Name = "Rodger Contreras", Birthday = DateTime.Today.AddYears(-25), Active = true, Earnings = 90.0m, Comments = "CSharp books", Rate = 8, City = "Cartagena" });
-            authors.Add(new Author() { Name = "Chuck Benedict", Birthday = DateTime.Today.AddYears(-22), Active = true, Earnings = 85.5m, Comments = "CSharp books", Rate = 8, City = "London" });
-            authors.Add(new Author() { Name = "James Benedict II", Birthday = DateTime.Today.AddYears(-22), Active = true, Earnings = 85.5m, Comments = "Java books", Rate = 5, City = "Berlin" });
-            authors.Add(new Author() { Name = "Ethan Brown", Birthday = DateTime.Today.AddYears(-20), Active = true, Earnings = 45.0m, Comments = "CSharp books", Rate = 5, City = "Madrid" });
-            authors.Add(new Author() { Name = "Xavi Garzon", Birthday = DateTime.Today.AddYears(-22), Active = true, Earnings = 75.0m, Comments = "CSharp books", Rate = 9, City = "Madrid" });
-            authors.Add(new Author() { Name = "Luis garzon", Birthday = DateTime.Today.AddYears(-22), Active = true, Earnings = 85.0m, Comments = "CSharp books", Rate = 10, City = "Mexico", LastActivity = DateTime.Today });   
+            authors = new List<Author>
+            {
+                new Author
+                {
+                    Name = "Demis Bellot",
+                    Birthday = DateTime.Today.AddYears(-20),
+                    Active = true,
+                    Earnings = 99.9m,
+                    Comments = "CSharp books",
+                    Rate = 10,
+                    City = "London"
+                },
+                new Author
+                {
+                    Name = "Angel Colmenares",
+                    Birthday = DateTime.Today.AddYears(-25),
+                    Active = true,
+                    Earnings = 50.0m,
+                    Comments = "CSharp books",
+                    Rate = 5,
+                    City = "Bogota"
+                },
+                new Author
+                {
+                    Name = "Adam Witco",
+                    Birthday = DateTime.Today.AddYears(-20),
+                    Active = true,
+                    Earnings = 80.0m,
+                    Comments = "Math Books",
+                    Rate = 9,
+                    City = "London"
+                },
+                new Author
+                {
+                    Name = "Claudia Espinel",
+                    Birthday = DateTime.Today.AddYears(-23),
+                    Active = true,
+                    Earnings = 60.0m,
+                    Comments = "Cooking books",
+                    Rate = 10,
+                    City = "Bogota"
+                },
+                new Author
+                {
+                    Name = "Libardo Pajaro",
+                    Birthday = DateTime.Today.AddYears(-25),
+                    Active = true,
+                    Earnings = 80.0m,
+                    Comments = "CSharp books",
+                    Rate = 9,
+                    City = "Bogota"
+                },
+                new Author
+                {
+                    Name = "Jorge Garzon",
+                    Birthday = DateTime.Today.AddYears(-28),
+                    Active = true,
+                    Earnings = 70.0m,
+                    Comments = "CSharp books",
+                    Rate = 9,
+                    City = "Bogota"
+                },
+                new Author
+                {
+                    Name = "Alejandro Isaza",
+                    Birthday = DateTime.Today.AddYears(-20),
+                    Active = true,
+                    Earnings = 70.0m,
+                    Comments = "Java books",
+                    Rate = 0,
+                    City = "Bogota"
+                },
+                new Author
+                {
+                    Name = "Wilmer Agamez",
+                    Birthday = DateTime.Today.AddYears(-20),
+                    Active = true,
+                    Earnings = 30.0m,
+                    Comments = "Java books",
+                    Rate = 0,
+                    City = "Cartagena"
+                },
+                new Author
+                {
+                    Name = "Rodger Contreras",
+                    Birthday = DateTime.Today.AddYears(-25),
+                    Active = true,
+                    Earnings = 90.0m,
+                    Comments = "CSharp books",
+                    Rate = 8,
+                    City = "Cartagena"
+                },
+                new Author
+                {
+                    Name = "Chuck Benedict",
+                    Birthday = DateTime.Today.AddYears(-22),
+                    Active = true,
+                    Earnings = 85.5m,
+                    Comments = "CSharp books",
+                    Rate = 8,
+                    City = "London"
+                },
+                new Author
+                {
+                    Name = "James Benedict II",
+                    Birthday = DateTime.Today.AddYears(-22),
+                    Active = true,
+                    Earnings = 85.5m,
+                    Comments = "Java books",
+                    Rate = 5,
+                    City = "Berlin"
+                },
+                new Author
+                {
+                    Name = "Ethan Brown",
+                    Birthday = DateTime.Today.AddYears(-20),
+                    Active = true,
+                    Earnings = 45.0m,
+                    Comments = "CSharp books",
+                    Rate = 5,
+                    City = "Madrid"
+                },
+                new Author
+                {
+                    Name = "Xavi Garzon",
+                    Birthday = DateTime.Today.AddYears(-22),
+                    Active = true,
+                    Earnings = 75.0m,
+                    Comments = "CSharp books",
+                    Rate = 9,
+                    City = "Madrid"
+                },
+                new Author
+                {
+                    Name = "Luis garzon",
+                    Birthday = DateTime.Today.AddYears(-22),
+                    Active = true,
+                    Earnings = 85.0m,
+                    Comments = "CSharp books",
+                    Rate = 10,
+                    City = "Mexico",
+                    LastActivity = DateTime.Today
+                }
+            };
         }
 
         [SetUp]
@@ -42,7 +172,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
         [Test]
         public void AuthorUsesCases()
         {
-            var ev = OrmLiteConfig.DialectProvider.SqlExpression<Author>();
+            var ev = DialectProvider.SqlExpression<Author>();
 
             using (var db = OpenDbConnection())
             {
@@ -57,7 +187,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
                 Assert.AreEqual(expected, result.Count);
                 result = db.Select<Author>(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= lastDay);
                 Assert.AreEqual(expected, result.Count);
-                Author a = new Author() { Birthday = lastDay };
+                Author a = new Author { Birthday = lastDay };
                 result = db.Select<Author>(rn => rn.Birthday >= new DateTime(year, 1, 1) && rn.Birthday <= a.Birthday);
                 Assert.AreEqual(expected, result.Count);
 
@@ -162,13 +292,13 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
                 expected = 2;
                 var rate = 0;
                 ev.Where().Where(rn => rn.Rate == rate).Update(rn => rn.Active);
-                var rows = db.UpdateOnly(new Author() { Active = false }, ev);
+                var rows = db.UpdateOnly(new Author { Active = false }, ev);
                 Assert.AreEqual(expected, rows);
 
                 // insert values  only in Id, Name, Birthday, Rate and Active fields 
                 expected = 4;
-                db.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Victor Grozny", Birthday = DateTime.Today.AddYears(-18) }, rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
-                db.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Ivan Chorny", Birthday = DateTime.Today.AddYears(-19) }, rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
+                db.InsertOnly(new Author { Active = false, Rate = 0, Name = "Victor Grozny", Birthday = DateTime.Today.AddYears(-18) }, rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
+                db.InsertOnly(new Author { Active = false, Rate = 0, Name = "Ivan Chorny", Birthday = DateTime.Today.AddYears(-19) }, rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
                 ev.Where().Where(rn => !rn.Active);
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
@@ -176,7 +306,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
                 //update comment for City == null 
                 expected = 2;
                 ev.Where().Where(rn => rn.City == null).Update(rn => rn.Comments);
-                rows = db.UpdateOnly(new Author() { Comments = "No comments" }, ev);
+                rows = db.UpdateOnly(new Author { Comments = "No comments" }, ev);
                 Assert.AreEqual(expected, rows);
 
                 // delete where City is null 
@@ -357,7 +487,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
                 Assert.AreEqual(expected, rows);
 
                 expected = db.Select<Author>(x => x.City == "Madrid").Count;
-                author = new Author() { Active = false };
+                author = new Author { Active = false };
                 rows = db.UpdateOnly(author, x => x.Active, x => x.City == "Madrid");
                 Assert.AreEqual(expected, rows);
 

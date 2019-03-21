@@ -2,14 +2,16 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.OrmLite.Tests;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
-    [TestFixture]
-    public class OrmLiteBasicPersistenceProviderTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class OrmLiteBasicPersistenceProviderTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteBasicPersistenceProviderTests() : base(Dialect.PostgreSql) { }
+        public OrmLiteBasicPersistenceProviderTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [SetUp]
         public void SetUp()
