@@ -183,10 +183,10 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_ModelWithIdAndName_table_with_specified_DefaultStringLength()
         {
-            var converter = OrmLiteConfig.DialectProvider.GetStringConverter();
+            var converter = DialectProvider.GetStringConverter();
             var hold = converter.StringLength;
             converter.StringLength = 255;
-            var createTableSql = OrmLiteConfig.DialectProvider.ToCreateTableStatement(typeof(ModelWithIdAndName));
+            var createTableSql = DialectProvider.ToCreateTableStatement(typeof(ModelWithIdAndName));
 
             Console.WriteLine("createTableSql: " + createTableSql);
             if (Dialect != Dialect.AnyPostgreSql)
@@ -328,14 +328,8 @@ namespace ServiceStack.OrmLite.Tests
 
             public Object this[string attributeName]
             {
-                get
-                {
-                    return Attributes[attributeName];
-                }
-                set
-                {
-                    Attributes[attributeName] = value;
-                }
+                get => Attributes[attributeName];
+                set => Attributes[attributeName] = value;
             }
 
             Dictionary<string, object> Attributes { get; set; } 
