@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                 db.Insert(new Poco { Id = 1, Name = "A" });
                 db.Insert(new Poco { Id = 2, Name = "B" });
 
-                var result = await db.ExecuteSqlAsync("UPDATE poco SET name = @name WHERE id = @id", new { id = 2, name = "UPDATED" });
+                var result = await db.ExecuteSqlAsync($"UPDATE {"POCO".SqlTable(DialectProvider)} SET name = @name WHERE id = @id", new { id = 2, name = "UPDATED" });
                 Assert.That(result, Is.EqualTo(1));
 
                 var row = await db.SingleByIdAsync<Poco>(2);
