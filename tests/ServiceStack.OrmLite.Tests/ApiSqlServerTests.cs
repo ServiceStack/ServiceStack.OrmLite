@@ -1,22 +1,21 @@
 ﻿using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.Shared;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class ApiSqlServerTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
+    public class ApiSqlServerTests : OrmLiteProvidersTestBase
     {
+        public ApiSqlServerTests(Dialect dialect) : base(dialect)
+        {   
+        }
+        
         [Test]
         public void API_SqlServer_Examples()
         {
-            if (Dialect != Dialect.SqlServer) return;
-
-            SuppressIfOracle("SQL Server tests");
-            var db = CreateSqlServerDbFactory().OpenDbConnection();
+            var db = OpenDbConnection();
             db.DropAndCreateTable<Person>();
             db.DropAndCreateTable<PersonWithAutoId>();
 
@@ -32,10 +31,24 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" > @0)"));
 
             db.Single<Person>(x => x.Age == 42);
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0)"));
+            if (DialectFeatures.RowOffset)
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0) ORDER BY 1 OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY"));
+            }
+            else
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0)"));    
+            }
 
             db.Single(db.From<Person>().Where(x => x.Age == 42));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0)"));
+            if (DialectFeatures.RowOffset)
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0) ORDER BY 1 OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY"));
+            }
+            else
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 \"Id\", \"FirstName\", \"LastName\", \"Age\" \nFROM \"Person\"\nWHERE (\"Age\" = @0)"));    
+            }
 
             db.Scalar<Person, int>(x => Sql.Max(x.Age));
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Max(\"Age\") \nFROM \"Person\""));
@@ -167,10 +180,24 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT Id, LastName FROM Person WHERE Age < @age"));
 
             db.Exists<Person>(x => x.Age < 50);
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
+            if (DialectFeatures.RowOffset)
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0) ORDER BY 1 OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY"));
+            }
+            else
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
+            }
 
             db.Exists(db.From<Person>().Where(x => x.Age < 50));
-            Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
+            if (DialectFeatures.RowOffset)
+            { 
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0) ORDER BY 1 OFFSET 0 ROWS FETCH NEXT 1 ROWS ONLY"));
+            }
+            else
+            {
+                Assert.That(db.GetLastSql(), Is.EqualTo("SELECT TOP 1 'exists' \nFROM \"Person\"\nWHERE (\"Age\" < @0)"));
+            }
 
             db.Exists<Person>(new { Age = 42 });
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT \"Id\", \"FirstName\", \"LastName\", \"Age\" FROM \"Person\" WHERE \"Age\" = @Age"));
