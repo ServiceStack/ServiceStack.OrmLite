@@ -16,10 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.Core.csproj" />
     <PackageReference Include="ServiceStack.Common.Core" Version="$(Version)" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="2.2.2" />
+	<PackageReference Include="System.Data.SQLite.Core" Version="1.0.110" />
   </ItemGroup>
 
 </Project>
