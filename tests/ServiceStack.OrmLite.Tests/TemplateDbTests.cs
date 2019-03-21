@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using ServiceStack.Templates;
+using ServiceStack.Script;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -21,13 +21,14 @@ namespace ServiceStack.OrmLite.Tests
                 db.InsertAll(AutoQueryTests.SeedRockstars);
 
                 var args = new Dictionary<string, object> {{"id", 3}};
-                var result = db.Single<Rockstar>("SELECT * FROM Rockstar WHERE Id = @id", args);
+                var tableName = "Rockstar".SqlTable(DialectProvider);
+                var result = db.Single<Rockstar>($"SELECT * FROM {tableName} WHERE Id = @id", args);
                 Assert.That(result.FirstName, Is.EqualTo("Kurt"));
 
-                result = await db.SingleAsync<Rockstar>("SELECT * FROM Rockstar WHERE Id = @id", args);
+                result = await db.SingleAsync<Rockstar>($"SELECT * FROM {tableName} WHERE Id = @id", args);
                 Assert.That(result.FirstName, Is.EqualTo("Kurt"));
 
-                result = await db.SingleAsync<Rockstar>("SELECT * FROM Rockstar WHERE Id = @id", new { id = 3 });
+                result = await db.SingleAsync<Rockstar>($"SELECT * FROM {tableName} WHERE Id = @id", new { id = 3 });
                 Assert.That(result.FirstName, Is.EqualTo("Kurt"));
             }
         }
@@ -35,24 +36,26 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public async Task Can_call_dbSingle_with_param()
         {
-            if (Dialect == Dialect.Sqlite) return;
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Rockstar>();
                 db.InsertAll(AutoQueryTests.SeedRockstars);
 
-                var firstName = db.GetDialectProvider().NamingStrategy.GetColumnName("FirstName");
+                var firstName = "FirstName".SqlColumn(DialectProvider).StripQuotes();
 
-                var args = new Dictionary<string, object> { { "id", 3 } };
+                var args = new Dictionary<string, object> { { "id", 3 }};
 
-                var filter = new TemplateDbFilters { DbFactory = base.DbFactory };
-                var result = filter.dbSingle(default(TemplateScopeContext), "SELECT * FROM Rockstar WHERE Id = @id", args);
+                var filter = new DbScripts { DbFactory = base.DbFactory };
+                var sqlTable = "Rockstar".SqlTable(DialectProvider);
+                var options = new Dictionary<string, object> {{"namedConnection", Dialect.ToString()}};
+                
+                var result = filter.dbSingle(default(ScriptScopeContext), $"SELECT * FROM {sqlTable} WHERE Id = @id", args, options);
+                
                 var objDictionary = (Dictionary<string, object>)result;
                 Assert.That(objDictionary[firstName], Is.EqualTo("Kurt"));
 
-                var asyncFilter = new TemplateDbFiltersAsync { DbFactory = base.DbFactory };
-                result = await asyncFilter.dbSingle(default(TemplateScopeContext), "SELECT * FROM Rockstar WHERE Id = @id", args);
+                var asyncFilter = new DbScriptsAsync { DbFactory = base.DbFactory };
+                result = await asyncFilter.dbSingle(default(ScriptScopeContext), $"SELECT * FROM {sqlTable} WHERE Id = @id", args, options);
 
                 objDictionary = (Dictionary<string, object>)result;
                 Assert.That(objDictionary[firstName], Is.EqualTo("Kurt"));
