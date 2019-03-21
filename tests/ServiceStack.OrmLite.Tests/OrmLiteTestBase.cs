@@ -151,13 +151,13 @@ namespace ServiceStack.OrmLite.Tests
                     return Init(Config.SqlServerBuildDb, SqlServer2016Dialect.Provider);
                 case Dialect.SqlServer2017:
                     return Init(Config.SqlServerBuildDb, SqlServer2017Dialect.Provider);
-                case Dialect.MySql:
+                case Dialect.MySql5_5:
                     return Init(Config.MySqlDb_5_5, MySqlDialect.Provider);
-                case Dialect.PostgreSql:
+                case Dialect.PostgreSql9:
                     return Init(Config.PostgresDb_9, PostgreSqlDialect.Provider);
                 case Dialect.SqlServerMdf:
                     return Init(Config.SqlServerDb, SqlServerDialect.Provider);
-                case Dialect.Oracle:
+                case Dialect.Oracle10:
                     return Init(Config.OracleDb, OracleDialect.Provider);
                 case Dialect.Firebird:
                     return Init(Config.FirebirdDb_3, FirebirdDialect.Provider);
