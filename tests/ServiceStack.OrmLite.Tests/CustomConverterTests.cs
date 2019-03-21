@@ -22,11 +22,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreProvider(Dialect.SqlServer | Dialect.SqlServer2012, "Timespan not supported")]
         public void Can_override_SqlServer_Time_Converter()
         {
-            if (Dialect != Dialect.SqlServer && Dialect != Dialect.SqlServer2012)
-                return;
-
             using (var db = OpenDbConnection())
             {
                 var hold = db.GetDialectProvider().GetConverter<TimeSpan>();
