@@ -21,11 +21,11 @@ $> docker-compose down
 |Database|Version|Port|DbName|DbUser|DbPwd|
 |--------|-------|----|------|------|-----|
 |Firebird|3.0.4|48101|test|test|test|masterkey|
-|MySql (mariaDb)|5.5.x|48201|test|test|test|
-|MySql (mariaDb)|10.1.x|48202|test|test|test|
-|MySql (mariaDb)|10.2.x|48203|test|test|test|
-|MySql (mariaDb)|10.3.x|48204|test|test|test|
-|MySql (mariaDb)|10.4.x|48205|test|test|test|
+|MySql (mariaDb)|5.5.x|48201|test|root|test|
+|MySql (mariaDb)|10.1.x|48202|test|root|test|
+|MySql (mariaDb)|10.2.x|48203|test|root|test|
+|MySql (mariaDb)|10.3.x|48204|test|root|test|
+|MySql (mariaDb)|10.4.x|48205|test|root|test|
 |Postgres|9.x|48301|test|test|test|
 |Postgres|10.x|48302|test|test|test|
 |Postgres|11.x|48303|test|test|test|
