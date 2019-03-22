@@ -181,11 +181,6 @@ namespace ServiceStack.OrmLite.Tests
                 pg9.ExecuteSql(pgInit);
                 pg10.ExecuteSql(pgInit);
                 pg11.ExecuteSql(pgInit);
-
-                var schemaDboIfNotExists = "CREATE SCHEMA IF NOT EXISTS dbo";
-                pg9.ExecuteSql(schemaDboIfNotExists);
-                pg10.ExecuteSql(schemaDboIfNotExists);
-                pg11.ExecuteSql(schemaDboIfNotExists);
             }
 
             // SQLSERVER specific init
