@@ -82,11 +82,11 @@ public class SqlDbFeatures1 : OrmLiteProvidersTestBase
 
 ### For all tests in fixture
 
-To exclude testing specific providers for all tests in a fixture, use the `IgnoreProviderAttribute`
+To exclude testing specific dialects for all tests in a fixture, use the `IgnoreDialectAttribute`
 
 ```csharp
 [TestFixtureOrmLite()]
-[IgnoreProvider(Dialects.AnyMySql | Dialects.PostgreSql9, "Not supported by database")]
+[IgnoreDialect(Dialects.AnyMySql | Dialects.PostgreSql9, "Not supported by database")]
 public class SqlDbFeatures1 : OrmLiteProvidersTestBase 
 {
 }
@@ -94,12 +94,12 @@ public class SqlDbFeatures1 : OrmLiteProvidersTestBase
 
 ### Individual tests 
 
-To exclude individual tests for one or more db providers, use the `IgnoreProviderAttribute`
+To exclude individual tests for one or more db providers, use the `IgnoreDialectAttribute`
 
 ```csharp
 [Test]
-[IgnoreProvider(Dialect.PostgreSql9 | Dialect.PostgreSql10, "ignore message to output")]
-[IgnoreProvider(Dialect.AnySqlServer, "diff ignore message to output")]
+[IgnoreDialect(Dialect.PostgreSql9 | Dialect.PostgreSql10, "ignore message to output")]
+[IgnoreDialect(Dialect.AnySqlServer, "diff ignore message to output")]
 public void Test1()
 {
     // Test will not run for any dialects ignored above but any others 
