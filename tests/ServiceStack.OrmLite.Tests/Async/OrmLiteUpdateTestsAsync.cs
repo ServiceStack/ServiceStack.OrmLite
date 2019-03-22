@@ -60,8 +60,9 @@ namespace ServiceStack.OrmLite.Tests.Async
                 await CreateAndInitializeAsync(db, 2);
 
                 await ResetUpdateDateAsync(db);
-                await db.UpdateAsync(cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider),
-                    new DefaultValues { Id = 1, DefaultInt = 45 }, new DefaultValues { Id = 2, DefaultInt = 72 });
+                await db.UpdateAsync(
+                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider),
+                    new DefaultValues {Id = 1, DefaultInt = 45, CreatedDateUtc = DateTime.UtcNow}, new DefaultValues {Id = 2, DefaultInt = 72, CreatedDateUtc = DateTime.UtcNow});
                 await VerifyUpdateDateAsync(db);
                 await VerifyUpdateDateAsync(db, 2);
             }
@@ -115,7 +116,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                 await CreateAndInitializeAsync(db);
 
                 await ResetUpdateDateAsync(db);
-                await db.UpdateAsync(new DefaultValues { Id = 1, DefaultInt = 2342 }, p => p.Id == 1,
+                await db.UpdateAsync(new DefaultValues { Id = 1, DefaultInt = 2342, CreatedDateUtc = DateTime.UtcNow}, p => p.Id == 1,
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
                 await VerifyUpdateDateAsync(db);
             }
@@ -162,7 +163,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                 await CreateAndInitializeAsync(db, 2);
 
                 await ResetUpdateDateAsync(db);
-                db.UpdateAll(new[] { new DefaultValues { Id = 1, DefaultInt = 45 }, new DefaultValues { Id = 2, DefaultInt = 72 } },
+                db.UpdateAll(new[] { new DefaultValues { Id = 1, DefaultInt = 45, CreatedDateUtc = DateTime.UtcNow }, new DefaultValues { Id = 2, DefaultInt = 72, CreatedDateUtc = DateTime.UtcNow } },
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
                 await VerifyUpdateDateAsync(db);
                 await VerifyUpdateDateAsync(db, 2);
