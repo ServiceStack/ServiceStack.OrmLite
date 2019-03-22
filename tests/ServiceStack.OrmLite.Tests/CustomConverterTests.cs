@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer.Converters;
@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Tests
         public TimeSpan TimeSpan { get; set; }
     }
     
-    [TestFixtureOrmLite]
+    [TestFixtureOrmLiteDialects(Dialect.AnySqlServer)]
     public class CustomConverterTests : OrmLiteProvidersTestBase
     {
         public CustomConverterTests(Dialect dialect) : base(dialect)
