@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using ServiceStack.Script;
+using ServiceStack.Templates;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -45,17 +45,15 @@ namespace ServiceStack.OrmLite.Tests
 
                 var args = new Dictionary<string, object> { { "id", 3 }};
 
-                var filter = new DbScripts { DbFactory = base.DbFactory };
-                var sqlTable = "Rockstar".SqlTable(DialectProvider);
-                var options = new Dictionary<string, object> {{"namedConnection", Dialect.ToString()}};
+                var filter = new TemplateDbFilters { DbFactory = base.DbFactory };
                 
-                var result = filter.dbSingle(default(ScriptScopeContext), $"SELECT * FROM {sqlTable} WHERE Id = @id", args, options);
+                var result = filter.dbSingle(default(TemplateScopeContext), $"SELECT * FROM Rockstar WHERE Id = @id", args);
                 
                 var objDictionary = (Dictionary<string, object>)result;
                 Assert.That(objDictionary[firstName], Is.EqualTo("Kurt"));
 
-                var asyncFilter = new DbScriptsAsync { DbFactory = base.DbFactory };
-                result = await asyncFilter.dbSingle(default(ScriptScopeContext), $"SELECT * FROM {sqlTable} WHERE Id = @id", args, options);
+                var asyncFilter = new TemplateDbFiltersAsync { DbFactory = base.DbFactory };
+                result = await asyncFilter.dbSingle(default(TemplateScopeContext), $"SELECT * FROM Rockstar WHERE Id = @id", args);
 
                 objDictionary = (Dictionary<string, object>)result;
                 Assert.That(objDictionary[firstName], Is.EqualTo("Kurt"));
