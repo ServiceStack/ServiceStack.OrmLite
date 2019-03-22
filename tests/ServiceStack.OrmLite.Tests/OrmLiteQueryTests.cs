@@ -82,7 +82,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 rows = db.Select<ModelWithOnlyStringFields>(
                     "SELECT * FROM {0} WHERE {1} = {2}AlbumName"
-                    .Fmt("ModelWithOnlyStringFields".SqlTable(DialectProvider), "AlbumName".SqlColumn(DialectProvider), OrmLiteConfig.DialectProvider.ParamString),
+                    .Fmt("ModelWithOnlyStringFields".SqlTable(DialectProvider), "AlbumName".SqlColumn(DialectProvider), DialectProvider.ParamString),
                     new { filterRow.AlbumName });
                 dbRowIds = rows.ConvertAll(x => x.Id);
                 Assert.That(dbRowIds, Has.Count.EqualTo(1));
@@ -176,11 +176,11 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(notes[0].Id, Is.EqualTo(note.Id));
                 Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
 
-                notes = db.Select<Note>("SELECT * FROM Note WHERE {0}={1}schemaUri".Fmt("SchemaUri".SqlColumn(DialectProvider), OrmLiteConfig.DialectProvider.ParamString), new { schemaUri = "tcm:0-0-0" });
+                notes = db.Select<Note>("SELECT * FROM Note WHERE {0}={1}schemaUri".Fmt("SchemaUri".SqlColumn(DialectProvider), DialectProvider.ParamString), new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(note.Id));
                 Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
 
-                notes = db.Select<Note>("SchemaUri".SqlColumn(DialectProvider) + "={0}schemaUri".Fmt(OrmLiteConfig.DialectProvider.ParamString), new { schemaUri = "tcm:0-0-0" });
+                notes = db.Select<Note>("SchemaUri".SqlColumn(DialectProvider) + "={0}schemaUri".Fmt(DialectProvider.ParamString), new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(note.Id));
                 Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
 
@@ -218,7 +218,7 @@ Id, {0}, {1}
 FROM {2}
 WHERE {0}={3}
 ".Fmt("SchemaUri".SqlColumn(DialectProvider), "NoteText".SqlColumn(DialectProvider), "Note".SqlTable(DialectProvider),
-OrmLiteConfig.DialectProvider.GetParam("schemaUri"));
+DialectProvider.GetParam("schemaUri"));
 
                 var notes = db.Select<NoteDto>(sql, new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(id));

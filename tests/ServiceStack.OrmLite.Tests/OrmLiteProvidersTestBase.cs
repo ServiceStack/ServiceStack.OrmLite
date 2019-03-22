@@ -217,7 +217,7 @@ namespace ServiceStack.OrmLite.Tests
     /// <summary>
     /// Repeats tests for all dialect versions from <see cref="TestConfig.DefaultDialects"/>
     /// To restrict tests to specific dialects use <see cref="TestFixtureOrmLiteDialectsAttribute"/>
-    /// To filter tests for specific dialects use <see cref="IgnoreProviderAttribute"/>
+    /// To filter tests for specific dialects use <see cref="IgnoreDialectAttribute"/>
     /// </summary>
     /// <inheritdoc cref="TestFixtureOrmLiteDialectsAttribute"/>
     public class TestFixtureOrmLiteAttribute : TestFixtureOrmLiteDialectsAttribute
