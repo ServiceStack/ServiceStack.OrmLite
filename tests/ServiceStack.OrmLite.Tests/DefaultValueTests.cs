@@ -1,7 +1,8 @@
-using System;
+﻿using System;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests.Models;
 using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
@@ -23,9 +24,9 @@ namespace ServiceStack.OrmLite.Tests
             {
                 var row = CreateAndInitialize(db);
 
-                var expectedDate = !Dialect.AnyMySql.HasFlag(Dialect) //&& !Dialect.HasFlag(Dialect.Firebird)
+                var expectedDate = !Dialect.HasFlag(Dialect.Firebird)
                     ? DateTime.UtcNow.Date
-                    : DateTime.Now.Date; //MySql CURRENT_TIMESTAMP == LOCAL_TIME
+                    : DateTime.Now.Date; 
 
                 Assert.That(row.CreatedDateUtc, Is.GreaterThan(expectedDate));
                 Assert.That(row.NCreatedDateUtc, Is.GreaterThan(expectedDate));
@@ -330,6 +331,9 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
     
+    /// <summary>
+    /// MySql 5.5 only allows a single timestamp default column
+    /// </summary>
     [TestFixtureOrmLiteDialects(Dialect.MySql5_5)]
     public class MySqlDefaultValueTests : OrmLiteProvidersTestBase
     {
@@ -344,27 +348,24 @@ namespace ServiceStack.OrmLite.Tests
             {
                 var row = CreateAndInitialize(db);
 
-                var expectedDate = !Dialect.AnyMySql.HasFlag(Dialect) //&& !Dialect.HasFlag(Dialect.Firebird)
-                    ? DateTime.UtcNow.Date
-                    : DateTime.Now.Date; //MySql CURRENT_TIMESTAMP == LOCAL_TIME
+                var expectedDate = DateTime.Now.Date; //MySql CURRENT_TIMESTAMP == LOCAL_TIME
 
-                Assert.That(row.CreatedDateUtc, Is.GreaterThan(expectedDate));
-                Assert.That(row.NCreatedDateUtc, Is.GreaterThan(expectedDate));
+                Assert.That(row.UpdatedDateUtc, Is.GreaterThan(expectedDate));
             }
         }
 
-        private DefaultValues CreateAndInitialize(IDbConnection db, int count = 1)
+        private MySqlDefaultValues CreateAndInitialize(IDbConnection db, int count = 1)
         {
-            db.DropAndCreateTable<DefaultValues>();
+            db.DropAndCreateTable<MySqlDefaultValues>();
             db.GetLastSql().Print();
 
-            DefaultValues firstRow = null;
+            MySqlDefaultValues firstRow = null;
             for (var i = 1; i <= count; i++)
             {
-                var defaultValues = new DefaultValues { Id = i };
+                var defaultValues = new MySqlDefaultValues { Id = i };
                 db.Insert(defaultValues);
 
-                var row = db.SingleById<DefaultValues>(1);
+                var row = db.SingleById<MySqlDefaultValues>(1);
                 row.PrintDump();
                 Assert.That(row.DefaultInt, Is.EqualTo(1));
                 Assert.That(row.DefaultIntNoDefault, Is.EqualTo(0));
@@ -387,14 +388,14 @@ namespace ServiceStack.OrmLite.Tests
             {
                 CreateAndInitialize(db);
 
-                var row = db.SingleById<DefaultValues>(1);
+                var row = db.SingleById<MySqlDefaultValues>(1);
                 row.DefaultIntNoDefault = 42;
 
                 var sql = db.ToUpdateStatement(row);
                 sql.Print();
                 db.ExecuteSql(sql);
 
-                row = db.SingleById<DefaultValues>(1);
+                row = db.SingleById<MySqlDefaultValues>(1);
 
                 Assert.That(row.DefaultInt, Is.EqualTo(1));
                 Assert.That(row.DefaultIntNoDefault, Is.EqualTo(42));
@@ -413,9 +414,9 @@ namespace ServiceStack.OrmLite.Tests
                 CreateAndInitialize(db, 2);
 
                 ResetUpdateDate(db);
-                db.Update(cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider),
-                    new DefaultValues { Id = 1, DefaultInt = 45, CreatedDateUtc = DateTime.Now }, 
-                    new DefaultValues { Id = 2, DefaultInt = 72, CreatedDateUtc = DateTime.Now });
+                db.Update(cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider),
+                    new MySqlDefaultValues { Id = 1, DefaultInt = 45 }, 
+                    new MySqlDefaultValues { Id = 2, DefaultInt = 72 });
                 VerifyUpdateDate(db);
                 VerifyUpdateDate(db, id: 2);
             }
@@ -424,12 +425,12 @@ namespace ServiceStack.OrmLite.Tests
         private static void ResetUpdateDate(IDbConnection db)
         {
             var updateTime = new DateTime(2011, 1, 1, 1, 1, 1, DateTimeKind.Utc);
-            db.Update<DefaultValues>(new { UpdatedDateUtc = updateTime }, p => p.Id == 1);
+            db.Update<MySqlDefaultValues>(new { UpdatedDateUtc = updateTime }, p => p.Id == 1);
         }
 
         private void VerifyUpdateDate(IDbConnection db, int id = 1)
         {
-            var row = db.SingleById<DefaultValues>(id);
+            var row = db.SingleById<MySqlDefaultValues>(id);
             row.PrintDump();
 
             if (!Dialect.HasFlag(Dialect.AnyMySql)) //not returning UTC
@@ -444,8 +445,8 @@ namespace ServiceStack.OrmLite.Tests
                 CreateAndInitialize(db);
 
                 ResetUpdateDate(db);
-                db.Update(new DefaultValues { Id = 1, DefaultInt = 2342, CreatedDateUtc = DateTime.Now }, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+                db.Update(new MySqlDefaultValues { Id = 1, DefaultInt = 2342 }, p => p.Id == 1,
+                    cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider));
                 VerifyUpdateDate(db);
             }
         }
@@ -458,10 +459,10 @@ namespace ServiceStack.OrmLite.Tests
                 CreateAndInitialize(db);
 
                 ResetUpdateDate(db);
-                var row = db.SingleById<DefaultValues>(1);
+                var row = db.SingleById<MySqlDefaultValues>(1);
                 row.DefaultInt = 3245;
                 row.DefaultDouble = 978.423;
-                db.Update(row, cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+                db.Update(row, cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider));
                 VerifyUpdateDate(db);
             }
         }
@@ -474,8 +475,8 @@ namespace ServiceStack.OrmLite.Tests
                 CreateAndInitialize(db);
 
                 ResetUpdateDate(db);
-                db.Update<DefaultValues>(new { DefaultInt = 765 }, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+                db.Update<MySqlDefaultValues>(new { DefaultInt = 765 }, p => p.Id == 1,
+                    cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider));
                 VerifyUpdateDate(db);
             }
         }
@@ -488,9 +489,9 @@ namespace ServiceStack.OrmLite.Tests
                 CreateAndInitialize(db, 2);
 
                 ResetUpdateDate(db);
-                db.UpdateAll(new [] { new DefaultValues { Id = 1, DefaultInt = 45, CreatedDateUtc = DateTime.Now },
-                                      new DefaultValues { Id = 2, DefaultInt = 72, CreatedDateUtc = DateTime.Now } },
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+                db.UpdateAll(new [] { new MySqlDefaultValues { Id = 1, DefaultInt = 45 },
+                                      new MySqlDefaultValues { Id = 2, DefaultInt = 72 } },
+                    cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider));
                 VerifyUpdateDate(db);
                 VerifyUpdateDate(db, id: 2);
             }
@@ -504,8 +505,8 @@ namespace ServiceStack.OrmLite.Tests
                 CreateAndInitialize(db);
 
                 ResetUpdateDate(db);
-                db.UpdateOnly(() => new DefaultValues {DefaultInt = 345}, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+                db.UpdateOnly(() => new MySqlDefaultValues {DefaultInt = 345}, p => p.Id == 1,
+                    cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider));
                 VerifyUpdateDate(db);
             }
         }
@@ -518,8 +519,8 @@ namespace ServiceStack.OrmLite.Tests
                 CreateAndInitialize(db);
 
                 ResetUpdateDate(db);
-                db.UpdateOnly(() => new DefaultValues { DefaultInt = 345 }, db.From<DefaultValues>().Where(p => p.Id == 1),
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+                db.UpdateOnly(() => new MySqlDefaultValues { DefaultInt = 345 }, db.From<MySqlDefaultValues>().Where(p => p.Id == 1),
+                    cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider));
                 VerifyUpdateDate(db);
             }
         }
@@ -532,10 +533,10 @@ namespace ServiceStack.OrmLite.Tests
                 CreateAndInitialize(db);
 
                 ResetUpdateDate(db);
-                var row = db.SingleById<DefaultValues>(1);
+                var row = db.SingleById<MySqlDefaultValues>(1);
                 row.DefaultDouble = 978.423;
-                db.UpdateOnly(row, db.From<DefaultValues>().Update(p => p.DefaultDouble),
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+                db.UpdateOnly(row, db.From<MySqlDefaultValues>().Update(p => p.DefaultDouble),
+                    cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider));
                 VerifyUpdateDate(db);
             }
         }
@@ -548,10 +549,10 @@ namespace ServiceStack.OrmLite.Tests
                 CreateAndInitialize(db);
 
                 ResetUpdateDate(db);
-                var row = db.SingleById<DefaultValues>(1);
+                var row = db.SingleById<MySqlDefaultValues>(1);
                 row.DefaultDouble = 978.423;
                 db.UpdateOnly(row, p => p.DefaultDouble, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+                    cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider));
                 VerifyUpdateDate(db);
             }
         }
@@ -564,10 +565,10 @@ namespace ServiceStack.OrmLite.Tests
                 CreateAndInitialize(db);
 
                 ResetUpdateDate(db);
-                var row = db.SingleById<DefaultValues>(1);
+                var row = db.SingleById<MySqlDefaultValues>(1);
                 row.DefaultDouble = 978.423;
-                db.UpdateOnly(row, new[] { nameof(DefaultValues.DefaultDouble) }, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+                db.UpdateOnly(row, new[] { nameof(MySqlDefaultValues.DefaultDouble) }, p => p.Id == 1,
+                    cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider));
                 VerifyUpdateDate(db);
             }
         }
@@ -581,11 +582,11 @@ namespace ServiceStack.OrmLite.Tests
 
                 ResetUpdateDate(db);
 
-                var count = db.UpdateAdd(() => new DefaultValues { DefaultInt = 5, DefaultDouble = 7.2 }, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+                var count = db.UpdateAdd(() => new MySqlDefaultValues { DefaultInt = 5, DefaultDouble = 7.2 }, p => p.Id == 1,
+                    cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider));
 
                 Assert.That(count, Is.EqualTo(1));
-                var row = db.SingleById<DefaultValues>(1);
+                var row = db.SingleById<MySqlDefaultValues>(1);
                 Assert.That(row.DefaultInt, Is.EqualTo(6));
                 Assert.That(row.DefaultDouble, Is.EqualTo(8.3).Within(0.1));
                 VerifyUpdateDate(db);
@@ -601,12 +602,12 @@ namespace ServiceStack.OrmLite.Tests
 
                 ResetUpdateDate(db);
 
-                var where = db.From<DefaultValues>().Where(p => p.Id == 1);
-                var count = db.UpdateAdd(() => new DefaultValues { DefaultInt = 5, DefaultDouble = 7.2 }, where,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+                var where = db.From<MySqlDefaultValues>().Where(p => p.Id == 1);
+                var count = db.UpdateAdd(() => new MySqlDefaultValues { DefaultInt = 5, DefaultDouble = 7.2 }, where,
+                    cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider));
 
                 Assert.That(count, Is.EqualTo(1));
-                var row = db.SingleById<DefaultValues>(1);
+                var row = db.SingleById<MySqlDefaultValues>(1);
                 Assert.That(row.DefaultInt, Is.EqualTo(6));
                 Assert.That(row.DefaultDouble, Is.EqualTo(8.3).Within(0.1));
                 VerifyUpdateDate(db);
@@ -648,6 +649,31 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(rows.All(x => x.DefaultInt == 1));
                 Assert.That(rows.All(x => x.DefaultString == "String"));
             }
+        }
+        
+        private class MySqlDefaultValues
+        {
+            public int Id { get; set; }
+
+            [Default(1)]
+            public int DefaultInt { get; set; }
+
+            public int DefaultIntNoDefault { get; set; }
+
+            [Default(1)]
+            public int? NDefaultInt { get; set; }
+
+            [Default(1.1)]
+            public double DefaultDouble { get; set; }
+
+            [Default(1.1)]
+            public double? NDefaultDouble { get; set; }
+
+            [Default("'String'")]
+            public string DefaultString { get; set; }
+
+            [Default(OrmLiteVariables.SystemUtc)]
+            public DateTime UpdatedDateUtc { get; set; }
         }
     }
 }
