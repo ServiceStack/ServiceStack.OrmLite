@@ -95,7 +95,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<UniqueTest3>();
 
-                var createSql = db.GetDialectProvider().ToCreateTableStatement(typeof(UniqueTest3));
+                var createSql = DialectProvider.ToCreateTableStatement(typeof(UniqueTest3));
                 Assert.That(createSql.ToUpper(), Does.Contain("CONSTRAINT UC_CUSTOM UNIQUE"));
 
                 db.Insert(new UniqueTest3 { Field4 = "A", Field5 = "A", Field6 = "A" });
