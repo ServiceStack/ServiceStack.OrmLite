@@ -90,10 +90,12 @@ namespace ServiceStack.OrmLite.Tests
     public class DialectFeatures
     {
         public readonly bool RowOffset;
+        public readonly bool SchemaSupport;
         
         public DialectFeatures(Dialect dialect)
         {
             RowOffset = (Dialect.SqlServer2012 | Dialect.SqlServer2014 | Dialect.SqlServer2016 | Dialect.SqlServer2017).HasFlag(dialect);
+            SchemaSupport = !(Dialect.Sqlite).HasFlag(dialect);
         }
     }
 

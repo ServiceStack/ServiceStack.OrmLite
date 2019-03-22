@@ -30,6 +30,17 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public JoinsWithSchemas(Dialect dialect) : base(dialect)
         {
         }
+        
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            if (!DialectFeatures.SchemaSupport) return;
+            
+            using (var db = OpenDbConnection())
+            {
+                db.CreateSchema<ModelWithSchema>();
+            }
+        }
 
         [Test]
         public void Can_detect_if_table_with_schema_exists()

@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.Tests
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
-            if (!Dialect.Sqlite.HasFlag(Dialect))
+            if (DialectFeatures.SchemaSupport)
             {
                 using (var db = OpenDbConnection())
                 {
@@ -32,17 +32,17 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Table1>();
-                db.DropAndCreateTable<Table2>();
+                db.DropAndCreateTable<TableMetadata1>();
+                db.DropAndCreateTable<TableMetadata2>();
 
-                3.Times(i => db.Insert(new Table1 {Id = i + 1, Field1 = $"Field{i+1}"}) );
-                1.Times(i => db.Insert(new Table2 {Id = i + 1, Field2 = $"Field{i+1}"}) );
+                3.Times(i => db.Insert(new TableMetadata1 {Id = i + 1, Field1 = $"Field{i+1}"}) );
+                1.Times(i => db.Insert(new TableMetadata2 {Id = i + 1, Field2 = $"Field{i+1}"}) );
                 
                 var tableNames = db.GetTableNames();
                 tableNames.TextDump().Print();
                 Assert.That(tableNames.Count, Is.GreaterThan(0));
-                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(nameof(Table1))));
-                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(nameof(Table2))));
+                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(nameof(TableMetadata1))));
+                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(nameof(TableMetadata2))));
             }
         }
 
@@ -51,17 +51,17 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Table1>();
-                db.DropAndCreateTable<Table2>();
+                db.DropAndCreateTable<TableMetadata1>();
+                db.DropAndCreateTable<TableMetadata2>();
 
-                3.Times(i => db.Insert(new Table1 {Id = i + 1, Field1 = $"Field{i+1}"}) );
-                1.Times(i => db.Insert(new Table2 {Id = i + 1, Field2 = $"Field{i+1}"}) );
+                3.Times(i => db.Insert(new TableMetadata1 {Id = i + 1, Field1 = $"Field{i+1}"}) );
+                1.Times(i => db.Insert(new TableMetadata2 {Id = i + 1, Field2 = $"Field{i+1}"}) );
                 
                 var tableNames = await db.GetTableNamesAsync();
                 tableNames.TextDump().Print();
                 Assert.That(tableNames.Count, Is.GreaterThan(0));
-                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(nameof(Table1))));
-                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(nameof(Table2))));
+                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(nameof(TableMetadata1))));
+                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(nameof(TableMetadata2))));
             }
         }
 
@@ -100,27 +100,27 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Table1>();
-                db.DropAndCreateTable<Table2>();
+                db.DropAndCreateTable<TableMetadata1>();
+                db.DropAndCreateTable<TableMetadata2>();
 
-                3.Times(i => db.Insert(new Table1 {Id = i + 1, Field1 = $"Field{i+1}"}) );
-                1.Times(i => db.Insert(new Table2 {Id = i + 1, Field2 = $"Field{i+1}"}) );
+                3.Times(i => db.Insert(new TableMetadata1 {Id = i + 1, Field1 = $"Field{i+1}"}) );
+                1.Times(i => db.Insert(new TableMetadata2 {Id = i + 1, Field2 = $"Field{i+1}"}) );
                 
                 var tableNames = db.GetTableNamesWithRowCounts(live:true);
                 tableNames.TextDump().Print();
                 Assert.That(tableNames.Count, Is.GreaterThan(0));
 
-                var table1Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(nameof(Table1)) && x.Value == 3);
+                var table1Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(nameof(TableMetadata1)) && x.Value == 3);
                 Assert.That(table1Pos, Is.GreaterThanOrEqualTo(0));
 
-                var table2Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(nameof(Table2)) && x.Value == 1);
+                var table2Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(nameof(TableMetadata2)) && x.Value == 1);
                 Assert.That(table2Pos, Is.GreaterThanOrEqualTo(0));
                 
                 Assert.That(table1Pos < table2Pos); //is sorted desc
 
                 tableNames = db.GetTableNamesWithRowCounts(live:false);
-                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(Table1))));
-                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(Table2))));
+                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(TableMetadata1))));
+                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(TableMetadata2))));
             }
         }
 
@@ -129,27 +129,27 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Table1>();
-                db.DropAndCreateTable<Table2>();
+                db.DropAndCreateTable<TableMetadata1>();
+                db.DropAndCreateTable<TableMetadata2>();
 
-                3.Times(i => db.Insert(new Table1 {Id = i + 1, Field1 = $"Field{i+1}"}) );
-                1.Times(i => db.Insert(new Table2 {Id = i + 1, Field2 = $"Field{i+1}"}) );
+                3.Times(i => db.Insert(new TableMetadata1 {Id = i + 1, Field1 = $"Field{i+1}"}) );
+                1.Times(i => db.Insert(new TableMetadata2 {Id = i + 1, Field2 = $"Field{i+1}"}) );
                 
                 var tableNames = await db.GetTableNamesWithRowCountsAsync(live:true);
                 tableNames.TextDump().Print();
                 Assert.That(tableNames.Count, Is.GreaterThan(0));
 
-                var table1Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(nameof(Table1)) && x.Value == 3);
+                var table1Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(nameof(TableMetadata1)) && x.Value == 3);
                 Assert.That(table1Pos, Is.GreaterThanOrEqualTo(0));
 
-                var table2Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(nameof(Table2)) && x.Value == 1);
+                var table2Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(nameof(TableMetadata2)) && x.Value == 1);
                 Assert.That(table2Pos, Is.GreaterThanOrEqualTo(0));
                 
                 Assert.That(table1Pos < table2Pos); //is sorted desc
                 
                 tableNames = await db.GetTableNamesWithRowCountsAsync(live:false);
-                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(Table1))));
-                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(Table2))));
+                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(TableMetadata1))));
+                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(TableMetadata2))));
             }
         }
 
@@ -182,5 +182,18 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(tableNames.Any(x => x.Key.IndexOf(nameof(Schematable2), StringComparison.OrdinalIgnoreCase) >= 0));
             }
         }
+    }
+    
+    public class TableMetadata1
+    {
+        public int Id { get; set; }
+        public string String { get; set; }
+        public string Field1 { get; set; }
+    }
+    public class TableMetadata2
+    {
+        public int Id { get; set; }
+        public string String { get; set; }
+        public string Field2 { get; set; }
     }
 }

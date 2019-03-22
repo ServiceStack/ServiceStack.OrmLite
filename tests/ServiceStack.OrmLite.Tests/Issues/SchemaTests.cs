@@ -16,8 +16,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [OneTimeSetUp]
         public void OneTimeSetup()
         {
-            // sqlite doesn't support schemas
-            if (!Dialect.Sqlite.HasFlag(Dialect))
+            if (DialectFeatures.SchemaSupport)
             {
                 using (var db = OpenDbConnection())
                 {
