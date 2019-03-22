@@ -81,16 +81,18 @@ namespace ServiceStack.OrmLite.Tests.Issues
             using (var db = OpenDbConnection())
             {
                 var modelDef = OrmLiteUtils.GetModelDefinition(typeof(Poco));
+
+                modelDef.Schema = "schema2";
                 
                 db.SingleById<Poco>(1);
 
-                Assert.That(captured.SqlStatements.Last().ToLower(), Does.Contain("schema1"));
+                Assert.That(captured.SqlStatements.Last().ToLower(), Does.Contain("schema2"));
 
-                modelDef.Schema = "schema2";
+                modelDef.Schema = "schema3";
 
                 db.SingleById<Poco>(1);
 
-                Assert.That(captured.SqlStatements.Last().ToLower(), Does.Contain("schema2"));
+                Assert.That(captured.SqlStatements.Last().ToLower(), Does.Contain("schema3"));
             }
         }
     }
