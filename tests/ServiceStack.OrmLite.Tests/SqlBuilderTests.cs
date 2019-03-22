@@ -14,8 +14,8 @@ namespace ServiceStack.OrmLite.Tests
         {
         }
 
-        [Alias("Users")]
-        public class User 
+        [Alias("UsersSqlBuilder")]
+        public class UsersSqlBuilder 
         {
             [AutoIncrement]
             public int Id { get; set; }
@@ -23,60 +23,59 @@ namespace ServiceStack.OrmLite.Tests
             public int Age { get; set; }
         }
 
-        private IDbConnection db;
-
-        [SetUp]
-        public void SetUp()
-        {
-            db = OpenDbConnection();
-            db.DropAndCreateTable<User>();
-        }
-
-        [TearDown]
-        public void TearDown()
-        {
-        }
-        
         [Test]
         public void BuilderSelectClause()
         {
-            var rand = new Random(8675309);
-            var data = new List<User>();
-            for (var i = 0; i < 100; i++)
+            using (var db = OpenDbConnection())
             {
-                var nU = new User { Age = rand.Next(70), Id = i, Name = Guid.NewGuid().ToString() };
-                data.Add(nU);
-                nU.Id = (int) db.Insert(nU, selectIdentity: true);
-            }
+                db.DropAndCreateTable<UsersSqlBuilder>();
+                var rand = new Random(8675309);
+                var data = new List<UsersSqlBuilder>();
+                for (var i = 0; i < 100; i++)
+                {
+                    var nU = new UsersSqlBuilder {Age = rand.Next(70), Id = i, Name = Guid.NewGuid().ToString()};
+                    data.Add(nU);
+                    nU.Id = (int) db.Insert(nU, selectIdentity: true);
+                }
 
-            var builder = new SqlBuilder();
-            var justId = builder.AddTemplate("SELECT /**select**/ FROM Users");
-            var all = builder.AddTemplate("SELECT /**select**/, Name, Age FROM Users");
+                var builder = new SqlBuilder();
+                var justId = builder.AddTemplate("SELECT /**select**/ FROM UsersSqlBuilder");
+                var all = builder.AddTemplate("SELECT /**select**/, Name, Age FROM UsersSqlBuilder");
 
-            builder.Select("Id");
+                builder.Select("Id");
 
-            var ids = db.Column<int>(justId.RawSql, justId.Parameters);
-            var users = db.Select<User>(all.RawSql, all.Parameters);
+                var ids = db.Column<int>(justId.RawSql, justId.Parameters);
+                var users = db.Select<UsersSqlBuilder>(all.RawSql, all.Parameters);
 
-            foreach (var u in data)
-            {
-                Assert.That(ids.Any(i => u.Id == i), "Missing ids in select");
-                Assert.That(users.Any(a => a.Id == u.Id && a.Name == u.Name && a.Age == u.Age), "Missing users in select");
+                foreach (var u in data)
+                {
+                    Assert.That(ids.Any(i => u.Id == i), "Missing ids in select");
+                    Assert.That(users.Any(a => a.Id == u.Id && a.Name == u.Name && a.Age == u.Age),
+                        "Missing users in select");
+                }
             }
         }
 
         [Test]
         public void BuilderTemplateWOComposition()
         {
-            var builder = new SqlBuilder();
-            var template = builder.AddTemplate("SELECT COUNT(*) FROM Users WHERE Age = {0}age".Fmt(OrmLiteConfig.DialectProvider.ParamString), new { age = 5 });
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<UsersSqlBuilder>();
+                
+                var builder = new SqlBuilder();
+                var template =
+                    builder.AddTemplate(
+                        "SELECT COUNT(*) FROM UsersSqlBuilder WHERE Age = {0}age".Fmt(DialectProvider.ParamString),
+                        new {age = 5});
 
-            if (template.RawSql == null) throw new Exception("RawSql null");
-            if (template.Parameters == null) throw new Exception("Parameters null");
+                if (template.RawSql == null) throw new Exception("RawSql null");
+                if (template.Parameters == null) throw new Exception("Parameters null");
 
-            db.Insert(new User { Age = 5, Name = "Testy McTestington" });
+                db.Insert(new UsersSqlBuilder {Age = 5, Name = "Testy McTestington"});
 
-            Assert.That(db.Scalar<int>(template.RawSql, template.Parameters), Is.EqualTo(1));
+                Assert.That(db.Scalar<int>(template.RawSql, template.Parameters), Is.EqualTo(1));
+            }
         }         
     }
 }
