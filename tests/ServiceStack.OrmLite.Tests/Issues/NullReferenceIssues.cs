@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         }
 
         [Test]
-        [IgnoreProvider(Dialect.Sqlite, "Not supported")]
+        [IgnoreDialect(Dialect.Sqlite, "Not supported")]
         public void Can_AlterColumn()
         {
             using (var db = OpenDbConnection())

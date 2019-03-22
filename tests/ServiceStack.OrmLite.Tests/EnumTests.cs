@@ -29,7 +29,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Dialect.AnyMySql, "Blob columns can't have a default value. https://stackoverflow.com/a/4553664/85785")]
+        [IgnoreDialect(Dialect.AnyMySql, "Blob columns can't have a default value. https://stackoverflow.com/a/4553664/85785")]
         public void Can_use_RowVersion_on_EnumAsString_PrimaryKey()
         {
             using (var db = OpenDbConnection())

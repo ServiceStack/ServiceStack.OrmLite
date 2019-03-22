@@ -765,7 +765,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.AnyPostgreSql, "Dapper doesn't know about pgsql naming conventions")]
+        [IgnoreDialect(Tests.Dialect.AnyPostgreSql, "Dapper doesn't know about pgsql naming conventions")]
         public void Can_populate_multiple_POCOs_using_Dappers_QueryMultiple()
         {
             ResetTables();

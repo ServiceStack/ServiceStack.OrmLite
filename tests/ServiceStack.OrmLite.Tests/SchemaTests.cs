@@ -106,7 +106,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Dialect.Sqlite, "DROP COLUMN Not supported")]
+        [IgnoreDialect(Dialect.Sqlite, "DROP COLUMN Not supported")]
         public void Can_drop_and_add_column()
         {
             using (var db = OpenDbConnection())

@@ -28,7 +28,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.Sqlite, "doesn't support concurrent writers")]
+        [IgnoreDialect(Dialect.Sqlite, "doesn't support concurrent writers")]
         public void TwoSimultaneousInsertsGetDifferentIds()
         {
             var dataArray = new[]
@@ -86,7 +86,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Dialect.Sqlite, "doesn't support concurrent writers")]
+        [IgnoreDialect(Dialect.Sqlite, "doesn't support concurrent writers")]
         public void TwoSimultaneousSavesGetDifferentIds()
         {
             var dataArray = new[]

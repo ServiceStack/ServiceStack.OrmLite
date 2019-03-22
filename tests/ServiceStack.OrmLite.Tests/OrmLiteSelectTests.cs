@@ -276,7 +276,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.AnyOracle, "Oracle provider doesn't modify user supplied SQL to conform to name length restrictions")]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "Oracle provider doesn't modify user supplied SQL to conform to name length restrictions")]
         public void Can_Select_subset_ModelWithIdAndName_from_ModelWithFieldsOfDifferentTypes_table()
         {
             using (var db = OpenDbConnection())

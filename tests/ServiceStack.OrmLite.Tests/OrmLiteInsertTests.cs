@@ -262,7 +262,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.AnyOracle, "Need trigger for autoincrement keys to work in Oracle with caller supplied SQL")]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "Need trigger for autoincrement keys to work in Oracle with caller supplied SQL")]
         public void Can_GetLastInsertedId_using_Insert()
         {
             var date = new DateTime(2000, 1, 1);
@@ -295,7 +295,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.AnyOracle, "Need trigger for autoincrement keys to work in Oracle")]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "Need trigger for autoincrement keys to work in Oracle")]
         public void Can_InsertOnly_selected_fields()
         {
             using (var db = OpenDbConnection())
@@ -327,7 +327,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.AnyOracle, "Need trigger for autoincrement keys to work in Oracle")]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "Need trigger for autoincrement keys to work in Oracle")]
         public void Can_InsertOnly_selected_fields_using_AssignmentExpression()
         {
             using (var db = OpenDbConnection())

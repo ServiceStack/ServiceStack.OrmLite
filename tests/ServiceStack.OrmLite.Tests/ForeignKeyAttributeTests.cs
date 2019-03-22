@@ -47,7 +47,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Dialect.Sqlite, "no support for cascade deletes")]
+        [IgnoreDialect(Dialect.Sqlite, "no support for cascade deletes")]
         public void CascadesOnDelete()
         {
             // TODO: group tests around db features
@@ -79,7 +79,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.Sqlite, "Not supported in sqlite?")]
+        [IgnoreDialect(Tests.Dialect.Sqlite, "Not supported in sqlite?")]
         public void CanCreateForeignWithOnDeleteNoAction()
         {
             using (var dbConn = OpenDbConnection())

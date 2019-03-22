@@ -241,7 +241,7 @@ OrmLiteConfig.DialectProvider.GetParam("schemaUri"));
         [TestCase("t030CustomerId", "t030CustomerName", "t030Customer_birth_date")]
         [TestCase("t030_customer_id", "t030_customer_name", "t130_customer_birth_date")]
         [TestCase("t030#Customer_I#d", "t030CustomerNa$^me", "t030Cust^omer_birth_date")]
-        [IgnoreProvider(Tests.Dialect.AnyOracle, "Oracle provider is not smart enough to insert 'from dual' everywhere required in user supplied SQL")]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "Oracle provider is not smart enough to insert 'from dual' everywhere required in user supplied SQL")]
         public void Can_query_CustomerDto_and_map_db_fields_not_identical_by_guessing_the_mapping(string field1Name, string field2Name, string field3Name)
         {
             using (var db = OpenDbConnection())

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -76,7 +76,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Dialect.AnyOracle, "Can't run this with Oracle until use trigger for AutoIncrement primary key insertion")]
+        [IgnoreDialect(Dialect.AnyOracle, "Can't run this with Oracle until use trigger for AutoIncrement primary key insertion")]
         public void Can_add_replay_logic()
         {
             var holdExecFilter = DialectProvider.ExecFilter;

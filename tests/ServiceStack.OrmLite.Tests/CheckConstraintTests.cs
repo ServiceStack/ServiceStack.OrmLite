@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Tests
         }
         
         [Test]
-        [IgnoreProvider(Dialect.MySql5_5 | Dialect.MySql10_1, "Check constraints supported from MariaDb 10.2.1 onwards")]
+        [IgnoreDialect(Dialect.MySql5_5 | Dialect.MySql10_1, "Check constraints supported from MariaDb 10.2.1 onwards")]
         public void Does_create_table_with_CheckConstraints()
         {
             using (var db = OpenDbConnection())

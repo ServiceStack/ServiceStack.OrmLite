@@ -308,12 +308,17 @@ namespace ServiceStack.OrmLite.Tests
     /// Can be applied to a test to skip for specific dialects
     /// </summary>
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
-    public class IgnoreProviderAttribute : NUnitAttribute, ITestAction
+    public class IgnoreDialectAttribute : NUnitAttribute, ITestAction
     {
         private readonly Dialect _dialect;
         private readonly string _reason;
 
-        public IgnoreProviderAttribute(Dialect dialect, string reason)
+        /// <summary>
+        /// Ignore one or more specific dialects from testing
+        /// </summary>
+        /// <param name="dialect">The dialect flags to ignore</param>
+        /// <param name="reason">The ignore reason that will be output in test results</param>
+        public IgnoreDialectAttribute(Dialect dialect, string reason)
         {
             _dialect = dialect;
             _reason = reason;

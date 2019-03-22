@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.AnyPostgreSql | Tests.Dialect.AnyMySql, "Invalid Custom SQL for provider naming convention")]
+        [IgnoreDialect(Tests.Dialect.AnyPostgreSql | Tests.Dialect.AnyMySql, "Invalid Custom SQL for provider naming convention")]
         public void Can_use_JoinAlias_in_condition()
         {
             using (var db = OpenDbConnection())

@@ -82,8 +82,8 @@ namespace ServiceStack.OrmLite.Tests.Async
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.AnyMySql, "doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery")]
-        [IgnoreProvider(Tests.Dialect.AnySqlServer, "generates Windowing function \"... WHERE CustomerId IN (SELECT * FROM ...)\" when should generate \"... WHERE CustomerId IN (SELECT Id FROM ...)\"")]
+        [IgnoreDialect(Tests.Dialect.AnyMySql, "doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery")]
+        [IgnoreDialect(Tests.Dialect.AnySqlServer, "generates Windowing function \"... WHERE CustomerId IN (SELECT * FROM ...)\" when should generate \"... WHERE CustomerId IN (SELECT Id FROM ...)\"")]
         public void Can_select_limit_on_Table_with_References()
         {
             using (var db = OpenDbConnection())
@@ -125,8 +125,8 @@ namespace ServiceStack.OrmLite.Tests.Async
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.AnyMySql, "doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery")]
-        [IgnoreProvider(Tests.Dialect.AnySqlServer, "generates Windowing function \"... WHERE CustomerId IN (SELECT * FROM ...)\" when should generate \"... WHERE CustomerId IN (SELECT Id FROM ...)\"")]
+        [IgnoreDialect(Tests.Dialect.AnyMySql, "doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery")]
+        [IgnoreDialect(Tests.Dialect.AnySqlServer, "generates Windowing function \"... WHERE CustomerId IN (SELECT * FROM ...)\" when should generate \"... WHERE CustomerId IN (SELECT Id FROM ...)\"")]
         public async Task Can_select_limit_on_Table_with_References_Async()
         {
             using (var db = OpenDbConnection())

@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer.Converters;
@@ -22,7 +22,6 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Dialect.SqlServer | Dialect.SqlServer2012, "Timespan not supported")]
         public void Can_override_SqlServer_Time_Converter()
         {
             using (var db = OpenDbConnection())

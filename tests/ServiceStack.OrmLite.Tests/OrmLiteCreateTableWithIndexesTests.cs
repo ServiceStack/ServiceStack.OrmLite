@@ -83,7 +83,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.Firebird, "Too long, not supported")]
+        [IgnoreDialect(Tests.Dialect.Firebird, "Too long, not supported")]
         public void Can_create_ModelWithCompositeIndexOnFieldSpacesDesc_table()
         {
             using (var db = OpenDbConnection())

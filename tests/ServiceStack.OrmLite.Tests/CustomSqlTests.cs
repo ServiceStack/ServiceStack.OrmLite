@@ -121,7 +121,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Dialect.AnyOracle | Dialect.AnyPostgreSql, "multiple SQL statements need to be wrapped in an anonymous block")]
+        [IgnoreDialect(Dialect.AnyOracle | Dialect.AnyPostgreSql, "multiple SQL statements need to be wrapped in an anonymous block")]
         public void Does_execute_CustomSql_after_table_created()
         {
             using (var db = OpenDbConnection())
@@ -135,7 +135,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Dialect.AnyOracle | Dialect.AnyPostgreSql, "multiple SQL statements need to be wrapped in an anonymous block")]
+        [IgnoreDialect(Dialect.AnyOracle | Dialect.AnyPostgreSql, "multiple SQL statements need to be wrapped in an anonymous block")]
         public void Does_execute_CustomSql_after_table_created_using_dynamic_attribute()
         {
             typeof(DynamicAttributeSeedData)

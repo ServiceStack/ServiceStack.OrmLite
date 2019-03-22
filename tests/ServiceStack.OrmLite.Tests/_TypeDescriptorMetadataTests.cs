@@ -39,8 +39,8 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Dialect.AnyOracle, "Test assert fails with Oracle because Oracle does not allow 64000 character fields and uses VARCHAR2 not VARCHAR")]
-        [IgnoreProvider(Dialect.AnyPostgreSql, "Uses 'text' for strings by default")]
+        [IgnoreDialect(Dialect.AnyOracle, "Test assert fails with Oracle because Oracle does not allow 64000 character fields and uses VARCHAR2 not VARCHAR")]
+        [IgnoreDialect(Dialect.AnyPostgreSql, "Uses 'text' for strings by default")]
         public void Can_change_column_definition()
         {
             using (var db = OpenDbConnection())

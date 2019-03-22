@@ -372,7 +372,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        [IgnoreProvider(Tests.Dialect.AnyOracle, "This seems wrong here as the save actually goes through to the database in Oracle to get the next number from the sequence")]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "This seems wrong here as the save actually goes through to the database in Oracle to get the next number from the sequence")]
         public void Can_hijack_References_Apis()
         {
             var customer = new Customer

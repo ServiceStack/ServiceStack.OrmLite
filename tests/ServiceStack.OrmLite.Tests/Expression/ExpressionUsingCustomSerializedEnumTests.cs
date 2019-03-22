@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [TestCase(0)]
         [TestCase(1)]
         [TestCase(2)]
-        [IgnoreProvider(Tests.Dialect.AnyOracle, "Can't work on Oracle because Oracle does not allow empty strings in a varchar column")]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "Can't work on Oracle because Oracle does not allow empty strings in a varchar column")]
         public void Can_select_on_custom_default_null_serialized_enum(int index)
         {
             EnumSerializerWithNullDefaults.Configure();
@@ -75,7 +75,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         [TestCase(0)]
         [TestCase(1)]
         [TestCase(2)]
-        [IgnoreProvider(Tests.Dialect.AnyOracle, "Can't work on Oracle because Oracle does not allow empty strings in a varchar column")]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "Can't work on Oracle because Oracle does not allow empty strings in a varchar column")]
         public void Can_select_on_custom_default_empty_serialized_enum(int index)
         {
             EnumSerializerWithEmptyDefaults.Configure();
