@@ -141,7 +141,7 @@ namespace ServiceStack.OrmLite.Tests
                 var meta = type.GetModelMetadata();
                 if (type.HasInterface(typeof(ISoftDelete)))
                 {
-                    var sqlFalse = OrmLiteConfig.DialectProvider.SqlBool(false);
+                    var sqlFalse = DialectProvider.SqlBool(false);
                     sql += $" AND ({meta.ModelName.SqlTable(DialectProvider)}.{"IsDeleted".SqlColumn(DialectProvider)} = {sqlFalse})";
                 }
 
@@ -171,7 +171,7 @@ namespace ServiceStack.OrmLite.Tests
                 var meta = type.GetModelMetadata();
                 if (type.HasInterface(typeof(ISoftDelete)))
                 {
-                    var sqlFalse = OrmLiteConfig.DialectProvider.SqlBool(false);
+                    var sqlFalse = DialectProvider.SqlBool(false);
                     sql += $" AND ({meta.ModelName.SqlTable(DialectProvider)}.{"IsDeleted".SqlColumn(DialectProvider)} = {sqlFalse})";
                 }
 

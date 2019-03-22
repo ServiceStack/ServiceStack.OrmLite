@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
@@ -79,8 +79,8 @@ namespace ServiceStack.OrmLite.Tests
         [IgnoreProvider(Dialect.AnyOracle, "Can't run this with Oracle until use trigger for AutoIncrement primary key insertion")]
         public void Can_add_replay_logic()
         {
-            var holdExecFilter = OrmLiteConfig.DialectProvider.ExecFilter;
-            OrmLiteConfig.DialectProvider.ExecFilter = new ReplayOrmLiteExecFilter { ReplayTimes = 3 };
+            var holdExecFilter = DialectProvider.ExecFilter;
+            DialectProvider.ExecFilter = new ReplayOrmLiteExecFilter { ReplayTimes = 3 };
 
             using (var db = OpenDbConnection())
             {
@@ -91,14 +91,14 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(rowsInserted, Is.EqualTo(3));
             }
 
-            OrmLiteConfig.DialectProvider.ExecFilter = holdExecFilter;
+            DialectProvider.ExecFilter = holdExecFilter;
         }
 
         [Test]
         public void Can_mock_store_procedure()
         {
-            var holdExecFilter = OrmLiteConfig.DialectProvider.ExecFilter;
-            OrmLiteConfig.DialectProvider.ExecFilter = new MockStoredProcExecFilter();
+            var holdExecFilter = DialectProvider.ExecFilter;
+            DialectProvider.ExecFilter = new MockStoredProcExecFilter();
 
             using (var db = OpenDbConnection())
             {
@@ -108,14 +108,14 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(person.FirstName, Is.EqualTo("Mocked"));
             }
 
-            OrmLiteConfig.DialectProvider.ExecFilter = holdExecFilter;
+            DialectProvider.ExecFilter = holdExecFilter;
         }
 
         [Test]
         public async Task Can_mock_store_procedure_Async()
         {
-            var holdExecFilter = OrmLiteConfig.DialectProvider.ExecFilter;
-            OrmLiteConfig.DialectProvider.ExecFilter = new MockStoredProcExecFilter();
+            var holdExecFilter = DialectProvider.ExecFilter;
+            DialectProvider.ExecFilter = new MockStoredProcExecFilter();
 
             using (var db = OpenDbConnection())
             {
@@ -125,7 +125,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(person.FirstName, Is.EqualTo("Mocked"));
             }
 
-            OrmLiteConfig.DialectProvider.ExecFilter = holdExecFilter;
+            DialectProvider.ExecFilter = holdExecFilter;
         }
 
         [Test]
