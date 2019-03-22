@@ -22,6 +22,17 @@ namespace ServiceStack.OrmLite.Tests.Issues
         {
         }
 
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            if (!DialectFeatures.SchemaSupport) return;
+            
+            using (var db = OpenDbConnection())
+            {
+                db.CreateSchema<ModelWithSchema>();
+            }
+        }
+
         [Test]
         public void Can_perform_join_alias_on_ModelWithSchema()
         {
