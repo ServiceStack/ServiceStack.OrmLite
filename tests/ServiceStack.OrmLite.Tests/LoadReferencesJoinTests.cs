@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table
 
-            db.CreateSchema<ProjectTask>();
+            if(DialectFeatures.SchemaSupport) db.CreateSchema<ProjectTask>();
             db.DropAndCreateTable<Order>();
             db.DropAndCreateTable<Customer>();
             db.DropAndCreateTable<CustomerAddress>();
