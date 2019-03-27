@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -34,6 +34,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table
 
+            db.CreateSchema<ProjectTask>();
             db.DropAndCreateTable<Order>();
             db.DropAndCreateTable<Customer>();
             db.DropAndCreateTable<CustomerAddress>();

@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite.Tests
 
 
         [Test]
-        public void Can_create_TableWithNamingStrategy_table_nameUnderscoreCoumpound()
+        public void Can_create_TableWithNamingStrategy_table_nameUnderscoreCompound()
         {
             using (new TemporaryNamingStrategy(DialectProvider, new UnderscoreSeparatedCompoundNamingStrategy()))
             using (var db = OpenDbConnection())
