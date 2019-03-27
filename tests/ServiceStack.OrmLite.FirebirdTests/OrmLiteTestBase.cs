@@ -4,6 +4,7 @@ using System.Data;
 using NUnit.Framework;
 using ServiceStack.Logging;
 using ServiceStack.OrmLite.Firebird;
+using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.FirebirdTests
 {
@@ -13,7 +14,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 		protected string GetFileConnectionString()
 		{
-            return ConfigurationManager.ConnectionStrings["testDb"].ConnectionString;
+            return TestConfig.FirebirdDb_3;
         }
 
 		protected void CreateNewDatabase()
