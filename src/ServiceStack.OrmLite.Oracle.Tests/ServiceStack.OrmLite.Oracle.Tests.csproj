@@ -15,7 +15,7 @@
     <ProjectReference Include="..\ServiceStack.OrmLite.Oracle\ServiceStack.OrmLite.Oracle.csproj" />
     <ProjectReference Include="..\..\tests\ServiceStack.OrmLite.Tests\ServiceStack.OrmLite.Tests.csproj" />
     <PackageReference Include="ServiceStack" Version="$(Version)" />
-    <PackageReference Include="ServiceStack.NetFramework" Version="$(Version)" />
+    <!--<PackageReference Include="ServiceStack.NetFramework" Version="$(Version)" />-->
     <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
     <PackageReference Include="NUnit" Version="3.10.1" />

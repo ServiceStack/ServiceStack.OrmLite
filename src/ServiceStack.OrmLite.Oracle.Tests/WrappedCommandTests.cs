@@ -1,4 +1,5 @@
-﻿using System.Data;
+﻿#if false
+using System.Data;
 using System.Data.Common;
 using NUnit.Framework;
 using ServiceStack.MiniProfiler;
@@ -79,3 +80,5 @@ namespace ServiceStack.OrmLite.Tests
         { }
     }
 }
+
+#endif
