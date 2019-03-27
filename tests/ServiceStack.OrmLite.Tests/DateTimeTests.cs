@@ -52,7 +52,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                var dialectProvider = db.GetDialectProvider();
+                var dialectProvider = DialectProvider;
                 var hold = dialectProvider.GetDateTimeConverter().DateStyle;
                 dialectProvider.GetDateTimeConverter().DateStyle = DateTimeKind.Local;
 
@@ -101,7 +101,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                var dialectProvider = db.GetDialectProvider();
+                var dialectProvider = DialectProvider;
                 var hold = dialectProvider.GetDateTimeConverter().DateStyle;
                 dialectProvider.GetDateTimeConverter().DateStyle = DateTimeKind.Utc;
 
@@ -171,8 +171,8 @@ namespace ServiceStack.OrmLite.Tests
                     {
                         cmd.CommandText = "INSERT INTO {0} VALUES({1}, {2})"
                             .Fmt(typeof(DateTimeObject).Name.SqlTable(DialectProvider),
-                                db.GetDialectProvider().GetParam("p1"),
-                                db.GetDialectProvider().GetParam("p2"));
+                                DialectProvider.GetParam("p1"),
+                                DialectProvider.GetParam("p2"));
 
                         cmd.Parameters.Add(cmd.CreateParam("p1", dateTime));
                         cmd.Parameters.Add(cmd.CreateParam("p2", dateTime));

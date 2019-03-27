@@ -26,8 +26,8 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                var hold = db.GetDialectProvider().GetConverter<TimeSpan>();
-                db.GetDialectProvider().RegisterConverter<TimeSpan>(
+                var hold = DialectProvider.GetConverter<TimeSpan>();
+                DialectProvider.RegisterConverter<TimeSpan>(
                     new SqlServerTimeConverter());
 
                 db.DropAndCreateTable<PocoWithTime>();
@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(sql, Does.Contain("\"TimeSpan\" = '01:01:01.0030000'").
                                  Or.Contain("\"TimeSpan\" = CAST(@0 AS TIME))"));
 
-                db.GetDialectProvider().RegisterConverter<TimeSpan>(hold);
+                DialectProvider.RegisterConverter<TimeSpan>(hold);
             }
         }
     }

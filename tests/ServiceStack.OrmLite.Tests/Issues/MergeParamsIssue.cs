@@ -47,7 +47,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 for (var i = 0; i < 11; i++)
                 {
-                    Assert.That(expression, Does.Contain(db.GetDialectProvider().ParamString + i));
+                    Assert.That(expression, Does.Contain(DialectProvider.ParamString + i));
                 }
             }
         }

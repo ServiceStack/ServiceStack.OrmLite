@@ -152,8 +152,8 @@ namespace ServiceStack.OrmLite.Tests
                 var guidA = new GuidAutoId { Id = existingGuid, Name = "A" };
 
                 db.Exec(cmd => {
-                    cmd.CommandText = db.GetDialectProvider().ToInsertRowStatement(cmd, guidA);
-                    db.GetDialectProvider().SetParameterValues<GuidAutoId>(cmd, guidA);
+                    cmd.CommandText = DialectProvider.ToInsertRowStatement(cmd, guidA);
+                    DialectProvider.SetParameterValues<GuidAutoId>(cmd, guidA);
                     cmd.ExecuteNonQuery();
                 });
 
