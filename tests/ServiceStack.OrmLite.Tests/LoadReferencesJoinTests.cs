@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.Linq;
 using System.Text;
@@ -723,14 +723,10 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Dialect.AnyMySql, "doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery")]
+        [IgnoreDialect(Dialect.AnySqlServer, "Only one expression can be specified in the select list when the subquery is not introduced with EXISTS.")]
         public void Can_load_references_with_OrderBy_and_Paging()
         {
-            //This version of MariaDB doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
-            if (Dialect == Dialect.AnyMySql)
-                return;
-            if ((Dialect & Dialect.AnySqlServer) == Dialect) //Only one expression can be specified in the select list when the subquery is not introduced with EXISTS.
-                return;
-
             db.DropTable<ParentSelf>();
             db.DropTable<ChildSelf>();
 
