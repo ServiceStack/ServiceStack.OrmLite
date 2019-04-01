@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.SqliteTests
         public void Can_open_readonly_connection_to_file_database()
         {
             var dbPath = "~/App_Data/northwind.sqlite".MapProjectPlatformPath();
-            var connectionString = "Data Source=" + dbPath + ";Read Only=true";
+            var connectionString = $"Data Source={dbPath};Mode=ReadOnly";
             connectionString.Print();
             var dbFactory = new OrmLiteConnectionFactory(connectionString, SqliteDialect.Provider);
 

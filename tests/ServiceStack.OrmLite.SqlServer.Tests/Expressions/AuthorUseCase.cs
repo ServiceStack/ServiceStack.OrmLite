@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
-namespace ServiceStack.OrmLite.Tests.Expressions
+namespace ServiceStack.OrmLite.SqlServerTests.Expressions
 {
     public class AuthorUseCase : OrmLiteTestBase
     {
@@ -64,7 +64,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                 expected = 6;
                 //Sql.In can take params object[]
                 var city = "Berlin";
-                ev.Where().Where(rn => Sql.In(rn.City, "London", "Madrid", city));
+				ev.Where().Where(rn => Sql.In(rn.City, "London", "Madrid", city));
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
                 result = db.Select<Author>(rn => Sql.In(rn.City, new[] { "London", "Madrid", "Berlin" }));
@@ -159,7 +159,6 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
                 // insert values  only in Id, Name, Birthday, Rate and Active fields 
                 expected = 4;
-                ev.Insert(rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
                 db.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Victor Grozny", Birthday = DateTime.Today.AddYears(-18) }, rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
                 db.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Ivan Chorny", Birthday = DateTime.Today.AddYears(-19) }, rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
 				ev.Where().Where(rn => !rn.Active);
@@ -224,9 +223,16 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                 Assert.AreEqual("Rodger Contreras".ToUpper(), author.Name);
 
                 // select distinct..
-                ev.Limit().OrderBy(); // clear limit, clear order for postres
+                ev.Limit().OrderBy(); // clear limit, clear orde
                 ev.SelectDistinct(r => r.City);
                 expected = 6;
+                result = db.Select(ev);
+                Assert.AreEqual(expected, result.Count);
+
+                // select distinct with limit
+                ev.Limit(0, 4);
+                ev.SelectDistinct(r => r.City);
+                expected = 4;
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
 
@@ -298,7 +304,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                     bool r6 = db.Scalar<Author, bool>(e => Sql.Max(e.Active));
                     Assert.AreEqual(expectedBool, r6);
                 }
-                catch (Exception)
+                catch //(Exception e)
                 {
                     //????
                     //if (dialect.Name == "PostgreSQL")
@@ -357,6 +363,14 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                 expected = db.Select<Author>(x => x.Active == false).Count;
                 rows = db.Delete<Author>(x => x.Active == false);
                 Assert.AreEqual(expected, rows);
+
+                // Sql.In(empty array) and Sql.In(null) should evaluate to false rather than failing
+
+                expected = 0;
+                result = db.Select<Author>(rn => Sql.In(rn.City, new string[0]));
+                Assert.AreEqual(expected, result.Count);
+                result = db.Select<Author>(rn => Sql.In(rn.City, (string[])null));
+                Assert.AreEqual(expected, result.Count);
             }
         }
     }

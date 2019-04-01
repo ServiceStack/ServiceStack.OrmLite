@@ -20,7 +20,7 @@ namespace ServiceStack.OrmLite.Tests
         public static string SqliteFileDir = "~/App_Data/".MapAbsolutePath();
         public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
         public static string SqlServerDb = "~/App_Data/Database1.mdf".MapAbsolutePath();
-        public static string SqlServerBuildDb = Environment.GetEnvironmentVariable("MSSQL_CONNECTION") ?? "Data Source=localhost,48501\\SQLExpress;Network Library=DBMSSOCN;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;";
+        public static string SqlServerBuildDb = Environment.GetEnvironmentVariable("MSSQL_CONNECTION") ?? "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;";
         //public static string SqlServerBuildDb = "Data Source=localhost;Initial Catalog=TestDb;Integrated Security=SSPI;Connect Timeout=120;MultipleActiveResultSets=True";
 
         public static string OracleDb = Environment.GetEnvironmentVariable("ORACLE_CONNECTION") ?? "Data Source=localhost:48401/XE;User ID=system;Password=test";

@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
+using ServiceStack.OrmLite.Tests;
 
-namespace ServiceStack.OrmLite.Tests.Expressions
+namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 {
     public class AuthorUseCase : OrmLiteTestBase
     {
         private List<Author> authors; 
 
-        public AuthorUseCase()
+        public AuthorUseCase() : base(Dialect.PostgreSql)
         {
             authors = new List<Author>();
             authors.Add(new Author() { Name = "Demis Bellot", Birthday = DateTime.Today.AddYears(-20), Active = true, Earnings = 99.9m, Comments = "CSharp books", Rate = 10, City = "London" });
@@ -77,7 +78,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                 List<Object> cities = new List<Object>();
                 cities.Add(city);
                 cities.Add("Cartagena");
-				ev.Where().Where(rn => Sql.In(rn.City, cities));
+                ev.Where().Where(rn => Sql.In(rn.City, cities));
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
                 result = db.Select<Author>(rn => Sql.In(rn.City, "Bogota", "Cartagena"));
@@ -86,7 +87,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
                 // select authors which name starts with A
                 expected = 3;
-				ev.Where().Where(rn => rn.Name.StartsWith("A"));
+                ev.Where().Where(rn => rn.Name.StartsWith("A"));
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
                 result = db.Select<Author>(rn => rn.Name.StartsWith("A"));
@@ -95,7 +96,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                 // select authors which name ends with Garzon o GARZON o garzon ( no case sensitive )
                 expected = 3;
                 var name = "GARZON";
-				ev.Where().Where(rn => rn.Name.ToUpper().EndsWith(name));
+                ev.Where().Where(rn => rn.Name.ToUpper().EndsWith(name));
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
                 result = db.Select<Author>(rn => rn.Name.ToUpper().EndsWith(name));
@@ -106,8 +107,15 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                 //in the string. 
                 //An underscore ("_") in the LIKE pattern matches any single character in the string. 
                 //Any other character matches itself or its lower/upper case equivalent (i.e. case-insensitive matching).
+                //case-sensitivity matching depends on PostgreSQL underlying OS.
+
+#if NETCORE 
+                expected = 1;
+#else
                 expected = 3;
-				ev.Where().Where(rn => rn.Name.EndsWith("garzon"));
+#endif
+
+                ev.Where().Where(rn => rn.Name.EndsWith("garzon"));
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
                 result = db.Select<Author>(rn => rn.Name.EndsWith("garzon"));
@@ -117,7 +125,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                 // select authors which name contains  Benedict 
                 expected = 2;
                 name = "Benedict";
-				ev.Where().Where(rn => rn.Name.Contains(name));
+                ev.Where().Where(rn => rn.Name.Contains(name));
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
                 result = db.Select<Author>(rn => rn.Name.Contains("Benedict"));
@@ -130,7 +138,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                 // select authors with Earnings <= 50 
                 expected = 3;
                 var earnings = 50;
-				ev.Where().Where(rn => rn.Earnings <= earnings);
+                ev.Where().Where(rn => rn.Earnings <= earnings);
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
                 result = db.Select<Author>(rn => rn.Earnings <= 50);
@@ -139,7 +147,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                 // select authors with Rate = 10 and city=Mexio 
                 expected = 1;
                 city = "Mexico";
-				ev.Where().Where(rn => rn.Rate == 10 && rn.City == city);
+                ev.Where().Where(rn => rn.Rate == 10 && rn.City == city);
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
                 result = db.Select<Author>(rn => rn.Rate == 10 && rn.City == "Mexico");
@@ -153,22 +161,21 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                 // set Active=false where rate =0
                 expected = 2;
                 var rate = 0;
-				ev.Where().Where(rn => rn.Rate == rate).Update(rn => rn.Active);
+                ev.Where().Where(rn => rn.Rate == rate).Update(rn => rn.Active);
                 var rows = db.UpdateOnly(new Author() { Active = false }, ev);
                 Assert.AreEqual(expected, rows);
 
                 // insert values  only in Id, Name, Birthday, Rate and Active fields 
                 expected = 4;
-                ev.Insert(rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
                 db.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Victor Grozny", Birthday = DateTime.Today.AddYears(-18) }, rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
                 db.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Ivan Chorny", Birthday = DateTime.Today.AddYears(-19) }, rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
-				ev.Where().Where(rn => !rn.Active);
+                ev.Where().Where(rn => !rn.Active);
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
 
                 //update comment for City == null 
                 expected = 2;
-				ev.Where().Where(rn => rn.City == null).Update(rn => rn.Comments);
+                ev.Where().Where(rn => rn.City == null).Update(rn => rn.Comments);
                 rows = db.UpdateOnly(new Author() { Comments = "No comments" }, ev);
                 Assert.AreEqual(expected, rows);
 
@@ -340,12 +347,12 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                 var rr = db.Single<Author>(rn => rn.Name == "Luis garzon");
                 rr.City = "Madrid";
                 rr.Comments = "Updated";
-				ev.Where().Where(r => r.Id == rr.Id); // if omit,  then all records will be updated 
+                ev.Where().Where(r => r.Id == rr.Id); // if omit,  then all records will be updated 
                 rows = db.UpdateOnly(rr, ev); // == dbCmd.Update(rr) but it returns void
                 Assert.AreEqual(expected, rows);
 
                 expected = 0;
-				ev.Where().Where(r => r.City == "Ciudad Gotica");
+                ev.Where().Where(r => r.City == "Ciudad Gotica");
                 rows = db.UpdateOnly(rr, ev);
                 Assert.AreEqual(expected, rows);
 

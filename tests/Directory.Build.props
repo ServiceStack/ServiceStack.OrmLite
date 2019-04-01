@@ -2,8 +2,11 @@
 
   <PropertyGroup>
     <Version>5.5.1</Version>
+    <AssemblyVersion>5.0.0.0</AssemblyVersion>
     <LangVersion>latest</LangVersion>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+	<Authors>ServiceStack</Authors>
+    <Company>ServiceStack, Inc.</Company>
+    <Copyright>&#169; 2008-2018 ServiceStack, Inc</Copyright>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">

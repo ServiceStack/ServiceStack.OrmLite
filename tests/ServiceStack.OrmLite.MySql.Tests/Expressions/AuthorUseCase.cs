@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 
-namespace ServiceStack.OrmLite.Tests.Expressions
+namespace ServiceStack.OrmLite.MySql.Tests.Expressions
 {
     public class AuthorUseCase : OrmLiteTestBase
     {
@@ -64,7 +64,7 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                 expected = 6;
                 //Sql.In can take params object[]
                 var city = "Berlin";
-                ev.Where().Where(rn => Sql.In(rn.City, "London", "Madrid", city));
+				ev.Where().Where(rn => Sql.In(rn.City, "London", "Madrid", city));
                 result = db.Select(ev);
                 Assert.AreEqual(expected, result.Count);
                 result = db.Select<Author>(rn => Sql.In(rn.City, new[] { "London", "Madrid", "Berlin" }));
@@ -159,7 +159,6 @@ namespace ServiceStack.OrmLite.Tests.Expressions
 
                 // insert values  only in Id, Name, Birthday, Rate and Active fields 
                 expected = 4;
-                ev.Insert(rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
                 db.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Victor Grozny", Birthday = DateTime.Today.AddYears(-18) }, rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
                 db.InsertOnly(new Author() { Active = false, Rate = 0, Name = "Ivan Chorny", Birthday = DateTime.Today.AddYears(-19) }, rn => new { rn.Id, rn.Name, rn.Birthday, rn.Active, rn.Rate });
 				ev.Where().Where(rn => !rn.Active);
@@ -306,8 +305,6 @@ namespace ServiceStack.OrmLite.Tests.Expressions
                     //else
                     //    Console.WriteLine("**************  FAILED *************** " + e.Message);
                 }
-
-
 
                 // Tests for predicate overloads that make use of the expression visitor
                 author = db.Single<Author>(q => q.Name == "Jorge Garzon");

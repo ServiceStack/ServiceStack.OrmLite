@@ -13,7 +13,6 @@
     <BuildSolutionDir>$(MSBuildProjectDirectory)/..</BuildSolutionDir>
     <SrcDir>$(BuildSolutionDir)/src</SrcDir>
     <Configuration Condition="$(Configuration) == ''">Release</Configuration>
-    <NuGetPackageDir>$(BuildSolutionDir)/NuGet/</NuGetPackageDir>
     <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>
   </PropertyGroup>
 
@@ -121,13 +120,6 @@
     <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.T4/ServiceStack.OrmLite.T4.csproj"
              Targets="Build;Pack"
              Properties="Configuration=$(Configuration)" />
-
-
-    <!-- Copy all *.nupkg to /NuGet -->
-    <ItemGroup>
-      <NugetPackagesToMove Include="$(BuildSolutionDir)/src/**/bin/$(Configuration)/*.nupkg"/>
-    </ItemGroup>
-    <Move SourceFiles="@(NugetPackagesToMove)" DestinationFolder="$(NuGetPackageDir)" />
 
     <!-- leave .sln in optimal state then NuGet restore .sln to build -->
     <CallTarget Targets="ClearNuGetRestoreCaches" />
