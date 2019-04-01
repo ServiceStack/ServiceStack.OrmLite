@@ -94,8 +94,9 @@ namespace ServiceStack.OrmLite.Tests
         
         public DialectFeatures(Dialect dialect)
         {
+            // Tag dialects with supported features and use to toggle in tests
             RowOffset = (Dialect.SqlServer2012 | Dialect.SqlServer2014 | Dialect.SqlServer2016 | Dialect.SqlServer2017).HasFlag(dialect);
-            SchemaSupport = !(Dialect.Sqlite).HasFlag(dialect);
+            SchemaSupport = !(Dialect.Sqlite | Dialect.AnyPostgreSql).HasFlag(dialect);
         }
     }
 
@@ -124,13 +125,11 @@ namespace ServiceStack.OrmLite.Tests
             dbFactory.RegisterConnection(Dialect.PostgreSql10.ToString(), TestConfig.PostgresDb_10, PostgreSqlDialect.Provider);
             dbFactory.RegisterConnection(Dialect.PostgreSql11.ToString(), TestConfig.PostgresDb_11, PostgreSqlDialect.Provider);
 
-            dbFactory.RegisterConnection(Dialect.MySqlConnector.ToString(), TestConfig.MySqlDb_10_1, MySqlConnectorDialect.Provider);
-            
-            dbFactory.RegisterConnection(Dialect.MySql5_5.ToString(), TestConfig.MySqlDb_5_5, MySql55Dialect.Provider);
-            dbFactory.RegisterConnection(Dialect.MySql10_1.ToString(), TestConfig.MySqlDb_10_1, MySqlDialect.Provider);
-            dbFactory.RegisterConnection(Dialect.MySql10_2.ToString(), TestConfig.MySqlDb_10_2, MySqlDialect.Provider);
-            dbFactory.RegisterConnection(Dialect.MySql10_3.ToString(), TestConfig.MySqlDb_10_3, MySqlDialect.Provider);
-            dbFactory.RegisterConnection(Dialect.MySql10_4.ToString(), TestConfig.MySqlDb_10_4, MySqlDialect.Provider);
+            dbFactory.RegisterConnection(Dialect.MySql5_5.ToString(), TestConfig.MariaDb_5_5, MySql55Dialect.Provider);
+            dbFactory.RegisterConnection(Dialect.MySql10_1.ToString(), TestConfig.MariaDb_10_1, MySqlDialect.Provider);
+            dbFactory.RegisterConnection(Dialect.MySql10_2.ToString(), TestConfig.MariaDb_10_2, MySqlDialect.Provider);
+            dbFactory.RegisterConnection(Dialect.MySql10_3.ToString(), TestConfig.MariaDb_10_3, MySqlDialect.Provider);
+            dbFactory.RegisterConnection(Dialect.MySql10_4.ToString(), TestConfig.MariaDb_10_4, MySqlDialect.Provider);
 
             dbFactory.RegisterConnection(Dialect.Sqlite.ToString(), TestConfig.SqliteMemoryDb, SqliteDialect.Provider);
 
@@ -182,7 +181,16 @@ namespace ServiceStack.OrmLite.Tests
                 pg10.ExecuteSql(pgInit);
                 pg11.ExecuteSql(pgInit);
             }
+            
+            // Create separate Db's for MySqlConnector
+            using (var db = dbFactory.OpenDbConnection(Dialect.MySql10_1.ToString()))
+            {
+                db.ExecuteSql("CREATE DATABASE IF NOT EXISTS `testMySql`");
+                
+                dbFactory.RegisterConnection(Dialect.MySqlConnector.ToString(), TestConfig.MySqlDb_10_1, MySqlConnectorDialect.Provider);
 
+            }
+            
             // SQLSERVER specific init
             // for sql create unique db per fixture to avoid conflicts when testing dialects
             // uses COMPATABILITY_LEVEL set to each version  
