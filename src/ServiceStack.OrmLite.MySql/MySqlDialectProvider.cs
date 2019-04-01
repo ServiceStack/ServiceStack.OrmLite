@@ -48,6 +48,5 @@ namespace ServiceStack.OrmLite.MySql
         {
             return new MySqlParameter();
         }
-
     }
 }

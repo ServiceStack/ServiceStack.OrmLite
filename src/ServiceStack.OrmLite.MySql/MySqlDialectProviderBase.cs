@@ -1,15 +1,11 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Data.Common;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using ServiceStack.Data;
-using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.MySql.Converters;
 using ServiceStack.OrmLite.MySql.DataAnnotations;
-using ServiceStack.OrmLite.Support;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.MySql
@@ -21,29 +17,29 @@ namespace ServiceStack.OrmLite.MySql
 
         public MySqlDialectProviderBase()
         {
-            AutoIncrementDefinition = "AUTO_INCREMENT";
-            DefaultValueFormat = " DEFAULT {0}";
+            base.AutoIncrementDefinition = "AUTO_INCREMENT";
+            base.DefaultValueFormat = " DEFAULT {0}";
             base.SelectIdentitySql = "SELECT LAST_INSERT_ID()";
 
-            InitColumnTypeMap();
+            base.InitColumnTypeMap();
 
-            RegisterConverter<string>(new MySqlStringConverter());
-            RegisterConverter<char[]>(new MySqlCharArrayConverter());
-            RegisterConverter<bool>(new MySqlBoolConverter());
+            base.RegisterConverter<string>(new MySqlStringConverter());
+            base.RegisterConverter<char[]>(new MySqlCharArrayConverter());
+            base.RegisterConverter<bool>(new MySqlBoolConverter());
 
-            RegisterConverter<byte>(new MySqlByteConverter());
-            RegisterConverter<sbyte>(new MySqlSByteConverter());
-            RegisterConverter<short>(new MySqlInt16Converter());
-            RegisterConverter<ushort>(new MySqlUInt16Converter());
-            RegisterConverter<int>(new MySqlInt32Converter());
-            RegisterConverter<uint>(new MySqlUInt32Converter());
+            base.RegisterConverter<byte>(new MySqlByteConverter());
+            base.RegisterConverter<sbyte>(new MySqlSByteConverter());
+            base.RegisterConverter<short>(new MySqlInt16Converter());
+            base.RegisterConverter<ushort>(new MySqlUInt16Converter());
+            base.RegisterConverter<int>(new MySqlInt32Converter());
+            base.RegisterConverter<uint>(new MySqlUInt32Converter());
 
-            RegisterConverter<decimal>(new MySqlDecimalConverter());
+            base.RegisterConverter<decimal>(new MySqlDecimalConverter());
 
-            RegisterConverter<Guid>(new MySqlGuidConverter());
-            RegisterConverter<DateTimeOffset>(new MySqlDateTimeOffsetConverter());
+            base.RegisterConverter<Guid>(new MySqlGuidConverter());
+            base.RegisterConverter<DateTimeOffset>(new MySqlDateTimeOffsetConverter());
 
-            Variables = new Dictionary<string, string>
+            this.Variables = new Dictionary<string, string>
             {
                 { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
                 { OrmLiteVariables.MaxText, "LONGTEXT" },
@@ -100,8 +96,8 @@ namespace ServiceStack.OrmLite.MySql
 
             return base.GetQuotedValue(value, fieldType);
         }
-
-        public override string GetTableName(string table, string schema = null) => GetTableName(table, schema, useStrategy: true);
+        
+        public override string GetTableName(string table, string schema = null) => GetTableName(table, schema, useStrategy: false);
 
         public override string GetTableName(string table, string schema, bool useStrategy)
         {
@@ -117,20 +113,17 @@ namespace ServiceStack.OrmLite.MySql
                 : table;
         }
 
+        public override string GetQuotedName(string name) => $"`{name}`";
+
         public override string GetQuotedTableName(string tableName, string schema = null)
         {
             return GetQuotedName(GetTableName(tableName, schema));
         }
 
-        public override string GetQuotedName(string name) => $"`{name}`";
-        public override string GetQuotedColumnName(string columnName) => $"`{columnName}`";
-
         public override SqlExpression<T> SqlExpression<T>()
         {
             return new MySqlExpression<T>(this);
         }
-
-        public override string GetQuotedName(string name, string schema) => GetQuotedName(name); //schema name is embedded in table name in MySql
 
         public override string ToTableNamesStatement(string schema)
         {
@@ -148,7 +141,7 @@ namespace ServiceStack.OrmLite.MySql
                 ? "SELECT table_name, table_rows FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema = DATABASE()"
                 : "SELECT table_name, table_rows FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema = DATABASE() AND table_name LIKE {0}".SqlFmt(this, GetTableName("",schema) + "%");
         }
-
+        
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0} AND TABLE_SCHEMA = {1}"
@@ -163,9 +156,9 @@ namespace ServiceStack.OrmLite.MySql
         {
             tableName = GetTableName(tableName, schema);
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS"
-                    + " WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName AND TABLE_SCHEMA = @schema"
-                .SqlFmt(tableName, columnName);
-
+                      + " WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName AND TABLE_SCHEMA = @schema"
+                          .SqlFmt(GetTableName(tableName, schema), columnName);
+            
             var result = db.SqlScalar<long>(sql, new { tableName, columnName, schema = db.Database });
 
             return result > 0;
@@ -216,26 +209,21 @@ namespace ServiceStack.OrmLite.MySql
                 sbConstraints.Append(",\n" + uniqueConstraints);
             }
 
-            var sql = $"CREATE TABLE {GetQuotedTableName(modelDef)} \n(\n  {StringBuilderCache.ReturnAndFree(sbColumns)}{StringBuilderCacheAlt.ReturnAndFree(sbConstraints)} \n); \n";
+            var sql = $"CREATE TABLE {GetQuotedName(NamingStrategy.GetTableName(modelDef))} \n(\n  {StringBuilderCache.ReturnAndFree(sbColumns)}{StringBuilderCacheAlt.ReturnAndFree(sbConstraints)} \n); \n";
 
             return sql;
         }
         
         public override bool DoesSchemaExist(IDbCommand dbCmd, string schemaName)
         {
-            // to maintain existing schema table prefixing behaviour, all schema will exist
+            // schema is prefixed to table name
             return true;
-            dbCmd.CommandText = $"SELECT EXISTS(SELECT 1 FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = '{schemaName.SqlParam()}')";
-            var query = dbCmd.ExecuteScalar();
-            return query as bool? ?? false;
         }
 
         public override string ToCreateSchemaStatement(string schemaName)
         {
-            // to maintain existing table prefixing behaviour, just return 1;
-            return "SELECT 1";
-            var sql = $"CREATE SCHEMA {GetSchemaName(schemaName)}";
-            return sql;
+            // https://mariadb.com/kb/en/library/create-database/
+            return $"SELECT 1";
         }
 
         public override string GetColumnDefinition(FieldDefinition fieldDef)
@@ -243,7 +231,7 @@ namespace ServiceStack.OrmLite.MySql
             if (fieldDef.PropertyInfo?.HasAttribute<TextAttribute>() == true)
             {
                 var sql = StringBuilderCache.Allocate();
-                sql.AppendFormat("{0} {1}", GetQuotedColumnName(fieldDef.FieldName), TextColumnDefinition);
+                sql.AppendFormat("{0} {1}", GetQuotedName(NamingStrategy.GetColumnName(fieldDef.FieldName)), TextColumnDefinition);
                 sql.Append(fieldDef.IsNullable ? " NULL" : " NOT NULL");
                 return StringBuilderCache.ReturnAndFree(sql);
             }
@@ -258,11 +246,11 @@ namespace ServiceStack.OrmLite.MySql
         public override string SqlConflict(string sql, string conflictResolution)
         {
             var parts = sql.SplitOnFirst(' ');
-            return parts[0] + " " + conflictResolution + " " + parts[1];
+            return $"{parts[0]} {conflictResolution} {parts[1]}";
         }
 
         public override string SqlCurrency(string fieldOrValue, string currencySymbol) =>
-            SqlConcat(new[] { "'" + currencySymbol + "'", "cast(" + fieldOrValue + " as decimal(15,2))" });
+            SqlConcat(new[] {$"'{currencySymbol}'", $"cast({fieldOrValue} as decimal(15,2))"});
 
         public override string SqlCast(object fieldOrValue, string castAs) => 
             castAs == Sql.VARCHAR
