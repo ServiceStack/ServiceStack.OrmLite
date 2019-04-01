@@ -37,10 +37,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
         }
 
         [Test]
+        [IgnoreDialect(Dialect.AnyPostgreSql, "Not supported")]
         public void Can_use_CustomSelect_field_in_Typed_Query()
         {
-            if (Dialect == Dialect.AnyPostgreSql || Dialect == Dialect.SqlServer || Dialect == Dialect.SqlServer2012 || Dialect == Dialect.AnyMySql) return;
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Custom1>();
