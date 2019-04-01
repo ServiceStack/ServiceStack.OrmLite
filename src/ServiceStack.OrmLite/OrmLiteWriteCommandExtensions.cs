@@ -143,6 +143,7 @@ namespace ServiceStack.OrmLite
                                     Log.DebugFormat("Ignoring existing generator '{0}': {1}", seq, ex.Message);
                                     continue;
                                 }
+
                                 throw;
                             }
                         }
@@ -175,9 +176,11 @@ namespace ServiceStack.OrmLite
                                 Log.DebugFormat("Ignoring existing index '{0}': {1}", sqlIndex, exIndex.Message);
                                 continue;
                             }
+
                             throw;
                         }
                     }
+
                     return true;
                 }
             }
@@ -188,8 +191,10 @@ namespace ServiceStack.OrmLite
                     Log.DebugFormat("Ignoring existing table '{0}': {1}", modelDef.ModelName, ex.Message);
                     return false;
                 }
+
                 throw;
             }
+
             return false;
         }
 

@@ -392,9 +392,7 @@ namespace ServiceStack.OrmLite
             var escapedSchema = NamingStrategy.GetSchemaName(schema)
                 .Replace(".", "\".\"");
 
-            return GetQuotedName(escapedSchema)
-                + "."
-                + GetQuotedName(NamingStrategy.GetTableName(tableName));
+            return $"{GetQuotedName(escapedSchema)}.{GetQuotedName(NamingStrategy.GetTableName(tableName))}";
         }
 
         public virtual string GetQuotedColumnName(string columnName)
