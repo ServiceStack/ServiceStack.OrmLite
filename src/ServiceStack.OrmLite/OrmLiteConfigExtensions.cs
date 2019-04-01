@@ -91,14 +91,8 @@ namespace ServiceStack.OrmLite
                 var customSelectAttr = propertyInfo.FirstAttribute<CustomSelectAttribute>();
                 var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();
                 var belongToAttribute = propertyInfo.FirstAttribute<BelongToAttribute>();
-                var isFirst = i++ == 0;
-
-                var isAutoId = propertyInfo.HasAttribute<AutoIdAttribute>();
-
-                var isPrimaryKey = (!hasPkAttr && (propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)))
-                    || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name)
-                    || isAutoId;
-
+                var referenceAttr = propertyInfo.FirstAttribute<ReferenceAttribute>();
+                
                 var isRowVersion = propertyInfo.Name == ModelDefinition.RowVersionName
                     && (propertyInfo.PropertyType == typeof(ulong) || propertyInfo.PropertyType == typeof(byte[]));
 
@@ -116,6 +110,18 @@ namespace ServiceStack.OrmLite
                 if (propertyType.IsEnumFlags() || propertyType.HasAttribute<EnumAsIntAttribute>())
                     treatAsType = Enum.GetUnderlyingType(propertyType);
 
+                var isReference = referenceAttr != null && propertyType.IsClass;
+                var isIgnored = propertyInfo.HasAttribute<IgnoreAttribute>() || isReference;
+
+                var isFirst = !isIgnored && i++ == 0;
+
+                var isAutoId = propertyInfo.HasAttribute<AutoIdAttribute>();
+
+                var isPrimaryKey = (!hasPkAttr && (propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)))
+                   || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name)
+                   || isAutoId;
+
+                
                 var aliasAttr = propertyInfo.FirstAttribute<AliasAttribute>();
 
                 var indexAttr = propertyInfo.FirstAttribute<IndexAttribute>();
@@ -127,7 +133,6 @@ namespace ServiceStack.OrmLite
                 var defaultValueAttr = propertyInfo.FirstAttribute<DefaultAttribute>();
 
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
-                var referenceAttr = propertyInfo.FirstAttribute<ReferenceAttribute>();
                 var fkAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
                 var customFieldAttr = propertyInfo.FirstAttribute<CustomFieldAttribute>();
                 var chkConstraintAttr = propertyInfo.FirstAttribute<CheckConstraintAttribute>();
@@ -162,7 +167,7 @@ namespace ServiceStack.OrmLite
                     ForeignKey = fkAttr == null
                         ? referencesAttr != null ? new ForeignKeyConstraint(referencesAttr.Type) : null
                         : new ForeignKeyConstraint(fkAttr.Type, fkAttr.OnDelete, fkAttr.OnUpdate, fkAttr.ForeignKeyName),
-                    IsReference = referenceAttr != null && propertyType.IsClass,
+                    IsReference = isReference,
                     GetValueFn = propertyInfo.CreateGetter(),
                     SetValueFn = propertyInfo.CreateSetter(),
                     Sequence = sequenceAttr?.Name,
@@ -175,8 +180,6 @@ namespace ServiceStack.OrmLite
                     IsRefType = propertyType.IsRefType(),
                 };
 
-                var isIgnored = propertyInfo.HasAttribute<IgnoreAttribute>()
-                    || fieldDefinition.IsReference;
                 if (isIgnored)
                     modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
                 else

@@ -106,6 +106,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void Can_save_complex_types_as_JSON()
         {
+            
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<ModelWithJsonType>();
@@ -127,21 +128,20 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
                 db.Insert(row);
 
-                var result = db.Select<ModelWithJsonType>(
+                var result = db.Single<ModelWithJsonType>(
                     "complex_type_json->'SubType'->>'Name' = 'SubType2'");
 
                 db.GetLastSql().Print();
 
-                Assert.That(result.Count, Is.EqualTo(1));
-                Assert.That(result[0].Id, Is.EqualTo(1));
-                Assert.That(result[0].ComplexTypeJson.Id, Is.EqualTo(2));
-                Assert.That(result[0].ComplexTypeJson.SubType.Name, Is.EqualTo("SubType2"));
+                Assert.That(result.Id, Is.EqualTo(1));
+                Assert.That(result.ComplexTypeJson.Id, Is.EqualTo(2));
+                Assert.That(result.ComplexTypeJson.SubType.Name, Is.EqualTo("SubType2"));
 
-                result = db.Select<ModelWithJsonType>(
+                var results = db.Select<ModelWithJsonType>(
                     "complex_type_jsonb->'SubType'->>'Name' = 'SubType3'");
 
-                Assert.That(result[0].ComplexTypeJsonb.Id, Is.EqualTo(3));
-                Assert.That(result[0].ComplexTypeJsonb.SubType.Name, Is.EqualTo("SubType3"));
+                Assert.That(results[0].ComplexTypeJsonb.Id, Is.EqualTo(3));
+                Assert.That(results[0].ComplexTypeJsonb.SubType.Name, Is.EqualTo("SubType3"));
             }
         }
 

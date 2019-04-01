@@ -189,5 +189,28 @@ namespace ServiceStack.OrmLite.Tests.Async
                 }));
             }
         }
+
+        [Test]
+        public void Can_select_custom_GroupBy_KeyValuePairs()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitLetters(db);
+
+                var q = db.From<LetterFrequency>()
+                    .GroupBy("Letter")
+                    .Select(x => new { x.Letter, Count = Sql.Count("*") });
+
+                var results = db.KeyValuePairs<string, int>(q);
+
+                Assert.That(results, Is.EquivalentTo(new List<KeyValuePair<string,int>>
+                {
+                    new KeyValuePair<string, int>("A", 1),
+                    new KeyValuePair<string, int>("B", 2),
+                    new KeyValuePair<string, int>("C", 3),
+                    new KeyValuePair<string, int>("D", 4),
+                }));
+            }
+        }
     }
 }
