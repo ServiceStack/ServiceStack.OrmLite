@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite.Tests
         /// <summary>
         /// This value controls which providers are tested for all <see cref="TestFixtureOrmLiteAttribute"/> tests where dialects are not explicitly set
         /// </summary>
-        public static Dialect DefaultDialects = EnvironmentVariable("DefaultDialects", Dialect.Sqlite);
+        public static Dialect DefaultDialects = EnvironmentVariable("ORMLITE_DIALECT", Dialect.Sqlite);
         
         public static string SqliteMemoryDb = EnvironmentVariable("SQLITE_CONNECTION", ":memory:");
         public static string SqlServerBuildDb = EnvironmentVariable("MSSQL_CONNECTION", "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;");
