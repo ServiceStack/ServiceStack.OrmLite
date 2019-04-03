@@ -5,10 +5,12 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture, Ignore("Required DB with MigrateSqlServerTypes table")]
-    public class AdoNetDataAccessTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.SqlServer), Ignore("Required DB with MigrateSqlServerTypes table")]
+    public class AdoNetDataAccessTests : OrmLiteProvidersTestBase
     {
+        public AdoNetDataAccessTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         /*
         CREATE TABLE [dbo].[MigrateSqlServerTypes](
@@ -27,9 +29,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_read_from_existing_database()
         {
-            OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
-
-            using (var db = Config.SqlServerBuildDb.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 var map = new Dictionary<int, TimeSpan>();
 

@@ -52,8 +52,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public int AmountCents { get; set; }
     }
 
-    public class MultipleSelfJoinsWithTableAliases : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class MultipleSelfJoinsWithTableAliases : OrmLiteProvidersTestBase
     {
+        public MultipleSelfJoinsWithTableAliases(Dialect dialect) : base(dialect)
+        {
+        }
+
         private static Sale PopulateData(IDbConnection db, Guid tenantId)
         {
             db.DropTable<Sale>();
@@ -103,15 +108,15 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 var q = db.From<Sale>()
                     .CustomJoin("LEFT JOIN {0} seller on (Sale.{1} = seller.Id)"
-                        .Fmt("ContactIssue".SqlTable(), "SellerId".SqlColumn()))
+                        .Fmt("ContactIssue".SqlTable(DialectProvider), "SellerId".SqlColumn(DialectProvider)))
                     .CustomJoin("LEFT JOIN {0} buyer on (Sale.{1} = buyer.Id)"
-                        .Fmt("ContactIssue".SqlTable(), "BuyerId".SqlColumn()))
+                        .Fmt("ContactIssue".SqlTable(DialectProvider), "BuyerId".SqlColumn(DialectProvider)))
                     .Select(@"Sale.*
                         , buyer.{0} AS BuyerFirstName
                         , buyer.{1} AS BuyerLastName
                         , seller.{0} AS SellerFirstName
                         , seller.{1} AS SellerLastName"
-                    .Fmt("FirstName".SqlColumn(), "LastName".SqlColumn()));
+                    .Fmt("FirstName".SqlColumn(DialectProvider), "LastName".SqlColumn(DialectProvider)));
 
                 q.Where(x => x.TenantId == tenantId);
 

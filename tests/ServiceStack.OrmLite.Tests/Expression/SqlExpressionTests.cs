@@ -2,11 +2,9 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 #if !NETCORE_SUPPORT
-using ServiceStack.Html;
 #endif
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
@@ -36,8 +34,13 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public int Weighting { get; set; }
     }
 
+    [TestFixtureOrmLite]
     public class SqlExpressionTests : ExpressionsTestBase
     {
+        public SqlExpressionTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private int letterFrequenceMaxId;
         private int letterFrequencyMinId;
         private int letterFrequencySumId;
@@ -360,7 +363,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
 #pragma warning disable 618
                 var joinFn = new Func<JoinSqlBuilder<LetterFrequency, LetterWeighting>>(() =>
-                    new JoinSqlBuilder<LetterFrequency, LetterWeighting>()
+                    new JoinSqlBuilder<LetterFrequency, LetterWeighting>(DialectProvider)
                         .Join<LetterFrequency, LetterWeighting>(x => x.Id, x => x.LetterFrequencyId)
                     );
 #pragma warning restore 618
@@ -514,7 +517,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.GetLastSql().Print();
                 Assert.That(rowCount, Is.EqualTo(4));
 
-                var table = typeof(LetterFrequency).Name.SqlTable();
+                var table = typeof(LetterFrequency).Name.SqlTable(DialectProvider);
 
                 rowCount = db.RowCount("SELECT * FROM {0} WHERE Letter = @p1".PreNormalizeSql(db).Fmt(table), new { p1 = "B" });
                 Assert.That(rowCount, Is.EqualTo(4));
@@ -609,7 +612,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public void Can_select_limit_on_Table_with_References()
         {
             //This version of MariaDB doesn't yet support 'LIMIT & IN/ALL/ANY/SOME subquery'
-            if (Dialect == Dialect.MySql) return;
+            if (Dialect == Dialect.AnyMySql) return;
 
             //Only one expression can be specified in the select list when the subquery is not introduced with EXISTS.
             if ((Dialect & Dialect.AnySqlServer) == Dialect)

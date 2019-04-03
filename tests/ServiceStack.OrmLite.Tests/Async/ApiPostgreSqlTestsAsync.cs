@@ -1,21 +1,21 @@
 ﻿using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    public class ApiPostgreSqlTestsAsync
-        : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class ApiPostgreSqlTestsAsync : OrmLiteProvidersTestBase
     {
+        public ApiPostgreSqlTestsAsync(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public async Task API_PostgreSql_Examples_Async()
         {
-            if (Dialect != Dialect.PostgreSql) return;
-
-            SuppressIfOracle("PostgreSQL tests");
-            var db = CreatePostgreSqlDbFactory().OpenDbConnection();
+            var db = OpenDbConnection();
             db.DropAndCreateTable<Person>();
             db.DropAndCreateTable<PersonWithAutoId>();
 

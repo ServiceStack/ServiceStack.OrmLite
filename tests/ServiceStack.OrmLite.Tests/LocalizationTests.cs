@@ -1,44 +1,18 @@
-using System;
-using System.Globalization;
-using System.Threading;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class LocalizationTests : OrmLiteTestBase
+    [TestFixtureOrmLite, SetUICulture("vi-VN"), SetCulture("vi-VN")]
+    public class LocalizationTests : OrmLiteProvidersTestBase
     {
-        //private readonly CultureInfo CurrentCulture = Thread.CurrentThread.CurrentCulture;
-        //private readonly CultureInfo CurrentUICulture = Thread.CurrentThread.CurrentUICulture;
-
-        //[SetUp]
-        //public void TestSetUp()
-        //{
-        //	Thread.CurrentThread.CurrentCulture = new CultureInfo("vi-VN");
-        //	Thread.CurrentThread.CurrentUICulture = new CultureInfo("vi-VN");
-        //}
-
-        //[TearDown]
-        //public void TestFixtureTearDown()
-        //{
-        //	Thread.CurrentThread.CurrentCulture = CurrentCulture;
-        //	Thread.CurrentThread.CurrentUICulture = CurrentUICulture;
-        //}
-
-        public class Point
+        public LocalizationTests(Dialect dialect) : base(dialect)
         {
-            [AutoIncrement]
-            public int Id { get; set; }
-            public short Width { get; set; }
-            public float Height { get; set; }
-            public double Top { get; set; }
-            public decimal Left { get; set; }
         }
 
         [Test]
-        public void Can_query_using_float_in_alernate_culture()
+        public void Can_query_using_float_in_alternate_culture()
         {
             using (var db = OpenDbConnection())
             {
@@ -58,5 +32,14 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        public class Point
+        {
+            [AutoIncrement]
+            public int Id { get; set; }
+            public short Width { get; set; }
+            public float Height { get; set; }
+            public double Top { get; set; }
+            public decimal Left { get; set; }
+        }
     }
 }

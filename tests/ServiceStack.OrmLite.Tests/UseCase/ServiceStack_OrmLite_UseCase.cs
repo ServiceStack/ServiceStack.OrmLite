@@ -14,9 +14,13 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         public bool Done { get; set; }
     }
 
-    [TestFixture]
-    public class ServiceStack_OrmLite_UseCase : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ServiceStack_OrmLite_UseCase : OrmLiteProvidersTestBase
     {
+        public ServiceStack_OrmLite_UseCase(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_Add_Update_and_Delete_Todo_item()
         {

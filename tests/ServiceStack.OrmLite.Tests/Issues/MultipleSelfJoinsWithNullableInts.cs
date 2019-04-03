@@ -31,8 +31,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public string Name { get; set; }
     }
 
-    public class MultipleSelfJoinsWithNullableInts : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class MultipleSelfJoinsWithNullableInts : OrmLiteProvidersTestBase
     {
+        public MultipleSelfJoinsWithNullableInts(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Does_support_multiple_self_joins_with_nullable_ints()
         {

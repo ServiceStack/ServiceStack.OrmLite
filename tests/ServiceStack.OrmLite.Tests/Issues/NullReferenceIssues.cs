@@ -1,12 +1,13 @@
 ﻿using NUnit.Framework;
-using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class NullReferenceIssues : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class NullReferenceIssues : OrmLiteProvidersTestBase
     {
-        //public NullReferenceIssues() : base(Dialect.MySql) {}
+        public NullReferenceIssues(Dialect dialect) : base(dialect)
+        {
+        }
 
         public class Foo
         {
@@ -20,13 +21,9 @@ namespace ServiceStack.OrmLite.Tests.Issues
         }
 
         [Test]
+        [IgnoreDialect(Dialect.Sqlite, "Not supported")]
         public void Can_AlterColumn()
         {
-            if (Dialect == Dialect.Sqlite)
-                return; // Not supported
-
-            LogManager.LogFactory = new ConsoleLogFactory(debugEnabled:true);
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Foo>();

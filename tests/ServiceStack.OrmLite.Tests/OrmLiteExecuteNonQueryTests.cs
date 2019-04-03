@@ -8,11 +8,15 @@
 
     #endregion using
 
-    [TestFixture]
     public class OrmLiteExecuteNonQueryTests
     {
-        public class WithDbCmdFilter : OrmLiteTestBase
+        [TestFixtureOrmLite]
+        public class WithDbCmdFilter : OrmLiteProvidersTestBase
         {
+            public WithDbCmdFilter(Dialect dialect) : base(dialect)
+            {
+            }
+
             [Test]
             public void Can_insert_one_row_and_get_one_affected_row()
             {
@@ -157,8 +161,13 @@
             }
         }
 
-        public class UsingAnonType : OrmLiteTestBase
+        [TestFixtureOrmLite]
+        public class UsingAnonType : OrmLiteProvidersTestBase
         {
+            public UsingAnonType(Dialect dialect) : base(dialect)
+            {
+            }
+
             [Test]
             public void Can_insert_one_row_and_get_one_affected_row()
             {
@@ -290,8 +299,13 @@
             }
         }
 
-        public class UsingDictionary : OrmLiteTestBase
+        [TestFixtureOrmLite]
+        public class UsingDictionary : OrmLiteProvidersTestBase
         {
+            public UsingDictionary(Dialect dialect) : base(dialect)
+            {
+            }
+
             [Test]
             public void Can_insert_one_row_and_get_one_affected_row()
             {
@@ -434,8 +448,13 @@
             }
         }
 
-        public class WithoutParams : OrmLiteTestBase
+        [TestFixtureOrmLite]
+        public class WithoutParams : OrmLiteProvidersTestBase
         {
+            public WithoutParams(Dialect dialect) : base(dialect)
+            {
+            }
+
             [Test]
             public void Can_insert_one_row_and_get_one_affected_row()
             {

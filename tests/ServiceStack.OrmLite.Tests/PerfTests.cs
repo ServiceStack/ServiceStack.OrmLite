@@ -31,9 +31,13 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
-    [TestFixture, Explicit]
-    public class PerfTests : OrmLiteTestBase
+    [TestFixtureOrmLite, Explicit]
+    public class PerfTests : OrmLiteProvidersTestBase
     {
+        public PerfTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test] 
         public void Is_GetValue_Slow()
         {

@@ -7,9 +7,8 @@ namespace ServiceStack.OrmLite.Tests.Shared
 {
     public static class UpdateCommandFilter
     {
-        public static void SetUpdateDate<T>(this IDbCommand cmd, string fieldName) where T : new()
+        public static void SetUpdateDate<T>(this IDbCommand cmd, string fieldName, IOrmLiteDialectProvider dialectProvider) where T : new()
         {
-            var dialectProvider = OrmLiteConfig.DialectProvider;
             var field = typeof(T).GetProperty(fieldName);
             var alias = field.GetCustomAttribute(typeof(AliasAttribute)) as AliasAttribute;
             var columnName = dialectProvider.GetQuotedColumnName(dialectProvider.NamingStrategy.GetColumnName(alias?.Name ?? field.Name));

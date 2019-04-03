@@ -6,10 +6,12 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrmLiteQueryTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteQueryTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteQueryTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Test]
         public void Can_GetById_int_from_ModelWithFieldsOfDifferentTypes_table()
@@ -80,7 +82,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 rows = db.Select<ModelWithOnlyStringFields>(
                     "SELECT * FROM {0} WHERE {1} = {2}AlbumName"
-                    .Fmt("ModelWithOnlyStringFields".SqlTable(), "AlbumName".SqlColumn(), OrmLiteConfig.DialectProvider.ParamString),
+                    .Fmt("ModelWithOnlyStringFields".SqlTable(DialectProvider), "AlbumName".SqlColumn(DialectProvider), DialectProvider.ParamString),
                     new { filterRow.AlbumName });
                 dbRowIds = rows.ConvertAll(x => x.Id);
                 Assert.That(dbRowIds, Has.Count.EqualTo(1));
@@ -174,11 +176,11 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(notes[0].Id, Is.EqualTo(note.Id));
                 Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
 
-                notes = db.Select<Note>("SELECT * FROM Note WHERE {0}={1}schemaUri".Fmt("SchemaUri".SqlColumn(), OrmLiteConfig.DialectProvider.ParamString), new { schemaUri = "tcm:0-0-0" });
+                notes = db.Select<Note>("SELECT * FROM Note WHERE {0}={1}schemaUri".Fmt("SchemaUri".SqlColumn(DialectProvider), DialectProvider.ParamString), new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(note.Id));
                 Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
 
-                notes = db.Select<Note>("SchemaUri".SqlColumn() + "={0}schemaUri".Fmt(OrmLiteConfig.DialectProvider.ParamString), new { schemaUri = "tcm:0-0-0" });
+                notes = db.Select<Note>("SchemaUri".SqlColumn(DialectProvider) + "={0}schemaUri".Fmt(DialectProvider.ParamString), new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(note.Id));
                 Assert.That(notes[0].NoteText, Is.EqualTo(note.NoteText));
 
@@ -215,8 +217,8 @@ SELECT
 Id, {0}, {1}
 FROM {2}
 WHERE {0}={3}
-".Fmt("SchemaUri".SqlColumn(), "NoteText".SqlColumn(), "Note".SqlTable(),
-OrmLiteConfig.DialectProvider.GetParam("schemaUri"));
+".Fmt("SchemaUri".SqlColumn(DialectProvider), "NoteText".SqlColumn(DialectProvider), "Note".SqlTable(DialectProvider),
+DialectProvider.GetParam("schemaUri"));
 
                 var notes = db.Select<NoteDto>(sql, new { schemaUri = "tcm:0-0-0" });
                 Assert.That(notes[0].Id, Is.EqualTo(id));
@@ -239,20 +241,18 @@ OrmLiteConfig.DialectProvider.GetParam("schemaUri"));
         [TestCase("t030CustomerId", "t030CustomerName", "t030Customer_birth_date")]
         [TestCase("t030_customer_id", "t030_customer_name", "t130_customer_birth_date")]
         [TestCase("t030#Customer_I#d", "t030CustomerNa$^me", "t030Cust^omer_birth_date")]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "Oracle provider is not smart enough to insert 'from dual' everywhere required in user supplied SQL")]
         public void Can_query_CustomerDto_and_map_db_fields_not_identical_by_guessing_the_mapping(string field1Name, string field2Name, string field3Name)
         {
-            SuppressIfOracle("Oracle provider is not smart enough to insert 'from dual' everywhere required in user supplied SQL");
-            if (Dialect == Dialect.Firebird) return; //Requires Generator
-
             using (var db = OpenDbConnection())
             {
                 var sql = string.Format(@"
                     SELECT 1 AS {0}, 'John' AS {1}, '1970-01-01' AS {2}
                     UNION ALL
                     SELECT 2 AS {0}, 'Jane' AS {1}, '1980-01-01' AS {2}",
-                        field1Name.SqlColumn(),
-                        field2Name.SqlColumn(),
-                        field3Name.SqlColumn());
+                        field1Name.SqlColumn(DialectProvider),
+                        field2Name.SqlColumn(DialectProvider),
+                        field3Name.SqlColumn(DialectProvider));
 
                 var customers = db.Select<CustomerDto>(sql);
 

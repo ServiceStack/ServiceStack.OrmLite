@@ -2,7 +2,6 @@ using System;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
-using ServiceStack.Text;
 
 namespace ServiceStack.Common.Tests.Models
 {

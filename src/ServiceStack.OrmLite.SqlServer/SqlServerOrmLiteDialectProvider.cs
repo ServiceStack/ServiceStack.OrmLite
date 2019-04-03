@@ -122,6 +122,19 @@ namespace ServiceStack.OrmLite.SqlServer
             return sql;
         }
 
+        public override bool DoesSchemaExist(IDbCommand dbCmd, string schemaName)
+        {
+            var sql = $"SELECT count(*) FROM sys.schemas WHERE name = '{schemaName.SqlParam()}'";
+            var result = dbCmd.ExecLongScalar(sql);
+            return result > 0; 
+        }
+
+        public override string ToCreateSchemaStatement(string schemaName)
+        {
+            var sql = $"CREATE SCHEMA [{GetSchemaName(schemaName)}]";
+            return sql;
+        }
+
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}"

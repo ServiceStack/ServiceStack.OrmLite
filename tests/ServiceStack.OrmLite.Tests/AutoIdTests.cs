@@ -2,7 +2,6 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -14,12 +13,14 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
-    public class AutoIdTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    [NonParallelizable]
+    public class AutoIdTests : OrmLiteProvidersTestBase
     {
-        //PostgreSQL / psql on db run: CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-//        public AutoIdTests() : base(Dialect.SqlServer) {}
+        public AutoIdTests(Dialect dialect) : base(dialect)
+        {
+        }
         
-
         [Test]
         public void Does_populate_and_return_new_guid_on_insert()
         {
@@ -151,8 +152,8 @@ namespace ServiceStack.OrmLite.Tests
                 var guidA = new GuidAutoId { Id = existingGuid, Name = "A" };
 
                 db.Exec(cmd => {
-                    cmd.CommandText = db.GetDialectProvider().ToInsertRowStatement(cmd, guidA);
-                    db.GetDialectProvider().SetParameterValues<GuidAutoId>(cmd, guidA);
+                    cmd.CommandText = DialectProvider.ToInsertRowStatement(cmd, guidA);
+                    DialectProvider.SetParameterValues<GuidAutoId>(cmd, guidA);
                     cmd.ExecuteNonQuery();
                 });
 

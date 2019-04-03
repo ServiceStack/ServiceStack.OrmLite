@@ -13,9 +13,13 @@ namespace ServiceStack.OrmLite.Tests.Async
         public string Letter { get; set; }
     }
 
-    [TestFixture]
-    public class CustomSqlTestsAsync : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
+    public class CustomSqlTestsAsync : OrmLiteProvidersTestBase
     {
+        public CustomSqlTestsAsync(Dialect dialect) : base(dialect)
+        {
+        }
+        
         private const string DropProcedureSql = @"
             IF OBJECT_ID('spSearchLetters') IS NOT NULL
                     DROP PROCEDURE spSearchLetters";
@@ -53,8 +57,6 @@ namespace ServiceStack.OrmLite.Tests.Async
         [Test]
         public async Task Can_execute_stored_procedure_using_SqlList_with_out_params()
         {
-            if (Dialect != Dialect.SqlServer) return;
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<LetterFrequency>();
@@ -81,8 +83,6 @@ namespace ServiceStack.OrmLite.Tests.Async
         [Test]
         public async Task Can_execute_stored_procedure_using_SqlProc_with_out_params()
         {
-            if (Dialect != Dialect.SqlServer) return;
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<LetterFrequency>();
@@ -108,8 +108,6 @@ namespace ServiceStack.OrmLite.Tests.Async
         [Test]
         public async Task Can_execute_stored_procedure_using_SqlProc_with_out_params_NonQueryAsync()
         {
-            if (Dialect != Dialect.SqlServer) return;
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<LetterFrequency>();
@@ -133,10 +131,8 @@ namespace ServiceStack.OrmLite.Tests.Async
 
         [Test]
         [NUnit.Framework.Ignore("Requires out-of-band SP")]
-        public async Task Can_execute_stored_proceduce_returning_scalars()
+        public async Task Can_execute_stored_procedure_returning_scalars()
         {
-            if (Dialect != Dialect.SqlServer) return;
-
             using (var db = OpenDbConnection())
             {
                 using (var cmd = db.SqlProc(

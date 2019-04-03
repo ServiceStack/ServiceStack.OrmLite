@@ -6,10 +6,12 @@ using IgnoreAttribute = NUnit.Framework.IgnoreAttribute;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
-    [TestFixture]
-    public class OrmLiteExecuteProcedureTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class OrmLiteExecuteProcedureTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteExecuteProcedureTests() : base(Dialect.PostgreSql) { }
+        public OrmLiteExecuteProcedureTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         private const string Create = @"
             CREATE OR REPLACE FUNCTION f_service_stack(

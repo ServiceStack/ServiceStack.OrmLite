@@ -8,9 +8,13 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class MultipleConnectionIdTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class MultipleConnectionIdTests : OrmLiteProvidersTestBase
     {
+        public MultipleConnectionIdTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private int _waitingThreadCount;
         private int _waitingThreadsReleasedCounter;
 
@@ -24,10 +28,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Dialect.Sqlite, "doesn't support concurrent writers")]
         public void TwoSimultaneousInsertsGetDifferentIds()
         {
-            if (Dialect == Dialect.Sqlite) return; // Sqlite doesn't support concurrent writers
-
             var dataArray = new[]
             {
                 new MultipleConnection {Data = "one"},
@@ -83,10 +86,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Dialect.Sqlite, "doesn't support concurrent writers")]
         public void TwoSimultaneousSavesGetDifferentIds()
         {
-            if (Dialect == Dialect.Sqlite) return; // Sqlite doesn't support concurrent writers
-
             var dataArray = new[]
             {
                 new MultipleConnection {Data = "one"},
@@ -135,7 +137,7 @@ namespace ServiceStack.OrmLite.Tests
             public IDbCommand CreateCommand(IDbConnection dbConn)
             {
                 var innerCommand = _inner.CreateCommand(dbConn);
-                return new PostExcuteActionCommand(innerCommand, _postExecuteAction);
+                return new PostExecuteActionCommand(innerCommand, _postExecuteAction);
             }
 
             public void DisposeCommand(IDbCommand dbCmd, IDbConnection dbConn)
@@ -226,12 +228,12 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
-        private class PostExcuteActionCommand : IDbCommand
+        private class PostExecuteActionCommand : IDbCommand
         {
             private readonly IDbCommand _inner;
             private readonly Action<IDbCommand> _postExecuteAction;
 
-            public PostExcuteActionCommand(IDbCommand inner, Action<IDbCommand> postExecuteAction)
+            public PostExecuteActionCommand(IDbCommand inner, Action<IDbCommand> postExecuteAction)
             {
                 _inner = inner;
                 _postExecuteAction = postExecuteAction;

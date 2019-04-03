@@ -26,8 +26,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public string MyValue { get; set; }
     }
 
-    public class LoadReferencesForeignKeyTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class LoadReferencesForeignKeyTests : OrmLiteProvidersTestBase
     {
+        public LoadReferencesForeignKeyTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Does_populate_Ref_Ids_of_non_convention_PrimaryKey_Tables()
         {

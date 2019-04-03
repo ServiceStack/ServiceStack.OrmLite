@@ -3,9 +3,13 @@ using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    [TestFixture]
-    public class SelectScalarTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SelectScalarTests : OrmLiteProvidersTestBase
     {
+        public SelectScalarTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         public class TestPerson
         {
             public Guid Id { get; set; }

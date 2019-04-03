@@ -1,16 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NUnit.Framework;
-using ServiceStack.Logging;
-using ServiceStack.Text;
+﻿using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class SelectWithBytesIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SelectWithBytesIssue : OrmLiteProvidersTestBase
     {
+        public SelectWithBytesIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         public class ModelWithBytes
         {
             public int Id { get; set; }

@@ -1,13 +1,15 @@
 ﻿using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class ForeignKeyAttributeTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ForeignKeyAttributeTests : OrmLiteProvidersTestBase
     {
+        public ForeignKeyAttributeTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [OneTimeSetUp]
         public void Setup()
         {
@@ -45,11 +47,10 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Dialect.Sqlite, "no support for cascade deletes")]
         public void CascadesOnDelete()
         {
-            //Ignore for Sqlite who doesn't support Cascade deletes. TODO: group tests around db features
-            if (OrmLiteConfig.DialectProvider == SqliteDialect.Provider)
-                return;
+            // TODO: group tests around db features
 
             using (var dbConn = OpenDbConnection())
             {
@@ -77,8 +78,8 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
-        [NUnit.Framework.Ignore("Not supported in sqlite?")]
         [Test]
+        [IgnoreDialect(Tests.Dialect.Sqlite, "Not supported in sqlite?")]
         public void CanCreateForeignWithOnDeleteNoAction()
         {
             using (var dbConn = OpenDbConnection())
@@ -95,12 +96,16 @@ namespace ServiceStack.OrmLite.Tests
                 dbConn.DropAndCreateTable<TypeWithOnDeleteRestrict>();
             }
         }
-        
+
         [Test]
         public void CanCreateForeignWithOnDeleteSetDefault()
         {
-            //ignoring Not supported in InnoDB: http://stackoverflow.com/a/1498015/85785
-            if (OrmLiteConfig.DialectProvider == MySqlDialect.Provider) return;
+            // ignoring Not supported in InnoDB: http://stackoverflow.com/a/1498015/85785
+            if (DialectProvider == MySqlDialect.Provider)
+            {
+                Assert.Ignore("MySql FK's not supported, skipping");
+                return;
+            }
 
             using (var dbConn = OpenDbConnection())
             {

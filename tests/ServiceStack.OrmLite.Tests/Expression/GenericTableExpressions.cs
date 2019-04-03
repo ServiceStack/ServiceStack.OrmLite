@@ -4,7 +4,6 @@ using System.Data;
 using System.Linq.Expressions;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
@@ -16,14 +15,16 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public string ColumnA { get; set; }
     }
 
-    [TestFixture]
-    public class GenericTableExpressions : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class GenericTableExpressions : OrmLiteProvidersTestBase
     {
+        public GenericTableExpressions(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_change_table_at_runtime()
         {
-            LogManager.LogFactory = new ConsoleLogFactory();
-
             const string tableName = "Entity1";
             using (var db = OpenDbConnection())
             {

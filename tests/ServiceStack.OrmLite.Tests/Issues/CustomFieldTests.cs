@@ -15,9 +15,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public string MaxText { get; set; }
     }
 
-    [TestFixture]
-    public class CustomFieldTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class CustomFieldTests : OrmLiteProvidersTestBase
     {
+        public CustomFieldTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_create_custom_Decimal_field()
         {

@@ -1,23 +1,23 @@
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrmLiteDeleteTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteDeleteTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteDeleteTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private IDbConnection db;
 
         [SetUp]
         public void SetUp()
         {
-            CreateNewDatabase();
             db = OpenDbConnection();
             db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
         }

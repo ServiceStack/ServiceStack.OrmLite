@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Composition;
-using System.ComponentModel.Composition.Hosting;
+//using System.ComponentModel.Composition;
+//using System.ComponentModel.Composition.Hosting;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
@@ -289,9 +289,10 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
-        [ImportMany(typeof(IParam))]
+        //[ImportMany(typeof(IParam))]
 // ReSharper disable UnassignedField.Compiler
-        private IEnumerable<IParam> _reservedNameParams;
+        private IEnumerable<IParam> _reservedNameParams => typeof(IParam).Assembly.GetExportedTypes()
+            .Where(x => x.HasInterface(typeof(IParam))).Select(x => Activator.CreateInstance(x) as IParam).ToArray();
 // ReSharper restore UnassignedField.Compiler
 
         [Test]
@@ -322,12 +323,12 @@ namespace ServiceStack.OrmLite.Tests
 
         private void ResolveReservedNameParameters()
         {
-            var catalog = new AssemblyCatalog(typeof(IParam).Assembly);
-            var container = new CompositionContainer(catalog);
-            container.ComposeParts(this);
+//            var catalog = new AssemblyCatalog(typeof(IParam).Assembly);
+//            var container = new CompositionContainer(catalog);
+//            container.ComposeParts(this);
         }
 
-        [InheritedExport]
+        //[InheritedExport]
         public interface IParam
         {
             int Id { get; set; }

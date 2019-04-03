@@ -11,10 +11,13 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrmLiteUpdateTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteUpdateTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteUpdateTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private ModelWithFieldsOfDifferentTypes CreateModelWithFieldsOfDifferentTypes(IDbConnection db)
         {
             db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
@@ -424,25 +427,32 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Poco>();
+                db.DropAndCreateTable<PocoUpdate>();
 
-                db.Insert(new Poco { Id = 1, Name = "A" });
-                db.Insert(new Poco { Id = 2, Name = "B" });
+                db.Insert(new PocoUpdate { Id = 1, Name = "A" });
+                db.Insert(new PocoUpdate { Id = 2, Name = "B" });
 
-                var sql = "UPDATE poco SET name = {0}name WHERE id = {0}id".Fmt(OrmLiteConfig.DialectProvider.ParamString);
+                var paramString = DialectProvider.ParamString;
+                var sql = $"UPDATE PocoUpdate SET name = {paramString}name WHERE id = {paramString}id";
                 var result = db.ExecuteSql(sql, new { id = 2, name = "UPDATED" });
                 Assert.That(result, Is.EqualTo(1));
 
-                var row = db.SingleById<Poco>(2);
+                var row = db.SingleById<PocoUpdate>(2);
                 Assert.That(row.Name, Is.EqualTo("UPDATED"));
 
-                sql = "UPDATE poco SET name = {0}name WHERE id = {0}id".Fmt(OrmLiteConfig.DialectProvider.ParamString);
+                sql = $"UPDATE PocoUpdate SET name = {paramString}name WHERE id = {paramString}id";
                 result = db.ExecuteSql(sql, new Dictionary<string, object> { {"id", 2}, {"name", "RE-UPDATED" } });
                 Assert.That(result, Is.EqualTo(1));
 
-                row = db.SingleById<Poco>(2);
+                row = db.SingleById<PocoUpdate>(2);
                 Assert.That(row.Name, Is.EqualTo("RE-UPDATED"));
             }
+        }
+        
+        private class PocoUpdate
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
         }
 
         [Test]

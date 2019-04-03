@@ -186,6 +186,16 @@ namespace ServiceStack.OrmLite.Sqlite
             return new SqliteExpression<T>(this);
         }
 
+        public override bool DoesSchemaExist(IDbCommand dbCmd, string schemaName)
+        {
+            throw new NotImplementedException("Schemas are not supported by sqlite");
+        }
+
+        public override string ToCreateSchemaStatement(string schemaName)
+        {
+            throw new NotImplementedException("Schemas are not supported by sqlite");
+        }
+
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name = {0}"

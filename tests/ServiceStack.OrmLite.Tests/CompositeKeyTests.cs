@@ -4,9 +4,13 @@ using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class CompositeKeyTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class CompositeKeyTests : OrmLiteProvidersTestBase
     {
+        public CompositeKeyTests(Dialect dialect) : base(dialect)
+        {
+        }
+        
         const long SubId1Value = 1;
         const long SubId2Value = 1;
 

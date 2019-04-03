@@ -3,9 +3,13 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    [TestFixture]
-    public class SqlExpressionParamTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SqlExpressionParamTests : OrmLiteProvidersTestBase
     {
+        public SqlExpressionParamTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_add_DbParam_to_SqlExpression()
         {
@@ -14,7 +18,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 SqlExpressionTests.InitLetters(db);
 
                 var q = db.From<LetterFrequency>()
-                    .UnsafeWhere("Letter = {0}".Fmt(db.GetDialectProvider().GetParam("p1")));
+                    .UnsafeWhere("Letter = {0}".Fmt(DialectProvider.GetParam("p1")));
 
                 q.Params.Add(q.CreateParam("p1", "B"));
 

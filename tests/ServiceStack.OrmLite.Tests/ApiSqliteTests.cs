@@ -1,20 +1,21 @@
 ﻿using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class ApiSqliteTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.Sqlite)]
+    public class ApiSqliteTests : OrmLiteProvidersTestBase
     {
+        public ApiSqliteTests(Dialect dialect) : base(dialect)
+        {   
+        }
+        
         [Test]
         public void API_Sqlite_Examples()
         {
-            if (Dialect != Dialect.Sqlite) return;
-
-            var db = CreateSqliteMemoryDbFactory().OpenDbConnection();
+            var db = OpenDbConnection();
             db.DropAndCreateTable<Person>();
             db.DropAndCreateTable<PersonWithAutoId>();
 

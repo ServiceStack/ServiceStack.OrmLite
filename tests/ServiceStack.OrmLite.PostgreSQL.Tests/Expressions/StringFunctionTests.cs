@@ -1,9 +1,15 @@
 ﻿using NUnit.Framework;
+using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 {
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class StringFunctionTests : ExpressionsTestBase
     {
+        public StringFunctionTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_select_using_contains()
         {

@@ -6,9 +6,23 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
 {
-    [TestFixture]
-    public class SchemaUseCase
+    [TestFixtureOrmLite]
+    public class SchemaUseCase : OrmLiteProvidersTestBase
     {
+        public SchemaUseCase(Dialect dialect) : base(dialect)
+        {
+        }
+
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            using (var db = OpenDbConnection())
+            {
+                if(!Dialect.Sqlite.HasFlag(Dialect))
+                    db.CreateSchema<User>();
+            }
+        }
+
         [Alias("Users")]
         [Schema("Security")]
         public class User
@@ -23,54 +37,21 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         }
 
         [Test]
-        public void Can_Create_Tables_With_Schema_In_Sqlite()
+        public void Can_Create_Tables_With_Schema()
         {
-            OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
-
-            using (IDbConnection db = ":memory:".OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<User>(true);
-
-                var tables = db.Column<string>(@"SELECT name FROM sqlite_master WHERE type='table';");
-
-                //sqlite dialect should just concatenate the schema and table name to create a unique table name
-                Assert.That(tables.Contains("Security_Users"));
-            }
-        }
-
-        private void CreateSchemaIfNotExists(IDbConnection db)
-        {
-            //in Sql2008, CREATE SCHEMA must be the first statement in a batch
-            const string createSchemaSQL = @"IF NOT EXISTS (SELECT * FROM sys.schemas WHERE name = 'Security')
-                                        BEGIN
-                                        EXEC( 'CREATE SCHEMA Security' );
-                                        END";
-            db.ExecuteSql(createSchemaSQL);
-        }
-
-        [Test]
-        public void Can_Create_Tables_With_Schema_in_SqlServer()
-        {
-            var dbFactory = OrmLiteTestBase.CreateSqlServerDbFactory();
-            using (IDbConnection db = dbFactory.OpenDbConnection())
-            {
-                CreateSchemaIfNotExists(db);
-                db.DropAndCreateTable<User>();
-
-                var tables = db.Column<string>(@"SELECT '['+SCHEMA_NAME(schema_id)+'].['+name+']' AS SchemaTable FROM sys.tables");
-
-                //sql server dialect should create the table in the schema
-                Assert.That(tables.Contains("[Security].[Users]"));
+                
+                Assert.That(db.TableExists<User>());
             }
         }
 
         [Test]
         public void Can_Perform_CRUD_Operations_On_Table_With_Schema()
         {
-            var dbFactory = OrmLiteTestBase.CreateSqlServerDbFactory();
-            using (IDbConnection db = dbFactory.OpenDbConnection())
+            using (var db = OpenDbConnection())
             {
-                CreateSchemaIfNotExists(db);
                 db.CreateTable<User>(true);
 
 				db.Insert(new User { Id = 1, Name = "A", CreatedDate = DateTime.Now });

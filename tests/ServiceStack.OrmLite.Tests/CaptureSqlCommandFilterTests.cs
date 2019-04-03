@@ -6,10 +6,13 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class CaptureSqlCommandFilterTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class CaptureSqlCommandFilterTests : OrmLiteProvidersTestBase
     {
+        public CaptureSqlCommandFilterTests(Dialect dialect) : base(dialect)
+        {
+        }
+        
         [Test]
         public void Can_capture_command_each_type_of_API()
         {
@@ -28,7 +31,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.SqlList<Person>("exec sp_name @firstName, @age", 
                     new { firstName = "aName", age = 1 });
                 db.ExecuteNonQuery("UPDATE Person SET LastName={0} WHERE Id={1}"
-                    .SqlFmt("WaterHouse", 7));
+                    .SqlFmt(DialectProvider, "WaterHouse", 7));
 
                 captured.SqlCommandHistory.PrintDump();
             }
@@ -241,7 +244,7 @@ namespace ServiceStack.OrmLite.Tests
                 i++; db.SqlScalar<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new { age = 50 });
                 i++; db.SqlScalar<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new Dictionary<string, object> { { "age", 50 } });
 
-                i++; db.ExecuteNonQuery("UPDATE Person SET LastName={0} WHERE Id={1}".SqlFmt("WaterHouse", 7));
+                i++; db.ExecuteNonQuery("UPDATE Person SET LastName={0} WHERE Id={1}".SqlFmt(DialectProvider, "WaterHouse", 7));
                 i++; db.ExecuteNonQuery("UPDATE Person SET LastName=@name WHERE Id=@id", new { name = "WaterHouse", id = 7 });
 
                 i++; db.SqlList<Person>("exec sp_name @firstName, @age", new { firstName = "aName", age = 1 });

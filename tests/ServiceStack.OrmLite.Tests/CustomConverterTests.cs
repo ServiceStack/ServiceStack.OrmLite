@@ -2,7 +2,6 @@
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer.Converters;
-using ServiceStack.OrmLite.Tests.Expression;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -14,20 +13,21 @@ namespace ServiceStack.OrmLite.Tests
 
         public TimeSpan TimeSpan { get; set; }
     }
-
-    [TestFixture]
-    public class CustomConverterTests : OrmLiteTestBase
+    
+    [TestFixtureOrmLiteDialects(Dialect.AnySqlServer)]
+    public class CustomConverterTests : OrmLiteProvidersTestBase
     {
+        public CustomConverterTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_override_SqlServer_Time_Converter()
         {
-            if (Dialect != Dialect.SqlServer && Dialect != Dialect.SqlServer2012)
-                return;
-
             using (var db = OpenDbConnection())
             {
-                var hold = db.GetDialectProvider().GetConverter<TimeSpan>();
-                db.GetDialectProvider().RegisterConverter<TimeSpan>(
+                var hold = DialectProvider.GetConverter<TimeSpan>();
+                DialectProvider.RegisterConverter<TimeSpan>(
                     new SqlServerTimeConverter());
 
                 db.DropAndCreateTable<PocoWithTime>();
@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(sql, Does.Contain("\"TimeSpan\" = '01:01:01.0030000'").
                                  Or.Contain("\"TimeSpan\" = CAST(@0 AS TIME))"));
 
-                db.GetDialectProvider().RegisterConverter<TimeSpan>(hold);
+                DialectProvider.RegisterConverter<TimeSpan>(hold);
             }
         }
     }

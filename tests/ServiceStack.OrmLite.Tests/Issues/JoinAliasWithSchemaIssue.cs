@@ -15,9 +15,24 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public int Value { get; set; }
     }
 
-    [TestFixture]
-    public class JoinAliasWithSchemaIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class JoinAliasWithSchemaIssue : OrmLiteProvidersTestBase
     {
+        public JoinAliasWithSchemaIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            if (!DialectFeatures.SchemaSupport) return;
+            
+            using (var db = OpenDbConnection())
+            {
+                db.CreateSchema<ModelWithSchema>();
+            }
+        }
+
         [Test]
         public void Can_perform_join_alias_on_ModelWithSchema()
         {

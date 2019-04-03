@@ -13,5 +13,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
         {
             return name.ToLowercaseUnderscore();
         }
+
+        public override string GetSchemaName(string name)
+        {
+            return name.ToLowercaseUnderscore();
+        }
     }
 }

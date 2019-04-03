@@ -7,20 +7,51 @@ namespace ServiceStack.OrmLite.Tests
     [Flags]
     public enum Dialect
     {
-        Sqlite = 1,
-        SqlServer = 2,
-        SqlServer2008 = 4,
-        SqlServer2012 = 8,
-        PostgreSql = 16,
-        MySql = 32,
-        SqlServerMdf = 64,
-        Oracle = 128,
-        Firebird = 256,
-        VistaDb = 512,
-        SqlServer2014 = 1024,
-        SqlServer2016 = 2048,
-        SqlServer2017 = 4096,
+        Sqlite         = 1,
+        
+        SqlServer = 1 << 1,
+        SqlServerMdf = 1 << 2,
+        SqlServer2008 = 1 << 3,
+        SqlServer2012 = 1 << 4,
+        SqlServer2014 = 1 << 5,
+        SqlServer2016 = 1 << 6,
+        SqlServer2017 = 1 << 7,
+        
+        PostgreSql9 = 1 << 8,
+        PostgreSql10 = 1 << 9,
+        PostgreSql11 = 1 << 10,
+        
+        MySql5_5 = 1 << 11,
+        MySql10_1 = 1 << 12,
+        MySql10_2 = 1 << 13,
+        MySql10_3 = 1 << 14,
+        MySql10_4 = 1 << 15,
+        MySqlConnector = 1 << 16,
+        
+        Oracle10 = 1 << 17,
+        Oracle11 = 1 << 18,
+        Oracle12 = 1 << 19,
+        Oracle18 = 1 << 20,
+        
+        Firebird = 1 << 21,
+        
+        VistaDb = 1 << 22,
+        
+        // any versions
+        AnyPostgreSql = PostgreSql9 | PostgreSql10 | PostgreSql11,
+        AnyMySql = MySql5_5 | MySql10_1 | MySql10_2 | MySql10_3 | MySql10_4 | MySqlConnector, 
         AnySqlServer = SqlServer | SqlServer2008 | SqlServer2012 | SqlServer2014 | SqlServer2016 | SqlServer2017 | SqlServerMdf,
+        AnyOracle = Oracle10 | Oracle11 | Oracle12 | Oracle18,
+        
+        // db groups
+        BaseSupported = Sqlite | MySql5_5 | MySqlConnector | PostgreSql9 | SqlServer,
+        Supported = Sqlite | AnyMySql | AnyPostgreSql | AnySqlServer,
+        BaseCommunity = Firebird | Oracle10 | VistaDb,
+        Community = Firebird | AnyOracle | VistaDb,
+        DockerDb =  AnyMySql | AnyPostgreSql | AnySqlServer | Community,
+        
+        // all
+        All = Supported | Community
     }
 
     public static class TestHelpers

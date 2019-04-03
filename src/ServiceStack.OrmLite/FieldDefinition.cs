@@ -187,20 +187,20 @@ namespace ServiceStack.OrmLite
         public string OnUpdate { get; private set; }
         public string ForeignKeyName { get; private set; }
 
-        public string GetForeignKeyName(ModelDefinition modelDef, ModelDefinition refModelDef, INamingStrategy NamingStrategy, FieldDefinition fieldDef)
+        public string GetForeignKeyName(ModelDefinition modelDef, ModelDefinition refModelDef, INamingStrategy namingStrategy, FieldDefinition fieldDef)
         {
             if (ForeignKeyName.IsNullOrEmpty())
             {
                 var modelName = modelDef.IsInSchema
-                    ? modelDef.Schema + "_" + NamingStrategy.GetTableName(modelDef.ModelName)
-                    : NamingStrategy.GetTableName(modelDef.ModelName);
+                    ? $"{modelDef.Schema}_{namingStrategy.GetTableName(modelDef.ModelName)}"
+                    : namingStrategy.GetTableName(modelDef.ModelName);
 
                 var refModelName = refModelDef.IsInSchema
-                    ? refModelDef.Schema + "_" + NamingStrategy.GetTableName(refModelDef.ModelName)
-                    : NamingStrategy.GetTableName(refModelDef.ModelName);
+                    ? $"{refModelDef.Schema}_{namingStrategy.GetTableName(refModelDef.ModelName)}"
+                    : namingStrategy.GetTableName(refModelDef.ModelName);
 
                 var fkName = $"FK_{modelName}_{refModelName}_{fieldDef.FieldName}";
-                return NamingStrategy.ApplyNameRestrictions(fkName);
+                return namingStrategy.ApplyNameRestrictions(fkName);
             }
             return ForeignKeyName;
         }

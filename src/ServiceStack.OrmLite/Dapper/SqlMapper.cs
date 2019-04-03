@@ -2535,7 +2535,9 @@ namespace ServiceStack.OrmLite.Dapper
                 {
                     // need to be a little careful about adding; use a utility method
                     il.Emit(OpCodes.Ldstr, prop.Name); // stack is now [parameters] [parameters] [command] [name]
+#pragma warning disable 612, 618
                     il.EmitCall(OpCodes.Call, typeof(SqlMapper).GetMethod(nameof(SqlMapper.FindOrAddParameter)), null); // stack is [parameters] [parameter]
+#pragma warning restore 612, 618
                 }
                 else
                 {
@@ -2666,9 +2668,9 @@ namespace ServiceStack.OrmLite.Dapper
 
                 if (handler != null)
                 {
-#pragma warning disable 618
+#pragma warning disable 612, 618
                     il.Emit(OpCodes.Call, typeof(TypeHandlerCache<>).MakeGenericType(prop.PropertyType).GetMethod(nameof(TypeHandlerCache<int>.SetValue))); // stack is now [parameters] [[parameters]] [parameter]
-#pragma warning restore 618
+#pragma warning restore 612, 618
                 }
                 else
                 {
@@ -3273,9 +3275,9 @@ namespace ServiceStack.OrmLite.Dapper
                             {
                                 if (hasTypeHandler)
                                 {
-#pragma warning disable 618
+#pragma warning disable 612, 618
                                     il.EmitCall(OpCodes.Call, typeof(TypeHandlerCache<>).MakeGenericType(unboxType).GetMethod(nameof(TypeHandlerCache<int>.Parse)), null); // stack is now [target][target][typed-value]
-#pragma warning restore 618
+#pragma warning restore 612, 618
                                 }
                                 else
                                 {

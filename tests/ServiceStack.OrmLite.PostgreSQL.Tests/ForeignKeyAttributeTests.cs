@@ -4,10 +4,12 @@ using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
-    [TestFixture]
-    public class ForeignKeyAttributeTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class ForeignKeyAttributeTests : OrmLiteProvidersTestBase
     {
-        public ForeignKeyAttributeTests() : base(Dialect.PostgreSql) { }
+        public ForeignKeyAttributeTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [OneTimeSetUp]
         public void Setup()

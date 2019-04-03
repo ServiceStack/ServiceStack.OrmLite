@@ -3,14 +3,16 @@ using System.Globalization;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Tests;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
-    [TestFixture]
-    public class OrmLiteInsertTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class OrmLiteInsertTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteInsertTests() : base(Dialect.PostgreSql) { }
+        public OrmLiteInsertTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Test]
         public void Can_insert_into_ModelWithFieldsOfDifferentTypes_table()
@@ -200,10 +202,10 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
-    public class PostgreSQLUpdateTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql), SetUICulture("en-US"), SetCulture("en-US")]
+    public class PostgreSQLUpdateTests : OrmLiteProvidersTestBase
     {
-        public PostgreSQLUpdateTests()
-            : base(Dialect.PostgreSql)
+        public PostgreSQLUpdateTests(Dialect dialect) : base(dialect)
         {
         }
 
@@ -211,13 +213,13 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_insert_datetimeoffsets_regardless_of_current_culture()
         {
             // datetimeoffset's default .ToString depends on culture, ensure we use one with MDY
-#if NETCORE
-            var previousCulture = CultureInfo.CurrentCulture;
-            CultureInfo.CurrentCulture = new CultureInfo("en-US");
-#else            
-            var previousCulture = System.Threading.Thread.CurrentThread.CurrentCulture;
-            System.Threading.Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
-#endif
+//#if NETCORE
+//            var previousCulture = CultureInfo.CurrentCulture;
+//            CultureInfo.CurrentCulture = new CultureInfo("en-US");
+//#else            
+//            var previousCulture = System.Threading.Thread.CurrentThread.CurrentCulture;
+//            System.Threading.Thread.CurrentThread.CurrentCulture = new CultureInfo("en-US");
+//#endif
             try
             {
                 using (var db = OpenDbConnection())
@@ -244,11 +246,11 @@ namespace ServiceStack.OrmLite.Tests
             }
             finally
             {
-#if NETCORE
-                CultureInfo.CurrentCulture = previousCulture;
-#else
-                System.Threading.Thread.CurrentThread.CurrentCulture = previousCulture;
-#endif
+//#if NETCORE
+//                CultureInfo.CurrentCulture = previousCulture;
+//#else
+//                System.Threading.Thread.CurrentThread.CurrentCulture = previousCulture;
+//#endif
             }
         }
 

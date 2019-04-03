@@ -16,9 +16,10 @@ namespace ServiceStack.OrmLite.SqlServerTests
 		private OrmLiteConnectionFactory dbFactory;
 
 		[OneTimeSetUp]
-		public void TestFixtureSetUp()
+		public new void TestFixtureSetUp()
 		{
 			base.TestFixtureSetUp();
+			
 			//change to datetime2 - check for higher range and precision
 			//default behaviour: normal datetime can't hold DateTime values of year 1.
 			dbFactory = new OrmLiteConnectionFactory(base.ConnectionString, SqlServerOrmLiteDialectProvider.Instance);

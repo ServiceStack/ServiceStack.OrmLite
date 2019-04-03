@@ -5,9 +5,13 @@ using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
 {
-	[TestFixture]
-	public class SimpleUseCase : OrmLiteTestBase
+	[TestFixtureOrmLite]
+	public class SimpleUseCase : OrmLiteProvidersTestBase
 	{
+		public SimpleUseCase(Dialect dialect) : base(dialect)
+		{
+		}
+
 		public class User
 		{
 			public long Id { get; set; }

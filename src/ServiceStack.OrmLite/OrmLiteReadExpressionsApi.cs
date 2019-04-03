@@ -157,8 +157,7 @@ namespace ServiceStack.OrmLite
                     sb.Append(" UNION ");
                 
                 // retain *real* table names and skip using naming strategy
-                sb.AppendLine(
-                    $"SELECT '{tableName}', COUNT(*) FROM {dialect.GetQuotedName(tableName, schema)}");
+                sb.AppendLine($"SELECT {tableName.Quoted()}, COUNT(*) FROM {dialect.GetQuotedTableName(tableName)}");
             }
 
             var sql = StringBuilderCache.ReturnAndFree(sb);

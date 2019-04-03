@@ -22,10 +22,13 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
-    [TestFixture]
-    public class StringSerializerTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class StringSerializerTests : OrmLiteProvidersTestBase
     {
+        public StringSerializerTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private static void InsertModelWithComplexType(IDbConnection db)
         {
             db.DropAndCreateTable<ModelWithComplexType>();
@@ -38,7 +41,7 @@ namespace ServiceStack.OrmLite.Tests
 
         public string TestSql
         {
-            get { return "SELECT {0} from {1}".Fmt("ComplexType".SqlColumn(), "ModelWithComplexType".SqlTable()); }
+            get { return "SELECT {0} from {1}".Fmt("ComplexType".SqlColumn(DialectProvider), "ModelWithComplexType".SqlTable(DialectProvider)); }
         }
 
         [Test]
@@ -64,8 +67,8 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                var hold = db.GetDialectProvider().StringSerializer;
-                db.GetDialectProvider().StringSerializer = new JsvStringSerializer();
+                var hold = DialectProvider.StringSerializer;
+                DialectProvider.StringSerializer = new JsvStringSerializer();
 
                 InsertModelWithComplexType(db);
 
@@ -75,7 +78,7 @@ namespace ServiceStack.OrmLite.Tests
                 var data = db.SingleById<ModelWithComplexType>(1);
                 Assert.That(data.ComplexType.SubType.Name, Is.EqualTo("Sub"));
 
-                db.GetDialectProvider().StringSerializer = hold;
+                DialectProvider.StringSerializer = hold;
             }
         }
 
@@ -84,8 +87,8 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                var hold = db.GetDialectProvider().StringSerializer;
-                db.GetDialectProvider().StringSerializer = new JsonStringSerializer();
+                var hold = DialectProvider.StringSerializer;
+                DialectProvider.StringSerializer = new JsonStringSerializer();
 
                 InsertModelWithComplexType(db);
 
@@ -95,7 +98,7 @@ namespace ServiceStack.OrmLite.Tests
                 var data = db.SingleById<ModelWithComplexType>(1);
                 Assert.That(data.ComplexType.SubType.Name, Is.EqualTo("Sub"));
 
-                db.GetDialectProvider().StringSerializer = hold;
+                DialectProvider.StringSerializer = hold;
             }
         }
 
@@ -104,8 +107,8 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                var hold = db.GetDialectProvider().StringSerializer;
-                db.GetDialectProvider().StringSerializer = new JsonDataContractSerializer();
+                var hold = DialectProvider.StringSerializer;
+                DialectProvider.StringSerializer = new JsonDataContractSerializer();
 
                 InsertModelWithComplexType(db);
 
@@ -115,7 +118,7 @@ namespace ServiceStack.OrmLite.Tests
                 var data = db.SingleById<ModelWithComplexType>(1);
                 Assert.That(data.ComplexType.SubType.Name, Is.EqualTo("Sub"));
 
-                db.GetDialectProvider().StringSerializer = hold;
+                DialectProvider.StringSerializer = hold;
             }
         }
 
@@ -124,8 +127,8 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                var hold = db.GetDialectProvider().StringSerializer;
-                db.GetDialectProvider().StringSerializer = new DataContractSerializer();
+                var hold = DialectProvider.StringSerializer;
+                DialectProvider.StringSerializer = new DataContractSerializer();
 
                 InsertModelWithComplexType(db);
 
@@ -136,7 +139,7 @@ namespace ServiceStack.OrmLite.Tests
                 var data = db.SingleById<ModelWithComplexType>(1);
                 Assert.That(data.ComplexType.SubType.Name, Is.EqualTo("Sub"));
 
-                db.GetDialectProvider().StringSerializer = hold;
+                DialectProvider.StringSerializer = hold;
             }
         }
 
@@ -145,8 +148,8 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                var hold = db.GetDialectProvider().StringSerializer;
-                db.GetDialectProvider().StringSerializer = new XmlSerializableSerializer();
+                var hold = DialectProvider.StringSerializer;
+                DialectProvider.StringSerializer = new XmlSerializableSerializer();
 
                 InsertModelWithComplexType(db);
 
@@ -159,7 +162,7 @@ namespace ServiceStack.OrmLite.Tests
                 var data = db.SingleById<ModelWithComplexType>(1);
                 Assert.That(data.ComplexType.SubType.Name, Is.EqualTo("Sub"));
 
-                db.GetDialectProvider().StringSerializer = hold;
+                DialectProvider.StringSerializer = hold;
             }
         }
     }

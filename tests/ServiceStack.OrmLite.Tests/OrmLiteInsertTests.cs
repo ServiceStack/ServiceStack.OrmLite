@@ -9,10 +9,12 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrmLiteInsertTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteInsertTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteInsertTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Test]
         public void Can_insert_into_ModelWithFieldsOfDifferentTypes_table()
@@ -260,11 +262,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "Need trigger for autoincrement keys to work in Oracle with caller supplied SQL")]
         public void Can_GetLastInsertedId_using_Insert()
         {
-            SuppressIfOracle("Need trigger for autoincrement keys to work in Oracle with caller supplied SQL");
-            if (Dialect == Dialect.Firebird) return; //Requires Generator
-
             var date = new DateTime(2000, 1, 1);
             var testObject = new UserAuth
             {
@@ -279,13 +279,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<UserAuth>();
 
-                db.ExecuteSql("INSERT INTO {0} ({1},{2},{3},{4}) VALUES ({5},'2000-01-01','2000-01-01',0)"
-                    .Fmt("UserAuth".SqlTable(),
-                         "UserName".SqlColumn(),
-                         "CreatedDate".SqlColumn(),
-                         "ModifiedDate".SqlColumn(),
-                         "InvalidLoginAttempts".SqlColumn(),
-                         testObject.UserName.SqlValue()));
+                db.ExecuteSql($"INSERT INTO {"UserAuth".SqlTable(DialectProvider)} ({"UserName".SqlColumn(DialectProvider)},{"CreatedDate".SqlColumn(DialectProvider)},{"ModifiedDate".SqlColumn(DialectProvider)},{"InvalidLoginAttempts".SqlColumn(DialectProvider)}) VALUES ('{testObject.UserName}','2000-01-01','2000-01-01',0)");
                 var normalLastInsertedId = db.LastInsertId();
                 Assert.Greater(normalLastInsertedId, 0, "normal Insert");
             }
@@ -301,10 +295,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "Need trigger for autoincrement keys to work in Oracle")]
         public void Can_InsertOnly_selected_fields()
         {
-            SuppressIfOracle("Need trigger for autoincrement keys to work in Oracle");
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<PersonWithAutoId>();
@@ -334,10 +327,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "Need trigger for autoincrement keys to work in Oracle")]
         public void Can_InsertOnly_selected_fields_using_AssignmentExpression()
         {
-            SuppressIfOracle("Need trigger for autoincrement keys to work in Oracle");
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<PersonWithAutoId>();

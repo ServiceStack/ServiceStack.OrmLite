@@ -11,9 +11,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public DateTime ExpiryDate { get; set; }
     }
 
-    [TestFixture]
-    public class UtcDateTimeIssueTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class UtcDateTimeIssueTests : OrmLiteProvidersTestBase
     {
+        public UtcDateTimeIssueTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Test_DateTime_Select()
         {
@@ -93,12 +97,12 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     ExpiryDate = DateTime.UtcNow.AddHours(1)
                 });
 
-                var result = db.Select<TestDate>("ExpiryDate".SqlColumn() + " > @theDate".PreNormalizeSql(db),
+                var result = db.Select<TestDate>("ExpiryDate".SqlColumn(DialectProvider) + " > @theDate".PreNormalizeSql(db),
                     new { theDate = DateTime.UtcNow });
                 db.GetLastSql().Print();
                 Assert.That(result.Count, Is.EqualTo(1));
 
-                result = db.Select<TestDate>("ExpiryDate".SqlColumn() + " > @theDate".PreNormalizeSql(db),
+                result = db.Select<TestDate>("ExpiryDate".SqlColumn(DialectProvider) + " > @theDate".PreNormalizeSql(db),
                     new { theDate = new DateTime(1999, 01, 02) });
                 db.GetLastSql().Print();
                 Assert.That(result.Count, Is.EqualTo(2));

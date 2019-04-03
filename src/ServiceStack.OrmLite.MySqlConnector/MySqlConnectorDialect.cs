@@ -1,4 +1,6 @@
-namespace ServiceStack.OrmLite.MySql
+using ServiceStack.OrmLite.MySql;
+
+namespace ServiceStack.OrmLite
 {
     public static class MySqlConnectorDialect
     {

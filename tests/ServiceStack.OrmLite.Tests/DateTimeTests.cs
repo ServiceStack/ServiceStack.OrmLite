@@ -6,8 +6,14 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class DateTimeTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    [NonParallelizable]
+    public class DateTimeTests : OrmLiteProvidersTestBase
     {
+        public DateTimeTests(Dialect dialect) : base(dialect)
+        {
+        }
+        
         [Test]
         public void Can_insert_and_query_with_Unspecified_DateStyle()
         {
@@ -46,7 +52,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                var dialectProvider = db.GetDialectProvider();
+                var dialectProvider = DialectProvider;
                 var hold = dialectProvider.GetDateTimeConverter().DateStyle;
                 dialectProvider.GetDateTimeConverter().DateStyle = DateTimeKind.Local;
 
@@ -95,7 +101,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                var dialectProvider = db.GetDialectProvider();
+                var dialectProvider = DialectProvider;
                 var hold = dialectProvider.GetDateTimeConverter().DateStyle;
                 dialectProvider.GetDateTimeConverter().DateStyle = DateTimeKind.Utc;
 
@@ -164,9 +170,9 @@ namespace ServiceStack.OrmLite.Tests
                     using (var cmd = db.OpenCommand())
                     {
                         cmd.CommandText = "INSERT INTO {0} VALUES({1}, {2})"
-                            .Fmt(typeof(DateTimeObject).Name.SqlTable(),
-                                db.GetDialectProvider().GetParam("p1"),
-                                db.GetDialectProvider().GetParam("p2"));
+                            .Fmt(typeof(DateTimeObject).Name.SqlTable(DialectProvider),
+                                DialectProvider.GetParam("p1"),
+                                DialectProvider.GetParam("p2"));
 
                         cmd.Parameters.Add(cmd.CreateParam("p1", dateTime));
                         cmd.Parameters.Add(cmd.CreateParam("p2", dateTime));
@@ -176,7 +182,7 @@ namespace ServiceStack.OrmLite.Tests
 
                     using (var cmd = db.OpenCommand())
                     {
-                        cmd.CommandText = "SELECT * FROM {0}".Fmt(typeof(DateTimeObject).Name.SqlTable());
+                        cmd.CommandText = "SELECT * FROM {0}".Fmt(typeof(DateTimeObject).Name.SqlTable(DialectProvider));
 
                         using (var reader = cmd.ExecuteReader())
                         {
@@ -188,13 +194,6 @@ namespace ServiceStack.OrmLite.Tests
                                     dateTime,
                                     dbDateTime.Kind,
                                     dbDateTime);
-
-                                //dbDateTime = reader.GetDateTime(1);
-                                //"#2 IN: {0} ({1}), OUT: {2} ({3})".Print(
-                                //    dateTime.Kind,
-                                //    dateTime,
-                                //    dbDateTime.Kind,
-                                //    dbDateTime);
                             }
                         }
                     }
@@ -214,16 +213,16 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new DateTimeObject { Test = dateTime, TestNullable = dateTime });
 
                 var row = db.SqlList<DateTimeObject>(
-                    "SELECT * FROM {0} WHERE Test = @dateTime".Fmt("DateTimeObject".SqlTable()), new { dateTime });
+                    "SELECT * FROM {0} WHERE Test = @dateTime".Fmt("DateTimeObject".SqlTable(DialectProvider)), new { dateTime });
                 Assert.That(dateTime, Is.EqualTo(row[0].Test));
 
                 row = db.SqlList<DateTimeObject>(
-                    "SELECT * FROM {0} WHERE {1} = @dateTime".Fmt("DateTimeObject".SqlTable(), "TestNullable".SqlColumn()), new { dateTime });
+                    "SELECT * FROM {0} WHERE {1} = @dateTime".Fmt("DateTimeObject".SqlTable(DialectProvider), "TestNullable".SqlColumn(DialectProvider)), new { dateTime });
                 Assert.That(dateTime, Is.EqualTo(row[0].TestNullable));
 
                 DateTime? nullableDate = dateTime;
                 row = db.SqlList<DateTimeObject>(
-                    "SELECT * FROM {0} WHERE {1} = @nullableDate".Fmt("DateTimeObject".SqlTable(), "TestNullable".SqlColumn()), new { nullableDate });
+                    "SELECT * FROM {0} WHERE {1} = @nullableDate".Fmt("DateTimeObject".SqlTable(DialectProvider), "TestNullable".SqlColumn(DialectProvider)), new { nullableDate });
                 Assert.That(dateTime, Is.EqualTo(row[0].TestNullable));
             }
         }

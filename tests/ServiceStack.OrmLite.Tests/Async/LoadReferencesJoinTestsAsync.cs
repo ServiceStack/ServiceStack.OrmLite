@@ -9,9 +9,13 @@ using System.Text.RegularExpressions;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    public class LoadReferencesJoinTestsAsync
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class LoadReferencesJoinTestsAsync : OrmLiteProvidersTestBase
     {
+        public LoadReferencesJoinTestsAsync(Dialect dialect) : base(dialect)
+        {
+        }
+
         private IDbConnection db;
 
         [OneTimeSetUp]

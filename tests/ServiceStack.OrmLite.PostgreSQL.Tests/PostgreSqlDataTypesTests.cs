@@ -13,10 +13,13 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         public IDictionary<string,string> IDictionary { get; set; }
     }
     
-    public class PostgreSqlDataTypesTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class PostgreSqlDataTypesTests : OrmLiteProvidersTestBase
     {
-        public PostgreSqlDataTypesTests() : base(Dialect.PostgreSql) {}
-        
+        public PostgreSqlDataTypesTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [OneTimeSetUp] 
         public void OneTimeSetup()
         {

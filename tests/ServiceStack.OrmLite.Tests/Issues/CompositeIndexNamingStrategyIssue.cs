@@ -24,9 +24,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public string Name { get; set; }
     }
 
-    [TestFixture]
-    public class CompositeIndexNamingStrategyIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class CompositeIndexNamingStrategyIssue : OrmLiteProvidersTestBase
     {
+        public CompositeIndexNamingStrategyIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_Create_composite_index_with_property_name_indexes()
         {

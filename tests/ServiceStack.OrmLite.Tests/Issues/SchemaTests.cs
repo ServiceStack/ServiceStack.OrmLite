@@ -6,12 +6,24 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    [TestFixture]
-    public class SchemaTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SchemaTests : OrmLiteProvidersTestBase
     {
-        public SchemaTests()
+        public SchemaTests(Dialect dialect) : base(dialect)
         {
-            Dialect = Dialect.Sqlite; //Other DB Providers needs creating out-of-band 
+        }
+
+        [OneTimeSetUp]
+        public void OneTimeSetup()
+        {
+            if (DialectFeatures.SchemaSupport)
+            {
+                using (var db = OpenDbConnection())
+                {
+                    db.CreateSchema<Editable>();
+                    db.CreateSchema<SchemaTable1>();
+                }
+            }
         }
 
         [Schema("Schema")]

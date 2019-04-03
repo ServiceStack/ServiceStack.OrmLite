@@ -1,9 +1,15 @@
 ﻿using NUnit.Framework;
+using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 {
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class MultiplicativeExpressionsTest : ExpressionsTestBase
     {
+        public MultiplicativeExpressionsTest(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_select_constant_multiply_expression()
         {

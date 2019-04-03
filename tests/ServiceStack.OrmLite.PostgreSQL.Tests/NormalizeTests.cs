@@ -12,17 +12,19 @@ using Order = ServiceStack.OrmLite.Tests.Order;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
-    class NormalizeTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    class NormalizeTests : OrmLiteProvidersTestBase
     {
-        public NormalizeTests() : base(Dialect.PostgreSql) { }
+        public NormalizeTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Test]
         public void Can_create_and_populate_tables_without_quotes()
         {
             using (var db = OpenDbConnection())
             {
-                PostgreSqlDialectProvider.Instance.Normalize = true;
+                ((PostgreSqlDialectProvider) DialectProvider).Normalize = true;
 
                 CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table
                 db.DropTable<Order>();
@@ -66,7 +68,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 var totalQty = orders.Sum(x => x.Qty);
                 Assert.That(totalQty, Is.EqualTo(3));
 
-                PostgreSqlDialectProvider.Instance.Normalize = false;
+                //PostgreSqlDialectProvider.Instance.Normalize = false;
             }
         }
     }

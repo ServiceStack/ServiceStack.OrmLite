@@ -31,9 +31,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public DateTime? DateOfDeath { get; set; }
     }
 
-    
-    public class DynamicDataIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class DynamicDataIssue : OrmLiteProvidersTestBase
     {
+        public DynamicDataIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         private static void InitTables(IDbConnection db)
         {
             db.DropTable<ChildTbl>();

@@ -1,16 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Tests;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
-    [TestFixture]
-    public class SchemaTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class SchemaTests : OrmLiteProvidersTestBase
     {
-        public SchemaTests() : base(Dialect.PostgreSql){}
+        public SchemaTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Alias("TestSchemaUser")]
         [Schema("TestSchema")]

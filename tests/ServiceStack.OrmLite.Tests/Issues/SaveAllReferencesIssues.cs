@@ -2,12 +2,16 @@
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class SaveAllReferencesIssues : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SaveAllReferencesIssues : OrmLiteProvidersTestBase
     {
+        public SaveAllReferencesIssues(Dialect dialect) : base(dialect)
+        {
+        }
+
         public class BranchRef
         {
             [AutoId]

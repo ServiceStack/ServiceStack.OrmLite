@@ -4,9 +4,12 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class MappingFieldIssues : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class MappingFieldIssues : OrmLiteProvidersTestBase
     {
-        public MappingFieldIssues() : base(Dialect.SqlServer) {}
+        public MappingFieldIssues(Dialect dialect) : base(dialect)
+        {
+        }
 
         public class OriginalTable
         {

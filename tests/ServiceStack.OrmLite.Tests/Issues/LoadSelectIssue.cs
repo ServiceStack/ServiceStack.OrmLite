@@ -2,20 +2,21 @@
 using System.Data;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using ServiceStack.Data;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
-using ServiceStack.OrmLite.SqlServer;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    [TestFixture]
-    public class LoadSelectIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class LoadSelectIssue : OrmLiteProvidersTestBase
     {
+        public LoadSelectIssue(Dialect dialect) : base(dialect)
+        {
+        }
+
         public class PlayerEquipment
         {
-            public string Id => PlayerId + "/" + ItemId;
+            public string Id => $"{PlayerId}/{ItemId}";
 
             public int PlayerId { get; set; }
 
@@ -144,7 +145,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_execute_LoadSelect_when_child_references_implement_IHasSoftDelete()
         {
-            LogManager.LogFactory = new ConsoleLogFactory(debugEnabled:true);
             // Automatically filter out all soft deleted records, for ALL table types.
             OrmLiteConfig.SqlExpressionSelectFilter = q =>
             {
@@ -198,7 +198,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
             public string Name { get; set; }
 
-//            [References(typeof(Contact))]
             public int ContactId { get; set; }
             
             [Reference]

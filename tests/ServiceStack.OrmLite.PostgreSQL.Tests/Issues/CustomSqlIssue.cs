@@ -21,9 +21,12 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Issues
         public string ColorJson { get; set; }
     }
 
-    public class OrmLiteModelArrayTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class OrmLiteModelArrayTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteModelArrayTests() : base(Dialect.PostgreSql) {}
+        public OrmLiteModelArrayTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Test]
         public void test_model_with_array_to_json()

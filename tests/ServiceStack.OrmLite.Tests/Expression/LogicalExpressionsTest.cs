@@ -2,8 +2,13 @@
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
+    [TestFixtureOrmLite]
     public class LogicalExpressionsTest : ExpressionsTestBase
     {
+        public LogicalExpressionsTest(Dialect dialect) : base(dialect)
+        {
+        }
+
         #region variables
 
         [Test]

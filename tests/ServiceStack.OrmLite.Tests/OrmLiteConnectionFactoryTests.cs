@@ -34,8 +34,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void NonAutoDispose_ConnectionFactory_reuses_connection()
         {
-            OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
-            var factory = new OrmLiteConnectionFactory(":memory:")
+            var factory = new OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider)
             {
                 AutoDisposeConnection = false,
             };
@@ -81,9 +80,9 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_open_multiple_nested_connections()
         {
-            var factory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, SqliteDialect.Provider);
-            factory.RegisterConnection("sqlserver", Config.SqlServerBuildDb, SqlServerDialect.Provider);
-            factory.RegisterConnection("sqlite-file", Config.SqliteFileDb, SqliteDialect.Provider);
+            var factory = new OrmLiteConnectionFactory(TestConfig.SqliteMemoryDb, SqliteDialect.Provider);
+            factory.RegisterConnection("sqlserver", $"{TestConfig.SqlServerBuildDb};Connection Timeout=1", SqlServerDialect.Provider);
+            factory.RegisterConnection("sqlite-file", TestConfig.SqliteFileDb, SqliteDialect.Provider);
 
             var results = new List<Person>();
             using (var db = factory.OpenDbConnection())
@@ -119,9 +118,9 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_open_multiple_nested_connections_in_any_order()
         {
-            var factory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, SqliteDialect.Provider);
-            factory.RegisterConnection("sqlserver", Config.SqlServerBuildDb, SqlServerDialect.Provider);
-            factory.RegisterConnection("sqlite-file", Config.SqliteFileDb, SqliteDialect.Provider);
+            var factory = new OrmLiteConnectionFactory(TestConfig.SqliteMemoryDb, SqliteDialect.Provider);
+            factory.RegisterConnection("sqlserver", $"{TestConfig.SqlServerBuildDb};Connection Timeout=1", SqlServerDialect.Provider);
+            factory.RegisterConnection("sqlite-file", TestConfig.SqliteFileDb, SqliteDialect.Provider);
 
             var results = new List<Person>();
             using (var db = factory.OpenDbConnection())
@@ -191,9 +190,9 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_register_ConnectionFilter_on_named_connections()
         {
-            var factory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, SqliteDialect.Provider);
-            factory.RegisterConnection("sqlserver", Config.SqlServerBuildDb, SqlServerDialect.Provider);
-            factory.RegisterConnection("sqlite-file", Config.SqliteFileDb, SqliteDialect.Provider);
+            var factory = new OrmLiteConnectionFactory(TestConfig.SqliteMemoryDb, SqliteDialect.Provider);
+            factory.RegisterConnection("sqlserver", $"{TestConfig.SqlServerBuildDb};Connection Timeout=1", SqlServerDialect.Provider);
+            factory.RegisterConnection("sqlite-file", TestConfig.SqliteFileDb, SqliteDialect.Provider);
 
             int filterCount = 0;
 

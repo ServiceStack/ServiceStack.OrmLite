@@ -7,18 +7,22 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    [TestFixture]
-    public class SqlServerProviderTestsAsync
+    [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
+    public class SqlServerProviderTestsAsync : OrmLiteProvidersTestBase
     {
-        private IDbConnection db;
-
-        [OneTimeSetUp]
-        public void TestFixtureSetUp()
+        public SqlServerProviderTestsAsync(Dialect dialect) : base(dialect)
         {
-            db = Config.OpenDbConnection();
         }
 
-        [OneTimeTearDown]
+        private IDbConnection db;
+
+        [SetUp]
+        public void TestFixtureSetUp()
+        {
+            db = OpenDbConnection();
+        }
+
+        [TearDown]
         public void TearDown()
         {
             db.Dispose();

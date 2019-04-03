@@ -7,10 +7,13 @@ using ServiceStack.Text;
 namespace ServiceStack.OrmLite.Tests.Issues
 {
     [Explicit]
-    [TestFixture]
-    public class MultithreadingIssueTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class MultithreadingIssueTests : OrmLiteProvidersTestBase
     {
+        public MultithreadingIssueTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [SetUp]
         public void SetUp()
         {

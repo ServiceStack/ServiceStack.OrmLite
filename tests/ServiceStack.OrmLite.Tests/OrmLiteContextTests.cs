@@ -6,10 +6,13 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrmLiteContextTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteContextTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteContextTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_set_and_get_TS_ContextItems()
         {
@@ -20,8 +23,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_override_timeout_for_specific_command()
         {
-            base.DbFactory.AutoDisposeConnection = true; //Turn off :memory: re-use of dbConn
-
+            DbFactory.AutoDisposeConnection = true; //Turn off :memory: re-use of dbConn
             OrmLiteConfig.CommandTimeout = 100;
 
             using (var db = OpenDbConnection())
@@ -60,7 +62,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public async Task Can_override_timeout_for_specific_command_Async()
         {
-            base.DbFactory.AutoDisposeConnection = true; //Turn off :memory: re-use of dbConn
+            DbFactory.AutoDisposeConnection = true; //Turn off :memory: re-use of dbConn
 
             OrmLiteConfig.CommandTimeout = 100;
 

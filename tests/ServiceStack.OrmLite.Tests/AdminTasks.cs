@@ -1,12 +1,16 @@
-﻿using NUnit.Framework;
-using ServiceStack.OrmLite.Tests.UseCase;
+﻿using System;
+using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [Explicit, Ignore("OneOff Tasks")]
-    public class AdminTasks
-        : OrmLiteTestBase
+    [TestFixtureOrmLite, Explicit, Ignore("OneOff Tasks")]
+    [Obsolete("Would think this is redundant if spinning up clean dbs for each test run")]
+    public class AdminTasks : OrmLiteProvidersTestBase
     {
+        public AdminTasks(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Clean_Database()
         {

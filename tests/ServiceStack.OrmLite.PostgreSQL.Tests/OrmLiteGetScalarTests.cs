@@ -1,15 +1,18 @@
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Tests;
 
-namespace ServiceStack.OrmLite.Tests
+namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
-    [TestFixture]
-    public class OrmLiteGetScalarTests:OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class OrmLiteGetScalarTests: OrmLiteProvidersTestBase
     {
-        public OrmLiteGetScalarTests() : base(Dialect.PostgreSql) { }
+        public OrmLiteGetScalarTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Test]
         public void Can_get_scalar_value(){

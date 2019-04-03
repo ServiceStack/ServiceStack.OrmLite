@@ -1,17 +1,18 @@
 ﻿using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
-using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class ConflictResolutionTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ConflictResolutionTests : OrmLiteProvidersTestBase
     {
-        //public ConflictResolutionTests() : base(Dialect.Sqlite) { }
-        //[SetUp] public void SetUp() => LogManager.LogFactory = new ConsoleLogFactory(debugEnabled:true);
-
+        public ConflictResolutionTests(Dialect dialect) : base(dialect)
+        {
+        }
+    
         [Test]
-        public void Can_change_conflict_resolutiion_with_Insert()
+        public void Can_change_conflict_resolution_with_Insert()
         {
             using (var db = OpenDbConnection())
             {
@@ -26,7 +27,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
-        public async Task Can_change_conflict_resolutiion_with_Insert_Async()
+        public async Task Can_change_conflict_resolution_with_Insert_Async()
         {
             using (var db = OpenDbConnection())
             {

@@ -4,14 +4,16 @@ using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class ExpressionVisitorTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ExpressionVisitorTests : OrmLiteProvidersTestBase
     {
+        public ExpressionVisitorTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         private IDbConnection Db;
 
         [SetUp]

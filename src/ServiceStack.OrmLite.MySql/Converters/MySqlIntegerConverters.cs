@@ -5,42 +5,27 @@ namespace ServiceStack.OrmLite.MySql.Converters
 {
     public abstract class MySqlIntegerConverter : IntegerConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "INT(11)"; }
-        }
+        public override string ColumnDefinition => "INT(11)";
     }
 
     public class MySqlByteConverter : MySqlIntegerConverter
     {
-        public override DbType DbType
-        {
-            get { return DbType.Byte; }
-        }
+        public override DbType DbType => DbType.Byte;
     }
 
     public class MySqlSByteConverter : MySqlIntegerConverter
     {
-        public override DbType DbType
-        {
-            get { return DbType.SByte; }
-        }
+        public override DbType DbType => DbType.SByte;
     }
 
     public class MySqlInt16Converter : MySqlIntegerConverter
     {
-        public override DbType DbType
-        {
-            get { return DbType.Int16; }
-        }
+        public override DbType DbType => DbType.Int16;
     }
 
     public class MySqlUInt16Converter : MySqlIntegerConverter
     {
-        public override DbType DbType
-        {
-            get { return DbType.UInt16; }
-        }
+        public override DbType DbType => DbType.UInt16;
     }
 
     public class MySqlInt32Converter : MySqlIntegerConverter
@@ -49,9 +34,6 @@ namespace ServiceStack.OrmLite.MySql.Converters
 
     public class MySqlUInt32Converter : MySqlIntegerConverter
     {
-        public override DbType DbType
-        {
-            get { return DbType.UInt32; }
-        }
+        public override DbType DbType => DbType.UInt32;
     }
 }

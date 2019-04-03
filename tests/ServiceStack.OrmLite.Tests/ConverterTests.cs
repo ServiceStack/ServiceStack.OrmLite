@@ -7,15 +7,19 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class ConverterTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ConverterTests : OrmLiteProvidersTestBase
     {
+        public ConverterTests(Dialect dialect) : base(dialect)
+        {
+        }
+   
         private struct TestStruct {}
 
         [Test]
         public void FromDbValue_does_not_throw_Exception()
         {
-            var dialectProvider = OrmLiteConfig.DialectProvider;
+            var dialectProvider = DialectProvider;
             var convertedValue = dialectProvider.FromDbValue(12345, typeof(TestStruct));
             Assert.That(convertedValue, Is.Null);
         }
@@ -26,7 +30,7 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = OpenDbConnection())
             {
                 if (Dialect == Dialect.Firebird) //Exceeds row limit
-                    db.GetDialectProvider().GetStringConverter().MaxColumnDefinition = "VARCHAR(4000)";
+                    DialectProvider.GetStringConverter().MaxColumnDefinition = "VARCHAR(4000)";
 
                 db.DropAndCreateTable<AllTypes>();
                 db.GetLastSql().Print();
@@ -77,7 +81,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(dbUpdatedRow, Is.EqualTo(lastUpdatedRow));
 
                 if (Dialect == Dialect.Firebird)
-                    db.GetDialectProvider().GetStringConverter().MaxColumnDefinition = null;
+                    DialectProvider.GetStringConverter().MaxColumnDefinition = null;
             }
         }
     }

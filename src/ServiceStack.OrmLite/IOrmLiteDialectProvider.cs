@@ -161,6 +161,7 @@ namespace ServiceStack.OrmLite
 
         string ToExecuteProcedureStatement(object objWithProperties);
 
+        string ToCreateSchemaStatement(string schema);
         string ToCreateTableStatement(Type tableType);
         string ToPostCreateTableStatement(ModelDefinition modelDef);
         string ToPostDropTableStatement(ModelDefinition modelDef);
@@ -170,7 +171,8 @@ namespace ServiceStack.OrmLite
         string ToCreateSequenceStatement(Type tableType, string sequenceName);
 
         List<string> SequenceList(Type tableType);
-
+        
+        bool DoesSchemaExist(IDbCommand dbCmd, string schema);
         bool DoesTableExist(IDbConnection db, string tableName, string schema = null);
         bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null);
         bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null);

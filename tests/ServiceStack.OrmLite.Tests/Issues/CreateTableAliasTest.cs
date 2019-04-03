@@ -37,9 +37,13 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public string ImageName { get; set; }
     }
 
-    [TestFixture]
-    public class CreateTableAliasTest : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class CreateTableAliasTest : OrmLiteProvidersTestBase
     {
+        public CreateTableAliasTest(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Can_Create_and_Select_from_table()
         {

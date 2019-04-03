@@ -33,7 +33,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
 
             if (!String.IsNullOrEmpty(postgreSqlDb))
             {
-                Config.PostgreSqlDb = postgreSqlDb;
+                TestConfig.PostgreSqlDb = postgreSqlDb;
             }
 
     	    CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");

@@ -17,15 +17,36 @@ namespace ServiceStack.OrmLite.MySql
             return new MySqlConnection(connectionString);
         }
 
-        public MySqlDialectProvider() : base()
+        public MySqlDialectProvider()
         {
-            base.RegisterConverter<DateTime>(new MySqlDateTimeConverter());
+            RegisterConverter<DateTime>(new MySqlDateTimeConverter());
         }
 
         public override IDbDataParameter CreateParam()
         {
             return new MySqlParameter();
         }
+    }
+    
+    public class MySql55DialectProvider : MySqlDialectProviderBase<MySqlDialectProvider>
+    {
+        public static MySql55DialectProvider Instance = new MySql55DialectProvider();
 
+        private const string TextColumnDefinition = "TEXT";
+
+        public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
+        {
+            return new MySqlConnection(connectionString);
+        }
+
+        public MySql55DialectProvider()
+        {
+            RegisterConverter<DateTime>(new MySql55DateTimeConverter());
+        }
+
+        public override IDbDataParameter CreateParam()
+        {
+            return new MySqlParameter();
+        }
     }
 }

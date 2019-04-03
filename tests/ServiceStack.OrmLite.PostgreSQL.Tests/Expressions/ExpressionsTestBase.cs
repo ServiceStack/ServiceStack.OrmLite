@@ -5,9 +5,11 @@ using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 {
-    public class ExpressionsTestBase : OrmLiteTestBase
+    public class ExpressionsTestBase : OrmLiteProvidersTestBase 
     {
-        public ExpressionsTestBase() : base(Dialect.PostgreSql) { }
+        public ExpressionsTestBase(Dialect dialect) : base(dialect)
+        {
+        }
 
         [SetUp]
         public void Setup()

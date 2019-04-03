@@ -1,5 +1,4 @@
-﻿using System.Data;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
@@ -37,27 +36,19 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
         public bool IsActive { get; set; }
     }
 
-    public class SqlServerComputedColumnIssue
+    [TestFixtureOrmLiteDialects(Dialect.AnySqlServer)]
+    public class SqlServerComputedColumnIssue : OrmLiteProvidersTestBase
     {
-        private IDbConnection db;
-
-        [OneTimeSetUp]
-        public void TestFixtureSetUp()
+        public SqlServerComputedColumnIssue(Dialect dialect) : base(dialect)
         {
-            OrmLiteConfig.DialectProvider = SqlServerDialect.Provider;
-            db = Config.SqlServerBuildDb.OpenDbConnection();
         }
-
-        [OneTimeTearDown]
-        public void TearDown()
-        {
-            db.Dispose();
-        }
-
+        
         private ComputeTest CreateTableAndGetRow()
         {
-            db.DropTable<ComputeTest>();
-            db.ExecuteSql(@"
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<ComputeTest>();
+                db.ExecuteSql(@"
 CREATE TABLE [dbo].[ComputeTest](
     [EmployeeId] [int] IDENTITY(1,1) NOT NULL,
     [FullName]  AS (concat(ltrim(rtrim([FirstName])),' ',ltrim(rtrim([LastName])))) PERSISTED NOT NULL,
@@ -71,90 +62,103 @@ CREATE TABLE [dbo].[ComputeTest](
 )WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON, FILLFACTOR = 80) ON [PRIMARY]
 ) ON [PRIMARY]");
 
-            var item = new ComputeTest
-            {
-                FirstName = "FirstName",
-                LastName = "LastName",
-                Username = "Username",
-                Password = "Password",
-                FullName = "Should be ignored",
-            };
-            return item;
+                var item = new ComputeTest
+                {
+                    FirstName = "FirstName",
+                    LastName = "LastName",
+                    Username = "Username",
+                    Password = "Password",
+                    FullName = "Should be ignored",
+                };
+                return item;
+            }
         }
 
         [Test]
         public void Can_Insert_and_Update_table_with_Computed_Column()
         {
-            var item = CreateTableAndGetRow();
+            using (var db = OpenDbConnection())
+            {
+                var item = CreateTableAndGetRow();
 
-            var id = db.Insert(item, selectIdentity: true);
+                var id = db.Insert(item, selectIdentity: true);
 
-            var row = db.LoadSingleById<ComputeTest>(id);
+                var row = db.LoadSingleById<ComputeTest>(id);
 
-            Assert.That(row.FirstName, Is.EqualTo("FirstName"));
-            Assert.That(row.FullName, Is.EqualTo("FirstName LastName"));
+                Assert.That(row.FirstName, Is.EqualTo("FirstName"));
+                Assert.That(row.FullName, Is.EqualTo("FirstName LastName"));
 
-            row.LastName = "Updated LastName";
-            db.Update(row);
+                row.LastName = "Updated LastName";
+                db.Update(row);
 
-            row = db.LoadSingleById<ComputeTest>(id);
+                row = db.LoadSingleById<ComputeTest>(id);
 
-            Assert.That(row.FirstName, Is.EqualTo("FirstName"));
-            Assert.That(row.FullName, Is.EqualTo("FirstName Updated LastName"));
+                Assert.That(row.FirstName, Is.EqualTo("FirstName"));
+                Assert.That(row.FullName, Is.EqualTo("FirstName Updated LastName"));
+            }
         }
 
         [Test]
         public async Task Can_Insert_and_Update_table_with_Computed_Column_async()
         {
-            var item = CreateTableAndGetRow();
+            using (var db = OpenDbConnection())
+            {
+                var item = CreateTableAndGetRow();
 
-            var row = await Create(item);
+                var row = await Create(item);
 
-            Assert.That(row.FirstName, Is.EqualTo("FirstName"));
-            Assert.That(row.FullName, Is.EqualTo("FirstName LastName"));
+                Assert.That(row.FirstName, Is.EqualTo("FirstName"));
+                Assert.That(row.FullName, Is.EqualTo("FirstName LastName"));
 
-            row.LastName = "Updated LastName";
-            row = await Create(row);
+                row.LastName = "Updated LastName";
+                row = await Create(row);
 
-            Assert.That(row.FirstName, Is.EqualTo("FirstName"));
-            Assert.That(row.FullName, Is.EqualTo("FirstName Updated LastName"));
+                Assert.That(row.FirstName, Is.EqualTo("FirstName"));
+                Assert.That(row.FullName, Is.EqualTo("FirstName Updated LastName"));
+            }
         }
 
         public virtual async Task<T> Create<T>(T obj) where T : IHasId<int>
         {
-            // if there is an id then INSERTS otherwise UPDATES
-            var id = obj.GetId().ConvertTo<long>();
+            using (var db = OpenDbConnection())
+            {
+                // if there is an id then INSERTS otherwise UPDATES
+                var id = obj.GetId().ConvertTo<long>();
 
-            if (id > 0)
-                db.Update(obj);
-            else
-                id = db.Insert(obj, true);
+                if (id > 0)
+                    db.Update(obj);
+                else
+                    id = db.Insert(obj, true);
 
-            // returns the object inserted or updated
-            return await db.LoadSingleByIdAsync<T>(id);
+                // returns the object inserted or updated
+                return await db.LoadSingleByIdAsync<T>(id);
+            }
         }
 
         [Test]
         public async Task LoadSelect_can_query_and_orderBy()
         {
-            db.DropAndCreateTable<TestExpression>();
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TestExpression>();
 
-            db.Insert(new TestExpression { AccountName = "Foo", IsActive = true });
-            db.Insert(new TestExpression { AccountName = "Bar", IsActive = false });
+                db.Insert(new TestExpression {AccountName = "Foo", IsActive = true});
+                db.Insert(new TestExpression {AccountName = "Bar", IsActive = false});
 
-            var rows = (await db.LoadSelectAsync<TestExpression>(x => x.IsActive))
-                .OrderBy(x => x.AccountName)
-                .ToList();
+                var rows = (await db.LoadSelectAsync<TestExpression>(x => x.IsActive))
+                    .OrderBy(x => x.AccountName)
+                    .ToList();
 
-            Assert.That(rows.Count, Is.EqualTo(1));
-            Assert.That(rows[0].AccountName, Is.EqualTo("Foo"));
+                Assert.That(rows.Count, Is.EqualTo(1));
+                Assert.That(rows[0].AccountName, Is.EqualTo("Foo"));
 
-            rows = await db.LoadSelectAsync(db.From<TestExpression>()
-                .Where(x => x.IsActive)
-                .OrderBy(x => x.AccountName));
+                rows = await db.LoadSelectAsync(db.From<TestExpression>()
+                    .Where(x => x.IsActive)
+                    .OrderBy(x => x.AccountName));
 
-            Assert.That(rows.Count, Is.EqualTo(1));
-            Assert.That(rows[0].AccountName, Is.EqualTo("Foo"));
+                Assert.That(rows.Count, Is.EqualTo(1));
+                Assert.That(rows[0].AccountName, Is.EqualTo("Foo"));
+            }
         }
     }
 }

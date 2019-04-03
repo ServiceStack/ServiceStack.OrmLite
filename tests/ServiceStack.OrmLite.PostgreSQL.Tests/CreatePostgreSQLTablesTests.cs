@@ -1,16 +1,18 @@
 ﻿using System;
+using Npgsql;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
-    [TestFixture]
-    public class CreatePostgreSQLTablesTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class CreatePostgreSQLTablesTests : OrmLiteProvidersTestBase
     {
-        public CreatePostgreSQLTablesTests() : base(Dialect.PostgreSql) { }
-        
+        public CreatePostgreSQLTablesTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void DropAndCreateTable_DropsTableAndCreatesTable()
         {
@@ -32,7 +34,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
             _reCreateTheTable();
 
             //all of these pass now:
-            var stringConverter = OrmLiteConfig.DialectProvider.GetStringConverter();
+            var stringConverter = DialectProvider.GetStringConverter();
             stringConverter.UseUnicode = true;
             _reCreateTheTable();
 
@@ -65,26 +67,30 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         [Test]
         public void can_create_same_table_in_multiple_schemas_based_on_conn_string_search_path()
         {
-            var builder = new Npgsql.NpgsqlConnectionStringBuilder(ConnectionString);
-            var schema1 = "schema_1";
-            var schema2 = "schema_2";
+            NpgsqlConnectionStringBuilder builder;
+            var schema1 = "postgres_schema_1";
+            var schema2 = "postgres_schema_2";   
             using (var db = OpenDbConnection())
             {
+                builder = new NpgsqlConnectionStringBuilder(db.ConnectionString);
                 CreateSchemaIfNotExists(db, schema1);
                 CreateSchemaIfNotExists(db, schema2);
+            
+                builder.SearchPath = schema1;
+                DbFactory.RegisterConnection(schema1, builder.ToString(), DialectProvider);
+                builder.SearchPath = schema2;
+                DbFactory.RegisterConnection(schema2, builder.ToString(), DialectProvider);
             }
 
-            builder.SearchPath = schema1;
-            using (var dbS1 = builder.ToString().OpenDbConnection())
+            using (var dbS1 = DbFactory.OpenDbConnection(schema1))
             {
                 dbS1.DropTable<CreatePostgreSQLTablesTests_dummy_table>();
                 dbS1.CreateTable<CreatePostgreSQLTablesTests_dummy_table>();
                 Assert.That(dbS1.Count<CreatePostgreSQLTablesTests_dummy_table>(), Is.EqualTo(0));
                 dbS1.DropTable<CreatePostgreSQLTablesTests_dummy_table>();
             }
-            builder.SearchPath = schema2;
 
-            using (var dbS2 = builder.ToString().OpenDbConnection())
+            using (var dbS2 = DbFactory.OpenDbConnection(schema2))
             {
                 dbS2.DropTable<CreatePostgreSQLTablesTests_dummy_table>();
                 dbS2.CreateTable<CreatePostgreSQLTablesTests_dummy_table>();

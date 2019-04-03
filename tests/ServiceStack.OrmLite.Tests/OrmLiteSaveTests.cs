@@ -6,10 +6,13 @@ using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrmLiteSaveTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteSaveTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteSaveTests(Dialect dialect) : base(dialect)
+        {
+        }
+
         [Test]
         public void Save_populates_AutoIncrementId()
         {

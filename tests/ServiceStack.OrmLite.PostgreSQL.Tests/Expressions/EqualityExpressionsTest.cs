@@ -1,9 +1,15 @@
 ﻿using NUnit.Framework;
+using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 {
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class EqualityExpressionsTest : ExpressionsTestBase
     {
+        public EqualityExpressionsTest(Dialect dialect) : base(dialect)
+        {
+        }
+
         #region int tests
 
         [Test]

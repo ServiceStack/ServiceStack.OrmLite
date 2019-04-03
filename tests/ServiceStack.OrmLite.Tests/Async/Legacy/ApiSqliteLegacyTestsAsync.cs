@@ -1,21 +1,22 @@
-﻿using System.Data;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Legacy;
 using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Async.Legacy
 {
-    public class ApiSqliteLegacyTestsAsync
-        : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.Sqlite)]
+    public class ApiSqliteLegacyTestsAsync : OrmLiteProvidersTestBase
     {
+        public ApiSqliteLegacyTestsAsync(Dialect dialect) : base(dialect)
+        {
+        }
+        
 #pragma warning disable 618
         [Test]
         public async Task API_Sqlite_Legacy_Examples_Async()
         {
-            if (Dialect != Dialect.Sqlite) return;
-
-            var db = CreateSqliteMemoryDbFactory().OpenDbConnection();
+            var db = OpenDbConnection();
             db.DropAndCreateTable<Person>();
             db.DropAndCreateTable<PersonWithAutoId>();
 
@@ -62,7 +63,7 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
             await db.ExistsFmtAsync<Person>("SELECT * FROM Person WHERE Age = {0}", 42);
             Assert.That(db.GetLastSql(), Is.EqualTo("SELECT * FROM Person WHERE Age = 42"));
 
-            var rowsAffected = await db.ExecuteNonQueryAsync("UPDATE Person SET LastName={0} WHERE Id={1}".SqlFmt("WaterHouse", 7));
+            var rowsAffected = await db.ExecuteNonQueryAsync("UPDATE Person SET LastName={0} WHERE Id={1}".SqlFmt(DialectProvider, "WaterHouse", 7));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE Person SET LastName='WaterHouse' WHERE Id=7"));
 
             await db.InsertOnlyAsync(new PersonWithAutoId { FirstName = "Amy", Age = 27 }, q => q.Insert(p => new { p.FirstName, p.Age }));
@@ -77,10 +78,10 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
             await db.UpdateOnlyAsync(new Person { FirstName = "JJ" }, q => q.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@FirstName WHERE (\"FirstName\" = @0)"));
 
-            await db.UpdateFmtAsync<Person>(set: "FirstName = {0}".SqlFmt("JJ"), where: "LastName = {0}".SqlFmt("Hendrix"));
+            await db.UpdateFmtAsync<Person>(set: "FirstName = {0}".SqlFmt(DialectProvider, "JJ"), where: "LastName = {0}".SqlFmt(DialectProvider, "Hendrix"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'"));
 
-            await db.UpdateFmtAsync(table: "Person", set: "FirstName = {0}".SqlFmt("JJ"), where: "LastName = {0}".SqlFmt("Hendrix"));
+            await db.UpdateFmtAsync(table: "Person", set: "FirstName = {0}".SqlFmt(DialectProvider, "JJ"), where: "LastName = {0}".SqlFmt(DialectProvider, "Hendrix"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'"));
 
             await db.DeleteFmtAsync<Person>("Age = {0}", 27);
@@ -92,10 +93,10 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
             await db.DeleteAsync<Person>(q => q.Where(p => p.Age == 27));
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE (\"Age\" = @0)"));
 
-            await db.DeleteFmtAsync<Person>(where: "Age = {0}".SqlFmt(27));
+            await db.DeleteFmtAsync<Person>(where: "Age = {0}".SqlFmt(DialectProvider, 27));
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE Age = 27"));
 
-            await db.DeleteFmtAsync(table: "Person", where: "Age = {0}".SqlFmt(27));
+            await db.DeleteFmtAsync(table: "Person", where: "Age = {0}".SqlFmt(DialectProvider, 27));
             Assert.That(db.GetLastSql(), Is.EqualTo("DELETE FROM \"Person\" WHERE Age = 27"));
 
             db.Dispose();

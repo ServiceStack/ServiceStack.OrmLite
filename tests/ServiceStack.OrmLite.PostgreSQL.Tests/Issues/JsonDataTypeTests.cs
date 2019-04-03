@@ -8,17 +8,17 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests.Issues
 {
-    [TestFixture]
-    public class JsonDataTypeTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class JsonDataTypeTests : OrmLiteProvidersTestBase
     {
-        public JsonDataTypeTests() : base(Dialect.PostgreSql)
+        public JsonDataTypeTests(Dialect dialect) : base(dialect)
         {
         }
-        
+
         [Test]
         public void Can_save_and_restore_JSON_property()
         {
-            using (new TemporaryNamingStrategy(new OrmLiteNamingStrategyBase()))
+            using (new TemporaryNamingStrategy(DialectProvider, new OrmLiteNamingStrategyBase()))
             {
                 var item = new LicenseCheckTemp
                 {

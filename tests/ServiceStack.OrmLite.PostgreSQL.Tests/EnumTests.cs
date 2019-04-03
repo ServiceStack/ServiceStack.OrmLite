@@ -5,9 +5,12 @@ using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests
 {
-    public class EnumTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
+    public class EnumTests : OrmLiteProvidersTestBase
     {
-        public EnumTests() : base(Dialect.PostgreSql) { }
+        public EnumTests(Dialect dialect) : base(dialect)
+        {
+        }
 
         [Test]
         public void CanCreateTable()

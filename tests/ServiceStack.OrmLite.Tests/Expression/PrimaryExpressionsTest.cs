@@ -2,8 +2,13 @@
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
+    [TestFixtureOrmLite]
     public class PrimaryExpressionsTest : ExpressionsTestBase
     {
+        public PrimaryExpressionsTest(Dialect dialect) : base(dialect)
+        {
+        }
+
         private static class TestClass
         {
             public static int StaticProperty { get { return 12; } }

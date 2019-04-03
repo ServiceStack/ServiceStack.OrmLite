@@ -2,19 +2,20 @@
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    [TestFixture]
-    public class ExpressionChainingUseCase: OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ExpressionChainingUseCase: OrmLiteProvidersTestBase
     {
+        public ExpressionChainingUseCase(Dialect dialect) : base(dialect)
+        {
+        }
+
         [SetUp]
         public void SetUp()
         {
-            LogManager.LogFactory = new ConsoleLogFactory();
-
             db = OpenDbConnection();
             db.CreateTable<Person>(overwrite: true);
 
@@ -48,7 +49,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             public override string ToString()
             {
-                return string.Format("Id: {0}, FirstName: {1}, LastName: {2}, Age: {3}", Id, FirstName, LastName, Age);
+                return $"Id: {Id}, FirstName: {FirstName}, LastName: {LastName}, Age: {Age}";
             }
         }
 

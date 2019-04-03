@@ -2,13 +2,11 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
 	[TestFixture]
-	public class SqlFormatTests
-		: OrmLiteTestBase
+	public class SqlFormatTests 
 	{
 		[Test]
 		public void SqlJoin_joins_int_ids()
@@ -28,7 +26,7 @@ namespace ServiceStack.OrmLite.Tests
 		public void SqlFormat_can_handle_null_args()
 		{
 			const string sql = "SELECT Id FROM FOO WHERE Bar = {0}";
-			var sqlFormat = sql.SqlFmt(1, null);
+			var sqlFormat = sql.SqlFmt(SqliteDialect.Provider, 1, null);
 
 			Assert.That(sqlFormat, Is.EqualTo("SELECT Id FROM FOO WHERE Bar = 1"));
 		}

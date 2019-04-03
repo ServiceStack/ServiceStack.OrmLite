@@ -1,9 +1,15 @@
 ﻿using NUnit.Framework;
+using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
 {
+    [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class LogicalExpressionsTest : ExpressionsTestBase
     {
+        public LogicalExpressionsTest(Dialect dialect) : base(dialect)
+        {
+        }
+
         #region constants
 
         // Unlikely 
