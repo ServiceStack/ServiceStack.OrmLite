@@ -167,57 +167,101 @@ namespace ServiceStack.OrmLite.Tests
 #endif
             return dbFactory;
         }
-
+        
         private void InitDbScripts(OrmLiteConnectionFactory dbFactory)
         {
             // POSTGRESQL specific init
             // enable postgres uuid extension for all test db's
             var pgInit = @"CREATE EXTENSION IF NOT EXISTS ""uuid-ossp""";
-            using (var pg9 = dbFactory.OpenDbConnection(Dialect.PostgreSql9.ToString()))
-            using (var pg10 = dbFactory.OpenDbConnection(Dialect.PostgreSql10.ToString()))
-            using (var pg11 = dbFactory.OpenDbConnection(Dialect.PostgreSql11.ToString()))
-            {
-                pg9.ExecuteSql(pgInit);
-                pg10.ExecuteSql(pgInit);
-                pg11.ExecuteSql(pgInit);
-            }
-            
-            // Create separate Db's for MySqlConnector
-            using (var db = dbFactory.OpenDbConnection(Dialect.MySql10_1.ToString()))
-            {
-                db.ExecuteSql("CREATE DATABASE IF NOT EXISTS `testMySql`");
-                
-                dbFactory.RegisterConnection(Dialect.MySqlConnector.ToString(), TestConfig.MySqlDb_10_1, MySqlConnectorDialect.Provider);
 
+            OrmLiteConnectionFactory getFactory(Dialect dialect) => OrmLiteConnectionFactory.NamedConnections[dialect.ToString()];
+            try
+            {
+                using (var pg9 = getFactory(Dialect.PostgreSql9).OpenDbConnectionString($"{TestConfig.PostgresDb_9};Timeout=1"))
+                    pg9.ExecuteSql(pgInit);
             }
-            
+            catch
+            {
+                // no db available
+            }
+
+            try
+            {
+                using (var pg10 = getFactory(Dialect.PostgreSql10).OpenDbConnectionString($"{TestConfig.PostgresDb_10};Timeout=1"))
+                    pg10.ExecuteSql(pgInit);
+            }
+            catch
+            {
+                // no db available
+            }
+
+            try
+            {
+                using (var pg11 = getFactory(Dialect.PostgreSql11).OpenDbConnectionString($"{TestConfig.PostgresDb_11};Timeout=1"))
+                    pg11.ExecuteSql(pgInit);
+            }
+            catch
+            {
+                // no db available
+            }
+
+            try
+            {
+                // Create separate Db's for MySqlConnector
+                using (var db = getFactory(Dialect.MySql10_1).OpenDbConnectionString($"{TestConfig.MariaDb_10_1};Connection Timeout=1"))
+                {
+                    db.ExecuteSql("CREATE DATABASE IF NOT EXISTS `testMySql`");
+                    dbFactory.RegisterConnection(Dialect.MySqlConnector.ToString(), TestConfig.MySqlDb_10_1,
+                        MySqlConnectorDialect.Provider);
+                }
+            }
+            catch
+            {
+                // no db available
+            }
+
             // SQLSERVER specific init
             // for sql create unique db per fixture to avoid conflicts when testing dialects
-            // uses COMPATABILITY_LEVEL set to each version  
-            using (var db = dbFactory.OpenDbConnection(Dialect.SqlServer.ToString()))
+            // uses COMPATABILITY_LEVEL set to each version 
+            try
             {
-                var versions = new (string DbName, IOrmLiteDialectProvider Provider, int CompatabilityLevel)[]
+                using (var db = getFactory(Dialect.SqlServer)
+                    .OpenDbConnectionString($"{TestConfig.SqlServerBuildDb};Connection Timeout=1"))
                 {
-                    (Dialect.SqlServer2008.ToString(), SqlServer2008Dialect.Provider, 100),
-                    (Dialect.SqlServer2012.ToString(), SqlServer2012Dialect.Provider, 110),
-                    (Dialect.SqlServer2014.ToString(), SqlServer2014Dialect.Provider, 120),
-                    (Dialect.SqlServer2016.ToString(), SqlServer2016Dialect.Provider, 130),
-                    (Dialect.SqlServer2017.ToString(), SqlServer2017Dialect.Provider, 140),
-                };
+                    var versions = new (string DbName, IOrmLiteDialectProvider Provider, int CompatabilityLevel)[]
+                    {
+                        (Dialect.SqlServer2008.ToString(), SqlServer2008Dialect.Provider, 100),
+                        (Dialect.SqlServer2012.ToString(), SqlServer2012Dialect.Provider, 110),
+                        (Dialect.SqlServer2014.ToString(), SqlServer2014Dialect.Provider, 120),
+                        (Dialect.SqlServer2016.ToString(), SqlServer2016Dialect.Provider, 130),
+                        (Dialect.SqlServer2017.ToString(), SqlServer2017Dialect.Provider, 140),
+                    };
 
-                var connStr = new SqlConnectionStringBuilder(TestConfig.SqlServerBuildDb);
-                foreach (var version in versions)
-                {
-                    var createSqlDb = $@"If(db_id(N'{version.DbName}') IS NULL)
+                    var connStr = new SqlConnectionStringBuilder($"{TestConfig.SqlServerBuildDb};Connection Timeout=1");
+                    foreach (var version in versions)
+                    {
+                        try
+                        {
+                            var createSqlDb = $@"If(db_id(N'{version.DbName}') IS NULL)
   BEGIN
   CREATE DATABASE {version.DbName};
   ALTER DATABASE {version.DbName} SET COMPATIBILITY_LEVEL = {version.CompatabilityLevel};
   END";
-                    connStr.InitialCatalog = version.DbName;
-                    db.ExecuteSql(createSqlDb);
+                            connStr.InitialCatalog = version.DbName;
+                            db.ExecuteSql(createSqlDb);
 
-                    dbFactory.RegisterConnection(version.DbName, connStr.ToString(), version.Provider);
+                            dbFactory.RegisterConnection(version.DbName, connStr.ToString(), version.Provider);
+                        }
+                        catch
+                        {
+                            // no db available
+                        }
+                    }
                 }
+            }
+            catch
+            {
+                // no db available
             }
         }
     }

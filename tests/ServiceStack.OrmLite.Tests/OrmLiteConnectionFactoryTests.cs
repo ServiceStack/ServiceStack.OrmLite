@@ -81,7 +81,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_open_multiple_nested_connections()
         {
             var factory = new OrmLiteConnectionFactory(TestConfig.SqliteMemoryDb, SqliteDialect.Provider);
-            factory.RegisterConnection("sqlserver", TestConfig.SqlServerBuildDb, SqlServerDialect.Provider);
+            factory.RegisterConnection("sqlserver", $"{TestConfig.SqlServerBuildDb};Connection Timeout=1", SqlServerDialect.Provider);
             factory.RegisterConnection("sqlite-file", TestConfig.SqliteFileDb, SqliteDialect.Provider);
 
             var results = new List<Person>();
@@ -119,7 +119,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_open_multiple_nested_connections_in_any_order()
         {
             var factory = new OrmLiteConnectionFactory(TestConfig.SqliteMemoryDb, SqliteDialect.Provider);
-            factory.RegisterConnection("sqlserver", TestConfig.SqlServerBuildDb, SqlServerDialect.Provider);
+            factory.RegisterConnection("sqlserver", $"{TestConfig.SqlServerBuildDb};Connection Timeout=1", SqlServerDialect.Provider);
             factory.RegisterConnection("sqlite-file", TestConfig.SqliteFileDb, SqliteDialect.Provider);
 
             var results = new List<Person>();
@@ -191,7 +191,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_register_ConnectionFilter_on_named_connections()
         {
             var factory = new OrmLiteConnectionFactory(TestConfig.SqliteMemoryDb, SqliteDialect.Provider);
-            factory.RegisterConnection("sqlserver", TestConfig.SqlServerBuildDb, SqlServerDialect.Provider);
+            factory.RegisterConnection("sqlserver", $"{TestConfig.SqlServerBuildDb};Connection Timeout=1", SqlServerDialect.Provider);
             factory.RegisterConnection("sqlite-file", TestConfig.SqliteFileDb, SqliteDialect.Provider);
 
             int filterCount = 0;
