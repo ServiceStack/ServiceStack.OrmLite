@@ -16,9 +16,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class PostgreSqlDataTypesTests : OrmLiteProvidersTestBase
     {
-        public PostgreSqlDataTypesTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public PostgreSqlDataTypesTests(Dialect dialect) : base(dialect) {}
 
         [OneTimeSetUp] 
         public void OneTimeSetup()

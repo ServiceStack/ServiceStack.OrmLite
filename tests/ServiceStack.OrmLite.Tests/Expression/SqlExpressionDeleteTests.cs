@@ -12,9 +12,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class SqlExpressionDeleteTests : OrmLiteProvidersTestBase
     {
-        public SqlExpressionDeleteTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SqlExpressionDeleteTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_delete_entity_with_join_expression()

@@ -12,9 +12,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class OrmLiteCountTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteCountTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public OrmLiteCountTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void CanDoCountWithInterface()

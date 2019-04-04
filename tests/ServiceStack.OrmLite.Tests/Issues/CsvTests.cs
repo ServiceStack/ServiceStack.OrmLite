@@ -9,9 +9,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class CsvTests : OrmLiteProvidersTestBase
     {
-        public CsvTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public CsvTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_serialize_Dapper_results_to_CSV()

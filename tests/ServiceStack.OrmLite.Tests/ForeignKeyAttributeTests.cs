@@ -6,9 +6,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class ForeignKeyAttributeTests : OrmLiteProvidersTestBase
     {
-        public ForeignKeyAttributeTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public ForeignKeyAttributeTests(Dialect dialect) : base(dialect) {}
 
         [OneTimeSetUp]
         public void Setup()

@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteCreateTableWithNamingStrategyTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteCreateTableWithNamingStrategyTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public OrmLiteCreateTableWithNamingStrategyTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_create_TableWithNamingStrategy_table_prefix()

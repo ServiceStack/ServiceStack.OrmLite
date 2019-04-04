@@ -13,9 +13,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteComplexTypesTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteComplexTypesTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public OrmLiteComplexTypesTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_insert_into_ModelWithComplexTypes_table()

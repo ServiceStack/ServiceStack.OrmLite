@@ -6,9 +6,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class GeneratedSqlIssues : OrmLiteProvidersTestBase
     {
-        public GeneratedSqlIssues(Dialect dialect) : base(dialect)
-        {
-        }
+        public GeneratedSqlIssues(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Does_generate_valid_sql_when_param_contains_dollar_char()

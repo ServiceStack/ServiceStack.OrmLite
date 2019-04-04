@@ -6,9 +6,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class SqlExpressionFilterTests : OrmLiteProvidersTestBase
     {
-        public SqlExpressionFilterTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SqlExpressionFilterTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_enhance_SqlExpression_with_Custom_SqlFilter()

@@ -7,9 +7,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class JsonUpdateOnlyIssue : OrmLiteProvidersTestBase
     {
-        public JsonUpdateOnlyIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public JsonUpdateOnlyIssue(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_Update_Answer_CustomField_json()

@@ -6,18 +6,10 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class LogicalExpressionsTest : ExpressionsTestBase
     {
-        public LogicalExpressionsTest(Dialect dialect) : base(dialect)
-        {
-        }
-
-        #region constants
+        public LogicalExpressionsTest(Dialect dialect) : base(dialect) {}
 
         // Unlikely 
         // OpenDbConnection().Select<TestType>(q => q.BoolColumn == (true & false));
-
-        #endregion
-
-        #region variables
 
         [Test]
         public void Can_select_logical_and_variable_expression()
@@ -100,10 +92,6 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
             }
         }
 
-        #endregion
-
-        #region method
-
         [Test]
         public void Can_select_logical_and_method_expression()
         {
@@ -169,7 +157,5 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
                 CollectionAssert.Contains(actual, expected);
             }
         }
-
-        #endregion
     }
 }

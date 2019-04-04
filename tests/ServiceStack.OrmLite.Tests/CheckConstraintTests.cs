@@ -21,9 +21,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class CheckConstraintTests : OrmLiteProvidersTestBase
     {
-        public CheckConstraintTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public CheckConstraintTests(Dialect dialect) : base(dialect) {}
         
         [Test]
         [IgnoreDialect(Dialect.MySql5_5 | Dialect.MySql10_1, "Check constraints supported from MariaDb 10.2.1 onwards")]

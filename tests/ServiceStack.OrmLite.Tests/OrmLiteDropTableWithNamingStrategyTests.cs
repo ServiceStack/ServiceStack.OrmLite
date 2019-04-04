@@ -6,9 +6,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteDropTableWithNamingStrategyTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteDropTableWithNamingStrategyTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public OrmLiteDropTableWithNamingStrategyTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_drop_TableWithNamingStrategy_table_prefix()

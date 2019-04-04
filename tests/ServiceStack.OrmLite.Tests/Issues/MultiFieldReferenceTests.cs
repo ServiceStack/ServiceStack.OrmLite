@@ -65,9 +65,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class MultiFieldReferenceTests : OrmLiteProvidersTestBase
     {
-        public MultiFieldReferenceTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public MultiFieldReferenceTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Does_select_correct_reference_field()

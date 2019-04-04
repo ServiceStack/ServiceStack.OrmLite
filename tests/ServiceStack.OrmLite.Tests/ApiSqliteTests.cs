@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLiteDialects(Dialect.Sqlite)]
     public class ApiSqliteTests : OrmLiteProvidersTestBase
     {
-        public ApiSqliteTests(Dialect dialect) : base(dialect)
-        {   
-        }
+        public ApiSqliteTests(Dialect dialect) : base(dialect) {}
         
         [Test]
         public void API_Sqlite_Examples()

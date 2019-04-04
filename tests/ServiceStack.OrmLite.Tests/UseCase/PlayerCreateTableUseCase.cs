@@ -119,9 +119,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     [TestFixtureOrmLite]
     public class PlayerCreateTableUseCase : OrmLiteProvidersTestBase
     {
-        public PlayerCreateTableUseCase(Dialect dialect) : base(dialect)
-        {
-        }
+        public PlayerCreateTableUseCase(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_Create_Player_Tables_and_Save_Data()

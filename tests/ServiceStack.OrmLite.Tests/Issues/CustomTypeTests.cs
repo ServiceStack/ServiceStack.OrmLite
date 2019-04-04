@@ -7,9 +7,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class CustomTypeTests : OrmLiteProvidersTestBase
     {
-        public CustomTypeTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public CustomTypeTests(Dialect dialect) : base(dialect) {}
 
         public class PocoWithCustomTypes
         {

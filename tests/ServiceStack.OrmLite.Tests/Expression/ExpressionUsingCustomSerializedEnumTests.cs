@@ -34,9 +34,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class ExpressionUsingCustomSerializedEnumTests : ExpressionsTestBase
     {
-        public ExpressionUsingCustomSerializedEnumTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public ExpressionUsingCustomSerializedEnumTests(Dialect dialect) : base(dialect) {}
 
         [TestCase(0)]
         [TestCase(1)]

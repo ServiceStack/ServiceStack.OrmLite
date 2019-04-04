@@ -30,9 +30,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class SoftDeleteTests : OrmLiteProvidersTestBase
     {
-        public SoftDeleteTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SoftDeleteTests(Dialect dialect) : base(dialect) {}
 
         private static void InitData(IDbConnection db)
         {

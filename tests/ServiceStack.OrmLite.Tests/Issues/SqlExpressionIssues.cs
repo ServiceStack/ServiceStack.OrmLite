@@ -6,9 +6,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class SqlExpressionIssues : OrmLiteProvidersTestBase
     {
-        public SqlExpressionIssues(Dialect dialect) : base(dialect)
-        {
-        }
+        public SqlExpressionIssues(Dialect dialect) : base(dialect) {}
 
         public class MetadataEntity
         {

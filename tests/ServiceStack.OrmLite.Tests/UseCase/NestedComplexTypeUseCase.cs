@@ -7,9 +7,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     [TestFixtureOrmLite]
     public class NestedComplexTypeUseCase : OrmLiteProvidersTestBase
     {
-        public NestedComplexTypeUseCase(Dialect dialect) : base(dialect)
-        {
-        }
+        public NestedComplexTypeUseCase(Dialect dialect) : base(dialect) {}
 
         public class Location
         {

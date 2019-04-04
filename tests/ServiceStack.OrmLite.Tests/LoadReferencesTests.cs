@@ -184,9 +184,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class LoadReferencesTests : OrmLiteProvidersTestBase
     {
-        public LoadReferencesTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public LoadReferencesTests(Dialect dialect) : base(dialect) {}
 
         private IDbConnection db;
 

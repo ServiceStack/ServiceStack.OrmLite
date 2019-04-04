@@ -5,9 +5,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class NullReferenceIssues : OrmLiteProvidersTestBase
     {
-        public NullReferenceIssues(Dialect dialect) : base(dialect)
-        {
-        }
+        public NullReferenceIssues(Dialect dialect) : base(dialect) {}
 
         public class Foo
         {

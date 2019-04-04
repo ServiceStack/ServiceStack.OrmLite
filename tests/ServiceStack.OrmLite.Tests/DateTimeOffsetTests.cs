@@ -9,9 +9,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class DateTimeOffsetTests : OrmLiteProvidersTestBase
     {
-        public DateTimeOffsetTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public DateTimeOffsetTests(Dialect dialect) : base(dialect) {}
         
         private IDbConnection db;
 

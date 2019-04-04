@@ -9,9 +9,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class MultiColumnOrderByDescending : OrmLiteProvidersTestBase
     {
-        public MultiColumnOrderByDescending(Dialect dialect) : base(dialect)
-        {
-        }
+        public MultiColumnOrderByDescending(Dialect dialect) : base(dialect) {}
 
         private List<Person> _people;
 

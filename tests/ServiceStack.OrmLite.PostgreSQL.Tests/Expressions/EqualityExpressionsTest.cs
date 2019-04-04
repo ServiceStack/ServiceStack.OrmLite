@@ -6,11 +6,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class EqualityExpressionsTest : ExpressionsTestBase
     {
-        public EqualityExpressionsTest(Dialect dialect) : base(dialect)
-        {
-        }
-
-        #region int tests
+        public EqualityExpressionsTest(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_select_equals_constant_int_expression()
@@ -149,10 +145,6 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
             }
         }
 
-        #endregion
-
-        #region bool test
-
         [Test]
         public void Can_select_equals_constant_bool_expression()
         {
@@ -250,7 +242,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
         }
 
         [Test]
-        public void Can_select_equals_null_espression()
+        public void Can_select_equals_null_expression()
         {
             var expected = new TestType()
             {
@@ -273,7 +265,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
         }
 
         [Test]
-        public void Can_select_not_equals_null_espression()
+        public void Can_select_not_equals_null_expression()
         {
             var expected = new TestType()
             {
@@ -294,8 +286,5 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
                 CollectionAssert.Contains(actual, expected);
             }
         }
-
-        // Assume not equal works ;-)
-        #endregion
     }
 }

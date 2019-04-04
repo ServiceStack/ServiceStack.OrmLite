@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class JoinBoolSqlServerIssue : OrmLiteProvidersTestBase
     {
-        public JoinBoolSqlServerIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public JoinBoolSqlServerIssue(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_Join_on_bool()

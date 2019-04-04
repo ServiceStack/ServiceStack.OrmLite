@@ -10,9 +10,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class LoadSelectIssue : OrmLiteProvidersTestBase
     {
-        public LoadSelectIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public LoadSelectIssue(Dialect dialect) : base(dialect) {}
 
         public class PlayerEquipment
         {

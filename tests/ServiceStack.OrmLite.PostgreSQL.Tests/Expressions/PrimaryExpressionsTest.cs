@@ -6,9 +6,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class PrimaryExpressionsTest : ExpressionsTestBase
     {
-        public PrimaryExpressionsTest(Dialect dialect) : base(dialect)
-        {
-        }
+        public PrimaryExpressionsTest(Dialect dialect) : base(dialect) {}
 
         private static class TestClass
         {

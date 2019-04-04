@@ -7,9 +7,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite, SetUICulture("vi-VN"), SetCulture("vi-VN")]
     public class LocalizationTests : OrmLiteProvidersTestBase
     {
-        public LocalizationTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public LocalizationTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_query_using_float_in_alternate_culture()

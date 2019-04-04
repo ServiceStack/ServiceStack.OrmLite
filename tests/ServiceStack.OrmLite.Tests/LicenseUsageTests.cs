@@ -90,9 +90,7 @@ namespace ServiceStack.OrmLite.Tests
 
     public abstract class LicenseUsageTests : OrmLiteProvidersTestBase
     {
-        protected LicenseUsageTests(Dialect dialect) : base(dialect)
-        {
-        }
+        protected LicenseUsageTests(Dialect dialect) : base(dialect) {}
 
         protected IDbConnection db;
 

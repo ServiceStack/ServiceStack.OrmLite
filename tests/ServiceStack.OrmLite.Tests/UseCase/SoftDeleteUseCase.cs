@@ -37,9 +37,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     [TestFixtureOrmLite]
     public class SoftDeleteUseCase : OrmLiteProvidersTestBase
     {
-        public SoftDeleteUseCase(Dialect dialect) : base(dialect)
-        {
-        }
+        public SoftDeleteUseCase(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_add_generic_soft_delete_filter_to_SqlExpression()

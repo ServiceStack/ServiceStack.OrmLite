@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class SelectFieldExpressionTests : OrmLiteProvidersTestBase
     {
-        public SelectFieldExpressionTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SelectFieldExpressionTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_Select_Substring()

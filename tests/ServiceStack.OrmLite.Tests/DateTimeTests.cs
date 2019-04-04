@@ -10,9 +10,7 @@ namespace ServiceStack.OrmLite.Tests
     [NonParallelizable]
     public class DateTimeTests : OrmLiteProvidersTestBase
     {
-        public DateTimeTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public DateTimeTests(Dialect dialect) : base(dialect) {}
         
         [Test]
         public void Can_insert_and_query_with_Unspecified_DateStyle()

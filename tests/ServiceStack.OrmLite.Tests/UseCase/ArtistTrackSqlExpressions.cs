@@ -9,9 +9,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
     public class ArtistTrackSqlExpressions : OrmLiteProvidersTestBase
     {
-        public ArtistTrackSqlExpressions(Dialect dialect) : base(dialect)
-        {
-        }
+        public ArtistTrackSqlExpressions(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_OrderBy_Column_Index()

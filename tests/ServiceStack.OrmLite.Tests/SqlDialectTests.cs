@@ -16,9 +16,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
     public class SqlDialectTests : OrmLiteProvidersTestBase
     {
-        public SqlDialectTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SqlDialectTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Does_concat_values()

@@ -27,9 +27,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class ComplexJoinWithAlias : OrmLiteProvidersTestBase
     {
-        public ComplexJoinWithAlias(Dialect dialect) : base(dialect)
-        {
-        }
+        public ComplexJoinWithAlias(Dialect dialect) : base(dialect) {}
 
         private static long _classAColumnAId;
 

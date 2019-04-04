@@ -9,9 +9,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteGetScalarTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteGetScalarTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public OrmLiteGetScalarTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_get_scalar_value()

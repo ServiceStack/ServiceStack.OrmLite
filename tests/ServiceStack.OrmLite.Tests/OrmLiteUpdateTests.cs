@@ -14,9 +14,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteUpdateTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteUpdateTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public OrmLiteUpdateTests(Dialect dialect) : base(dialect) {}
 
         private ModelWithFieldsOfDifferentTypes CreateModelWithFieldsOfDifferentTypes(IDbConnection db)
         {

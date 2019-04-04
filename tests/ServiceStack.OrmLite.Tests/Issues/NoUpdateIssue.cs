@@ -23,9 +23,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
     public class NoUpdateIssue : OrmLiteProvidersTestBase
     {
-        public NoUpdateIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public NoUpdateIssue(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Does_update_record()

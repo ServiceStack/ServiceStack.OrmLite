@@ -6,11 +6,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class UnaryExpressionsTest : ExpressionsTestBase
     {
-        public UnaryExpressionsTest(Dialect dialect) : base(dialect)
-        {
-        }
-
-        #region constants
+        public UnaryExpressionsTest(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_select_unary_plus_constant_expression()
@@ -99,10 +95,6 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
                 CollectionAssert.Contains(actual, expected);
             }
         }
-
-        #endregion
-
-        #region variables
 
         [Test]
         public void Can_select_unary_plus_variable_expression()
@@ -208,10 +200,6 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
             }
         }
 
-        #endregion
-
-        #region method
-
         [Test]
         public void Can_select_unary_not_method_expression()
         {
@@ -255,7 +243,5 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
                 CollectionAssert.Contains(actual, expected);
             }
         }
-
-        #endregion
     }
 }

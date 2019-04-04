@@ -37,9 +37,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class BelongsToIssue : OrmLiteProvidersTestBase
     {
-        public BelongsToIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public BelongsToIssue(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Does_use_BelongsTo_to_specify_Attribute()

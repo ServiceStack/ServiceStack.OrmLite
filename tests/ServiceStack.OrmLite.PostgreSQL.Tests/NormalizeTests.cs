@@ -15,9 +15,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     class NormalizeTests : OrmLiteProvidersTestBase
     {
-        public NormalizeTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public NormalizeTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_create_and_populate_tables_without_quotes()

@@ -7,9 +7,7 @@ namespace ServiceStack.OrmLite.Tests
     [Obsolete("Would think this is redundant if spinning up clean dbs for each test run")]
     public class AdminTasks : OrmLiteProvidersTestBase
     {
-        public AdminTasks(Dialect dialect) : base(dialect)
-        {
-        }
+        public AdminTasks(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Clean_Database()

@@ -48,9 +48,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class LoadSelectResultFilterIssue : OrmLiteProvidersTestBase
     {
-        public LoadSelectResultFilterIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public LoadSelectResultFilterIssue(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_use_results_filter_in_LoadSelect()

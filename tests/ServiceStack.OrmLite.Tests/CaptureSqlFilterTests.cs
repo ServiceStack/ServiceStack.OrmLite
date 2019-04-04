@@ -9,9 +9,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class CaptureSqlFilterTests : OrmLiteProvidersTestBase
     {
-        public CaptureSqlFilterTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public CaptureSqlFilterTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_capture_each_type_of_API()

@@ -25,9 +25,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class SqlExpressionSubSqlExpressionIssue : OrmLiteProvidersTestBase
     {
-        public SqlExpressionSubSqlExpressionIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public SqlExpressionSubSqlExpressionIssue(Dialect dialect) : base(dialect) {}
 
         private static void RecreateAnyObjectTables(IDbConnection db)
         {

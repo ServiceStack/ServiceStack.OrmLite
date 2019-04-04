@@ -10,9 +10,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class MultipleSelfJoinsWithJoinAliases : OrmLiteProvidersTestBase
     {
-        public MultipleSelfJoinsWithJoinAliases(Dialect dialect) : base(dialect)
-        {
-        }
+        public MultipleSelfJoinsWithJoinAliases(Dialect dialect) : base(dialect) {}
 
         private static Sale PopulateData(IDbConnection db, Guid tenantId)
         {

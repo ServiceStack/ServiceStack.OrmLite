@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class SqlExpressionJoinTests : ExpressionsTestBase
     {
-        public SqlExpressionJoinTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SqlExpressionJoinTests(Dialect dialect) : base(dialect) {}
 
         public class TableA
         {

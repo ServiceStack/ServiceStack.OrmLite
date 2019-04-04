@@ -12,9 +12,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class MergeParamsIssue : OrmLiteProvidersTestBase
     {
-        public MergeParamsIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public MergeParamsIssue(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Does_merge_params_correctly()

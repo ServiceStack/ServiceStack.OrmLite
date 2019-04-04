@@ -13,9 +13,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class AdhocJoinIssue : OrmLiteProvidersTestBase
     {
-        public AdhocJoinIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public AdhocJoinIssue(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_run_LRA_Query()

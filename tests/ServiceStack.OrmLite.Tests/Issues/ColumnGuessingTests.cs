@@ -6,9 +6,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class ColumnGuessingTests : OrmLiteProvidersTestBase
     {
-        public ColumnGuessingTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public ColumnGuessingTests(Dialect dialect) : base(dialect) {}
 
         private class Person
         {

@@ -24,9 +24,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class EnumTests : OrmLiteProvidersTestBase
     {
-        public EnumTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public EnumTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         [IgnoreDialect(Dialect.AnyMySql, "Blob columns can't have a default value. https://stackoverflow.com/a/4553664/85785")]

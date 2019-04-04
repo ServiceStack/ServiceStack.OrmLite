@@ -7,9 +7,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class SelectParamTests : OrmLiteProvidersTestBase
     {
-        public SelectParamTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SelectParamTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_Select_with_Different_APIs()

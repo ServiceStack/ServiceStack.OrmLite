@@ -34,9 +34,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class DynamicDataIssue : OrmLiteProvidersTestBase
     {
-        public DynamicDataIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public DynamicDataIssue(Dialect dialect) : base(dialect) {}
 
         private static void InitTables(IDbConnection db)
         {

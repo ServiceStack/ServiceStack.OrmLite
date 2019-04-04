@@ -7,9 +7,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class DbExtensionTests : OrmLiteProvidersTestBase
     {
-        public DbExtensionTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public DbExtensionTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_get_TableName()

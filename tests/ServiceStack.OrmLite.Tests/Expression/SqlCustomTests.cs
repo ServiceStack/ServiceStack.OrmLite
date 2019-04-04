@@ -32,9 +32,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class SqlCustomTests : OrmLiteProvidersTestBase
     {
-        public SqlCustomTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SqlCustomTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         [IgnoreDialect(Dialect.AnyPostgreSql, "Not supported")]

@@ -31,9 +31,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     [TestFixtureOrmLite]
     public class ExpressionsAuthorTests : OrmLiteProvidersTestBase
     {
-        public ExpressionsAuthorTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public ExpressionsAuthorTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Run_Expressions_Author_tests()

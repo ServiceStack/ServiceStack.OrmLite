@@ -5,9 +5,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class EqualityExpressionsTest : ExpressionsTestBase
     {
-        public EqualityExpressionsTest(Dialect dialect) : base(dialect)
-        {
-        }
+        public EqualityExpressionsTest(Dialect dialect) : base(dialect) {}
 
         #region int tests
 

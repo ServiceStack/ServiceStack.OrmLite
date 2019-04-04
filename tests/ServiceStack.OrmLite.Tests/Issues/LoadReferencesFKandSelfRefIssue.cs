@@ -17,9 +17,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class LoadReferencesFKandSelfRefIssue : OrmLiteProvidersTestBase
     {
-        public LoadReferencesFKandSelfRefIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public LoadReferencesFKandSelfRefIssue(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Does_not_populate_both_FK_and_self_reference()

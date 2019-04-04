@@ -13,9 +13,7 @@ namespace ServiceStack.OrmLite.Tests
     [IgnoreDialect(Dialect.MySql5_5, "You cannot set the default for a date column to be the value of a function such as NOW() or CURRENT_DATE. The exception is that you can specify CURRENT_TIMESTAMP as the default for a TIMESTAMP column")]
     public class DefaultValueTests : OrmLiteProvidersTestBase
     {
-        public DefaultValueTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public DefaultValueTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_create_table_with_DefaultValues()

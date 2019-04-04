@@ -5,9 +5,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class JoinAliasIntIssue : OrmLiteProvidersTestBase
     {
-        public JoinAliasIntIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public JoinAliasIntIssue(Dialect dialect) : base(dialect) {}
 
         class Team
         {

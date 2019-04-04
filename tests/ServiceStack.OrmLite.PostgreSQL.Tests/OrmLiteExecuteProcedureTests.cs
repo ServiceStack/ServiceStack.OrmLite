@@ -9,9 +9,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class OrmLiteExecuteProcedureTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteExecuteProcedureTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public OrmLiteExecuteProcedureTests(Dialect dialect) : base(dialect) {}
 
         private const string Create = @"
             CREATE OR REPLACE FUNCTION f_service_stack(

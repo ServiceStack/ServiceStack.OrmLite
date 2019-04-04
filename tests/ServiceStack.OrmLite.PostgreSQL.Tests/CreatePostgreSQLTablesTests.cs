@@ -9,9 +9,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class CreatePostgreSQLTablesTests : OrmLiteProvidersTestBase
     {
-        public CreatePostgreSQLTablesTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public CreatePostgreSQLTablesTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void DropAndCreateTable_DropsTableAndCreatesTable()

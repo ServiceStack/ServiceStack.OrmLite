@@ -12,9 +12,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteInsertTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteInsertTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public OrmLiteInsertTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_insert_into_ModelWithFieldsOfDifferentTypes_table()

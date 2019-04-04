@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests
 	[TestFixtureOrmLite]
 	public class ShippersExample : OrmLiteProvidersTestBase
 	{
-		public ShippersExample(Dialect dialect) : base(dialect)
-		{
-		}
+		public ShippersExample(Dialect dialect) : base(dialect) {}
 
 		[Alias("Shippers")]
 		public class Shipper

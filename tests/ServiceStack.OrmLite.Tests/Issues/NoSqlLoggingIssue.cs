@@ -7,9 +7,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class NoSqlLoggingIssue : OrmLiteProvidersTestBase
     {
-        public NoSqlLoggingIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public NoSqlLoggingIssue(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Does_log_SQL_Insert_for_Saves()

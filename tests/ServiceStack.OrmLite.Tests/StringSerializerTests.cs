@@ -25,9 +25,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class StringSerializerTests : OrmLiteProvidersTestBase
     {
-        public StringSerializerTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public StringSerializerTests(Dialect dialect) : base(dialect) {}
 
         private static void InsertModelWithComplexType(IDbConnection db)
         {

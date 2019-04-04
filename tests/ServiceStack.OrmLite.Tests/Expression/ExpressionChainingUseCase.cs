@@ -9,9 +9,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class ExpressionChainingUseCase: OrmLiteProvidersTestBase
     {
-        public ExpressionChainingUseCase(Dialect dialect) : base(dialect)
-        {
-        }
+        public ExpressionChainingUseCase(Dialect dialect) : base(dialect) {}
 
         [SetUp]
         public void SetUp()

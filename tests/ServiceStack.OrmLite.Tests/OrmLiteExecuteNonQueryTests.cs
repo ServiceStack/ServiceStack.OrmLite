@@ -13,9 +13,7 @@
         [TestFixtureOrmLite]
         public class WithDbCmdFilter : OrmLiteProvidersTestBase
         {
-            public WithDbCmdFilter(Dialect dialect) : base(dialect)
-            {
-            }
+            public WithDbCmdFilter(Dialect dialect) : base(dialect) {}
 
             [Test]
             public void Can_insert_one_row_and_get_one_affected_row()

@@ -9,9 +9,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteDeleteTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteDeleteTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public OrmLiteDeleteTests(Dialect dialect) : base(dialect) {}
 
         private IDbConnection db;
 

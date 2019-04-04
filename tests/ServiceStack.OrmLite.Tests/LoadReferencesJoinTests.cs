@@ -17,9 +17,7 @@ namespace ServiceStack.OrmLite.Tests
     [NonParallelizable]
     public class LoadReferencesJoinTests : OrmLiteProvidersTestBase
     {
-        public LoadReferencesJoinTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public LoadReferencesJoinTests(Dialect dialect) : base(dialect) {}
 
         private IDbConnection db;
 

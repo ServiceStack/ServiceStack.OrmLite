@@ -10,9 +10,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteTransactionTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteTransactionTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public OrmLiteTransactionTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Transaction_commit_persists_data_to_the_db()

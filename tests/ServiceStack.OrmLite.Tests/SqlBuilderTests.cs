@@ -10,9 +10,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class SqlBuilderTests : OrmLiteProvidersTestBase
     {
-        public SqlBuilderTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SqlBuilderTests(Dialect dialect) : base(dialect) {}
 
         [Alias("UsersSqlBuilder")]
         public class UsersSqlBuilder 

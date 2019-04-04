@@ -41,9 +41,7 @@ namespace ServiceStack.OrmLite.Tests.Issues.SP
     [TestFixtureOrmLite]
     public class MappingFieldsFromStoredProcedureTests : OrmLiteProvidersTestBase
     {
-        public MappingFieldsFromStoredProcedureTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public MappingFieldsFromStoredProcedureTests(Dialect dialect) : base(dialect) {}
 
         [Test]
         public void Can_select_from_Custom_stored_procedure()

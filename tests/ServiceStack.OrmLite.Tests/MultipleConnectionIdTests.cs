@@ -11,9 +11,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class MultipleConnectionIdTests : OrmLiteProvidersTestBase
     {
-        public MultipleConnectionIdTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public MultipleConnectionIdTests(Dialect dialect) : base(dialect) {}
 
         private int _waitingThreadCount;
         private int _waitingThreadsReleasedCounter;
