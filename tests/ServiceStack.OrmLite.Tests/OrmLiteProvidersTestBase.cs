@@ -222,7 +222,7 @@ namespace ServiceStack.OrmLite.Tests
 
             // SQLSERVER specific init
             // for sql create unique db per fixture to avoid conflicts when testing dialects
-            // uses COMPATABILITY_LEVEL set to each version 
+            // uses COMPATIBILITY_LEVEL set to each version 
             try
             {
                 using (var db = getFactory(Dialect.SqlServer)
@@ -283,7 +283,7 @@ namespace ServiceStack.OrmLite.Tests
 
     /// <summary>
     /// Repeats tests for all Dialect flags specified.
-    /// Also sets nunit categories for each dialect flag which 
+    /// Also sets NUnit categories for each dialect flag which 
     /// enables adhoc filtering of tests by using Dialect enum flag values
     /// as category names in the test runner
     /// </summary>
@@ -297,14 +297,14 @@ namespace ServiceStack.OrmLite.Tests
     [AttributeUsage(AttributeTargets.Class, AllowMultiple = true, Inherited = false)]
     public class TestFixtureOrmLiteDialectsAttribute : NUnitAttribute, IFixtureBuilder2
     {
-        private readonly Dialect _dialect;
+        private readonly Dialect dialect;
         private readonly NUnitTestFixtureBuilder _builder = new NUnitTestFixtureBuilder();
-        private readonly string _reason;
+        private readonly string reason;
 
         public TestFixtureOrmLiteDialectsAttribute(Dialect dialect)
         {
-            _dialect = dialect;
-            _reason = $"Dialect not included in TestConfig.DefaultDialects value {TestConfig.DefaultDialects}";
+            this.dialect = dialect;
+            reason = $"Dialect not included in TestConfig.DefaultDialects value {TestConfig.DefaultDialects}";
         }
 
         public IEnumerable<TestSuite> BuildFrom(ITypeInfo typeInfo)
@@ -315,35 +315,35 @@ namespace ServiceStack.OrmLite.Tests
         public IEnumerable<TestSuite> BuildFrom(ITypeInfo typeInfo, IPreFilter filter)
         {
             var fixtureData = new List<TestFixtureData>();
-            
-            if(_dialect.HasFlag(Dialect.Sqlite)) fixtureData.Add(new TestFixtureData(Dialect.Sqlite));
-            if(_dialect.HasFlag(Dialect.MySqlConnector)) fixtureData.Add(new TestFixtureData(Dialect.MySqlConnector));
-            if(_dialect.HasFlag(Dialect.MySql5_5)) fixtureData.Add(new TestFixtureData(Dialect.MySql5_5));
-            if(_dialect.HasFlag(Dialect.MySql10_1)) fixtureData.Add(new TestFixtureData(Dialect.MySql10_1));
-            if(_dialect.HasFlag(Dialect.MySql10_2)) fixtureData.Add(new TestFixtureData(Dialect.MySql10_2));
-            if(_dialect.HasFlag(Dialect.MySql10_3)) fixtureData.Add(new TestFixtureData(Dialect.MySql10_3));
-            if(_dialect.HasFlag(Dialect.MySql10_4)) fixtureData.Add(new TestFixtureData(Dialect.MySql10_4));
-            if(_dialect.HasFlag(Dialect.PostgreSql9)) fixtureData.Add(new TestFixtureData(Dialect.PostgreSql9));
-            if(_dialect.HasFlag(Dialect.PostgreSql10)) fixtureData.Add(new TestFixtureData(Dialect.PostgreSql10));
-            if(_dialect.HasFlag(Dialect.PostgreSql11)) fixtureData.Add(new TestFixtureData(Dialect.PostgreSql11));
-            if(_dialect.HasFlag(Dialect.SqlServer)) fixtureData.Add(new TestFixtureData(Dialect.SqlServer));
-            if(_dialect.HasFlag(Dialect.SqlServer2008)) fixtureData.Add(new TestFixtureData(Dialect.SqlServer2008));
-            if(_dialect.HasFlag(Dialect.SqlServer2012)) fixtureData.Add(new TestFixtureData(Dialect.SqlServer2012));
-            if(_dialect.HasFlag(Dialect.SqlServer2014)) fixtureData.Add(new TestFixtureData(Dialect.SqlServer2014));
-            if(_dialect.HasFlag(Dialect.SqlServer2016)) fixtureData.Add(new TestFixtureData(Dialect.SqlServer2016));
-            if(_dialect.HasFlag(Dialect.SqlServer2017)) fixtureData.Add(new TestFixtureData(Dialect.SqlServer2017));
-            if(_dialect.HasFlag(Dialect.Firebird)) fixtureData.Add(new TestFixtureData(Dialect.Firebird));
-            if(_dialect.HasFlag(Dialect.Oracle10)) fixtureData.Add(new TestFixtureData(Dialect.Oracle10));
-            if(_dialect.HasFlag(Dialect.Oracle11)) fixtureData.Add(new TestFixtureData(Dialect.Oracle11));
-            if(_dialect.HasFlag(Dialect.Oracle12)) fixtureData.Add(new TestFixtureData(Dialect.Oracle12));
-            if(_dialect.HasFlag(Dialect.Oracle18)) fixtureData.Add(new TestFixtureData(Dialect.Oracle18));
-            if(_dialect.HasFlag(Dialect.VistaDb)) fixtureData.Add(new TestFixtureData(Dialect.VistaDb));
+
+            if (dialect.HasFlag(Dialect.MySqlConnector)) fixtureData.Add(new TestFixtureData(Dialect.MySqlConnector));
+            if (dialect.HasFlag(Dialect.Sqlite)) fixtureData.Add(new TestFixtureData(Dialect.Sqlite));
+            if (dialect.HasFlag(Dialect.MySql5_5)) fixtureData.Add(new TestFixtureData(Dialect.MySql5_5));
+            if (dialect.HasFlag(Dialect.MySql10_1)) fixtureData.Add(new TestFixtureData(Dialect.MySql10_1));
+            if (dialect.HasFlag(Dialect.MySql10_2)) fixtureData.Add(new TestFixtureData(Dialect.MySql10_2));
+            if (dialect.HasFlag(Dialect.MySql10_3)) fixtureData.Add(new TestFixtureData(Dialect.MySql10_3));
+            if (dialect.HasFlag(Dialect.MySql10_4)) fixtureData.Add(new TestFixtureData(Dialect.MySql10_4));
+            if (dialect.HasFlag(Dialect.PostgreSql9)) fixtureData.Add(new TestFixtureData(Dialect.PostgreSql9));
+            if (dialect.HasFlag(Dialect.PostgreSql10)) fixtureData.Add(new TestFixtureData(Dialect.PostgreSql10));
+            if (dialect.HasFlag(Dialect.PostgreSql11)) fixtureData.Add(new TestFixtureData(Dialect.PostgreSql11));
+            if (dialect.HasFlag(Dialect.SqlServer)) fixtureData.Add(new TestFixtureData(Dialect.SqlServer));
+            if (dialect.HasFlag(Dialect.SqlServer2008)) fixtureData.Add(new TestFixtureData(Dialect.SqlServer2008));
+            if (dialect.HasFlag(Dialect.SqlServer2012)) fixtureData.Add(new TestFixtureData(Dialect.SqlServer2012));
+            if (dialect.HasFlag(Dialect.SqlServer2014)) fixtureData.Add(new TestFixtureData(Dialect.SqlServer2014));
+            if (dialect.HasFlag(Dialect.SqlServer2016)) fixtureData.Add(new TestFixtureData(Dialect.SqlServer2016));
+            if (dialect.HasFlag(Dialect.SqlServer2017)) fixtureData.Add(new TestFixtureData(Dialect.SqlServer2017));
+            if (dialect.HasFlag(Dialect.Firebird)) fixtureData.Add(new TestFixtureData(Dialect.Firebird));
+            if (dialect.HasFlag(Dialect.Oracle10)) fixtureData.Add(new TestFixtureData(Dialect.Oracle10));
+            if (dialect.HasFlag(Dialect.Oracle11)) fixtureData.Add(new TestFixtureData(Dialect.Oracle11));
+            if (dialect.HasFlag(Dialect.Oracle12)) fixtureData.Add(new TestFixtureData(Dialect.Oracle12));
+            if (dialect.HasFlag(Dialect.Oracle18)) fixtureData.Add(new TestFixtureData(Dialect.Oracle18));
+            if (dialect.HasFlag(Dialect.VistaDb)) fixtureData.Add(new TestFixtureData(Dialect.VistaDb));
 
             foreach (var data in fixtureData)
             {
                 // ignore test if not in TestConfig but add as ignored to explain why
                 if (!TestConfig.DefaultDialects.HasFlag((Dialect)data.Arguments[0]))
-                    data.Ignore(_reason);
+                    data.Ignore(reason);
 
                 data.Properties.Add(PropertyNames.Category, data.Arguments[0].ToString());
                 yield return _builder.BuildFrom(typeInfo, filter, data);
@@ -357,8 +357,8 @@ namespace ServiceStack.OrmLite.Tests
     [AttributeUsage(AttributeTargets.Method | AttributeTargets.Class, AllowMultiple = true)]
     public class IgnoreDialectAttribute : NUnitAttribute, ITestAction
     {
-        private readonly Dialect _dialect;
-        private readonly string _reason;
+        private readonly Dialect dialect;
+        private readonly string reason;
 
         /// <summary>
         /// Ignore one or more specific dialects from testing
@@ -367,20 +367,20 @@ namespace ServiceStack.OrmLite.Tests
         /// <param name="reason">The ignore reason that will be output in test results</param>
         public IgnoreDialectAttribute(Dialect dialect, string reason)
         {
-            _dialect = dialect;
-            _reason = reason;
+            this.dialect = dialect;
+            this.reason = reason;
         }
 
         public void BeforeTest(ITest test)
         {
             // get the dialect from either the class or method parent
             // and if dialect matches, ignore test
-            var dialects = test.TestType == "TestMethod" ? test.Parent.Arguments.OfType<Dialect>() : test.Arguments.OfType<Dialect>();
-            foreach (var dialect in dialects)
+            var testDialects = test.TestType == "TestMethod" ? test.Parent.Arguments.OfType<Dialect>() : test.Arguments.OfType<Dialect>();
+            foreach (var testDialect in testDialects)
             {
-                if (_dialect.HasFlag(dialect) && test.RunState != RunState.NotRunnable)
+                if (this.dialect.HasFlag(testDialect) && test.RunState != RunState.NotRunnable)
                 {
-                    Assert.Ignore($"Ignoring for {dialect}: {_reason}");
+                    Assert.Ignore($"Ignoring for {testDialect}: {reason}");
                 }
             }
         }
