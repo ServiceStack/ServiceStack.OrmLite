@@ -77,7 +77,8 @@ namespace ServiceStack.OrmLite.Tests
             DbFactory = OrmLiteConnectionFactory.NamedConnections[Dialect.ToString()].CreateCopy();
             DialectProvider = DbFactory.DialectProvider;
 
-            if (OrmLiteConfig.DialectProvider == null) OrmLiteConfig.DialectProvider = DialectProvider;
+            if (OrmLiteConfig.DialectProvider == null) 
+                OrmLiteConfig.DialectProvider = DialectProvider;
         }
 
         public virtual IDbConnection OpenDbConnection() => DbFactory.OpenDbConnection();
@@ -172,13 +173,17 @@ namespace ServiceStack.OrmLite.Tests
         {
             // POSTGRESQL specific init
             // enable postgres uuid extension for all test db's
-            var pgInit = @"CREATE EXTENSION IF NOT EXISTS ""uuid-ossp""";
+            var pgInits = new[] {
+                "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";",
+                "CREATE EXTENSION IF NOT EXISTS hstore;",
+            };
+            
 
             OrmLiteConnectionFactory getFactory(Dialect dialect) => OrmLiteConnectionFactory.NamedConnections[dialect.ToString()];
             try
             {
                 using (var pg9 = getFactory(Dialect.PostgreSql9).OpenDbConnectionString($"{TestConfig.PostgresDb_9};Timeout=1"))
-                    pg9.ExecuteSql(pgInit);
+                    pgInits.Map(pg9.ExecuteSql);
             }
             catch
             {
@@ -188,7 +193,7 @@ namespace ServiceStack.OrmLite.Tests
             try
             {
                 using (var pg10 = getFactory(Dialect.PostgreSql10).OpenDbConnectionString($"{TestConfig.PostgresDb_10};Timeout=1"))
-                    pg10.ExecuteSql(pgInit);
+                    pgInits.Map(pg10.ExecuteSql);
             }
             catch
             {
@@ -198,7 +203,7 @@ namespace ServiceStack.OrmLite.Tests
             try
             {
                 using (var pg11 = getFactory(Dialect.PostgreSql11).OpenDbConnectionString($"{TestConfig.PostgresDb_11};Timeout=1"))
-                    pg11.ExecuteSql(pgInit);
+                    pgInits.Map(pg11.ExecuteSql);
             }
             catch
             {

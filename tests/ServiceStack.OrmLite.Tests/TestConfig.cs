@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel;
+using System.Linq;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -18,17 +19,18 @@ namespace ServiceStack.OrmLite.Tests
         public static string OracleDb = EnvironmentVariable("ORACLE_CONNECTION", "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=48401))(CONNECT_DATA=(SID=XE)));User Id=system;Password=test;");
         
         // TODO should dates be handled by reader instead of having to set config options?
-        public static string MariaDb_5_5 = EnvironmentVariable("MYSQL_CONNECTION", "Server=localhost;Port=48201;Database=test;UID=root;Password=test;SslMode=none;Convert Zero Datetime=True;");
-        public static string MariaDb_10_1 = EnvironmentVariable("MYSQL_CONNECTION", "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none");
-        public static string MariaDb_10_2 = EnvironmentVariable("MYSQL_CONNECTION", "Server=localhost;Port=48203;Database=test;UID=root;Password=test;SslMode=none");
-        public static string MariaDb_10_3 = EnvironmentVariable("MYSQL_CONNECTION", "Server=localhost;Port=48204;Database=test;UID=root;Password=test;SslMode=none");
-        public static string MariaDb_10_4 = EnvironmentVariable("MYSQL_CONNECTION", "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none");
+        public static string MariaDb_5_5 = EnvironmentVariable(new[]{ "MYSQL55_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48201;Database=test;UID=root;Password=test;SslMode=none;Convert Zero Datetime=True;");
+        public static string MariaDb_10_1 = EnvironmentVariable(new[]{ "MYSQL101_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none");
+        public static string MariaDb_10_2 = EnvironmentVariable(new[]{ "MYSQL102_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48203;Database=test;UID=root;Password=test;SslMode=none");
+        public static string MariaDb_10_3 = EnvironmentVariable(new[]{ "MYSQL103_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48204;Database=test;UID=root;Password=test;SslMode=none");
+        public static string MariaDb_10_4 = EnvironmentVariable(new[]{ "MYSQL104_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none");
         
-        public static string MySqlDb_10_1 = EnvironmentVariable("MYSQL_CONNECTION", "Server=localhost;Port=48202;Database=testMySql;UID=root;Password=test;SslMode=none;Convert Zero Datetime=True;");
+        public static string MySqlDb_10_1 = EnvironmentVariable(new[]{ "MYSQL101_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48202;Database=testMySql;UID=root;Password=test;SslMode=none;Convert Zero Datetime=True;");
         
-        public static string PostgresDb_9 = EnvironmentVariable("PGSQL_CONNECTION", "Server=localhost;Port=48301;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200");
-        public static string PostgresDb_10 = EnvironmentVariable("PGSQL_CONNECTION", "Server=localhost;Port=48302;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200");
-        public static string PostgresDb_11 = EnvironmentVariable("PGSQL_CONNECTION", "Server=localhost;Port=48303;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200");
+        public static string PostgresDb_9 = EnvironmentVariable(new[]{ "PGSQL9_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48301;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200");
+        public static string PostgresDb_10 = EnvironmentVariable(new[]{ "PGSQL10_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48302;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200");
+        public static string PostgresDb_11 = EnvironmentVariable(new[]{ "PGSQL11_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48303;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200");
+        
         public static string FirebirdDb_3 = EnvironmentVariable("FIREBIRD_CONNECTION", @"User=SYSDBA;Password=masterkey;Database=/firebird/data/test.gdb;DataSource=localhost;Port=48101;Dialect=3;charset=ISO8859_1;MinPoolSize=0;MaxPoolSize=100;");
         public static string VistaDb = EnvironmentVariable("VISTADB_CONNECTION", @"Data Source='|DataDirectory|\Database.vdb5'");
         public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
@@ -36,6 +38,9 @@ namespace ServiceStack.OrmLite.Tests
         // The default provider and connection the DbFactory is initialised with
         public static IOrmLiteDialectProvider DefaultProvider = SqliteDialect.Provider;
         public static string DefaultConnection = SqliteMemoryDb;
+
+        private static T EnvironmentVariable<T>(string[] variables, T defaultValue) =>
+            EnvironmentVariable(variables.FirstOrDefault(x => Environment.GetEnvironmentVariable(x) != null), defaultValue);
         
         private static T EnvironmentVariable<T>(string variable, T defaultValue)
         {
