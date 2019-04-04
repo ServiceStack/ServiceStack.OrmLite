@@ -14,22 +14,22 @@ namespace ServiceStack.OrmLite.Tests
         public static Dialect DefaultDialect = Dialect.Sqlite;
         public const bool EnableDebugLogging = false;
 
-        public static string SqliteMemoryDb = Environment.GetEnvironmentVariable("SQLITE_CONNECTION") ?? ":memory:";
         public static string SqliteFileDir = "~/App_Data/".MapAbsolutePath();
         public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
         public static string SqlServerDb = "~/App_Data/Database1.mdf".MapAbsolutePath();
-        public static string SqlServerBuildDb = Environment.GetEnvironmentVariable("MSSQL_CONNECTION") ?? "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;";
         //public static string SqlServerBuildDb = "Data Source=localhost;Initial Catalog=TestDb;Integrated Security=SSPI;Connect Timeout=120;MultipleActiveResultSets=True";
 
+        public static string SqliteMemoryDb = Environment.GetEnvironmentVariable("SQLITE_CONNECTION") ?? ":memory:";
+        public static string SqlServerBuildDb = Environment.GetEnvironmentVariable("MSSQL_CONNECTION") ?? "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;";
         public static string OracleDb = Environment.GetEnvironmentVariable("ORACLE_CONNECTION") ?? "Data Source=localhost:48401/XE;User ID=system;Password=test";
         public static string MySqlDb_5_5 = Environment.GetEnvironmentVariable("MYSQL_CONNECTION") ?? "Server=localhost;Port=48201;Database=test;UID=root;Password=test;SslMode=none";
-        public static string MySqlDb_10_1 = "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none";
-        public static string MySqlDb_10_2 = "Server=localhost;Port=48203;Database=test;UID=root;Password=test;SslMode=none";
-        public static string MySqlDb_10_3 = "Server=localhost;Port=48204;Database=test;UID=root;Password=test;SslMode=none";
-        public static string MySqlDb_10_4 = "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none";
+        public static string MySqlDb_10_1 = Environment.GetEnvironmentVariable("MYSQL_CONNECTION") ?? "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none";
+        public static string MySqlDb_10_2 = Environment.GetEnvironmentVariable("MYSQL_CONNECTION") ?? "Server=localhost;Port=48203;Database=test;UID=root;Password=test;SslMode=none";
+        public static string MySqlDb_10_3 = Environment.GetEnvironmentVariable("MYSQL_CONNECTION") ?? "Server=localhost;Port=48204;Database=test;UID=root;Password=test;SslMode=none";
+        public static string MySqlDb_10_4 = Environment.GetEnvironmentVariable("MYSQL_CONNECTION") ?? "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none";
         public static string PostgresDb_9 = Environment.GetEnvironmentVariable("PGSQL_CONNECTION") ?? "Server=localhost;Port=48301;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
-        public static string PostgresDb_10 = "Server=localhost;Port=48302;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
-        public static string PostgresDb_11 = "Server=localhost;Port=48303;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
+        public static string PostgresDb_10 = Environment.GetEnvironmentVariable("PGSQL_CONNECTION") ?? "Server=localhost;Port=48302;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
+        public static string PostgresDb_11 = Environment.GetEnvironmentVariable("PGSQL_CONNECTION") ?? "Server=localhost;Port=48303;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
         public static string FirebirdDb_3 = Environment.GetEnvironmentVariable("FIREBIRD_CONNECTION") ?? @"User=SYSDBA;Password=masterkey;Database=/firebird/data/test.gdb;DataSource=localhost;Port=48101;Dialect=3;charset=ISO8859_1;MinPoolSize=0;MaxPoolSize=100;";
 
         public static IOrmLiteDialectProvider DefaultProvider = SqlServerDialect.Provider;
@@ -78,13 +78,13 @@ namespace ServiceStack.OrmLite.Tests
 
         public static OrmLiteConnectionFactory CreateMySqlDbFactory()
         {
-            var dbFactory = new OrmLiteConnectionFactory(Config.MySqlDb_5_5, MySqlDialect.Provider);
+            var dbFactory = new OrmLiteConnectionFactory(Config.MySqlDb_10_4, MySqlDialect.Provider);
             return dbFactory;
         }
 
         public static OrmLiteConnectionFactory CreatePostgreSqlDbFactory()
         {
-            var dbFactory = new OrmLiteConnectionFactory(Config.PostgresDb_9, PostgreSqlDialect.Provider);
+            var dbFactory = new OrmLiteConnectionFactory(Config.PostgresDb_11, PostgreSqlDialect.Provider);
             return dbFactory;
         }
 
@@ -152,9 +152,9 @@ namespace ServiceStack.OrmLite.Tests
                 case Dialect.SqlServer2017:
                     return Init(Config.SqlServerBuildDb, SqlServer2017Dialect.Provider);
                 case Dialect.MySql5_5:
-                    return Init(Config.MySqlDb_5_5, MySqlDialect.Provider);
+                    return Init(Config.MySqlDb_10_4, MySqlDialect.Provider);
                 case Dialect.PostgreSql9:
-                    return Init(Config.PostgresDb_9, PostgreSqlDialect.Provider);
+                    return Init(Config.PostgresDb_11, PostgreSqlDialect.Provider);
                 case Dialect.SqlServerMdf:
                     return Init(Config.SqlServerDb, SqlServerDialect.Provider);
                 case Dialect.Oracle10:
