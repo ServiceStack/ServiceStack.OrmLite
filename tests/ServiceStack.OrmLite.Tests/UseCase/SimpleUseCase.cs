@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 	[TestFixtureOrmLite]
 	public class SimpleUseCase : OrmLiteProvidersTestBase
 	{
-		public SimpleUseCase(Dialect dialect) : base(dialect)
-		{
-		}
+		public SimpleUseCase(Dialect dialect) : base(dialect) {}
 
 		public class User
 		{
@@ -25,7 +23,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 		[Test]
 		public void Simple_CRUD_example()
 		{
-			using (IDbConnection db = OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.DropAndCreateTable<User>();
 

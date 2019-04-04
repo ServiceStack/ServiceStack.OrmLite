@@ -7,6 +7,7 @@ using ServiceStack.Text;
 namespace ServiceStack.OrmLite.Tests.Issues
 {
     [Explicit]
+    [IgnoreDialect(Dialect.Sqlite, "doesn't support concurrent writes")]
     [TestFixtureOrmLite]
     public class MultithreadingIssueTests : OrmLiteProvidersTestBase
     {
@@ -37,7 +38,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     var threadId = Thread.CurrentThread.ManagedThreadId;
                     "Thread {0} started...".Print(threadId);
                     
-                    var rows = 10.Times(i => ModelWithDifferentNumTypes.Create(i));
+                    var rows = 10.Times(ModelWithDifferentNumTypes.Create);
                     using (var db = OpenDbConnection())
                     {
                         100.Times(i =>
