@@ -126,6 +126,7 @@ namespace ServiceStack.OrmLite.Tests
             dbFactory.RegisterConnection(Dialect.Sqlite.ToString(), SqliteMemoryDb, SqliteDialect.Provider);
 
             dbFactory.RegisterConnection(Dialect.SqlServer.ToString(), SqlServerBuildDb, SqlServerDialect.Provider);
+            dbFactory.RegisterConnection(Dialect.SqlServer2017.ToString(), SqlServerBuildDb, SqlServer2017Dialect.Provider);
 
             dbFactory.RegisterConnection(Dialect.Oracle10.ToString(), OracleDb, OracleDialect.Provider);
             dbFactory.RegisterConnection(Dialect.Oracle11.ToString(), OracleDb, OracleDialect.Provider);
