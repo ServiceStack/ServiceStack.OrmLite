@@ -220,6 +220,7 @@ namespace ServiceStack.OrmLite.Tests
             db.DeleteAll<Order>();
             db.DeleteAll<CustomerAddress>();
             db.DeleteAll<Customer>();
+            db.DeleteAll<MultiSelfCustomer>();
             db.DeleteAll<SelfCustomerAddress>();
             db.DeleteAll<SelfCustomer>();
         }
