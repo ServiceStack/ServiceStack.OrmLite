@@ -93,7 +93,7 @@ namespace ServiceStack.OrmLite.Tests
         public static string DefaultConnection = SqliteMemoryDb;
 
         private static string EnvironmentVariable(string[] variables, string defaultValue) => 
-            variables.FirstOrDefault(x => Environment.GetEnvironmentVariable(x) != null) ?? defaultValue;
+            variables.Map(Environment.GetEnvironmentVariable).FirstOrDefault(x => x != null) ?? defaultValue;
 
         private static T EnvironmentVariable<T>(string variable, T defaultValue)
         {
