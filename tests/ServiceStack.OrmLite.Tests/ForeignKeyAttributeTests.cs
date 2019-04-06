@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite.Tests
                 dbConn.DropTable<TypeWithSimpleForeignKey>();
                 dbConn.DropTable<ReferencedType>();
 
-                dbConn.DropAndCreateTable<ReferencedType>();
+                dbConn.CreateTable<ReferencedType>();
             }
         }
 
