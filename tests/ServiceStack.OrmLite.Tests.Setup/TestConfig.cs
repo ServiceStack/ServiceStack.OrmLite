@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Common;
 using System.Data.SqlClient;
@@ -65,7 +66,7 @@ namespace ServiceStack.OrmLite.Tests
         /// <summary>
         /// This value controls which providers are tested for all <see cref="TestFixtureOrmLiteAttribute"/> tests where dialects are not explicitly set
         /// </summary>
-        public static Dialect DefaultDialects = EnvironmentVariable("ORMLITE_DIALECT", Dialect.Sqlite);
+        public static Dialect Dialect = EnvironmentVariable("ORMLITE_DIALECT", Dialect.Sqlite);
         
         public static string SqliteMemoryDb = EnvironmentVariable("SQLITE_CONNECTION", ":memory:");
         public static string SqlServerBuildDb = EnvironmentVariable("MSSQL_CONNECTION", "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;");
@@ -76,9 +77,10 @@ namespace ServiceStack.OrmLite.Tests
         public static string MariaDb_10_1 = EnvironmentVariable(new[]{ "MYSQL101_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none");
         public static string MariaDb_10_2 = EnvironmentVariable(new[]{ "MYSQL102_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48203;Database=test;UID=root;Password=test;SslMode=none");
         public static string MariaDb_10_3 = EnvironmentVariable(new[]{ "MYSQL103_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48204;Database=test;UID=root;Password=test;SslMode=none");
-        public static string MariaDb_10_4 = EnvironmentVariable(new[]{ "MYSQL104_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none");
+//        public static string MariaDb_10_4 = EnvironmentVariable(new[]{ "MYSQL104_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none");
+        public static string MariaDb_10_4 = EnvironmentVariable(new[]{ "MYSQL104_CONNECTION" }, "Server=gistlyn.com;Port=48205;Database=test;UID=root;Password=test;SslMode=none");
         
-        public static string MySqlDb_10_1 = EnvironmentVariable(new[]{ "MYSQL101_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48202;Database=testMySql;UID=root;Password=test;SslMode=none;Convert Zero Datetime=True;");
+        public static string MySqlDb_10_1 = EnvironmentVariable(new[]{ "MYSQL101_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none;Convert Zero Datetime=True;");
         
         public static string PostgresDb_9 = EnvironmentVariable(new[]{ "PGSQL9_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48301;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200");
         public static string PostgresDb_10 = EnvironmentVariable(new[]{ "PGSQL10_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48302;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200");
@@ -123,6 +125,8 @@ namespace ServiceStack.OrmLite.Tests
             dbFactory.RegisterConnection(Dialect.MySql10_3.ToString(), MariaDb_10_3, MySqlDialect.Provider);
             dbFactory.RegisterConnection(Dialect.MySql10_4.ToString(), MariaDb_10_4, MySqlDialect.Provider);
 
+            dbFactory.RegisterConnection(Dialect.MySqlConnector.ToString(), MariaDb_10_1, MySqlConnectorDialect.Provider);
+
             dbFactory.RegisterConnection(Dialect.Sqlite.ToString(), SqliteMemoryDb, SqliteDialect.Provider);
 
             dbFactory.RegisterConnection(Dialect.SqlServer.ToString(), SqlServerBuildDb, SqlServerDialect.Provider);
@@ -163,7 +167,7 @@ namespace ServiceStack.OrmLite.Tests
 
         public static void InitDbScripts(OrmLiteConnectionFactory dbFactory)
         {
-            // POSTGRESQL specific init
+            // PostgreSQL specific init
             // enable postgres uuid extension for all test db's
             var pgInits = new[] {
                 "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";",
@@ -262,5 +266,62 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
         
+        
+        public static Dictionary<Dialect, int> SqlServerCompatibilityLevels = new Dictionary<Dialect, int> {
+            [Dialect.SqlServer2008] = 100,
+            [Dialect.SqlServer2012] = 110,
+            [Dialect.SqlServer2014] = 120,
+            [Dialect.SqlServer2016] = 130,
+            [Dialect.SqlServer2017] = 140,
+        };
+
+        public static void InitPostgres(OrmLiteConnectionFactory dbFactory, Dialect dialect)
+        {
+            if ((dialect & Dialect.AnyPostgreSql) != dialect)
+                return;
+            
+            var pgExtensions = new[] {
+                "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";",
+                "CREATE EXTENSION IF NOT EXISTS hstore;",
+            };
+
+            using (var db = dbFactory.OpenDbConnection(dialect.ToString()))
+            {
+                foreach (var pgExtension in pgExtensions)
+                {
+                    db.ExecuteSql(pgExtension);
+                }
+            }
+        }
+
+        public static void InitMySqlConnector(OrmLiteConnectionFactory dbFactory, Dialect dialect)
+        {
+            if ((dialect & Dialect.MySqlConnector) != dialect)
+                return;
+            
+            using (var db = dbFactory.OpenDbConnection(dialect.ToString()))
+            {
+                db.ExecuteSql("CREATE DATABASE IF NOT EXISTS `testMySql`");
+            }
+        }
+        
+        public static void InitSqlServer(OrmLiteConnectionFactory dbFactory, Dialect dialect)
+        {
+            if ((dialect & Dialect.AnySqlServer) != dialect)
+                return;
+            
+            using (var db = dbFactory.OpenDbConnection(dialect.ToString()))
+            {
+                var dbName = dialect.ToString();
+                var compatibilityLevel = SqlServerCompatibilityLevels[dialect];
+                var createSqlDb = $@"If(db_id(N'{dbName}') IS NULL)
+  BEGIN
+  CREATE DATABASE {dbName};
+  ALTER DATABASE {dbName} SET COMPATIBILITY_LEVEL = {compatibilityLevel};
+  END";
+                db.ExecuteSql(createSqlDb);
+            }
+        }
+
     }
 }

@@ -119,14 +119,14 @@ namespace ServiceStack.OrmLite.Tests
     }
 
     /// <summary>
-    /// Repeats tests for all dialect versions from <see cref="TestConfig.DefaultDialects"/>
+    /// Repeats tests for all dialect versions from <see cref="TestConfig.Dialect"/>
     /// To restrict tests to specific dialects use <see cref="TestFixtureOrmLiteDialectsAttribute"/>
     /// To filter tests for specific dialects use <see cref="IgnoreDialectAttribute"/>
     /// </summary>
     /// <inheritdoc cref="TestFixtureOrmLiteDialectsAttribute"/>
     public class TestFixtureOrmLiteAttribute : TestFixtureOrmLiteDialectsAttribute
     {
-        public TestFixtureOrmLiteAttribute() : base(TestConfig.DefaultDialects)
+        public TestFixtureOrmLiteAttribute() : base(TestConfig.Dialect)
         {
             // loads the dialects from TestConfig.DefaultDialects
             // which can be overridden using an environment variable
@@ -156,7 +156,7 @@ namespace ServiceStack.OrmLite.Tests
         public TestFixtureOrmLiteDialectsAttribute(Dialect dialect)
         {
             this.dialect = dialect;
-            reason = $"Dialect not included in TestConfig.DefaultDialects value {TestConfig.DefaultDialects}";
+            reason = $"Dialect not included in TestConfig.DefaultDialects value {TestConfig.Dialect}";
         }
 
         public IEnumerable<TestSuite> BuildFrom(ITypeInfo typeInfo)
@@ -194,7 +194,7 @@ namespace ServiceStack.OrmLite.Tests
             foreach (var data in fixtureData)
             {
                 // ignore test if not in TestConfig but add as ignored to explain why
-                if (!TestConfig.DefaultDialects.HasFlag((Dialect)data.Arguments[0]))
+                if (!TestConfig.Dialect.HasFlag((Dialect)data.Arguments[0]))
                     data.Ignore(reason);
 
                 data.Properties.Add(PropertyNames.Category, data.Arguments[0].ToString());
