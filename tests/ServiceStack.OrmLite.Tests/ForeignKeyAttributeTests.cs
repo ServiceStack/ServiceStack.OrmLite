@@ -49,21 +49,20 @@ namespace ServiceStack.OrmLite.Tests
         public void CascadesOnDelete()
         {
             // TODO: group tests around db features
-
-            using (var dbConn = OpenDbConnection())
+            Setup();
+            using (var db = OpenDbConnection())
             {
-                dbConn.DropAndCreateTable<TypeWithOnDeleteCascade>();
+                db.CreateTableIfNotExists<TypeWithOnDeleteCascade>();
+                db.Save(new ReferencedType { Id = 1 });
+                db.Save(new TypeWithOnDeleteCascade { RefId = 1 });
 
-                dbConn.Save(new ReferencedType { Id = 1 });
-                dbConn.Save(new TypeWithOnDeleteCascade { RefId = 1 });
+                Assert.AreEqual(1, db.Select<ReferencedType>().Count);
+                Assert.AreEqual(1, db.Select<TypeWithOnDeleteCascade>().Count);
 
-                Assert.AreEqual(1, dbConn.Select<ReferencedType>().Count);
-                Assert.AreEqual(1, dbConn.Select<TypeWithOnDeleteCascade>().Count);
+                db.Delete<ReferencedType>(r => r.Id == 1);
 
-                dbConn.Delete<ReferencedType>(r => r.Id == 1);
-
-                Assert.AreEqual(0, dbConn.Select<ReferencedType>().Count);
-                Assert.AreEqual(0, dbConn.Select<TypeWithOnDeleteCascade>().Count);
+                Assert.AreEqual(0, db.Select<ReferencedType>().Count);
+                Assert.AreEqual(0, db.Select<TypeWithOnDeleteCascade>().Count);
             }
         }
 
@@ -124,14 +123,11 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_Skip_creating_ForeignKeys()
         {
             OrmLiteConfig.SkipForeignKeys = true;
+            Setup();
 
             using (var db = OpenDbConnection())
             {
-                db.DropTable<TypeWithOnDeleteCascade>();
-                db.DropTable<ReferencedType>();
-                db.CreateTable<ReferencedType>();
-                db.CreateTable<TypeWithOnDeleteCascade>();
-
+                db.CreateTableIfNotExists<TypeWithOnDeleteCascade>();
                 db.Save(new ReferencedType { Id = 1 });
                 db.Save(new TypeWithOnDeleteCascade { RefId = 1 });
 
