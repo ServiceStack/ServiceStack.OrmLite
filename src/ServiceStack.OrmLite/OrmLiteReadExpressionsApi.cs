@@ -151,13 +151,14 @@ namespace ServiceStack.OrmLite
             var dialect = db.GetDialectProvider();
 
             var tableNames = GetTableNames(db, schema);
+            var schemaName = dialect.NamingStrategy.GetSchemaName(schema);
             foreach (var tableName in tableNames)
             {
                 if (sb.Length > 0)
                     sb.Append(" UNION ");
                 
                 // retain *real* table names and skip using naming strategy
-                sb.AppendLine($"SELECT {tableName.Quoted()}, COUNT(*) FROM {dialect.GetQuotedTableName(tableName)}");
+                sb.AppendLine($"SELECT {OrmLiteUtils.QuotedLiteral(tableName)}, COUNT(*) FROM {dialect.GetTableName(tableName, schemaName, useStrategy:false)}");
             }
 
             var sql = StringBuilderCache.ReturnAndFree(sb);

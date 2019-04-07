@@ -1030,7 +1030,7 @@ Order:
         public TABLE_2 TableTwo { get; set; }
     }
 
-    [Schema("dbo")]
+    [Schema("Schema")]
     [Alias("ProjectTask")]
     public class ProjectTask : IHasId<int>
     {
@@ -1048,7 +1048,7 @@ Order:
         public string Val { get; set; }
     }
 
-    [Schema("dbo")]
+    [Schema("Schema")]
     [Alias("Project")]
     public class Project : IHasId<int>
     {

@@ -23,6 +23,7 @@ using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
 using ServiceStack.OrmLite.Converters;
 using ServiceStack.Text;
+using ServiceStack.Script;
 
 namespace ServiceStack.OrmLite
 {
@@ -357,10 +358,11 @@ namespace ServiceStack.OrmLite
             return NamingStrategy.GetSchemaName(schema);
         }
 
-        public virtual string GetTableName(ModelDefinition modelDef)
-        {
-            return GetTableName(modelDef.ModelName, modelDef.Schema);
-        }
+        public virtual string GetTableName(ModelDefinition modelDef) => 
+            GetTableName(modelDef.ModelName, modelDef.Schema, useStrategy:true);
+
+        public virtual string GetTableName(ModelDefinition modelDef, bool useStrategy) => 
+            GetTableName(modelDef.ModelName, modelDef.Schema, useStrategy);
 
         public virtual string GetTableName(string table, string schema = null) =>
             GetTableName(table, schema, useStrategy: false);
@@ -370,13 +372,13 @@ namespace ServiceStack.OrmLite
             if (useStrategy)
             {
                 return schema != null
-                    ? $"{NamingStrategy.GetSchemaName(schema)}.{NamingStrategy.GetTableName(table)}"
-                    : NamingStrategy.GetTableName(table);
+                    ? $"{QuoteIfRequired(NamingStrategy.GetSchemaName(schema))}.{QuoteIfRequired(NamingStrategy.GetTableName(table))}"
+                    : QuoteIfRequired(NamingStrategy.GetTableName(table));
             }
             
             return schema != null
-                ? $"{schema}.{table}"
-                : table;
+                ? $"{QuoteIfRequired(schema)}.{QuoteIfRequired(table)}"
+                : QuoteIfRequired(table);
         }
 
         public virtual string GetQuotedTableName(ModelDefinition modelDef)
@@ -400,10 +402,18 @@ namespace ServiceStack.OrmLite
             return GetQuotedName(NamingStrategy.GetColumnName(columnName));
         }
 
-        public virtual string GetQuotedName(string name)
+        public virtual bool ShouldQuote(string name) => !string.IsNullOrEmpty(name) && 
+            (name.IndexOf(' ') >= 0 || name.IndexOf('.') >= 0);
+
+        public virtual string QuoteIfRequired(string name)
         {
-            return $"\"{name}\"";
+            return ShouldQuote(name)
+                ? GetQuotedName(name)
+                : name;
         }
+
+        public virtual string GetQuotedName(string name) => name == null ? null : name.FirstCharEquals('"') 
+            ? name : '"' + name + '"';
 
         public virtual string GetQuotedName(string name, string schema)
         {

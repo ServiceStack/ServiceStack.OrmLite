@@ -39,8 +39,10 @@ namespace ServiceStack.OrmLite.Tests
                 var tableNames = db.GetTableNames();
                 tableNames.TextDump().Print();
                 Assert.That(tableNames.Count, Is.GreaterThan(0));
-                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(nameof(TableMetadata1))));
-                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(nameof(TableMetadata2))));
+                var table1Name = db.GetDialectProvider().GetTableName(typeof(TableMetadata1).GetModelMetadata());
+                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(table1Name)));
+                var table2Name = db.GetDialectProvider().GetTableName(typeof(TableMetadata2).GetModelMetadata());
+                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(table2Name)));
             }
         }
 
@@ -58,8 +60,10 @@ namespace ServiceStack.OrmLite.Tests
                 var tableNames = await db.GetTableNamesAsync();
                 tableNames.TextDump().Print();
                 Assert.That(tableNames.Count, Is.GreaterThan(0));
-                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(nameof(TableMetadata1))));
-                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(nameof(TableMetadata2))));
+                var table1Name = db.GetDialectProvider().GetTableName(typeof(TableMetadata1).GetModelMetadata());
+                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(table1Name)));
+                var table2Name = db.GetDialectProvider().GetTableName(typeof(TableMetadata2).GetModelMetadata());
+                Assert.That(tableNames.Any(x => x.EqualsIgnoreCase(table2Name)));
             }
         }
 
@@ -108,17 +112,20 @@ namespace ServiceStack.OrmLite.Tests
                 tableNames.TextDump().Print();
                 Assert.That(tableNames.Count, Is.GreaterThan(0));
 
-                var table1Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(nameof(TableMetadata1)) && x.Value == 3);
+                var table1Name = db.GetDialectProvider().GetTableName(typeof(TableMetadata1).GetModelMetadata());
+                var table2Name = db.GetDialectProvider().GetTableName(typeof(TableMetadata2).GetModelMetadata());
+                
+                var table1Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(table1Name) && x.Value == 3);
                 Assert.That(table1Pos, Is.GreaterThanOrEqualTo(0));
 
-                var table2Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(nameof(TableMetadata2)) && x.Value == 1);
+                var table2Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(table2Name) && x.Value == 1);
                 Assert.That(table2Pos, Is.GreaterThanOrEqualTo(0));
                 
                 Assert.That(table1Pos < table2Pos); //is sorted desc
 
                 tableNames = db.GetTableNamesWithRowCounts(live:false);
-                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(TableMetadata1))));
-                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(TableMetadata2))));
+                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(table1Name)));
+                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(table2Name)));
             }
         }
 
@@ -137,17 +144,20 @@ namespace ServiceStack.OrmLite.Tests
                 tableNames.TextDump().Print();
                 Assert.That(tableNames.Count, Is.GreaterThan(0));
 
-                var table1Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(nameof(TableMetadata1)) && x.Value == 3);
+                var table1Name = db.GetDialectProvider().GetTableName(typeof(TableMetadata1).GetModelMetadata());
+                var table2Name = db.GetDialectProvider().GetTableName(typeof(TableMetadata2).GetModelMetadata());
+                
+                var table1Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(table1Name) && x.Value == 3);
                 Assert.That(table1Pos, Is.GreaterThanOrEqualTo(0));
 
-                var table2Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(nameof(TableMetadata2)) && x.Value == 1);
+                var table2Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(table2Name) && x.Value == 1);
                 Assert.That(table2Pos, Is.GreaterThanOrEqualTo(0));
                 
                 Assert.That(table1Pos < table2Pos); //is sorted desc
                 
                 tableNames = await db.GetTableNamesWithRowCountsAsync(live:false);
-                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(TableMetadata1))));
-                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(nameof(TableMetadata2))));
+                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(table1Name)));
+                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(table2Name)));
             }
         }
 
@@ -167,17 +177,20 @@ namespace ServiceStack.OrmLite.Tests
                 tableNames.TextDump().Print();
                 Assert.That(tableNames.Count, Is.GreaterThan(0));
 
-                var table1Pos = IndexOf(tableNames, x => x.Key.IndexOf(nameof(Schematable1), StringComparison.OrdinalIgnoreCase) >=0 && x.Value == 3);
+                var table1Name = db.GetDialectProvider().GetTableName(typeof(Schematable1).GetModelMetadata()).LastRightPart('.').StripQuotes();
+                var table2Name = db.GetDialectProvider().GetTableName(typeof(Schematable2).GetModelMetadata()).LastRightPart('.').StripQuotes();
+
+                var table1Pos = IndexOf(tableNames, x => x.Key.IndexOf(table1Name, StringComparison.OrdinalIgnoreCase) >=0 && x.Value == 3);
                 Assert.That(table1Pos, Is.GreaterThanOrEqualTo(0));
 
-                var table2Pos = IndexOf(tableNames, x => x.Key.IndexOf(nameof(Schematable2), StringComparison.OrdinalIgnoreCase) >=0 && x.Value == 1);
+                var table2Pos = IndexOf(tableNames, x => x.Key.IndexOf(table2Name, StringComparison.OrdinalIgnoreCase) >=0 && x.Value == 1);
                 Assert.That(table2Pos, Is.GreaterThanOrEqualTo(0));
                 
                 Assert.That(table1Pos < table2Pos); //is sorted desc
                 
                 tableNames = db.GetTableNamesWithRowCounts(live:true,schema:schema);
-                Assert.That(tableNames.Any(x => x.Key.IndexOf(nameof(Schematable1), StringComparison.OrdinalIgnoreCase) >= 0));
-                Assert.That(tableNames.Any(x => x.Key.IndexOf(nameof(Schematable2), StringComparison.OrdinalIgnoreCase) >= 0));
+                Assert.That(tableNames.Any(x => x.Key.IndexOf(table1Name, StringComparison.OrdinalIgnoreCase) >= 0));
+                Assert.That(tableNames.Any(x => x.Key.IndexOf(table2Name, StringComparison.OrdinalIgnoreCase) >= 0));
             }
         }
     }

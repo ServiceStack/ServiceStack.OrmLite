@@ -377,16 +377,20 @@ namespace ServiceStack.OrmLite.PostgreSQL
         {
             var sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE'";
 
-            return schema != null 
-                ? sql + " AND table_schema = {0}".SqlFmt(this, schema) 
-                : sql + " AND table_schema = 'public'";
+            var schemaName = schema != null
+                ? NamingStrategy.GetSchemaName(schema)
+                : "public";
+            return sql + " AND table_schema = {0}".SqlFmt(this, schemaName);
         }
 
         public override string ToTableNamesWithRowCountsStatement(bool live, string schema)
         {
+            var schemaName = schema != null
+                ? NamingStrategy.GetSchemaName(schema)
+                : "public";
             return live
                 ? null 
-                : "SELECT relname, reltuples FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE relkind = 'r' AND nspname = {0}".SqlFmt(this, schema ?? "public");
+                : "SELECT relname, reltuples FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE relkind = 'r' AND nspname = {0}".SqlFmt(this, schemaName);
         }
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
@@ -502,31 +506,38 @@ namespace ServiceStack.OrmLite.PostgreSQL
             return sql;
         }
 
-        public override string GetQuotedTableName(string tableName, string schema = null)
-        {
-            return !Normalize || ReservedWords.Contains(tableName) || (schema != null && ReservedWords.Contains(schema)) || tableName.Contains(' ')
-                ? base.GetQuotedTableName(tableName, schema)
-                : schema != null
-                    ? schema + "." + tableName
-                    : tableName;
-        }
+        public override bool ShouldQuote(string name) => !string.IsNullOrEmpty(name) && 
+            (Normalize || ReservedWords.Contains(name) || name.IndexOf(' ') >= 0 || name.IndexOf('.') >= 0);
 
         public override string GetQuotedName(string name)
         {
-            return !Normalize || ReservedWords.Contains(name) || name.Contains(' ')
-                ? base.GetQuotedName(name)
-                : name;
+            return name.IndexOf('.') >= 0
+                ? base.GetQuotedName(name.Replace(".", "\".\""))
+                : base.GetQuotedName(name);
         }
 
         public override string GetQuotedTableName(ModelDefinition modelDef)
         {
             if (!modelDef.IsInSchema)
                 return base.GetQuotedTableName(modelDef);
-            if (Normalize && !ReservedWords.Contains(modelDef.ModelName) && !ReservedWords.Contains(modelDef.Schema))
-                return NamingStrategy.GetSchemaName(modelDef.Schema) + "." + NamingStrategy.GetTableName(modelDef.ModelName);
+            if (Normalize && !ShouldQuote(modelDef.ModelName) && !ShouldQuote(modelDef.Schema))
+                return GetQuotedName(NamingStrategy.GetSchemaName(modelDef.Schema)) + "." + GetQuotedName(NamingStrategy.GetTableName(modelDef.ModelName));
 
-            string escapedSchema = NamingStrategy.GetSchemaName(modelDef.Schema).Replace(".", "\".\"");
-            return $"\"{escapedSchema}\".\"{NamingStrategy.GetTableName(modelDef.ModelName)}\"";
+            return $"{GetQuotedName(NamingStrategy.GetSchemaName(modelDef.Schema))}.{GetQuotedName(NamingStrategy.GetTableName(modelDef.ModelName))}";
+        }
+
+        public override string GetTableName(string table, string schema, bool useStrategy)
+        {
+            if (useStrategy)
+            {
+                return schema != null
+                    ? $"{QuoteIfRequired(NamingStrategy.GetSchemaName(schema))}.{QuoteIfRequired(NamingStrategy.GetTableName(table))}"
+                    : QuoteIfRequired(NamingStrategy.GetTableName(table));
+            }
+            
+            return schema != null
+                ? $"{QuoteIfRequired(schema)}.{QuoteIfRequired(table)}"
+                : QuoteIfRequired(table);
         }
         
         public override string GetLastInsertIdSqlSuffix<T>()

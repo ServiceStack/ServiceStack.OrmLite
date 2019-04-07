@@ -1108,5 +1108,14 @@ namespace ServiceStack.OrmLite
             return (dialect, tableDef, expr) =>
                 $"{dialect.GetQuotedTableName(tableDef)} {alias} {expr.Replace(dialect.GetQuotedTableName(tableDef), dialect.GetQuotedTableName(alias))}";
         }
+        
+        /// <summary>
+        /// RDBMS Quoted string 'literal' 
+        /// </summary>
+        /// <returns></returns>
+        public static string QuotedLiteral(string text) => text == null || text.IndexOf('\'') >= 0
+            ? text
+            : "'" + text + "'";
+
     }
 }

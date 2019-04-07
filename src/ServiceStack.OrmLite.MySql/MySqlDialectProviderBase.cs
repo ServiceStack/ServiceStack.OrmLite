@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.OrmLite.MySql.Converters;
 using ServiceStack.OrmLite.MySql.DataAnnotations;
+using ServiceStack.Script;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.MySql
@@ -50,6 +51,272 @@ namespace ServiceStack.OrmLite.MySql
         }
 
         public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
+
+        public static HashSet<string> ReservedWords = new HashSet<string>(new[]
+        {
+		  "ACCESSIBLE",
+		  "ADD",
+		  "ALL",
+		  "ALTER",
+		  "ANALYZE",
+		  "AND",
+		  "AS",
+		  "ASC",
+		  "ASENSITIVE",
+		  "BEFORE",
+		  "BETWEEN",
+		  "BIGINT",
+		  "BINARY",
+		  "BLOB",
+		  "BOTH",
+		  "BY",
+		  "CALL",
+		  "CASCADE",
+		  "CASE",
+		  "CHANGE",
+		  "CHAR",
+		  "CHARACTER",
+		  "CHECK",
+		  "COLLATE",
+		  "COLUMN",
+		  "CONDITION",
+		  "CONSTRAINT",
+		  "CONTINUE",
+		  "CONVERT",
+		  "CREATE",
+		  "CROSS",
+		  "CUBE",
+		  "CUME_DIST",
+		  "CURRENT_DATE",
+		  "CURRENT_TIME",
+		  "CURRENT_TIMESTAMP",
+		  "CURRENT_USER",
+		  "CURSOR",
+		  "DATABASE",
+		  "DATABASES",
+		  "DAY_HOUR",
+		  "DAY_MICROSECOND",
+		  "DAY_MINUTE",
+		  "DAY_SECOND",
+		  "DEC",
+		  "DECIMAL",
+		  "DECLARE",
+		  "DEFAULT",
+		  "DELAYED",
+		  "DELETE",
+		  "DENSE_RANK",
+		  "DESC",
+		  "DESCRIBE",
+		  "DETERMINISTIC",
+		  "DISTINCT",
+		  "DISTINCTROW",
+		  "DIV",
+		  "DOUBLE",
+		  "DROP",
+		  "DUAL",
+		  "EACH",
+		  "ELSE",
+		  "ELSEIF",
+		  "EMPTY",
+		  "ENCLOSED",
+		  "ESCAPED",
+		  "EXCEPT",
+		  "EXISTS",
+		  "EXIT",
+		  "EXPLAIN",
+		  "FALSE",
+		  "FETCH",
+		  "FIRST_VALUE",
+		  "FLOAT",
+		  "FLOAT4",
+		  "FLOAT8",
+		  "FOR",
+		  "FORCE",
+		  "FOREIGN",
+		  "FROM",
+		  "FULLTEXT",
+		  "FUNCTION",
+		  "GENERATED",
+		  "GET",
+		  "GRANT",
+		  "GROUP",
+		  "GROUPING",
+		  "GROUPS",
+		  "HAVING",
+		  "HIGH_PRIORITY",
+		  "HOUR_MICROSECOND",
+		  "HOUR_MINUTE",
+		  "HOUR_SECOND",
+		  "IF",
+		  "IGNORE",
+		  "IN",
+		  "INDEX",
+		  "INFILE",
+		  "INNER",
+		  "INOUT",
+		  "INSENSITIVE",
+		  "INSERT",
+		  "INT",
+		  "INT1",
+		  "INT2",
+		  "INT3",
+		  "INT4",
+		  "INT8",
+		  "INTEGER",
+		  "INTERVAL",
+		  "INTO",
+		  "IO_AFTER_GTIDS",
+		  "IO_BEFORE_GTIDS",
+		  "IS",
+		  "ITERATE",
+		  "JOIN",
+		  "JSON_TABLE",
+		  "KEY",
+		  "KEYS",
+		  "KILL",
+		  "LAG",
+		  "LAST_VALUE",
+		  "LEAD",
+		  "LEADING",
+		  "LEAVE",
+		  "LEFT",
+		  "LIKE",
+		  "LIMIT",
+		  "LINEAR",
+		  "LINES",
+		  "LOAD",
+		  "LOCALTIME",
+		  "LOCALTIMESTAMP",
+		  "LOCK",
+		  "LONG",
+		  "LONGBLOB",
+		  "LONGTEXT",
+		  "LOOP",
+		  "LOW_PRIORITY",
+		  "MASTER_BIND",
+		  "MASTER_SSL_VERIFY_SERVER_CERT",
+		  "MATCH",
+		  "MAXVALUE",
+		  "MEDIUMBLOB",
+		  "MEDIUMINT",
+		  "MEDIUMTEXT",
+		  "MIDDLEINT",
+		  "MINUTE_MICROSECOND",
+		  "MINUTE_SECOND",
+		  "MOD",
+		  "MODIFIES",
+		  "NATURAL",
+		  "NOT",
+		  "NO_WRITE_TO_BINLOG",
+		  "NTH_VALUE",
+		  "NTILE",
+		  "NULL",
+		  "NUMERIC",
+		  "OF",
+		  "ON",
+		  "OPTIMIZE",
+		  "OPTIMIZER_COSTS",
+		  "OPTION",
+		  "OPTIONALLY",
+		  "OR",
+		  "ORDER",
+		  "OUT",
+		  "OUTER",
+		  "OUTFILE",
+		  "OVER",
+		  "PARTITION",
+		  "PERCENT_RANK",
+		  "PERSIST",
+		  "PERSIST_ONLY",
+		  "PRECISION",
+		  "PRIMARY",
+		  "PROCEDURE",
+		  "PURGE",
+		  "RANGE",
+		  "RANK",
+		  "READ",
+		  "READS",
+		  "READ_WRITE",
+		  "REAL",
+		  "RECURSIVE",
+		  "REFERENCES",
+		  "REGEXP",
+		  "RELEASE",
+		  "RENAME",
+		  "REPEAT",
+		  "REPLACE",
+		  "REQUIRE",
+		  "RESIGNAL",
+		  "RESTRICT",
+		  "RETURN",
+		  "REVOKE",
+		  "RIGHT",
+		  "RLIKE",
+		  "ROW",
+		  "ROWS",
+		  "ROW_NUMBER",
+		  "SCHEMA",
+		  "SCHEMAS",
+		  "SECOND_MICROSECOND",
+		  "SELECT",
+		  "SENSITIVE",
+		  "SEPARATOR",
+		  "SET",
+		  "SHOW",
+		  "SIGNAL",
+		  "SMALLINT",
+		  "SPATIAL",
+		  "SPECIFIC",
+		  "SQL",
+		  "SQLEXCEPTION",
+		  "SQLSTATE",
+		  "SQLWARNING",
+		  "SQL_BIG_RESULT",
+		  "SQL_CALC_FOUND_ROWS",
+		  "SQL_SMALL_RESULT",
+		  "SSL",
+		  "STARTING",
+		  "STORED",
+		  "STRAIGHT_JOIN",
+		  "SYSTEM",
+		  "TABLE",
+		  "TERMINATED",
+		  "THEN",
+		  "TINYBLOB",
+		  "TINYINT",
+		  "TINYTEXT",
+		  "TO",
+		  "TRAILING",
+		  "TRIGGER",
+		  "TRUE",
+		  "UNDO",
+		  "UNION",
+		  "UNIQUE",
+		  "UNLOCK",
+		  "UNSIGNED",
+		  "UPDATE",
+		  "USAGE",
+		  "USE",
+		  "USING",
+		  "UTC_DATE",
+		  "UTC_TIME",
+		  "UTC_TIMESTAMP",
+		  "VALUES",
+		  "VARBINARY",
+		  "VARCHAR",
+		  "VARCHARACTER",
+		  "VARYING",
+		  "VIRTUAL",
+		  "WHEN",
+		  "WHERE",
+		  "WHILE",
+		  "WINDOW",
+		  "WITH",
+		  "WRITE",
+		  "XOR",
+		  "YEAR_MONTH",
+		  "ZEROFILL",
+        }, StringComparer.OrdinalIgnoreCase);
 
         public override string GetLoadChildrenSubSelect<From>(SqlExpression<From> expr)
         {
@@ -103,17 +370,21 @@ namespace ServiceStack.OrmLite.MySql
         {
             if (useStrategy)
             {
-                return schema != null
-                    ? $"{NamingStrategy.GetSchemaName(schema)}_{NamingStrategy.GetTableName(table)}"
-                    : NamingStrategy.GetTableName(table);
+                return schema != null && !table.StartsWithIgnoreCase(schema + "_")
+					? QuoteIfRequired(NamingStrategy.GetSchemaName(schema) + "_" + NamingStrategy.GetTableName(table)) 	
+					: QuoteIfRequired(NamingStrategy.GetTableName(table));
             }
             
-            return schema != null
-                ? $"{schema}_{table}"
-                : table;
+            return schema != null && !table.StartsWithIgnoreCase(schema + "_")
+                ? QuoteIfRequired(schema + "_" + table)
+                : QuoteIfRequired(table);
         }
 
-        public override string GetQuotedName(string name) => $"`{name}`";
+        public override bool ShouldQuote(string name) => name != null && 
+            (ReservedWords.Contains(name) || name.IndexOf(' ') >= 0 || name.IndexOf('.') >= 0);
+
+        public override string GetQuotedName(string name) => name == null ? null : name.FirstCharEquals('`') 
+	        ? name : '`' + name + '`';
 
         public override string GetQuotedTableName(string tableName, string schema = null)
         {
@@ -129,7 +400,7 @@ namespace ServiceStack.OrmLite.MySql
         {
             return schema == null 
                 ? "SELECT table_name FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema = DATABASE()"
-                : "SELECT table_name FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema = DATABASE() AND table_name LIKE {0}".SqlFmt(this, GetTableName("",schema) + "%");
+                : "SELECT table_name FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema = DATABASE() AND table_name LIKE {0}".SqlFmt(this, NamingStrategy.GetSchemaName(schema)  + "\\_%");
         }
 
         public override string ToTableNamesWithRowCountsStatement(bool live, string schema)
@@ -139,7 +410,7 @@ namespace ServiceStack.OrmLite.MySql
             
             return schema == null 
                 ? "SELECT table_name, table_rows FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema = DATABASE()"
-                : "SELECT table_name, table_rows FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema = DATABASE() AND table_name LIKE {0}".SqlFmt(this, GetTableName("",schema) + "%");
+                : "SELECT table_name, table_rows FROM information_schema.tables WHERE table_type='BASE TABLE' AND table_schema = DATABASE() AND table_name LIKE {0}".SqlFmt(this, NamingStrategy.GetSchemaName(schema)  + "\\_%");
         }
         
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
@@ -209,7 +480,7 @@ namespace ServiceStack.OrmLite.MySql
                 sbConstraints.Append(",\n" + uniqueConstraints);
             }
 
-            var sql = $"CREATE TABLE {GetQuotedName(NamingStrategy.GetTableName(modelDef))} \n(\n  {StringBuilderCache.ReturnAndFree(sbColumns)}{StringBuilderCacheAlt.ReturnAndFree(sbConstraints)} \n); \n";
+            var sql = $"CREATE TABLE {GetQuotedTableName(modelDef)} \n(\n  {StringBuilderCache.ReturnAndFree(sbColumns)}{StringBuilderCacheAlt.ReturnAndFree(sbConstraints)} \n); \n";
 
             return sql;
         }

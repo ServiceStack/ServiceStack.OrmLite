@@ -166,12 +166,12 @@ namespace ServiceStack.OrmLite.Sqlite
         {
             if (useStrategy)
             {
-                return schema != null
+                return schema != null && !table.StartsWithIgnoreCase(schema + "_")
                     ? $"{NamingStrategy.GetSchemaName(schema)}_{NamingStrategy.GetTableName(table)}"
                     : NamingStrategy.GetTableName(table);
             }
             
-            return schema != null
+            return schema != null && !table.StartsWithIgnoreCase(schema + "_")
                 ? $"{schema}_{table}"
                 : table;
         }

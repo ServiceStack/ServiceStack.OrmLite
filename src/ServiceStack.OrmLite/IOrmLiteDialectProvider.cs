@@ -92,6 +92,8 @@ namespace ServiceStack.OrmLite
 
         string GetTableName(ModelDefinition modelDef);
 
+        string GetTableName(ModelDefinition modelDef, bool useStrategy);
+
         string GetTableName(string table, string schema = null);
         string GetTableName(string table, string schema, bool useStrategy);
 
