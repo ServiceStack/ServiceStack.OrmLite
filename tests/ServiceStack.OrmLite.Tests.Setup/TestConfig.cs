@@ -77,8 +77,7 @@ namespace ServiceStack.OrmLite.Tests
         public static string MariaDb_10_1 = EnvironmentVariable(new[]{ "MYSQL101_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none");
         public static string MariaDb_10_2 = EnvironmentVariable(new[]{ "MYSQL102_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48203;Database=test;UID=root;Password=test;SslMode=none");
         public static string MariaDb_10_3 = EnvironmentVariable(new[]{ "MYSQL103_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48204;Database=test;UID=root;Password=test;SslMode=none");
-//        public static string MariaDb_10_4 = EnvironmentVariable(new[]{ "MYSQL104_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none");
-        public static string MariaDb_10_4 = EnvironmentVariable(new[]{ "MYSQL104_CONNECTION" }, "Server=gistlyn.com;Port=48205;Database=test;UID=root;Password=test;SslMode=none");
+        public static string MariaDb_10_4 = EnvironmentVariable(new[]{ "MYSQL104_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none");
         
         public static string MySqlDb_10_1 = EnvironmentVariable(new[]{ "MYSQL101_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none;Convert Zero Datetime=True;");
         
