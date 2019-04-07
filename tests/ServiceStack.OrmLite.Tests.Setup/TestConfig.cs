@@ -290,6 +290,8 @@ namespace ServiceStack.OrmLite.Tests
                 {
                     db.ExecuteSql(pgExtension);
                 }
+
+                var dialectProvider = db.GetDialectProvider();
                 var schemaName = dialectProvider.NamingStrategy.GetSchemaName("Schema");
                 db.ExecuteSql($"CREATE SCHEMA IF NOT EXISTS {dialectProvider.GetQuotedName(schemaName)}");
             }
