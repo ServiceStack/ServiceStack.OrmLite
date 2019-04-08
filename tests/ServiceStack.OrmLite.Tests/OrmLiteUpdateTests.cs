@@ -431,14 +431,15 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(new PocoUpdate { Id = 2, Name = "B" });
 
                 var paramString = DialectProvider.ParamString;
-                var sql = $"UPDATE PocoUpdate SET name = {paramString}name WHERE id = {paramString}id";
+                var table = db.GetDialectProvider().GetTableName(nameof(PocoUpdate));
+                var sql = $"UPDATE {table} SET name = {paramString}name WHERE id = {paramString}id";
                 var result = db.ExecuteSql(sql, new { id = 2, name = "UPDATED" });
                 Assert.That(result, Is.EqualTo(1));
 
                 var row = db.SingleById<PocoUpdate>(2);
                 Assert.That(row.Name, Is.EqualTo("UPDATED"));
 
-                sql = $"UPDATE PocoUpdate SET name = {paramString}name WHERE id = {paramString}id";
+                sql = $"UPDATE {table} SET name = {paramString}name WHERE id = {paramString}id";
                 result = db.ExecuteSql(sql, new Dictionary<string, object> { {"id", 2}, {"name", "RE-UPDATED" } });
                 Assert.That(result, Is.EqualTo(1));
 

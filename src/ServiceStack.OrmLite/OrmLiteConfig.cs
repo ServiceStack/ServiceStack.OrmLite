@@ -46,15 +46,15 @@ namespace ServiceStack.OrmLite
 
         public static IOrmLiteDialectProvider GetDialectProvider(this IDbCommand dbCmd)
         {
-            return dbCmd is OrmLiteCommand ormLiteCmd 
-                ? ormLiteCmd.DialectProvider
+            return dbCmd is IHasDialectProvider hasDialectProvider 
+                ? hasDialectProvider.DialectProvider
                 : DialectProvider;
         }
 
         public static IOrmLiteDialectProvider GetDialectProvider(this IDbConnection db)
         {
-            return db is OrmLiteConnection ormLiteConn
-                ? ormLiteConn.DialectProvider
+            return db is IHasDialectProvider hasDialectProvider
+                ? hasDialectProvider.DialectProvider
                 : DialectProvider;
         }
 
@@ -65,15 +65,15 @@ namespace ServiceStack.OrmLite
         }
 
         public static IOrmLiteExecFilter GetExecFilter(this IDbCommand dbCmd) {
-            var dialect = dbCmd is OrmLiteCommand ormLiteCmd
-                ? ormLiteCmd.DialectProvider
+            var dialect = dbCmd is IHasDialectProvider hasDialectProvider
+                ? hasDialectProvider.DialectProvider
                 : DialectProvider;
             return dialect.GetExecFilter();
         }
 
         public static IOrmLiteExecFilter GetExecFilter(this IDbConnection db) {
-            var dialect = db is OrmLiteConnection ormLiteConn
-                ? ormLiteConn.DialectProvider
+            var dialect = db is IHasDialectProvider hasDialectProvider
+                ? hasDialectProvider.DialectProvider
                 : DialectProvider;
             return dialect.GetExecFilter();
         }

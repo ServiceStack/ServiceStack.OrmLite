@@ -36,9 +36,10 @@ namespace ServiceStack.OrmLite.Tests
                     nU.Id = (int) db.Insert(nU, selectIdentity: true);
                 }
 
+                var table = db.GetDialectProvider().GetTableName(nameof(UsersSqlBuilder));
                 var builder = new SqlBuilder();
-                var justId = builder.AddTemplate("SELECT /**select**/ FROM UsersSqlBuilder");
-                var all = builder.AddTemplate("SELECT /**select**/, Name, Age FROM UsersSqlBuilder");
+                var justId = builder.AddTemplate($"SELECT /**select**/ FROM {table}");
+                var all = builder.AddTemplate($"SELECT /**select**/, Name, Age FROM {table}");
 
                 builder.Select("Id");
 
@@ -62,10 +63,10 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<UsersSqlBuilder>();
                 
                 var builder = new SqlBuilder();
-                var template =
-                    builder.AddTemplate(
-                        "SELECT COUNT(*) FROM UsersSqlBuilder WHERE Age = {0}age".Fmt(DialectProvider.ParamString),
-                        new {age = 5});
+                var table = db.GetDialectProvider().GetTableName(nameof(UsersSqlBuilder));
+                var template = builder.AddTemplate(
+                    $"SELECT COUNT(*) FROM {table} WHERE Age = {DialectProvider.ParamString}age",
+                    new {age = 5});
 
                 if (template.RawSql == null) throw new Exception("RawSql null");
                 if (template.Parameters == null) throw new Exception("Parameters null");

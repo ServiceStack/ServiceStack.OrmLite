@@ -73,6 +73,7 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = OpenDbConnection())
             {
                 db.DropTable<Schematest>();
+                db.DropTable<NewSchematest>();
 
                 Assert.That(!db.ColumnExists<Schematest>(x => x.Id));
                 Assert.That(!db.ColumnExists<Schematest>(x => x.Name));

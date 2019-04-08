@@ -365,7 +365,7 @@ namespace ServiceStack.OrmLite
             GetTableName(modelDef.ModelName, modelDef.Schema, useStrategy);
 
         public virtual string GetTableName(string table, string schema = null) =>
-            GetTableName(table, schema, useStrategy: false);
+            GetTableName(table, schema, useStrategy: true);
 
         public virtual string GetTableName(string table, string schema, bool useStrategy)
         {
