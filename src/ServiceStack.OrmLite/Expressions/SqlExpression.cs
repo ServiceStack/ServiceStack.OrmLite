@@ -400,6 +400,12 @@ namespace ServiceStack.OrmLite
             return UnsafeFrom(tables);
         }
 
+        public virtual SqlExpression<T> IncludeTablePrefix()
+        {
+            PrefixFieldWithTableName = true;
+            return this;
+        }
+
         public virtual SqlExpression<T> SetTableAlias(string tableAlias)
         {
             PrefixFieldWithTableName = tableAlias != null;
