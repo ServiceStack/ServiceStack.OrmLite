@@ -396,8 +396,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = !Normalize || ReservedWords.Contains(tableName)
-                ? "SELECT COUNT(*) FROM pg_class WHERE relname = {0}".SqlFmt(tableName)
-                : "SELECT COUNT(*) FROM pg_class WHERE lower(relname) = {0}".SqlFmt(tableName.ToLower());
+                ? "SELECT COUNT(*) FROM pg_class WHERE relname = {0} AND relkind = 'r'".SqlFmt(tableName)
+                : "SELECT COUNT(*) FROM pg_class WHERE lower(relname) = {0} AND relkind = 'r'".SqlFmt(tableName.ToLower());
 
             var conn = dbCmd.Connection;
             if (conn != null)
@@ -405,13 +405,15 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 var builder = new NpgsqlConnectionStringBuilder(conn.ConnectionString);
                 if (schema == null)
                     schema = builder.SearchPath;
+                if (schema == null)
+                    schema = "public";
                 
                 // If a search path (schema) is specified, and there is only one, then assume the CREATE TABLE directive should apply to that schema.
                 if (!string.IsNullOrEmpty(schema) && !schema.Contains(","))
                 {
                     sql = !Normalize || ReservedWords.Contains(schema)
-                        ? "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE relname = {0} AND nspname = {1}".SqlFmt(tableName, schema)
-                        : "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE lower(relname) = {0} AND lower(nspname) = {1}".SqlFmt(tableName.ToLower(), schema.ToLower());
+                        ? "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE relname = {0} AND relkind = 'r' AND nspname = {1}".SqlFmt(tableName, schema)
+                        : "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE lower(relname) = {0} AND relkind = 'r' AND lower(nspname) = {1}".SqlFmt(tableName.ToLower(), schema.ToLower());
                 }
             }
 
