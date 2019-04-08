@@ -373,7 +373,7 @@ namespace ServiceStack.OrmLite.Tests
                     try
                     {
                         using (var db = dbFactory.OpenDbConnectionString(
-                            DialectConnections[Tuple.Create(Dialect.PostgreSql, version)] + ";Timeout=1",
+                            DialectConnections[Tuple.Create(Dialect.PostgreSql, version)] + ";Timeout=10",
                             Dialect.PostgreSql.ToString()))
                         {
                             InitPostgres(Dialect.PostgreSql, db);
@@ -390,7 +390,7 @@ namespace ServiceStack.OrmLite.Tests
                     foreach (var version in DialectVersions[Dialect.MySqlConnector])
                     {
                         using (var db = dbFactory.OpenDbConnectionString(
-                            DialectConnections[Tuple.Create(Dialect.MySqlConnector, version)] + ";Timeout=1",
+                            DialectConnections[Tuple.Create(Dialect.MySqlConnector, version)] + ";Timeout=10",
                             Dialect.MySqlConnector.ToString()))
                         {
                             InitMySqlConnector(Dialect.PostgreSql, db);
@@ -408,7 +408,7 @@ namespace ServiceStack.OrmLite.Tests
                     {
                         if (DialectConnections.TryGetValue(Tuple.Create(dialect, version), out var connString))
                         {
-                            using (var db = dbFactory.OpenDbConnectionString(connString + ";Timeout=1", dialect.ToString()))
+                            using (var db = dbFactory.OpenDbConnectionString(connString + ";Timeout=10", dialect.ToString()))
                             {
                                 InitSqlServer(dialect, db);
                             }
