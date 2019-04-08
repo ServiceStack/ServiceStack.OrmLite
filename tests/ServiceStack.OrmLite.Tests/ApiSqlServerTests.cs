@@ -5,7 +5,7 @@ using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
+    [TestFixtureOrmLiteDialects(Dialect.AnySqlServer)]
     public class ApiSqlServerTests : OrmLiteProvidersTestBase
     {
         public ApiSqlServerTests(DialectContext context) : base(context) {}

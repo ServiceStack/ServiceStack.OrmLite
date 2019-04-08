@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.Tests.Async
         public string Letter { get; set; }
     }
 
-    [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
+    [TestFixtureOrmLiteDialects(Dialect.AnySqlServer)]
     public class CustomSqlTestsAsync : OrmLiteProvidersTestBase
     {
         public CustomSqlTestsAsync(DialectContext context) : base(context) {}

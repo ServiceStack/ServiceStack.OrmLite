@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.Tests
         public bool Bool { get; set; }
     }
 
-    [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
+    [TestFixtureOrmLiteDialects(Dialect.AnySqlServer)]
     public class SqlDialectTests : OrmLiteProvidersTestBase
     {
         public SqlDialectTests(DialectContext context) : base(context) {}

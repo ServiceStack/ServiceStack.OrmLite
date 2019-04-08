@@ -7,7 +7,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
+    [TestFixtureOrmLiteDialects(Dialect.AnySqlServer)]
     public class SqlServerProviderTestsAsync : OrmLiteProvidersTestBase
     {
         public SqlServerProviderTestsAsync(DialectContext context) : base(context) {}

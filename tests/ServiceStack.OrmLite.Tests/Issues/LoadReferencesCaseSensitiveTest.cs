@@ -35,7 +35,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public string RegionName { get; set; }
     }
 
-    [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
+    [TestFixtureOrmLiteDialects(Dialect.AnySqlServer)]
     public class LoadReferencesCaseSensitiveTest : OrmLiteProvidersTestBase
     {
         public LoadReferencesCaseSensitiveTest(DialectContext context) : base(context) {}

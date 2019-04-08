@@ -10,6 +10,14 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
+    public partial class TestConfig
+    {
+        /// <summary>
+        /// This value controls which providers are tested for all <see cref="TestFixtureOrmLiteAttribute"/> tests where dialects are not explicitly set
+        /// </summary>
+        public static Dialect Dialects = EnvironmentVariable("ORMLITE_DIALECT", Dialect.Sqlite);
+    }
+
     [Flags]
     public enum Dialect
     {
@@ -203,12 +211,8 @@ namespace ServiceStack.OrmLite.Tests
     /// <summary>
     /// Primary config for all tests 
     /// </summary>
-    public class TestConfig
+    public partial class TestConfig
     {
-        /// <summary>
-        /// This value controls which providers are tested for all <see cref="TestFixtureOrmLiteAttribute"/> tests where dialects are not explicitly set
-        /// </summary>
-        public static Dialect Dialects = EnvironmentVariable("ORMLITE_DIALECT", Dialect.Sqlite);
         public const bool EnableDebugLogging = false;
 
         public static Dictionary<Dialect, IOrmLiteDialectProvider> DialectProviders = new Dictionary<Dialect, IOrmLiteDialectProvider> 
