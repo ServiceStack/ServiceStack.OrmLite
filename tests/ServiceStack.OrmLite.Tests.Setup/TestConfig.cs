@@ -208,7 +208,7 @@ namespace ServiceStack.OrmLite.Tests
         /// <summary>
         /// This value controls which providers are tested for all <see cref="TestFixtureOrmLiteAttribute"/> tests where dialects are not explicitly set
         /// </summary>
-        public static Dialect Dialects = EnvironmentVariable("ORMLITE_DIALECT", Dialect.Sqlite | Dialect.MySql);
+        public static Dialect Dialects = EnvironmentVariable("ORMLITE_DIALECT", Dialect.Sqlite);
         public const bool EnableDebugLogging = false;
 
         public static Dictionary<Dialect, IOrmLiteDialectProvider> DialectProviders = new Dictionary<Dialect, IOrmLiteDialectProvider> 
