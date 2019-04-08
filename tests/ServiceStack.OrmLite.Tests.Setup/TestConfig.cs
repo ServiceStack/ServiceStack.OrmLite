@@ -98,7 +98,7 @@ namespace ServiceStack.OrmLite.Tests
     {
         public const int Memory = 1;
         public const int File = 100;
-        public static int[] Versions => TestConfig.EnvironmentVariable("SQLITE_VERSION", new[]{ Memory });
+        public static int[] Versions => TestConfig.EnvironmentVariableInto("SQLITE_VERSION", new[]{ Memory });
         public static string DefaultConnection => MemoryConnection;
         public static string MemoryConnection => TestConfig.DialectConnections[Tuple.Create(Dialect.Sqlite, Memory)];
         public static string FileConnection => TestConfig.DialectConnections[Tuple.Create(Dialect.Sqlite, File)];
@@ -115,7 +115,7 @@ namespace ServiceStack.OrmLite.Tests
         public const int V2014 = 2014;
         public const int V2016 = 2016;
         public const int V2017 = 2017;
-        public static int[] Versions = TestConfig.EnvironmentVariable("MSSQL_VERSION", new[]{ V2008, V2012, V2014, V2016, V2017 });
+        public static int[] Versions = TestConfig.EnvironmentVariableInto("MSSQL_VERSION", new[]{ V2008, V2012, V2014, V2016, V2017 });
         public static int[] V2008Versions = Versions.Where(x => x == V2008).ToArray();
         public static int[] V2012Versions = Versions.Where(x => x == V2012).ToArray();
         public static int[] V2014Versions = Versions.Where(x => x == V2014).ToArray();
@@ -140,7 +140,7 @@ namespace ServiceStack.OrmLite.Tests
         public const int V10_2 = 102;
         public const int V10_3 = 103;
         public const int V10_4 = 104;
-        public static readonly int[] Versions = TestConfig.EnvironmentVariable("MYSQL_VERSION", new[]{ V5_5, V10_1, V10_2, V10_3, V10_4 });
+        public static readonly int[] Versions = TestConfig.EnvironmentVariableInto("MYSQL_VERSION", new[]{ V5_5, V10_1, V10_2, V10_3, V10_4 });
         public static int[] MySqlConnectorVersions = Versions.Where(x => x == V10_4).ToArray();
         public static readonly string DefaultConnection = TestConfig.DialectConnections[Tuple.Create(Dialect.MySql, V10_4)];
 
@@ -162,7 +162,7 @@ namespace ServiceStack.OrmLite.Tests
         public const int V9 = 9;
         public const int V10 = 10;
         public const int V11 = 11;
-        public static readonly int[] Versions = TestConfig.EnvironmentVariable("PGSQL_VERSION", new[]{ V9, V10, V11 });
+        public static readonly int[] Versions = TestConfig.EnvironmentVariableInto("PGSQL_VERSION", new[]{ V9, V10, V11 });
         public static readonly string DefaultConnection = TestConfig.GetConnection(Dialect.PostgreSql, V11);
         public static string VersionString(int version) => "PostgreSQL " + (version == V9
             ? "v9"
@@ -175,7 +175,7 @@ namespace ServiceStack.OrmLite.Tests
     public static class OracleDb
     {
         public const int V11 = 11;
-        public static readonly int[] Versions = TestConfig.EnvironmentVariable("ORACLE_VERSION", new[]{ V11 });
+        public static readonly int[] Versions = TestConfig.EnvironmentVariableInto("ORACLE_VERSION", new[]{ V11 });
         public static readonly string DefaultConnection = TestConfig.GetConnection(Dialect.Oracle, V11);
         public static string VersionString(int version) => "Oracle " + (version == V11
             ? "v11"
@@ -184,7 +184,7 @@ namespace ServiceStack.OrmLite.Tests
     public static class FirebirdDb
     {
         public const int V3 = 3;
-        public static readonly int[] Versions = TestConfig.EnvironmentVariable("FIREBIRD_VERSION", new[]{ V3 });
+        public static readonly int[] Versions = TestConfig.EnvironmentVariableInto("FIREBIRD_VERSION", new[]{ V3 });
         public static readonly string DefaultConnection = TestConfig.GetConnection(Dialect.Firebird, V3);
         public static string VersionString(int version) => "Firebird " + (version == V3
             ? "v3"
@@ -193,7 +193,7 @@ namespace ServiceStack.OrmLite.Tests
     public static class VistaDb
     {
         public const int V5 = 5;
-        public static readonly int[] Versions = TestConfig.EnvironmentVariable("VISTADB_VERSION", new[]{ V5 });
+        public static readonly int[] Versions = TestConfig.EnvironmentVariableInto("VISTADB_VERSION", new[]{ V5 });
         public static readonly string DefaultConnection = TestConfig.GetConnection(Dialect.VistaDb, V5);
         public static string VersionString(int version) => "VistaDB " + (version == V5
             ? "v5"
@@ -295,6 +295,12 @@ namespace ServiceStack.OrmLite.Tests
         {
             var value = Environment.GetEnvironmentVariable(variable);
             return string.IsNullOrEmpty(value) ? defaultValue : Convert<T>(value);
+        }
+        
+        public static T[] EnvironmentVariableInto<T>(string variable, T[] defaultValues)
+        {
+            var value = Environment.GetEnvironmentVariable(variable);
+            return string.IsNullOrEmpty(value) ? defaultValues : value.FromJsv<T[]>();
         }
         
         private static T Convert<T>(string value)
