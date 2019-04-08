@@ -7,9 +7,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Async.Issues
 {
-    //[Schema("dbo")]
-    [Alias("Project")]
-    public class Project : IHasId<int>
+    public class AsyncProject : IHasId<int>
     {
         [Alias("ProjectId")]
         [Index(Unique = true)]
@@ -17,10 +15,10 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
         public int Id { get; set; }
 
         [Required]
-        [References(typeof(Department))]
+        [References(typeof(AsyncDepartment))]
         public int DepartmentId { get; set; }
         [Reference]
-        public Department Department { get; set; }
+        public AsyncDepartment AsyncDepartment { get; set; }
 
         [Required]
         public string ProjectName { get; set; }
@@ -30,7 +28,7 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
         public DateTime CreatedOn { get; set; }
     }
 
-    public class Department
+    public class AsyncDepartment
     {
         [Alias("DepartmentId")]
         [Index(Unique = true)]
@@ -40,18 +38,17 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
         public string Name { get; set; }
     }
 
-    [Alias("ProjectTask")]
-    public class ProjectTask : IHasId<int>
+    public class AsyncProjectTask : IHasId<int>
     {
         [Alias("ProjectTaskId")]
         [Index(Unique = true)]
         [AutoIncrement]
         public int Id { get; set; }
 
-        [References(typeof(Project))]
+        [References(typeof(AsyncProject))]
         public int ProjectId { get; set; }
         [Reference]
-        public Project Project { get; set; }
+        public AsyncProject AsyncProject { get; set; }
 
         [Required]
         public string Description { get; set; }
@@ -61,10 +58,10 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
         [Required]
         public int EstimatedHours { get; set; }
 
-        [References(typeof(ProjectTaskStatus))]
+        [References(typeof(AsyncProjectTaskStatus))]
         public int? ProjectTaskStatusId { get; set; }
         [Reference]
-        public ProjectTaskStatus ProjectTaskStatus { get; set; }
+        public AsyncProjectTaskStatus AsyncProjectTaskStatus { get; set; }
 
         [Required]
         public int Priority { get; set; }
@@ -72,9 +69,7 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
         public int Order { get; set; }
     }
 
-    //[Schema("dbo")]
-    [Alias("ProjectTaskStatus")]
-    public class ProjectTaskStatus : IHasId<int>
+    public class AsyncProjectTaskStatus : IHasId<int>
     {
         [Alias("ProjectTaskStatusId")]
         [Index(Unique = true)]
@@ -89,7 +84,7 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
     {
         public LoadSelectAmbiguousColumnIssue(DialectContext context) : base(context) {}
 
-        public class DeptEmployee //Ref of External Table
+        public class AsyncDeptEmployee //Ref of External Table
         {
             [PrimaryKey]
             public int Id { get; set; }
@@ -101,25 +96,25 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
         {
             using (var db = OpenDbConnection())
             {
-                db.DropTable<DeptEmployee>();
+                db.DropTable<AsyncDeptEmployee>();
 
-                db.DropTable<ProjectTask>();
-                db.DropTable<Project>();
-                db.DropTable<ProjectTaskStatus>();
-                db.DropTable<Department>();
+                db.DropTable<AsyncProjectTask>();
+                db.DropTable<AsyncProject>();
+                db.DropTable<AsyncProjectTaskStatus>();
+                db.DropTable<AsyncDepartment>();
 
-                db.CreateTable<Department>();
-                db.CreateTable<ProjectTaskStatus>();
-                db.CreateTable<Project>();
-                db.CreateTable<ProjectTask>();
+                db.CreateTable<AsyncDepartment>();
+                db.CreateTable<AsyncProjectTaskStatus>();
+                db.CreateTable<AsyncProject>();
+                db.CreateTable<AsyncProjectTask>();
 
                 int departmentId = 1;
                 int statusId = 1;
 
-                var q = db.From<ProjectTask>()
-                          .Join<ProjectTask, Project>((pt, p) => pt.ProjectId == p.Id)
-                          .Where<Project>(p => p.DepartmentId == departmentId || departmentId == 0)
-                          .And<ProjectTask>(pt => pt.ProjectTaskStatusId == statusId || statusId == 0);
+                var q = db.From<AsyncProjectTask>()
+                          .Join<AsyncProjectTask, AsyncProject>((pt, p) => pt.ProjectId == p.Id)
+                          .Where<AsyncProject>(p => p.DepartmentId == departmentId || departmentId == 0)
+                          .And<AsyncProjectTask>(pt => pt.ProjectTaskStatusId == statusId || statusId == 0);
 
                 var tasks = await db.LoadSelectAsync(q);
 
