@@ -115,103 +115,97 @@ namespace ServiceStack.OrmLite
 
         public string TableAlias
         {
-            get { return q.TableAlias; }
-            set { q.TableAlias = value; }
+            get => q.TableAlias;
+            set => q.TableAlias = value;
         }
 
         public bool PrefixFieldWithTableName
         {
-            get { return q.PrefixFieldWithTableName; }
-            set { q.PrefixFieldWithTableName = value; }
+            get => q.PrefixFieldWithTableName;
+            set => q.PrefixFieldWithTableName = value;
         }
 
         public bool WhereStatementWithoutWhereString
         {
-            get { return q.WhereStatementWithoutWhereString; }
-            set { q.WhereStatementWithoutWhereString = value; }
+            get => q.WhereStatementWithoutWhereString;
+            set => q.WhereStatementWithoutWhereString = value;
         }
 
         public IOrmLiteDialectProvider DialectProvider
         {
-            get { return q.DialectProvider; }
-            set { q.DialectProvider  = value; }
+            get => q.DialectProvider;
+            set => q.DialectProvider  = value;
         }
 
         public List<IDbDataParameter> Params
         {
-            get { return q.Params; }
-            set { q.Params = value; }
+            get => q.Params;
+            set => q.Params = value;
         }
 
         public string SelectExpression
         {
-            get { return q.SelectExpression; }
-            set { q.SelectExpression  = value; }
+            get => q.SelectExpression;
+            set => q.SelectExpression  = value;
         }
 
         public string FromExpression
         {
-            get { return q.FromExpression; }
-            set { q.FromExpression = value; }
+            get => q.FromExpression;
+            set => q.FromExpression = value;
         }
 
-        public string BodyExpression
-        {
-            get { return q.BodyExpression; }
-        }
+        public string BodyExpression => q.BodyExpression;
 
         public string WhereExpression
         {
-            get { return q.WhereExpression; }
-            set { q.WhereExpression = value; }
+            get => q.WhereExpression;
+            set => q.WhereExpression = value;
         }
 
         public string GroupByExpression
         {
-            get { return q.GroupByExpression; }
-            set { q.GroupByExpression = value; }
+            get => q.GroupByExpression;
+            set => q.GroupByExpression = value;
         }
 
         public string HavingExpression
         {
-            get { return q.HavingExpression; }
-            set { q.HavingExpression = value; }
+            get => q.HavingExpression;
+            set => q.HavingExpression = value;
         }
 
         public string OrderByExpression
         {
-            get { return q.OrderByExpression; }
-            set { q.OrderByExpression = value; }
+            get => q.OrderByExpression;
+            set => q.OrderByExpression = value;
         }
 
         public int? Rows
         {
-            get { return q.Rows; }
-            set { q.Rows = value; }
+            get => q.Rows;
+            set => q.Rows = value;
         }
 
         public int? Offset
         {
-            get { return q.Offset; }
-            set { q.Offset = value; }
+            get => q.Offset;
+            set => q.Offset = value;
         }
 
         public List<string> UpdateFields
         {
-            get { return q.UpdateFields; }
-            set { q.UpdateFields = value; }
+            get => q.UpdateFields;
+            set => q.UpdateFields = value;
         }
 
         public List<string> InsertFields
         {
-            get { return q.InsertFields; }
-            set { q.InsertFields = value; }
+            get => q.InsertFields;
+            set => q.InsertFields = value;
         }
 
-        public ModelDefinition ModelDef
-        {
-            get { return q.ModelDef; }
-        }
+        public ModelDefinition ModelDef => q.ModelDef;
 
 
         public IUntypedSqlExpression Clone()

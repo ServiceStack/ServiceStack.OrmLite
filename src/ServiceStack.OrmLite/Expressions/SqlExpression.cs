@@ -59,12 +59,18 @@ namespace ServiceStack.OrmLite
             InsertFields = new List<string>();
 
             modelDef = typeof(T).GetModelDefinition();
-            PrefixFieldWithTableName = false;
+            PrefixFieldWithTableName = OrmLiteConfig.IncludeTablePrefixes;
             WhereStatementWithoutWhereString = false;
 
             DialectProvider = dialectProvider;
             Params = new List<IDbDataParameter>();
             tableDefs.Add(modelDef);
+
+            var initFilter = OrmLiteConfig.SqlExpressionInitFilter;
+            if (initFilter != null)
+            {
+                initFilter(this.GetUntyped());
+            }
         }
 
         public SqlExpression<T> Clone()

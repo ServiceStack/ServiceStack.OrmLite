@@ -196,6 +196,10 @@ namespace ServiceStack.OrmLite
 
         public static bool SkipForeignKeys { get; set; }
 
+        public static bool IncludeTablePrefixes { get; set; }
+        
+        public static Action<IUntypedSqlExpression> SqlExpressionInitFilter { get; set; }
+
         public static Func<string, string> ParamNameFilter { get; set; }
         
         public static Action<ModelDefinition> OnModelDefinitionInit { get; set; }
