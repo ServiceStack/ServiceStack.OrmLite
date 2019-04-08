@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class SaveAllReferencesIssues : OrmLiteProvidersTestBase
     {
-        public SaveAllReferencesIssues(Dialect dialect) : base(dialect)
-        {
-        }
+        public SaveAllReferencesIssues(DialectContext context) : base(context) {}
 
         public class BranchRef
         {

@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class UtcDateTimeIssueTests : OrmLiteProvidersTestBase
     {
-        public UtcDateTimeIssueTests(Dialect dialect) : base(dialect) {}
+        public UtcDateTimeIssueTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Test_DateTime_Select()

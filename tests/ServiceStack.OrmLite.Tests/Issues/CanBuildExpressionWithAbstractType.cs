@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class CanBuildExpressionWithAbstractType : OrmLiteProvidersTestBase
     {
-        public CanBuildExpressionWithAbstractType(Dialect dialect) : base(dialect) {}
+        public CanBuildExpressionWithAbstractType(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_Update_Property_In_Abstract_Base_Class()

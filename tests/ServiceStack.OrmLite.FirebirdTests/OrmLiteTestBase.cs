@@ -12,10 +12,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 	{		
 		protected virtual string ConnectionString { get; set; }
 
-		protected string GetFileConnectionString()
-		{
-            return TestConfig.FirebirdDb_3;
-        }
+		protected string GetFileConnectionString() => FirebirdDb.DefaultConnection;
 
 		protected void CreateNewDatabase()
 		{

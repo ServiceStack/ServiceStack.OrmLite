@@ -13,7 +13,7 @@
         [TestFixtureOrmLite]
         public class WithDbCmdFilter : OrmLiteProvidersTestBase
         {
-            public WithDbCmdFilter(Dialect dialect) : base(dialect) {}
+            public WithDbCmdFilter(DialectContext context) : base(context) {}
 
             [Test]
             public void Can_insert_one_row_and_get_one_affected_row()
@@ -162,9 +162,7 @@
         [TestFixtureOrmLite]
         public class UsingAnonType : OrmLiteProvidersTestBase
         {
-            public UsingAnonType(Dialect dialect) : base(dialect)
-            {
-            }
+            public UsingAnonType(DialectContext context) : base(context) {}
 
             [Test]
             public void Can_insert_one_row_and_get_one_affected_row()
@@ -300,9 +298,7 @@
         [TestFixtureOrmLite]
         public class UsingDictionary : OrmLiteProvidersTestBase
         {
-            public UsingDictionary(Dialect dialect) : base(dialect)
-            {
-            }
+            public UsingDictionary(DialectContext context) : base(context) {}
 
             [Test]
             public void Can_insert_one_row_and_get_one_affected_row()
@@ -449,9 +445,7 @@
         [TestFixtureOrmLite]
         public class WithoutParams : OrmLiteProvidersTestBase
         {
-            public WithoutParams(Dialect dialect) : base(dialect)
-            {
-            }
+            public WithoutParams(DialectContext context) : base(context) {}
 
             [Test]
             public void Can_insert_one_row_and_get_one_affected_row()

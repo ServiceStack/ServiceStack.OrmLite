@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLiteDialects(Dialect.AnySqlServer)]
     public class CustomConverterTests : OrmLiteProvidersTestBase
     {
-        public CustomConverterTests(Dialect dialect) : base(dialect) {}
+        public CustomConverterTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_override_SqlServer_Time_Converter()

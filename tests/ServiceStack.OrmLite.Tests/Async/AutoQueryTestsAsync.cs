@@ -9,9 +9,7 @@ namespace ServiceStack.OrmLite.Tests.Async
     [TestFixtureOrmLite]
     public class AutoQueryTestsAsync : OrmLiteProvidersTestBase
     {
-        public AutoQueryTestsAsync(Dialect dialect) : base(dialect)
-        {
-        }
+        public AutoQueryTestsAsync(DialectContext context) : base(context) {}
 
         public static Rockstar[] SeedRockstars = new[] {
             new Rockstar { Id = 1, FirstName = "Jimi", LastName = "Hendrix", LivingStatus = LivingStatus.Dead, Age = 27, DateOfBirth = new DateTime(1942, 11, 27), DateDied = new DateTime(1970, 09, 18), },

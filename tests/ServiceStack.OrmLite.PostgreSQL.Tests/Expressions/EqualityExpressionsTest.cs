@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class EqualityExpressionsTest : ExpressionsTestBase
     {
-        public EqualityExpressionsTest(Dialect dialect) : base(dialect) {}
+        public EqualityExpressionsTest(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_select_equals_constant_int_expression()

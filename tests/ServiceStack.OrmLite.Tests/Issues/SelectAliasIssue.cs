@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class SelectAliasIssue : OrmLiteProvidersTestBase
     {
-        public SelectAliasIssue(Dialect dialect) : base(dialect) {}
+        public SelectAliasIssue(DialectContext context) : base(context) {}
 
         [Test]
         public void Does_populate_table_with_Aliases_having_same_name_as_alternative_field()

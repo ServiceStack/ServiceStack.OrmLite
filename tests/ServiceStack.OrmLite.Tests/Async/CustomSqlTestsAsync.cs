@@ -16,9 +16,7 @@ namespace ServiceStack.OrmLite.Tests.Async
     [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
     public class CustomSqlTestsAsync : OrmLiteProvidersTestBase
     {
-        public CustomSqlTestsAsync(Dialect dialect) : base(dialect)
-        {
-        }
+        public CustomSqlTestsAsync(DialectContext context) : base(context) {}
         
         private const string DropProcedureSql = @"
             IF OBJECT_ID('spSearchLetters') IS NOT NULL

@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class ConflictResolutionTests : OrmLiteProvidersTestBase
     {
-        public ConflictResolutionTests(Dialect dialect) : base(dialect) {}
+        public ConflictResolutionTests(DialectContext context) : base(context) {}
     
         [Test]
         public void Can_change_conflict_resolution_with_Insert()

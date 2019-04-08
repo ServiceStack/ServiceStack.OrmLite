@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class MetaDataTests : OrmLiteProvidersTestBase
     {
-        public MetaDataTests(Dialect dialect) : base(dialect) {}
+        public MetaDataTests(DialectContext context) : base(context) {}
 
         [OneTimeSetUp]
         public void OneTimeSetup()

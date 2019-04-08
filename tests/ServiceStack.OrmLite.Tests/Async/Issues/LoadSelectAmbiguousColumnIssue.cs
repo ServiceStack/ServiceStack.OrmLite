@@ -87,9 +87,7 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
     [TestFixtureOrmLite]
     public class LoadSelectAmbiguousColumnIssue : OrmLiteProvidersTestBase
     {
-        public LoadSelectAmbiguousColumnIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public LoadSelectAmbiguousColumnIssue(DialectContext context) : base(context) {}
 
         public class DeptEmployee //Ref of External Table
         {

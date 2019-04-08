@@ -30,7 +30,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     [TestFixtureOrmLiteDialects(Dialect.SqlServer), Explicit, NUnit.Framework.Ignore("Integration Test")]
     public class PostPerfTests : OrmLiteProvidersTestBase
     {
-        public PostPerfTests(Dialect dialect) : base(dialect) {}
+        public PostPerfTests(DialectContext context) : base(context) {}
         
 //        public PostPerfTests()
 //        {
@@ -144,7 +144,7 @@ end
     [TestFixtureOrmLiteDialects(Dialect.SqlServer), Explicit, NUnit.Framework.Ignore("Integration Test")]
     public class AdventureWorksPerfTests : OrmLiteProvidersTestBase
     {
-        public AdventureWorksPerfTests(Dialect dialect) : base(dialect) {}
+        public AdventureWorksPerfTests(DialectContext context) : base(context) {}
 
         private IDbConnection db;
 

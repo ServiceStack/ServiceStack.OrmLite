@@ -13,9 +13,7 @@ namespace ServiceStack.OrmLite.Tests.Async
     [TestFixtureOrmLite]
     public class AsyncTests : OrmLiteProvidersTestBase
     {
-        public AsyncTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public AsyncTests(DialectContext context) : base(context) {}
 
         [Test]
         public async Task Can_Insert_and_SelectAsync()

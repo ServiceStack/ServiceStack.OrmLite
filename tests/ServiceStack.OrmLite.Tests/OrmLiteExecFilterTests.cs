@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteExecFilterTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteExecFilterTests(Dialect dialect) : base(dialect) {}
+        public OrmLiteExecFilterTests(DialectContext context) : base(context) {}
 
         [Test]
         [IgnoreDialect(Dialect.AnyOracle, "Can't run this with Oracle until use trigger for AutoIncrement primary key insertion")]

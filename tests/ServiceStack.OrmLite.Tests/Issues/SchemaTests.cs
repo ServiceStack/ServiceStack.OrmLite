@@ -9,9 +9,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class SchemaTests : OrmLiteProvidersTestBase
     {
-        public SchemaTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SchemaTests(DialectContext context) : base(context) {}
 
         [OneTimeSetUp]
         public void OneTimeSetup()

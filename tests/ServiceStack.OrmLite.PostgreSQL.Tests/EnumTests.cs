@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class EnumTests : OrmLiteProvidersTestBase
     {
-        public EnumTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public EnumTests(DialectContext context) : base(context) {}
 
         [Test]
         public void CanCreateTable()

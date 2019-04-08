@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
     public class SqlServerProviderTests : OrmLiteProvidersTestBase
     {
-        public SqlServerProviderTests(Dialect dialect) : base(dialect) {}
+        public SqlServerProviderTests(DialectContext context) : base(context) {}
 
         private IDbConnection db;
 

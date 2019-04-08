@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class ToInsertAndUpdateStatementTests : OrmLiteProvidersTestBase
     {
-        public ToInsertAndUpdateStatementTests(Dialect dialect) : base(dialect) {}
+        public ToInsertAndUpdateStatementTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_use_ToUpdateStatement_to_generate_inline_SQL()

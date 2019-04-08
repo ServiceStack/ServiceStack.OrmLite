@@ -1,61 +1,203 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Data;
 using System.Data.Common;
 using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
     [Flags]
     public enum Dialect
     {
-        Sqlite         = 1,
+        Sqlite = 1,
         
         SqlServer = 1 << 1,
-        SqlServerMdf = 1 << 2,
-        SqlServer2008 = 1 << 3,
-        SqlServer2012 = 1 << 4,
-        SqlServer2014 = 1 << 5,
-        SqlServer2016 = 1 << 6,
-        SqlServer2017 = 1 << 7,
+        SqlServer2008 = 1 << 2,
+        SqlServer2012 = 1 << 3,
+        SqlServer2014 = 1 << 4,
+        SqlServer2016 = 1 << 5,
+        SqlServer2017 = 1 << 6,
         
-        PostgreSql9 = 1 << 8,
-        PostgreSql10 = 1 << 9,
-        PostgreSql11 = 1 << 10,
+        PostgreSql = 1 << 7,
         
-        MySql5_5 = 1 << 11,
-        MySql10_1 = 1 << 12,
-        MySql10_2 = 1 << 13,
-        MySql10_3 = 1 << 14,
-        MySql10_4 = 1 << 15,
-        MySqlConnector = 1 << 16,
+        MySql = 1 << 8,
+        MySqlConnector = 1 << 9,
         
-        Oracle10 = 1 << 17,
-        Oracle11 = 1 << 18,
-        Oracle12 = 1 << 19,
-        Oracle18 = 1 << 20,
+        Oracle = 1 << 10,
         
-        Firebird = 1 << 21,
+        Firebird = 1 << 11,
         
-        VistaDb = 1 << 22,
+        VistaDb = 1 << 12,
         
         // any versions
-        AnyPostgreSql = PostgreSql9 | PostgreSql10 | PostgreSql11,
-        AnyMySql = MySql5_5 | MySql10_1 | MySql10_2 | MySql10_3 | MySql10_4 | MySqlConnector, 
-        AnySqlServer = SqlServer | SqlServer2008 | SqlServer2012 | SqlServer2014 | SqlServer2016 | SqlServer2017 | SqlServerMdf,
-        AnyOracle = Oracle10 | Oracle11 | Oracle12 | Oracle18,
+        AnyPostgreSql = PostgreSql,
+        AnyMySql = MySql | MySqlConnector, 
+        AnySqlServer = SqlServer | SqlServer2008 | SqlServer2012 | SqlServer2014 | SqlServer2016 | SqlServer2017,
+        AnyOracle = Oracle,
         
         // db groups
-        BaseSupported = Sqlite | MySql5_5 | MySqlConnector | PostgreSql9 | SqlServer,
-        Supported = Sqlite | AnyMySql | AnyPostgreSql | AnySqlServer,
-        BaseCommunity = Firebird | Oracle10 | VistaDb,
-        Community = Firebird | AnyOracle | VistaDb,
-        DockerDb =  AnyMySql | AnyPostgreSql | AnySqlServer | Community,
+        BaseSupported = Sqlite | SqlServer | PostgreSql | MySql | MySqlConnector,
+        Supported = Sqlite | AnySqlServer | AnyMySql | AnyPostgreSql,
+        Community = Firebird | Oracle | VistaDb,
         
         // all
         All = Supported | Community
+    }
+
+    public struct DialectContext
+    {
+        public Dialect Dialect;
+        public int Version;
+        public DialectContext(Dialect dialect, int version)
+        {
+            Dialect = dialect;
+            Version = version;
+        }
+        
+        public Tuple<Dialect, int> Tuple => System.Tuple.Create(Dialect, Version);
+        public static string Key(Tuple<Dialect, int> tuple) => Key(tuple.Item1, tuple.Item2);
+        public static string Key(Dialect dialect, int version) => dialect + "-" + version;
+
+        public override string ToString()
+        {
+            var defaultLabel = Dialect + " " + Version;
+            switch (Dialect)
+            {
+                case Dialect.Sqlite:
+                    return SqliteDb.VersionString(Version); 
+                case Dialect.SqlServer:
+                case Dialect.SqlServer2008:
+                case Dialect.SqlServer2012:
+                case Dialect.SqlServer2014:
+                case Dialect.SqlServer2016:
+                case Dialect.SqlServer2017:
+                    return SqlServerDb.VersionString(Dialect, Version); 
+                case Dialect.MySql:
+                    return MySqlDb.VersionString(Version); 
+                case Dialect.PostgreSql:
+                    return PostgreSqlDb.VersionString(Version); 
+                case Dialect.Oracle:
+                    return OracleDb.VersionString(Version); 
+                case Dialect.Firebird:
+                    return FirebirdDb.VersionString(Version); 
+                case Dialect.VistaDb:
+                    return VistaDb.VersionString(Version); 
+            }
+
+            return defaultLabel;
+        }
+
+        public OrmLiteConnectionFactory NamedConnection => OrmLiteConnectionFactory.NamedConnections[Key(Dialect, Version)];
+    }
+
+    public static class SqliteDb
+    {
+        public const int Memory = 1;
+        public const int File = 100;
+        public static int[] Versions => TestConfig.EnvironmentVariable("SQLITE_VERSION", new[]{ Memory });
+        public static string DefaultConnection => MemoryConnection;
+        public static string MemoryConnection => TestConfig.DialectConnections[Tuple.Create(Dialect.Sqlite, Memory)];
+        public static string FileConnection => TestConfig.DialectConnections[Tuple.Create(Dialect.Sqlite, File)];
+        public static string VersionString(int version) => "SQLite " + (version == Memory
+            ? "Memory"
+            : version == File
+            ? "File"
+            : version.ToString());
+    }
+    public static class SqlServerDb
+    {
+        public const int V2008 = 2008;
+        public const int V2012 = 2012;
+        public const int V2014 = 2014;
+        public const int V2016 = 2016;
+        public const int V2017 = 2017;
+        public static int[] Versions = TestConfig.EnvironmentVariable("MSSQL_VERSION", new[]{ V2008, V2012, V2014, V2016, V2017 });
+        public static int[] V2008Versions = Versions.Where(x => x == V2008).ToArray();
+        public static int[] V2012Versions = Versions.Where(x => x == V2012).ToArray();
+        public static int[] V2014Versions = Versions.Where(x => x == V2014).ToArray();
+        public static int[] V2016Versions = Versions.Where(x => x == V2016).ToArray();
+        public static int[] V2017Versions = Versions.Where(x => x == V2017).ToArray();
+        public static string DefaultConnection => TestConfig.DialectConnections[Tuple.Create(Dialect.SqlServer2016, V2016)];
+        public static string VersionString(Dialect dialect, int version) => "SQL Server " + version;
+        
+        public static Dictionary<Dialect, int> CompatibilityLevels = new Dictionary<Dialect, int> 
+        {
+            [Dialect.SqlServer2008] = 100,
+            [Dialect.SqlServer2012] = 110,
+            [Dialect.SqlServer2014] = 120,
+            [Dialect.SqlServer2016] = 130,
+            [Dialect.SqlServer2017] = 140,
+        };
+    }
+    public static class MySqlDb
+    {
+        public const int V5_5 = 55;
+        public const int V10_1 = 101;
+        public const int V10_2 = 102;
+        public const int V10_3 = 103;
+        public const int V10_4 = 104;
+        public static readonly int[] Versions = TestConfig.EnvironmentVariable("MYSQL_VERSION", new[]{ V5_5, V10_1, V10_2, V10_3, V10_4 });
+        public static int[] MySqlConnectorVersions = Versions.Where(x => x == V10_4).ToArray();
+        public static readonly string DefaultConnection = TestConfig.DialectConnections[Tuple.Create(Dialect.MySql, V10_4)];
+
+        public static string VersionString(int version) => "MySQL " + (version == V5_5
+            ? "v5_5"
+            : version == V10_1
+            ? "v10_1"
+            : version == V10_2
+            ? "v10_2"
+            : version == V10_3
+            ? "v10_3"
+            : version == V10_4
+            ? "v10_4"
+            : version.ToString());
+
+    }
+    public static class PostgreSqlDb
+    {
+        public const int V9 = 9;
+        public const int V10 = 10;
+        public const int V11 = 11;
+        public static readonly int[] Versions = TestConfig.EnvironmentVariable("PGSQL_VERSION", new[]{ V9, V10, V11 });
+        public static readonly string DefaultConnection = TestConfig.GetConnection(Dialect.PostgreSql, V11);
+        public static string VersionString(int version) => "PostgreSQL " + (version == V9
+            ? "v9"
+            : version == V10
+            ? "v10"
+            : version == V11
+            ? "v11"
+            : version.ToString());
+    }
+    public static class OracleDb
+    {
+        public const int V11 = 11;
+        public static readonly int[] Versions = TestConfig.EnvironmentVariable("ORACLE_VERSION", new[]{ V11 });
+        public static readonly string DefaultConnection = TestConfig.GetConnection(Dialect.Oracle, V11);
+        public static string VersionString(int version) => "Oracle " + (version == V11
+            ? "v11"
+            : version.ToString());
+    }
+    public static class FirebirdDb
+    {
+        public const int V3 = 3;
+        public static readonly int[] Versions = TestConfig.EnvironmentVariable("FIREBIRD_VERSION", new[]{ V3 });
+        public static readonly string DefaultConnection = TestConfig.GetConnection(Dialect.Firebird, V3);
+        public static string VersionString(int version) => "Firebird " + (version == V3
+            ? "v3"
+            : version.ToString());
+    }
+    public static class VistaDb
+    {
+        public const int V5 = 5;
+        public static readonly int[] Versions = TestConfig.EnvironmentVariable("VISTADB_VERSION", new[]{ V5 });
+        public static readonly string DefaultConnection = TestConfig.GetConnection(Dialect.VistaDb, V5);
+        public static string VersionString(int version) => "VistaDB " + (version == V5
+            ? "v5"
+            : version.ToString());
     }
 
     /// <summary>
@@ -66,37 +208,90 @@ namespace ServiceStack.OrmLite.Tests
         /// <summary>
         /// This value controls which providers are tested for all <see cref="TestFixtureOrmLiteAttribute"/> tests where dialects are not explicitly set
         /// </summary>
-        public static Dialect Dialect = EnvironmentVariable("ORMLITE_DIALECT", Dialect.Sqlite);
-        
-        public static string SqliteMemoryDb = EnvironmentVariable("SQLITE_CONNECTION", ":memory:");
-        public static string SqlServerBuildDb = EnvironmentVariable("MSSQL_CONNECTION", "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;");
-        public static string OracleDb = EnvironmentVariable("ORACLE_CONNECTION", "Data Source=(DESCRIPTION=(ADDRESS=(PROTOCOL=TCP)(HOST=localhost)(PORT=48401))(CONNECT_DATA=(SID=XE)));User Id=system;Password=test;");
-        
-        // TODO should dates be handled by reader instead of having to set config options?
-        public static string MariaDb_5_5 = EnvironmentVariable(new[]{ "MYSQL55_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48201;Database=test;UID=root;Password=test;SslMode=none;Convert Zero Datetime=True;");
-        public static string MariaDb_10_1 = EnvironmentVariable(new[]{ "MYSQL101_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none");
-        public static string MariaDb_10_2 = EnvironmentVariable(new[]{ "MYSQL102_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48203;Database=test;UID=root;Password=test;SslMode=none");
-        public static string MariaDb_10_3 = EnvironmentVariable(new[]{ "MYSQL103_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48204;Database=test;UID=root;Password=test;SslMode=none");
-        public static string MariaDb_10_4 = EnvironmentVariable(new[]{ "MYSQL104_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none");
-        
-        public static string MySqlDb_10_1 = EnvironmentVariable(new[]{ "MYSQL101_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none;Convert Zero Datetime=True;");
-        
-        public static string PostgresDb_9 = EnvironmentVariable(new[]{ "PGSQL9_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48301;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200");
-        public static string PostgresDb_10 = EnvironmentVariable(new[]{ "PGSQL10_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48302;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200");
-        public static string PostgresDb_11 = EnvironmentVariable(new[]{ "PGSQL11_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48303;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200");
-        
-        public static string FirebirdDb_3 = EnvironmentVariable("FIREBIRD_CONNECTION", @"User=SYSDBA;Password=masterkey;Database=/firebird/data/test.gdb;DataSource=localhost;Port=48101;Dialect=3;charset=ISO8859_1;MinPoolSize=0;MaxPoolSize=100;");
-        public static string VistaDb = EnvironmentVariable("VISTADB_CONNECTION", @"Data Source='|DataDirectory|\Database.vdb5'");
-        public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
-        
-        // The default provider and connection the DbFactory is initialised with
-        public static IOrmLiteDialectProvider DefaultProvider = SqliteDialect.Provider;
-        public static string DefaultConnection = SqliteMemoryDb;
+        public static Dialect Dialects = EnvironmentVariable("ORMLITE_DIALECT", Dialect.Sqlite | Dialect.MySql);
+        public const bool EnableDebugLogging = false;
 
-        private static string EnvironmentVariable(string[] variables, string defaultValue) => 
+        public static Dictionary<Dialect, IOrmLiteDialectProvider> DialectProviders = new Dictionary<Dialect, IOrmLiteDialectProvider> 
+        {
+            [Dialect.Sqlite] = SqliteDialect.Provider,
+            [Dialect.SqlServer] = SqlServerDialect.Provider,
+            [Dialect.SqlServer2008] = SqlServer2008Dialect.Provider,
+            [Dialect.SqlServer2012] = SqlServer2012Dialect.Provider,
+            [Dialect.SqlServer2014] = SqlServer2014Dialect.Provider,
+            [Dialect.SqlServer2016] = SqlServer2016Dialect.Provider,
+            [Dialect.SqlServer2017] = SqlServer2017Dialect.Provider,
+            [Dialect.PostgreSql] = PostgreSqlDialect.Provider,
+            [Dialect.MySql] = MySqlDialect.Provider,
+            [Dialect.MySqlConnector] = MySqlConnectorDialect.Provider,
+            [Dialect.Oracle] = OracleDialect.Provider,
+            [Dialect.Firebird] = FirebirdDialect.Provider,
+#if !NETCORE
+            [Dialect.VistaDb] = VistaDbDialect.Provider,
+#endif
+        };
+
+        public static string GetConnection(Dialect dialect, int version)
+        {
+            if (DialectConnections.TryGetValue(Tuple.Create(dialect, version), out var connString))
+                return connString;
+
+            return null;
+        }
+
+        private static Dictionary<Tuple<Dialect, int>, string> dialectConnections;
+        public static Dictionary<Tuple<Dialect,int>, string> DialectConnections => dialectConnections ?? (dialectConnections = new Dictionary<Tuple<Dialect,int>, string> 
+        {
+            [Tuple.Create(Dialect.Sqlite, SqliteDb.Memory)] = EnvironmentVariable(new[]{ "SQLITE_MEMORY_CONNECTION", "SQLITE_CONNECTION" }, ":memory:"),
+            [Tuple.Create(Dialect.Sqlite, SqliteDb.File)] = EnvironmentVariable(new[]{ "SQLITE_FILE_CONNECTION", "SQLITE_CONNECTION" }, "~/App_Data/db.sqlite".MapAbsolutePath()),
+
+            [Tuple.Create(Dialect.SqlServer, SqlServerDb.V2008)] = EnvironmentVariable(new[]{ "MSSQL2008_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
+            [Tuple.Create(Dialect.SqlServer2016, SqlServerDb.V2016)] = EnvironmentVariable(new[]{ "MSSQL2016_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
+            [Tuple.Create(Dialect.SqlServer2017, SqlServerDb.V2017)] = EnvironmentVariable(new[]{ "MSSQL2017_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
+
+            [Tuple.Create(Dialect.PostgreSql, PostgreSqlDb.V9)]  = EnvironmentVariable(new[]{ "PGSQL9_CONNECTION",  "PGSQL_CONNECTION" }, "Server=localhost;Port=48301;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
+            [Tuple.Create(Dialect.PostgreSql, PostgreSqlDb.V10)] = EnvironmentVariable(new[]{ "PGSQL10_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48302;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
+            [Tuple.Create(Dialect.PostgreSql, PostgreSqlDb.V11)] = EnvironmentVariable(new[]{ "PGSQL11_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48303;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
+            
+            [Tuple.Create(Dialect.MySql, MySqlDb.V5_5)]  = EnvironmentVariable(new[]{ "MYSQL55_CONNECTION",  "MYSQL_CONNECTION" }, "Server=localhost;Port=48201;Database=test;UID=root;Password=test;SslMode=none;Convert Zero Datetime=True;"),
+            [Tuple.Create(Dialect.MySql, MySqlDb.V10_1)] = EnvironmentVariable(new[]{ "MYSQL101_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none"),
+            [Tuple.Create(Dialect.MySql, MySqlDb.V10_2)] = EnvironmentVariable(new[]{ "MYSQL102_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48203;Database=test;UID=root;Password=test;SslMode=none"),
+            [Tuple.Create(Dialect.MySql, MySqlDb.V10_3)] = EnvironmentVariable(new[]{ "MYSQL103_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48204;Database=test;UID=root;Password=test;SslMode=none"),
+            [Tuple.Create(Dialect.MySql, MySqlDb.V10_4)] = EnvironmentVariable(new[]{ "MYSQL104_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none"),
+
+            [Tuple.Create(Dialect.MySqlConnector, MySqlDb.V10_4)] = EnvironmentVariable(new[]{ "MYSQL104_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none"),
+            
+            [Tuple.Create(Dialect.Oracle, OracleDb.V11)] = EnvironmentVariable(new[]{ "ORACLE11_CONNECTION", "ORACLE_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
+            
+            [Tuple.Create(Dialect.Firebird, FirebirdDb.V3)] = EnvironmentVariable(new[]{ "FIREBIRD3_CONNECTION", "FIREBIRD_CONNECTION" }, @"User=SYSDBA;Password=masterkey;Database=/firebird/data/test.gdb;DataSource=localhost;Port=48101;Dialect=3;charset=ISO8859_1;MinPoolSize=0;MaxPoolSize=100;"),
+            
+            [Tuple.Create(Dialect.VistaDb, VistaDb.V5)] = EnvironmentVariable(new[]{ "VISTADB5_CONNECTION", "VISTADB_CONNECTION" }, @"Data Source='|DataDirectory|\Database.vdb5'"),
+        });
+        
+        public static Dictionary<Dialect, int[]> DialectVersions = new Dictionary<Dialect, int[]> 
+        {
+            [Dialect.Sqlite] = SqliteDb.Versions,
+            [Dialect.SqlServer] = SqlServerDb.V2008Versions,
+            [Dialect.SqlServer2008] = SqlServerDb.V2008Versions,
+            [Dialect.SqlServer2012] = SqlServerDb.V2012Versions,
+            [Dialect.SqlServer2014] = SqlServerDb.V2014Versions,
+            [Dialect.SqlServer2016] = SqlServerDb.V2016Versions,
+            [Dialect.SqlServer2017] = SqlServerDb.V2017Versions,
+            [Dialect.PostgreSql] = PostgreSqlDb.Versions,
+            [Dialect.MySql] = MySqlDb.Versions,
+            [Dialect.MySqlConnector] = MySqlDb.MySqlConnectorVersions,
+            
+            [Dialect.Oracle] = OracleDb.Versions,
+            [Dialect.Firebird] = FirebirdDb.Versions,
+            [Dialect.VistaDb] = VistaDb.Versions,
+        };
+        
+        public static IOrmLiteDialectProvider DefaultProvider = SqliteDialect.Provider;
+        public static string DefaultConnection = SqliteDb.DefaultConnection;
+
+        public static string EnvironmentVariable(string[] variables, string defaultValue) => 
             variables.Map(Environment.GetEnvironmentVariable).FirstOrDefault(x => x != null) ?? defaultValue;
 
-        private static T EnvironmentVariable<T>(string variable, T defaultValue)
+        public static T EnvironmentVariable<T>(string variable, T defaultValue)
         {
             var value = Environment.GetEnvironmentVariable(variable);
             return string.IsNullOrEmpty(value) ? defaultValue : Convert<T>(value);
@@ -108,222 +303,144 @@ namespace ServiceStack.OrmLite.Tests
             return (T)converter.ConvertFromInvariantString(value);
         }
 
-
         public static OrmLiteConnectionFactory InitDbFactory()
         {
             // init DbFactory, should be mainly ignored in tests as they should always ask for a provider specific named connection
             var dbFactory = new OrmLiteConnectionFactory(DefaultConnection, DefaultProvider);
 
-            dbFactory.RegisterConnection(Dialect.PostgreSql9.ToString(), PostgresDb_9, PostgreSqlDialect.Provider);
-            dbFactory.RegisterConnection(Dialect.PostgreSql10.ToString(), PostgresDb_10, PostgreSqlDialect.Provider);
-            dbFactory.RegisterConnection(Dialect.PostgreSql11.ToString(), PostgresDb_11, PostgreSqlDialect.Provider);
+            foreach (var dialectConnection in DialectConnections)
+            {
+                var dialect = dialectConnection.Key.Item1;
+                if (!DialectProviders.TryGetValue(dialect, out var dialectProvider))
+                    continue;
 
-            dbFactory.RegisterConnection(Dialect.MySql5_5.ToString(), MariaDb_5_5, MySql55Dialect.Provider);
-            dbFactory.RegisterConnection(Dialect.MySql10_1.ToString(), MariaDb_10_1, MySqlDialect.Provider);
-            dbFactory.RegisterConnection(Dialect.MySql10_2.ToString(), MariaDb_10_2, MySqlDialect.Provider);
-            dbFactory.RegisterConnection(Dialect.MySql10_3.ToString(), MariaDb_10_3, MySqlDialect.Provider);
-            dbFactory.RegisterConnection(Dialect.MySql10_4.ToString(), MariaDb_10_4, MySqlDialect.Provider);
-
-            dbFactory.RegisterConnection(Dialect.MySqlConnector.ToString(), MariaDb_10_1, MySqlConnectorDialect.Provider);
-
-            dbFactory.RegisterConnection(Dialect.Sqlite.ToString(), SqliteMemoryDb, SqliteDialect.Provider);
-
-            dbFactory.RegisterConnection(Dialect.SqlServer.ToString(), SqlServerBuildDb, SqlServerDialect.Provider);
-            dbFactory.RegisterConnection(Dialect.SqlServer2017.ToString(), SqlServerBuildDb, SqlServer2017Dialect.Provider);
-
-            dbFactory.RegisterConnection(Dialect.Oracle10.ToString(), OracleDb, OracleDialect.Provider);
-            dbFactory.RegisterConnection(Dialect.Oracle11.ToString(), OracleDb, OracleDialect.Provider);
-            dbFactory.RegisterConnection(Dialect.Oracle12.ToString(), OracleDb, OracleDialect.Provider);
-            dbFactory.RegisterConnection(Dialect.Oracle18.ToString(), OracleDb, OracleDialect.Provider);
-
-            dbFactory.RegisterConnection(Dialect.Firebird.ToString(), FirebirdDb_3, FirebirdDialect.Provider);
-            
-#if !NETCORE                    
-                    VistaDbDialect.Instance.UseLibraryFromGac = true;
-                    var connectionString = VistaDb;
-                    try
+                if (dialect != Dialect.VistaDb)
+                {
+                    
+                    dbFactory.RegisterConnection(DialectContext.Key(dialectConnection.Key), dialectConnection.Value, dialectProvider);
+                    continue;
+                }
+                
+#if !NETCORE
+                var version = dialectConnection.Key.Item2;
+                VistaDbDialect.Instance.UseLibraryFromGac = true;
+                var connectionString = VistaDb.DefaultConnection;
+                try
+                {
+                    var factory = DbProviderFactories.GetFactory("System.Data.VistaDB5;");
+                    using (var db = factory.CreateConnection())
+                    using (var cmd = db.CreateCommand())
                     {
-                        var factory = DbProviderFactories.GetFactory("System.Data.VistaDB5;");
-                            using (var db = factory.CreateConnection())
-                            using (var cmd = db.CreateCommand())
-                            {
-                                db.ConnectionString = connectionString;
-                                var tmpFile = Path.GetTempPath().CombineWith($"{Guid.NewGuid():n}.vb5");
-                                cmd.CommandText =
-                                    $"CREATE DATABASE '|DataDirectory|{tmpFile}', PAGE SIZE 4, LCID 1033, CASE SENSITIVE FALSE;";
-                                cmd.ExecuteNonQuery();
-                                dbFactory.RegisterConnection(Dialect.VistaDb.ToString(), tmpFile,
-                                    VistaDbDialect.Provider);
-                            }
+                        db.ConnectionString = connectionString;
+                        var tmpFile = Path.GetTempPath().CombineWith($"{Guid.NewGuid():n}.vb5");
+                        cmd.CommandText =
+                            $"CREATE DATABASE '|DataDirectory|{tmpFile}', PAGE SIZE 4, LCID 1033, CASE SENSITIVE FALSE;";
+                        cmd.ExecuteNonQuery();
+                        dbFactory.RegisterConnection(DialectContext.Key(dialect,version),tmpFile,VistaDbDialect.Provider);
                     }
-                    catch
-                    {
-                        // vista not installed.
-                    }
+                }
+                catch
+                {
+                    // vista not installed.
+                }
 #endif
+            }
+
+            foreach (var provider in DialectProviders)
+            {
+                dbFactory.RegisterDialectProvider(provider.Key.ToString(), provider.Value);
+            }
+            
             return dbFactory;
         }
 
         public static void InitDbScripts(OrmLiteConnectionFactory dbFactory)
         {
-            // PostgreSQL specific init
-            // enable postgres uuid extension for all test db's
-            var pgInits = new[] {
-                "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";",
-                "CREATE EXTENSION IF NOT EXISTS hstore;",
-            };
-            
-
-            OrmLiteConnectionFactory getFactory(Dialect dialect) => OrmLiteConnectionFactory.NamedConnections[dialect.ToString()];
-            try
+            if ((Dialects & Dialect.AnyPostgreSql) != 0)
             {
-                using (var pg9 = getFactory(Dialect.PostgreSql9).OpenDbConnectionString($"{PostgresDb_9};Timeout=1"))
-                    pgInits.Map(pg9.ExecuteSql);
-            }
-            catch
-            {
-                // no db available
-            }
-
-            try
-            {
-                using (var pg10 = getFactory(Dialect.PostgreSql10).OpenDbConnectionString($"{PostgresDb_10};Timeout=1"))
-                    pgInits.Map(pg10.ExecuteSql);
-            }
-            catch
-            {
-                // no db available
-            }
-
-            try
-            {
-                using (var pg11 = getFactory(Dialect.PostgreSql11).OpenDbConnectionString($"{PostgresDb_11};Timeout=1"))
-                    pgInits.Map(pg11.ExecuteSql);
-            }
-            catch
-            {
-                // no db available
-            }
-
-            try
-            {
-                // Create separate Db's for MySqlConnector
-                using (var db = getFactory(Dialect.MySql10_1).OpenDbConnectionString($"{MariaDb_10_1};Connection Timeout=1"))
+                foreach (var version in DialectVersions[Dialect.PostgreSql])
                 {
-                    db.ExecuteSql("CREATE DATABASE IF NOT EXISTS `testMySql`");
-                    dbFactory.RegisterConnection(Dialect.MySqlConnector.ToString(), MySqlDb_10_1,
-                        MySqlConnectorDialect.Provider);
+                    try
+                    {
+                        using (var db = dbFactory.OpenDbConnectionString(
+                            DialectConnections[Tuple.Create(Dialect.PostgreSql, version)] + ";Timeout=1",
+                            Dialect.PostgreSql.ToString()))
+                        {
+                            InitPostgres(Dialect.PostgreSql, db);
+                        }
+                    }
+                    catch {}
                 }
             }
-            catch
-            {
-                // no db available
-            }
 
-            // SQLSERVER specific init
-            // for sql create unique db per fixture to avoid conflicts when testing dialects
-            // uses COMPATIBILITY_LEVEL set to each version 
-            try
+            if ((Dialects & Dialect.MySqlConnector) != 0)
             {
-                using (var db = getFactory(Dialect.SqlServer)
-                    .OpenDbConnectionString($"{SqlServerBuildDb};Connection Timeout=1"))
+                try
                 {
-                    var versions = new (string DbName, IOrmLiteDialectProvider Provider, int CompatabilityLevel)[]
+                    foreach (var version in DialectVersions[Dialect.MySqlConnector])
                     {
-                        (Dialect.SqlServer2008.ToString(), SqlServer2008Dialect.Provider, 100),
-                        (Dialect.SqlServer2012.ToString(), SqlServer2012Dialect.Provider, 110),
-                        (Dialect.SqlServer2014.ToString(), SqlServer2014Dialect.Provider, 120),
-                        (Dialect.SqlServer2016.ToString(), SqlServer2016Dialect.Provider, 130),
-                        (Dialect.SqlServer2017.ToString(), SqlServer2017Dialect.Provider, 140),
-                    };
-
-                    var connStr = new SqlConnectionStringBuilder($"{SqlServerBuildDb};Connection Timeout=1");
-                    foreach (var version in versions)
-                    {
-                        try
+                        using (var db = dbFactory.OpenDbConnectionString(
+                            DialectConnections[Tuple.Create(Dialect.MySqlConnector, version)] + ";Timeout=1",
+                            Dialect.MySqlConnector.ToString()))
                         {
-                            var createSqlDb = $@"If(db_id(N'{version.DbName}') IS NULL)
-  BEGIN
-  CREATE DATABASE {version.DbName};
-  ALTER DATABASE {version.DbName} SET COMPATIBILITY_LEVEL = {version.CompatabilityLevel};
-  END";
-                            connStr.InitialCatalog = version.DbName;
-                            db.ExecuteSql(createSqlDb);
-
-                            dbFactory.RegisterConnection(version.DbName, connStr.ToString(), version.Provider);
-                        }
-                        catch
-                        {
-                            // no db available
+                            InitMySqlConnector(Dialect.PostgreSql, db);
                         }
                     }
                 }
+                catch {}
             }
-            catch
-            {
-                // no db available
-            }
-        }
-        
-        
-        public static Dictionary<Dialect, int> SqlServerCompatibilityLevels = new Dictionary<Dialect, int> {
-            [Dialect.SqlServer2008] = 100,
-            [Dialect.SqlServer2012] = 110,
-            [Dialect.SqlServer2014] = 120,
-            [Dialect.SqlServer2016] = 130,
-            [Dialect.SqlServer2017] = 140,
-        };
 
-        public static void InitPostgres(OrmLiteConnectionFactory dbFactory, Dialect dialect)
-        {
-            if ((dialect & Dialect.AnyPostgreSql) != dialect)
-                return;
-            
-            var pgExtensions = new[] {
-                "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";",
-                "CREATE EXTENSION IF NOT EXISTS hstore;",
-            };
-
-            using (var db = dbFactory.OpenDbConnection(dialect.ToString()))
+            if ((Dialects & Dialect.AnySqlServer) != 0)
             {
-                foreach (var pgExtension in pgExtensions)
+                void SetupSqlServer(Dialect dialect, int version)
                 {
-                    db.ExecuteSql(pgExtension);
+                    if ((Dialects & dialect) != 0)
+                    {
+                        if (DialectConnections.TryGetValue(Tuple.Create(dialect, version), out var connString))
+                        {
+                            using (var db = dbFactory.OpenDbConnectionString(connString + ";Timeout=1", dialect.ToString()))
+                            {
+                                InitSqlServer(dialect, db);
+                            }
+                        }
+                    }
                 }
-
-                var dialectProvider = db.GetDialectProvider();
-                var schemaName = dialectProvider.NamingStrategy.GetSchemaName("Schema");
-                db.ExecuteSql($"CREATE SCHEMA IF NOT EXISTS {dialectProvider.GetQuotedName(schemaName)}");
-            }
-        }
-
-        public static void InitMySqlConnector(OrmLiteConnectionFactory dbFactory, Dialect dialect)
-        {
-            if ((dialect & Dialect.MySqlConnector) != dialect)
-                return;
-            
-            using (var db = dbFactory.OpenDbConnection(dialect.ToString()))
-            {
-                db.ExecuteSql("CREATE DATABASE IF NOT EXISTS `testMySql`");
+                SetupSqlServer(Dialect.SqlServer, SqlServerDb.V2008);
+                SetupSqlServer(Dialect.SqlServer2012, SqlServerDb.V2012);
+                SetupSqlServer(Dialect.SqlServer2014, SqlServerDb.V2014);
+                SetupSqlServer(Dialect.SqlServer2016, SqlServerDb.V2016);
+                SetupSqlServer(Dialect.SqlServer2017, SqlServerDb.V2017);
             }
         }
         
-        public static void InitSqlServer(OrmLiteConnectionFactory dbFactory, Dialect dialect)
+        public static void InitPostgres(Dialect dialect, IDbConnection db)
         {
-            if ((dialect & Dialect.AnySqlServer) != dialect)
-                return;
-            
-            using (var db = dbFactory.OpenDbConnection(dialect.ToString()))
-            {
-                var dbName = dialect.ToString();
-                var compatibilityLevel = SqlServerCompatibilityLevels[dialect];
-                var createSqlDb = $@"If(db_id(N'{dbName}') IS NULL)
+            db.ExecuteSql("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";");
+            db.ExecuteSql("CREATE EXTENSION IF NOT EXISTS hstore");
+
+            var dialectProvider = db.GetDialectProvider();
+            var schemaName = dialectProvider.NamingStrategy.GetSchemaName("Schema");
+            db.ExecuteSql($"CREATE SCHEMA IF NOT EXISTS {dialectProvider.GetQuotedName(schemaName)}");
+        }
+
+        public static void InitMySqlConnector(Dialect dialect, IDbConnection db)
+        {
+            db.ExecuteSql("CREATE DATABASE IF NOT EXISTS `testMySql`");
+        }
+        
+        public static void InitSqlServer(Dialect dialect, IDbConnection db)
+        {
+            // Create unique db per fixture to avoid conflicts when testing dialects
+            // uses COMPATIBILITY_LEVEL set to each version 
+
+            var dbName = dialect.ToString();
+            var compatibilityLevel = SqlServerDb.CompatibilityLevels[dialect];
+            var createSqlDb = $@"If(db_id(N'{dbName}') IS NULL)
   BEGIN
   CREATE DATABASE {dbName};
   ALTER DATABASE {dbName} SET COMPATIBILITY_LEVEL = {compatibilityLevel};
   END";
-                db.ExecuteSql(createSqlDb);
-            }
+            db.ExecuteSql(createSqlDb);
         }
 
     }

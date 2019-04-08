@@ -64,7 +64,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class RowVersionJoinIssue : OrmLiteProvidersTestBase
     {
-        public RowVersionJoinIssue(Dialect dialect) : base(dialect) {}
+        public RowVersionJoinIssue(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_join_on_table_with_RowVersion()

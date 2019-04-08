@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     [TestFixtureOrmLite]
     public class AliasedFieldUseCase : OrmLiteProvidersTestBase
     {
-        public AliasedFieldUseCase(Dialect dialect) : base(dialect) {}
+        public AliasedFieldUseCase(DialectContext context) : base(context) {}
 
         public class Foo
         {

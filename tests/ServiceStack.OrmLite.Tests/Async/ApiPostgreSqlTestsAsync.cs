@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests.Async
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class ApiPostgreSqlTestsAsync : OrmLiteProvidersTestBase
     {
-        public ApiPostgreSqlTestsAsync(Dialect dialect) : base(dialect)
-        {
-        }
+        public ApiPostgreSqlTestsAsync(DialectContext context) : base(context) {}
 
         [Test]
         public async Task API_PostgreSql_Examples_Async()

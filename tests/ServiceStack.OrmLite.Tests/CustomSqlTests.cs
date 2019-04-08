@@ -73,7 +73,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class CustomSqlTests : OrmLiteProvidersTestBase
     {
-        public CustomSqlTests(Dialect dialect) : base(dialect) {}
+        public CustomSqlTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_create_field_with_custom_sql()

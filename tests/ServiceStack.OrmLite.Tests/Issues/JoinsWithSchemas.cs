@@ -27,9 +27,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class JoinsWithSchemas : OrmLiteProvidersTestBase
     {
-        public JoinsWithSchemas(Dialect dialect) : base(dialect)
-        {
-        }
+        public JoinsWithSchemas(DialectContext context) : base(context) {}
         
         [OneTimeSetUp]
         public void OneTimeSetup()

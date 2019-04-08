@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteCreateTableTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteCreateTableTests(Dialect dialect) : base(dialect) {}
+        public OrmLiteCreateTableTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Does_table_Exists()

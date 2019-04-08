@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteContextTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteContextTests(Dialect dialect) : base(dialect) {}
+        public OrmLiteContextTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_set_and_get_TS_ContextItems()

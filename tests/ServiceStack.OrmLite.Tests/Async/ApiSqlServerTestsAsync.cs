@@ -9,9 +9,7 @@ namespace ServiceStack.OrmLite.Tests.Async
     [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
     public class ApiSqlServerTestsAsync : OrmLiteProvidersTestBase
     {
-        public ApiSqlServerTestsAsync(Dialect dialect) : base(dialect)
-        {
-        }
+        public ApiSqlServerTestsAsync(DialectContext context) : base(context) {}
 
         private IDbConnection db;
 

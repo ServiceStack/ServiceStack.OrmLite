@@ -21,7 +21,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class PostgreSqlArrayTests : OrmLiteProvidersTestBase
     {
-        public PostgreSqlArrayTests(Dialect dialect) : base(dialect) {}
+        public PostgreSqlArrayTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_save_integer_array()

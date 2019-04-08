@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class MaxDataTypeTests : OrmLiteProvidersTestBase
     {
-        public MaxDataTypeTests(Dialect dialect) : base(dialect) {}
+        public MaxDataTypeTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_insert_and_select_max_values()

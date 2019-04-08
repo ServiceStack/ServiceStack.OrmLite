@@ -6,9 +6,7 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
     [TestFixtureOrmLite]
     public class PredicateBuilderIssue : OrmLiteProvidersTestBase
     {
-        public PredicateBuilderIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public PredicateBuilderIssue(DialectContext context) : base(context) {}
 
         public class ItemList
         {

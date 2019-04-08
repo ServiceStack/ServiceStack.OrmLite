@@ -9,9 +9,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class SchemaTests : OrmLiteProvidersTestBase
     {
-        public SchemaTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SchemaTests(DialectContext context) : base(context) {}
 
         [Alias("TestSchemaUser")]
         [Schema("TestSchema")]

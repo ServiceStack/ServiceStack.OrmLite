@@ -11,9 +11,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class SelectExpressionTests : ExpressionsTestBase
     {
-        public SelectExpressionTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SelectExpressionTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_select_where_and_limit_expression()

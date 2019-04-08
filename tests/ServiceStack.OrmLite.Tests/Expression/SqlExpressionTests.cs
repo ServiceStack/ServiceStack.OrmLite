@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class SqlExpressionTests : ExpressionsTestBase
     {
-        public SqlExpressionTests(Dialect dialect) : base(dialect) {}
+        public SqlExpressionTests(DialectContext context) : base(context) {}
 
         private int letterFrequenceMaxId;
         private int letterFrequencyMinId;

@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.Tests
     [NonParallelizable]
     public class AutoIdTests : OrmLiteProvidersTestBase
     {
-        public AutoIdTests(Dialect dialect) : base(dialect) {}
+        public AutoIdTests(DialectContext context) : base(context) {}
         
         [Test]
         public void Does_populate_and_return_new_guid_on_insert()

@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class MockAllApiTests : OrmLiteProvidersTestBase
     {
-        public MockAllApiTests(Dialect dialect) : base(dialect) {}
+        public MockAllApiTests(DialectContext context) : base(context) {}
 
         private IDbConnection db;
 

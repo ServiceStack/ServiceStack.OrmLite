@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteCreateTableWithIndexesTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteCreateTableWithIndexesTests(Dialect dialect) : base(dialect) {}
+        public OrmLiteCreateTableWithIndexesTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_create_ModelWithIndexFields_table()

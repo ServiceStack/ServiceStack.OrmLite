@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     [TestFixtureOrmLite]
     public class SchemaUseCase : OrmLiteProvidersTestBase
     {
-        public SchemaUseCase(Dialect dialect) : base(dialect) {}
+        public SchemaUseCase(DialectContext context) : base(context) {}
 
         [OneTimeSetUp]
         public void OneTimeSetup()

@@ -20,9 +20,7 @@ namespace ServiceStack.OrmLite.Tests.Async
     [TestFixtureOrmLite]
     public class SelectAsyncTests : OrmLiteProvidersTestBase
     {
-        public SelectAsyncTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SelectAsyncTests(DialectContext context) : base(context) {}
 
         [Test]
         public async Task Can_SELECT_SingleAsync()

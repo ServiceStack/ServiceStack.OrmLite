@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
     public class RelationalExpressionsTest : ExpressionsTestBase
     {
-        public RelationalExpressionsTest(Dialect dialect) : base(dialect) {}
+        public RelationalExpressionsTest(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_select_greater_than_expression()

@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLiteDialects(Dialect.Sqlite)]
     public class MergingNestedSqlExpressionIssue : OrmLiteProvidersTestBase
     {
-        public MergingNestedSqlExpressionIssue(Dialect dialect) : base(dialect) {}
+        public MergingNestedSqlExpressionIssue(DialectContext context) : base(context) {}
 
         [Test]
         public void Does_merge_subselect_params_correctly()

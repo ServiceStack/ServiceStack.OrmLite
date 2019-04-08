@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
     [TestFixtureOrmLiteDialects(Dialect.AnyMySql)]
     public class ApiMySqlLegacyTestsAsync : OrmLiteProvidersTestBase
     {
-        public ApiMySqlLegacyTestsAsync(Dialect dialect) : base(dialect)
-        {
-        }
+        public ApiMySqlLegacyTestsAsync(DialectContext context) : base(context) {}
 
         [Test]
         public async Task API_MySql_Legacy_Examples_Async()

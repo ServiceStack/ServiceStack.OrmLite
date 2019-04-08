@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class ConverterTests : OrmLiteProvidersTestBase
     {
-        public ConverterTests(Dialect dialect) : base(dialect) {}
+        public ConverterTests(DialectContext context) : base(context) {}
    
         private struct TestStruct {}
 

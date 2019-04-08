@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 	[TestFixtureOrmLite]
 	public class SimpleUseCase : OrmLiteProvidersTestBase
 	{
-		public SimpleUseCase(Dialect dialect) : base(dialect) {}
+		public SimpleUseCase(DialectContext context) : base(context) {}
 
 		public class User
 		{

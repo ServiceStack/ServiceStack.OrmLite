@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class EnumAsIntAsPkTests : OrmLiteProvidersTestBase
     {
-        public EnumAsIntAsPkTests(Dialect dialect) : base(dialect) {}
+        public EnumAsIntAsPkTests(DialectContext context) : base(context) {}
        
         [Test]
         public void CanCreateTable()

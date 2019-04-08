@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
     [TestFixtureOrmLiteDialects(Dialect.Sqlite)]
     public class ApiSqliteLegacyTestsAsync : OrmLiteProvidersTestBase
     {
-        public ApiSqliteLegacyTestsAsync(Dialect dialect) : base(dialect)
-        {
-        }
+        public ApiSqliteLegacyTestsAsync(DialectContext context) : base(context) {}
         
 #pragma warning disable 618
         [Test]

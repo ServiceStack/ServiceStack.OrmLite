@@ -5,11 +5,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class LogicalExpressionsTest : ExpressionsTestBase
     {
-        public LogicalExpressionsTest(Dialect dialect) : base(dialect)
-        {
-        }
-
-        #region variables
+        public LogicalExpressionsTest(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_select_logical_and_variable_expression()
@@ -92,10 +88,6 @@ namespace ServiceStack.OrmLite.Tests.Expression
             }
         }
 
-        #endregion
-
-        #region method
-
         [Test]
         public void Can_select_logical_and_method_expression()
         {
@@ -161,7 +153,5 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 CollectionAssert.Contains(actual, expected);
             }
         }
-
-        #endregion
-    }
+   }
 }

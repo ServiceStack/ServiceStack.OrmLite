@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class MetadataPrimaryKeyIssue : OrmLiteProvidersTestBase
     {
-        public MetadataPrimaryKeyIssue(Dialect dialect) : base(dialect) {}
+        public MetadataPrimaryKeyIssue(DialectContext context) : base(context) {}
 
         [Test]
         public void Should_generate_select_statement_multi_threaded()

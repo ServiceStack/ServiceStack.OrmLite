@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 	[TestFixtureOrmLiteDialects(Dialect.Firebird)]
 	public class OrmLiteCreateTableWithNamingStrategyTests : OrmLiteProvidersTestBase 
 	{
-		public OrmLiteCreateTableWithNamingStrategyTests(Dialect dialect) : base(dialect) {}
+		public OrmLiteCreateTableWithNamingStrategyTests(DialectContext context) : base(context) {}
 
 		[Test]
 		public void Can_create_TableWithNamingStrategy_table_nameUnderscoreCompound()

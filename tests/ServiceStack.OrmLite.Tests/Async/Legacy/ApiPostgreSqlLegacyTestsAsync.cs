@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class ApiPostgreSqlLegacyTestsAsync : OrmLiteProvidersTestBase
     {
-        public ApiPostgreSqlLegacyTestsAsync(Dialect dialect) : base(dialect)
-        {
-        }
+        public ApiPostgreSqlLegacyTestsAsync(DialectContext context) : base(context) {}
         
 #pragma warning disable 618
         [Test]

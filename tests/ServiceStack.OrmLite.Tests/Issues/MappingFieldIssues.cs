@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class MappingFieldIssues : OrmLiteProvidersTestBase
     {
-        public MappingFieldIssues(Dialect dialect) : base(dialect) {}
+        public MappingFieldIssues(DialectContext context) : base(context) {}
 
         public class OriginalTable
         {

@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class ParamNameIssues : OrmLiteProvidersTestBase
     {
-        public ParamNameIssues(Dialect dialect) : base(dialect) {}
+        public ParamNameIssues(DialectContext context) : base(context) {}
 
         [Test]
         public void Does_use_ParamName_filter()

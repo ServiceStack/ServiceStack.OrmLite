@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite, Explicit]
     public class MultiThreadedUpdateTransactionIssue : OrmLiteProvidersTestBase
     {
-        public MultiThreadedUpdateTransactionIssue(Dialect dialect) : base(dialect) {}
+        public MultiThreadedUpdateTransactionIssue(DialectContext context) : base(context) {}
 
         public class ModelWithIdAndName
         {

@@ -129,9 +129,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class ComplexJoinTests : OrmLiteProvidersTestBase
     {
-        public ComplexJoinTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public ComplexJoinTests(DialectContext context) : base(context) {}
 
         private static int _baz1Id;
         private static int _baz2Id;

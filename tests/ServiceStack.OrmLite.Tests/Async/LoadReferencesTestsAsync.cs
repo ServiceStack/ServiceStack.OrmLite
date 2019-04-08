@@ -11,9 +11,7 @@ namespace ServiceStack.OrmLite.Tests.Async
     [TestFixtureOrmLite]
     public class LoadReferencesTestsAsync : OrmLiteProvidersTestBase
     {
-        public LoadReferencesTestsAsync(Dialect dialect) : base(dialect)
-        {
-        }
+        public LoadReferencesTestsAsync(DialectContext context) : base(context) {}
 
         private IDbConnection db;
 

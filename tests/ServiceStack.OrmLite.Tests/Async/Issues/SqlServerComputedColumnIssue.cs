@@ -39,9 +39,7 @@ namespace ServiceStack.OrmLite.Tests.Async.Issues
     [TestFixtureOrmLiteDialects(Dialect.AnySqlServer)]
     public class SqlServerComputedColumnIssue : OrmLiteProvidersTestBase
     {
-        public SqlServerComputedColumnIssue(Dialect dialect) : base(dialect)
-        {
-        }
+        public SqlServerComputedColumnIssue(DialectContext context) : base(context) {}
         
         private ComputeTest CreateTableAndGetRow()
         {

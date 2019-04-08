@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class TypeWithByteArrayFieldTests : OrmLiteProvidersTestBase
     {
-        public TypeWithByteArrayFieldTests(Dialect dialect) : base(dialect) {}
+        public TypeWithByteArrayFieldTests(DialectContext context) : base(context) {}
 
         TypeWithByteArrayField getSampleObject()
         {

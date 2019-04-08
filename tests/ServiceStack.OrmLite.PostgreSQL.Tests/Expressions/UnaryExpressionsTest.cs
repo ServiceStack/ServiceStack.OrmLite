@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class UnaryExpressionsTest : ExpressionsTestBase
     {
-        public UnaryExpressionsTest(Dialect dialect) : base(dialect) {}
+        public UnaryExpressionsTest(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_select_unary_plus_constant_expression()

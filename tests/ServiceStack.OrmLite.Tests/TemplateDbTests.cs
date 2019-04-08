@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class TemplateDbTests : OrmLiteProvidersTestBase
     {
-        public TemplateDbTests(Dialect dialect) : base(dialect) {}
+        public TemplateDbTests(DialectContext context) : base(context) {}
 
         [Test]
         public async Task Can_retrieve_single_record_with_param()

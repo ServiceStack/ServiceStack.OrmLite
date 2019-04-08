@@ -13,9 +13,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class FreeLicenseUsageTests : LicenseUsageTests
     {
-        public FreeLicenseUsageTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public FreeLicenseUsageTests(DialectContext context) : base(context) {}
 
         [SetUp]
         public void SetUp()
@@ -57,9 +55,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class RegisteredLicenseUsageTests : LicenseUsageTests
     {
-        public RegisteredLicenseUsageTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public RegisteredLicenseUsageTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Allows_creation_of_11_tables()
@@ -90,7 +86,7 @@ namespace ServiceStack.OrmLite.Tests
 
     public abstract class LicenseUsageTests : OrmLiteProvidersTestBase
     {
-        protected LicenseUsageTests(Dialect dialect) : base(dialect) {}
+        protected LicenseUsageTests(DialectContext context) : base(context) {}
 
         protected IDbConnection db;
 

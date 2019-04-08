@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
     public class ApiSqlServerTests : OrmLiteProvidersTestBase
     {
-        public ApiSqlServerTests(Dialect dialect) : base(dialect) {}
+        public ApiSqlServerTests(DialectContext context) : base(context) {}
         
         [Test]
         public void API_SqlServer_Examples()

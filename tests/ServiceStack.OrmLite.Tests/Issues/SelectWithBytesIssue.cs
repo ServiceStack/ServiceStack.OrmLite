@@ -5,7 +5,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class SelectWithBytesIssue : OrmLiteProvidersTestBase
     {
-        public SelectWithBytesIssue(Dialect dialect) : base(dialect) {}
+        public SelectWithBytesIssue(DialectContext context) : base(context) {}
 
         public class ModelWithBytes
         {

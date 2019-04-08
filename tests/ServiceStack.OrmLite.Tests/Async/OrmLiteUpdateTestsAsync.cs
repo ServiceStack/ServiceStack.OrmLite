@@ -12,9 +12,7 @@ namespace ServiceStack.OrmLite.Tests.Async
     [TestFixtureOrmLite]
     public class OrmLiteUpdateTestsAsync : OrmLiteProvidersTestBase
     {
-        public OrmLiteUpdateTestsAsync(Dialect dialect) : base(dialect)
-        {
-        }
+        public OrmLiteUpdateTestsAsync(DialectContext context) : base(context) {}
 
         [Test]
         public async Task Can_filter_update_method1_to_insert_date()

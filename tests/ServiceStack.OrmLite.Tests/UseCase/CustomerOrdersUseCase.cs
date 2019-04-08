@@ -118,7 +118,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     [TestFixtureOrmLite]
     public class CustomerOrdersUseCase : OrmLiteProvidersTestBase
     {
-        public CustomerOrdersUseCase(Dialect dialect) : base(dialect) {}
+        public CustomerOrdersUseCase(DialectContext context) : base(context) {}
 
         //Stand-alone class, No other configs, nothing but POCOs.
         [Test]

@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class SelectIntoTests : OrmLiteProvidersTestBase
     {
-        public SelectIntoTests(Dialect dialect) : base(dialect) {}
+        public SelectIntoTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Dont_guess_column_in_mismatched_Into_model()

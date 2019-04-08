@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.Tests.Legacy
     [TestFixtureOrmLiteDialects(Dialect.AnySqlServer)]
     public class ApiSqlServerLegacyTests : OrmLiteProvidersTestBase
     {
-        public ApiSqlServerLegacyTests(Dialect dialect) : base(dialect) {}
+        public ApiSqlServerLegacyTests(DialectContext context) : base(context) {}
 
         private IDbConnection db;
 

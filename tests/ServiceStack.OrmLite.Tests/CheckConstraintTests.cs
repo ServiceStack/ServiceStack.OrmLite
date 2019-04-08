@@ -21,10 +21,10 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class CheckConstraintTests : OrmLiteProvidersTestBase
     {
-        public CheckConstraintTests(Dialect dialect) : base(dialect) {}
+        public CheckConstraintTests(DialectContext context) : base(context) {}
         
         [Test]
-        [IgnoreDialect(Dialect.MySql5_5 | Dialect.MySql10_1, "Check constraints supported from MariaDb 10.2.1 onwards")]
+        [IgnoreDialect(Dialect.MySql, new[]{ MySqlDb.V5_5, MySqlDb.V10_1 }, "Check constraints supported from MariaDb 10.2.1 onwards")]
         public void Does_create_table_with_CheckConstraints()
         {
             using (var db = OpenDbConnection())

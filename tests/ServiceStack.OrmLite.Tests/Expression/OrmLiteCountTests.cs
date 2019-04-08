@@ -11,9 +11,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class OrmLiteCountTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteCountTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public OrmLiteCountTests(DialectContext context) : base(context) {}
 
         [Test]
         public void CanDoCountWithInterface()

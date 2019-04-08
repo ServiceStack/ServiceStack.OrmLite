@@ -38,7 +38,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
     public class LoadReferencesCaseSensitiveTest : OrmLiteProvidersTestBase
     {
-        public LoadReferencesCaseSensitiveTest(Dialect dialect) : base(dialect) {}
+        public LoadReferencesCaseSensitiveTest(DialectContext context) : base(context) {}
 
         const string regionCode = "West";
         const string regionName = "Western Region";

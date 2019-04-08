@@ -5,7 +5,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class PrimaryExpressionsTest : ExpressionsTestBase
     {
-        public PrimaryExpressionsTest(Dialect dialect) : base(dialect) {}
+        public PrimaryExpressionsTest(DialectContext context) : base(context) {}
 
         private static class TestClass
         {

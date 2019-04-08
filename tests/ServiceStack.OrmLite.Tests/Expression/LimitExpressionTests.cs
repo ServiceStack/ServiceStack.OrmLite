@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class LimitExpressionTests : OrmLiteProvidersTestBase
     {
-        public LimitExpressionTests(Dialect dialect) : base(dialect) {}
+        public LimitExpressionTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_Skip_and_Take_UserAuth_Join()

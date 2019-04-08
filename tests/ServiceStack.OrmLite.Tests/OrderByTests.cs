@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrderByTests : OrmLiteProvidersTestBase
     {
-        public OrderByTests(Dialect dialect) : base(dialect) {}
+        public OrderByTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_order_by_random()

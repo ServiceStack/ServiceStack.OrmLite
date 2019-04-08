@@ -10,9 +10,7 @@ namespace ServiceStack.OrmLite.Tests.Async
     [TestFixtureOrmLite]
     public class SqlExpressionTests : OrmLiteProvidersTestBase
     {
-        public SqlExpressionTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SqlExpressionTests(DialectContext context) : base(context) {}
 
         public static void InitLetters(IDbConnection db)
         {

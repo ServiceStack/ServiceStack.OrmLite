@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteFiltersTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteFiltersTests(Dialect dialect) : base(dialect) {}
+        public OrmLiteFiltersTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Does_call_Filters_on_insert_and_update()

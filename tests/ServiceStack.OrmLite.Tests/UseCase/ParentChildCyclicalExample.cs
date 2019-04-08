@@ -36,7 +36,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     [TestFixtureOrmLite]
     public class ParentChildCyclicalExample : OrmLiteProvidersTestBase
     {
-        public ParentChildCyclicalExample(Dialect dialect) : base(dialect) {}
+        public ParentChildCyclicalExample(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_create_Parent_Child_Tables()

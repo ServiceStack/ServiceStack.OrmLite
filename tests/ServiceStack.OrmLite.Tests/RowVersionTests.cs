@@ -76,7 +76,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class RowVersionTests : OrmLiteProvidersTestBase
     {
-        public RowVersionTests(Dialect dialect) : base(dialect) {}
+        public RowVersionTests(DialectContext context) : base(context) {}
 
         private IDbConnection db;
 

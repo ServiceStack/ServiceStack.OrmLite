@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     [TestFixtureOrmLite]
     public class CustomerOrdersUseCaseAsync : OrmLiteProvidersTestBase
     {
-        public CustomerOrdersUseCaseAsync(Dialect dialect) : base(dialect) {}
+        public CustomerOrdersUseCaseAsync(DialectContext context) : base(context) {}
 
         [Test]
         public async Task Can_run_Customer_Orders_UseCase()

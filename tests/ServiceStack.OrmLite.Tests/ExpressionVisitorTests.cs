@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class ExpressionVisitorTests : OrmLiteProvidersTestBase
     {
-        public ExpressionVisitorTests(Dialect dialect) : base(dialect) {}
+        public ExpressionVisitorTests(DialectContext context) : base(context) {}
 
         private IDbConnection Db;
 

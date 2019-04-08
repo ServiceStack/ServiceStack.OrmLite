@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class LoadReferencesNullReferenceIssue : OrmLiteProvidersTestBase
     {
-        public LoadReferencesNullReferenceIssue(Dialect dialect) : base(dialect) {}
+        public LoadReferencesNullReferenceIssue(DialectContext context) : base(context) {}
 
         [Test]
         public void Does_not_load_references_when_RefId_is_null()

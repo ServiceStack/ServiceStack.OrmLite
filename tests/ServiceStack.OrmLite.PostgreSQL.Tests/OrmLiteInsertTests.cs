@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class OrmLiteInsertTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteInsertTests(Dialect dialect) : base(dialect) {}
+        public OrmLiteInsertTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_insert_into_ModelWithFieldsOfDifferentTypes_table()
@@ -203,7 +203,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql), SetUICulture("en-US"), SetCulture("en-US")]
     public class PostgreSQLUpdateTests : OrmLiteProvidersTestBase
     {
-        public PostgreSQLUpdateTests(Dialect dialect) : base(dialect) {}
+        public PostgreSQLUpdateTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_insert_datetimeoffsets_regardless_of_current_culture()

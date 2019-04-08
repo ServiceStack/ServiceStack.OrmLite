@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class TypeWithByteArrayFieldTests : OrmLiteProvidersTestBase
     {
-        public TypeWithByteArrayFieldTests(Dialect dialect) : base(dialect) {}
+        public TypeWithByteArrayFieldTests(DialectContext context) : base(context) {}
 
         [Test]
         public void CanInsertAndSelectByteArray()

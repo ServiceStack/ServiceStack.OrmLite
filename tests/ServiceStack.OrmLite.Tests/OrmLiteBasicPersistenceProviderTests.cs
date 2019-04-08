@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteBasicPersistenceProviderTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteBasicPersistenceProviderTests(Dialect dialect) : base(dialect) {}
+        public OrmLiteBasicPersistenceProviderTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_GetById_from_basic_persistence_provider()

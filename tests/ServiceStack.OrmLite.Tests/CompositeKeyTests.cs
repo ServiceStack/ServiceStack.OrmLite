@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class CompositeKeyTests : OrmLiteProvidersTestBase
     {
-        public CompositeKeyTests(Dialect dialect) : base(dialect) {}
+        public CompositeKeyTests(DialectContext context) : base(context) {}
         
         const long SubId1Value = 1;
         const long SubId2Value = 1;

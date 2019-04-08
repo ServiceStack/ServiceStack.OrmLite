@@ -20,7 +20,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite, NUnit.Framework.Ignore("Initializing LogFactory needs to run stand-alone")]
     public class LoggingTests : OrmLiteProvidersTestBase
     {
-        public LoggingTests(Dialect dialect) : base(dialect) {}
+        public LoggingTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Does_log_all_statements()

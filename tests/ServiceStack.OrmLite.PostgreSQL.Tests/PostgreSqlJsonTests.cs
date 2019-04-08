@@ -99,7 +99,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class PostgreSqlJsonTests : OrmLiteProvidersTestBase
     {
-        public PostgreSqlJsonTests(Dialect dialect) : base(dialect) {}
+        public PostgreSqlJsonTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_save_complex_types_as_JSON()

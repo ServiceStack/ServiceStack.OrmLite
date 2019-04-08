@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
     {
         private List<Author> authors;
 
-        public AuthorUseCase(Dialect dialect) : base(dialect)
+        public AuthorUseCase(DialectContext context) : base(context)
         {
             authors = new List<Author>
             {

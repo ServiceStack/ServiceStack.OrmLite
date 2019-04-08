@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class SelectScalarTests : OrmLiteProvidersTestBase
     {
-        public SelectScalarTests(Dialect dialect) : base(dialect) {}
+        public SelectScalarTests(DialectContext context) : base(context) {}
 
         public class TestPerson
         {

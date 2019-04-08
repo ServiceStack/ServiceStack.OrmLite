@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class GenericTableExpressions : OrmLiteProvidersTestBase
     {
-        public GenericTableExpressions(Dialect dialect) : base(dialect) {}
+        public GenericTableExpressions(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_change_table_at_runtime()

@@ -7,9 +7,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class ConditionalExpressionTest : ExpressionsTestBase
     {
-        public ConditionalExpressionTest(Dialect dialect) : base(dialect)
-        {
-        }
+        public ConditionalExpressionTest(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_select_conditional_and_expression()

@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteDropTableTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteDropTableTests(Dialect dialect) : base(dialect) {}
+        public OrmLiteDropTableTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_drop_existing_table()

@@ -18,9 +18,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class CustomFieldTests : OrmLiteProvidersTestBase
     {
-        public CustomFieldTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public CustomFieldTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_create_custom_Decimal_field()

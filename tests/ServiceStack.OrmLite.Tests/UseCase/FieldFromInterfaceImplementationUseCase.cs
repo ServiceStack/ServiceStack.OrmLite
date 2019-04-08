@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
     [TestFixtureOrmLite]
     public class FieldFromInterfaceImplementationUseCase : OrmLiteProvidersTestBase
     {
-        public FieldFromInterfaceImplementationUseCase(Dialect dialect) : base(dialect) {}
+        public FieldFromInterfaceImplementationUseCase(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_select_on_generic_interface_implementation_properties_with_PrefixFieldWithTableName()

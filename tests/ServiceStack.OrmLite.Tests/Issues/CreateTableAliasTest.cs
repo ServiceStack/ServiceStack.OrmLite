@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class CreateTableAliasTest : OrmLiteProvidersTestBase
     {
-        public CreateTableAliasTest(Dialect dialect) : base(dialect) {}
+        public CreateTableAliasTest(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_Create_and_Select_from_table()

@@ -44,9 +44,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class AutoQueryJoinTests : OrmLiteProvidersTestBase
     {
-        public AutoQueryJoinTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public AutoQueryJoinTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_select_references_with_join()

@@ -13,12 +13,12 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLiteDialects(Dialect.Sqlite)]
     public class CustomSqlExpressionTests : OrmLiteProvidersTestBase
     {
-        public CustomSqlExpressionTests(Dialect dialect) : base(dialect)
+        public CustomSqlExpressionTests(DialectContext context) : base(context)
         {
             // override the default sqlite provider and dbfactory with the custom one
             var customSqlServerDialectProvider = new CustomSqlServerDialectProvider();
             DialectProvider = customSqlServerDialectProvider;
-            DbFactory = new OrmLiteConnectionFactory(TestConfig.SqliteMemoryDb, customSqlServerDialectProvider, false);
+            DbFactory = new OrmLiteConnectionFactory(SqliteDb.MemoryConnection, customSqlServerDialectProvider, false);
         }
         
         [SetUp]

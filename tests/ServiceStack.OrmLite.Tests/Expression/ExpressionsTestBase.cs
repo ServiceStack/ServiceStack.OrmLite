@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [NonParallelizable]
     public abstract class ExpressionsTestBase : OrmLiteProvidersTestBase
     {
-        public ExpressionsTestBase(Dialect dialect) : base(dialect)
-        {
-        }
+        public ExpressionsTestBase(DialectContext context) : base(context) {}
 
         [SetUp]
         public void Setup()

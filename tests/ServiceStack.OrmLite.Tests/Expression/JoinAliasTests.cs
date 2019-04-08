@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class JoinAliasTests : OrmLiteProvidersTestBase
     {
-        public JoinAliasTests(Dialect dialect) : base(dialect) {}
+        public JoinAliasTests(DialectContext context) : base(context) {}
 
         [Test]
         [IgnoreDialect(Tests.Dialect.AnyPostgreSql | Tests.Dialect.AnyMySql, "Invalid Custom SQL for provider naming convention")]

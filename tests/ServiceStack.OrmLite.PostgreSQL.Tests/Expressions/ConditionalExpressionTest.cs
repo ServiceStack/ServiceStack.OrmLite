@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class ConditionalExpressionTest : ExpressionsTestBase
     {
-        public ConditionalExpressionTest(Dialect dialect) : base(dialect) {}
+        public ConditionalExpressionTest(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_select_conditional_and_expression()

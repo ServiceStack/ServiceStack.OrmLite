@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.Tests
 	[TestFixtureOrmLiteDialects(Dialect.Sqlite)]
 	public class SqliteOrmLiteConnectionTests : OrmLiteProvidersTestBase
 	{
-		public SqliteOrmLiteConnectionTests(Dialect dialect) : base(dialect) {}
+		public SqliteOrmLiteConnectionTests(DialectContext context) : base(context) {}
 
 		[Test]
 		public void Can_create_connection()

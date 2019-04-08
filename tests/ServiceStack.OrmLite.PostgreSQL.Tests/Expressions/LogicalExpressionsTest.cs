@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class LogicalExpressionsTest : ExpressionsTestBase
     {
-        public LogicalExpressionsTest(Dialect dialect) : base(dialect) {}
+        public LogicalExpressionsTest(DialectContext context) : base(context) {}
 
         // Unlikely 
         // OpenDbConnection().Select<TestType>(q => q.BoolColumn == (true & false));

@@ -75,7 +75,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class AutoQueryTests : OrmLiteProvidersTestBase
     {
-        public AutoQueryTests(Dialect dialect) : base(dialect) {}
+        public AutoQueryTests(DialectContext context) : base(context) {}
         
         public static Rockstar[] SeedRockstars = new[] {
             new Rockstar { Id = 1, FirstName = "Jimi", LastName = "Hendrix", LivingStatus = LivingStatus.Dead, Age = 27, DateOfBirth = new DateTime(1942, 11, 27), DateDied = new DateTime(1970, 09, 18), },

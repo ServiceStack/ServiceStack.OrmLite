@@ -13,9 +13,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class FromExpressionTests : ExpressionsTestBase
     {
-        public FromExpressionTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public FromExpressionTests(DialectContext context) : base(context) {}
 
         public void Init(IDbConnection db)
         {

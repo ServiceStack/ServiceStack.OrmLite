@@ -5,7 +5,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class AdditiveExpressionsTest : ExpressionsTestBase
     {
-        public AdditiveExpressionsTest(Dialect dialect) : base(dialect) {}
+        public AdditiveExpressionsTest(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_select_constant_add_expression()

@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteSaveTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteSaveTests(Dialect dialect) : base(dialect) {}
+        public OrmLiteSaveTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Save_populates_AutoIncrementId()

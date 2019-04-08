@@ -8,9 +8,8 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
     [TestFixtureOrmLiteDialects(Dialect.SqlServer)]
     public class ApiSqlServerLegacyTestsAsync : OrmLiteProvidersTestBase
     {
-        public ApiSqlServerLegacyTestsAsync(Dialect dialect) : base(dialect)
-        {
-        }
+        public ApiSqlServerLegacyTestsAsync(DialectContext context) : base(context) {}
+        
 #pragma warning disable 618
         [Test]
         public async Task API_SqlServer_Legacy_Examples_Async()

@@ -7,7 +7,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class DynamicResultsNamingStrategyTest : OrmLiteProvidersTestBase
     {
-        public DynamicResultsNamingStrategyTest(Dialect dialect) : base(dialect) {}
+        public DynamicResultsNamingStrategyTest(DialectContext context) : base(context) {}
 
         public class Menu : EntityBase<Menu>
         {

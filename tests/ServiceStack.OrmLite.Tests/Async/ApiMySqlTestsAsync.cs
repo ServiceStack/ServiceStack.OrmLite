@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests.Async
     [TestFixtureOrmLiteDialects(Dialect.AnyMySql)]
     public class ApiMySqlTestsAsync : OrmLiteProvidersTestBase
     {
-        public ApiMySqlTestsAsync(Dialect dialect) : base(dialect)
-        {
-        }
+        public ApiMySqlTestsAsync(DialectContext context) : base(context) {}
 
         [Test]
         public async Task API_MySql_Examples_Async()

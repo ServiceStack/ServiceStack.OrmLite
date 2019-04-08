@@ -11,7 +11,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class MultithreadingIssueTests : OrmLiteProvidersTestBase
     {
-        public MultithreadingIssueTests(Dialect dialect) : base(dialect) {}
+        public MultithreadingIssueTests(DialectContext context) : base(context) {}
 
         [SetUp]
         public void SetUp()

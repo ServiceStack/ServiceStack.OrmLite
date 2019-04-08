@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class OrmLiteBasicPersistenceProviderTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteBasicPersistenceProviderTests(Dialect dialect) : base(dialect) {}
+        public OrmLiteBasicPersistenceProviderTests(DialectContext context) : base(context) {}
 
         [SetUp]
         public void SetUp()

@@ -38,7 +38,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class UniqueConstraintTests : OrmLiteProvidersTestBase
     {
-        public UniqueConstraintTests(Dialect dialect) : base(dialect) {}
+        public UniqueConstraintTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Does_add_individual_Constraints()

@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class SelectDistinctTests : OrmLiteProvidersTestBase
     {
-        public SelectDistinctTests(Dialect dialect) : base(dialect) {}
+        public SelectDistinctTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_Select_Multiple_Distinct_Columns()

@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests.Expressions
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]
     public class StringFunctionTests : ExpressionsTestBase
     {
-        public StringFunctionTests(Dialect dialect) : base(dialect) {}
+        public StringFunctionTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_select_using_contains()

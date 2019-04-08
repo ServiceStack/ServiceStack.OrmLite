@@ -5,7 +5,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteUtilExtensionsTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteUtilExtensionsTests(Dialect dialect) : base(dialect) {}
+        public OrmLiteUtilExtensionsTests(DialectContext context) : base(context) {}
 
         [Test]
         public void CanCreateStringInStatement()

@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     [TestFixtureOrmLite]
     public class SqlExpressionJoinWithRowversionTests : ExpressionsTestBase
     {
-        public SqlExpressionJoinWithRowversionTests(Dialect dialect) : base(dialect) {}
+        public SqlExpressionJoinWithRowversionTests(DialectContext context) : base(context) {}
 
         public class TableA
         {

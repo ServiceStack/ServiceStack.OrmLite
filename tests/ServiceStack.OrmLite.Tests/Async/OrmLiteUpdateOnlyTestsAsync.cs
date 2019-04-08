@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests.Async
     [TestFixtureOrmLite]
     public class OrmLiteUpdateOnlyTestsAsync : OrmLiteProvidersTestBase
     {
-        public OrmLiteUpdateOnlyTestsAsync(Dialect dialect) : base(dialect)
-        {
-        }
+        public OrmLiteUpdateOnlyTestsAsync(DialectContext context) : base(context) {}
 
         [Test]
         public async Task Supports_different_ways_to_UpdateOnly()

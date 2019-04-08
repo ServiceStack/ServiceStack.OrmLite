@@ -8,9 +8,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class SqlExpressionWhereTests : OrmLiteProvidersTestBase
     {
-        public SqlExpressionWhereTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public SqlExpressionWhereTests(DialectContext context) : base(context) {}
 
         private static void Init(IDbConnection db)
         {

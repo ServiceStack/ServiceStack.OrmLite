@@ -5,9 +5,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class EqualityExpressionsTest : ExpressionsTestBase
     {
-        public EqualityExpressionsTest(Dialect dialect) : base(dialect) {}
-
-        #region int tests
+        public EqualityExpressionsTest(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_select_equals_constant_int_expression()
@@ -148,10 +146,6 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 CollectionAssert.DoesNotContain(actual, expected);
             }
         }
-
-        #endregion
-
-        #region bool test
 
         [Test]
         public void Can_select_equals_constant_bool_expression()
@@ -313,6 +307,5 @@ namespace ServiceStack.OrmLite.Tests.Expression
             Assert.AreEqual(actual.Count, 10);
             CollectionAssert.DoesNotContain(actual, expected);
         }
-        #endregion
     }
 }

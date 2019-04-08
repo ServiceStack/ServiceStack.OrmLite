@@ -6,7 +6,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
     [TestFixtureOrmLite]
     public class SqlExpressionParamTests : OrmLiteProvidersTestBase
     {
-        public SqlExpressionParamTests(Dialect dialect) : base(dialect) {}
+        public SqlExpressionParamTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_add_DbParam_to_SqlExpression()

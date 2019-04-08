@@ -7,9 +7,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
     [TestFixtureOrmLiteDialects(Dialect.AnyPostgreSql)]    
     public class OrmLiteDropTableWithNamingStrategyTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteDropTableWithNamingStrategyTests(Dialect dialect) : base(dialect)
-        {
-        }
+        public OrmLiteDropTableWithNamingStrategyTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_drop_TableWithNamingStrategy_table_PostgreSqlNamingStrategy()

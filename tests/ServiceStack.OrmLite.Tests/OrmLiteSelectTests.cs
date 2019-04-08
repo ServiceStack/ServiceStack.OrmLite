@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteSelectTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteSelectTests(Dialect dialect) : base(dialect) {}
+        public OrmLiteSelectTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_GetById_int_from_ModelWithFieldsOfDifferentTypes_table()
