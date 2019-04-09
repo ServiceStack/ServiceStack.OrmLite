@@ -53,7 +53,7 @@ namespace ServiceStack.OrmLite.Tests
             using (new TemporaryNamingStrategy(DialectProvider, aliasNamingStrategy))
             using (var db = OpenDbConnection())
             {
-                db.CreateTable<ModelWithOnlyStringFields>(true);
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Does.Contain("CREATE TABLE TableAlias".NormalizeSql()));
@@ -145,7 +145,6 @@ namespace ServiceStack.OrmLite.Tests
 
                 modelFromDb = db.SingleById<ModelWithOnlyStringFields>("998");
                 Assert.AreEqual(m.Name, modelFromDb.Name);
-
             }
 
             using (var db = OpenDbConnection())
@@ -166,7 +165,7 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
-                var m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
+                var m = new ModelWithOnlyStringFields { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
 
                 db.Save(m);
                 var modelFromDb = db.Where<ModelWithOnlyStringFields>(new { Name = "QueryByExample" })[0];

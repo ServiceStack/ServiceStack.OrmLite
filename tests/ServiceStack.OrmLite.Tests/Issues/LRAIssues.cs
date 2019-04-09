@@ -151,7 +151,11 @@ namespace ServiceStack.OrmLite.Tests.Issues
                         RisultatoId = 1,
                         DataOraRicezione = DateTime.UtcNow,
                         DataModifica = DateTime.UtcNow,
-                        VersioneRecord = 1
+                        VersioneRecord = 1,
+                        InviareALIS = 1,
+                        RisultatoPrincipale = 1,
+                        TipoInserimento = 1,
+                        Citrato = 1,
                     });
 
                 long result = db.InsertIntoSelect<LRARisultato>(q);
@@ -200,7 +204,11 @@ namespace ServiceStack.OrmLite.Tests.Issues
                         RisultatoId = 1,
                         DataOraRicezione = DateTime.UtcNow,
                         DataModifica = DateTime.UtcNow,
-                        VersioneRecord = 1
+                        VersioneRecord = 1,
+                        InviareALIS = 1,
+                        RisultatoPrincipale = 1,
+                        TipoInserimento = 1,
+                        Citrato = 1,
                     });
 
                 long result = await db.InsertIntoSelectAsync<LRARisultato>(q);
@@ -259,8 +267,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 VersioneRecord = 1,
                 ProfiloAnalisiId = null
             });
-
-            OrmLiteUtils.PrintSql();
         }
         
         [Test]

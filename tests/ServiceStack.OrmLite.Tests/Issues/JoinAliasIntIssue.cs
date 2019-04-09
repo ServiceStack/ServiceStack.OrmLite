@@ -82,8 +82,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_create_query_with_int_TableAlias()
         {
-            OrmLiteUtils.PrintSql();
-            
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<Teamuser>();
@@ -133,8 +131,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 var results = db.Select<dynamic>(q);
             }
-
-            OrmLiteUtils.UnPrintSql();
         }
 
     }

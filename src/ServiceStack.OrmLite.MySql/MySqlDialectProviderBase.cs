@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite.MySql
 
             this.Variables = new Dictionary<string, string>
             {
-                { OrmLiteVariables.SystemUtc, "CURRENT_TIMESTAMP" },
+                { OrmLiteVariables.SystemUtc, "UTC_TIMESTAMP" },
                 { OrmLiteVariables.MaxText, "LONGTEXT" },
                 { OrmLiteVariables.MaxTextUnicode, "LONGTEXT" },
                 { OrmLiteVariables.True, SqlBool(true) },                
@@ -364,7 +364,8 @@ namespace ServiceStack.OrmLite.MySql
             return base.GetQuotedValue(value, fieldType);
         }
         
-        public override string GetTableName(string table, string schema = null) => GetTableName(table, schema, useStrategy: false);
+        public override string GetTableName(string table, string schema = null) => 
+	        GetTableName(table, schema, useStrategy:true);
 
         public override string GetTableName(string table, string schema, bool useStrategy)
         {
@@ -416,7 +417,7 @@ namespace ServiceStack.OrmLite.MySql
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0} AND TABLE_SCHEMA = {1}"
-                .SqlFmt(GetTableName(tableName, schema), dbCmd.Connection.Database);
+                .SqlFmt(GetTableName(tableName, schema).StripQuotes(), dbCmd.Connection.Database);
 
             var result = dbCmd.ExecLongScalar(sql);
 
@@ -428,7 +429,7 @@ namespace ServiceStack.OrmLite.MySql
             tableName = GetTableName(tableName, schema);
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS"
                       + " WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName AND TABLE_SCHEMA = @schema"
-                          .SqlFmt(GetTableName(tableName, schema), columnName);
+                          .SqlFmt(GetTableName(tableName, schema).StripQuotes(), columnName);
             
             var result = db.SqlScalar<long>(sql, new { tableName, columnName, schema = db.Database });
 

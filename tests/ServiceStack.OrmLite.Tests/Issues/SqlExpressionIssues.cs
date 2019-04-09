@@ -19,8 +19,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_Equals_method_and_operator_with_Scalar()
         {
-            OrmLiteUtils.PrintSql();
-            
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<MetadataEntity>();
