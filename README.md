@@ -324,6 +324,18 @@ var q = db.From<Person>()
 Dictionary<int, List<string>> results = db.Lookup<int, string>(q);
 ```
 
+The new `db.KeyValuePair<K,V>` API is similar to `db.Dictionary<K,V>` where it uses the **first 2 columns** for its Key/Value Pairs to 
+create a Dictionary but is more appropriate when the results can contain duplicate Keys or when ordering needs to be preserved:
+
+```csharp
+var q = db.From<StatsLog>()
+    .GroupBy(x => x.Name)
+    .Select(x => new { x.Name, Count = Sql.Count("*") })
+    .OrderByDescending("Count");
+
+var results = db.KeyValuePairs<string, int>(q);
+```
+
 ### INSERT, UPDATE and DELETEs
 
 To see the behaviour of the different APIs, all examples uses this simple model
@@ -1092,6 +1104,15 @@ using (var multi = db.QueryMultiple(q.ToSelectStatement()))
 }
 ```
 
+### SELECT DISTINCT in SelectMulti
+
+[SelectMulti](https://github.com/ServiceStack/ServiceStack.OrmLite#selecting-multiple-columns-across-joined-tables) APIs for populating
+multiple tables now supports **SELECT DISTINCT** with:
+
+```csharp
+var tuples = db.SelectMulti<Customer, CustomerAddress>(q.SelectDistinct());
+```
+
 ### Select data from multiple tables into a Custom POCO
 
 Another implicit behaviour when selecting from a typed SqlExpression is that results are mapped to the 
@@ -1469,22 +1490,23 @@ var q = db.From<Table>()
     .Select(x => x.Join1.Join2.IntValue);
 ```
 
-### JOIN aliases
+### Table aliases
 
-You can specify join aliases when joining same table multiple times together to differentiate from any 
-ambiguous columns, e.g:
+The `TableAlias` APIs lets you specify table aliases when joining same table multiple times together to differentiate from any 
+ambiguous columns in Queries with multiple self-reference joins, e.g:
 
 ```csharp
-var q = db.From<Sale>()
-    .LeftJoin<ContactIssue>((s,c) => s.SellerId == c.Id, db.JoinAlias("seller"))
-    .LeftJoin<ContactIssue>((s,c) => s.BuyerId == c.Id, db.JoinAlias("buyer"))
-    .Select<Sale, ContactIssue>((s,c) => new {
-        s,
-        BuyerFirstName = Sql.JoinAlias(c.FirstName, "buyer"),
-        BuyerLastName = Sql.JoinAlias(c.LastName, "buyer"),
-        SellerFirstName = Sql.JoinAlias(c.FirstName, "seller"),
-        SellerLastName = Sql.JoinAlias(c.LastName, "seller"),
+var q = db.From<Page>(db.TableAlias("p1"))
+    .Join<Page>((p1, p2) => 
+        p1.PageId == p2.PageId && 
+        p2.ActivityId == activityId, db.TableAlias("p2"))
+    .Join<Page,Category>((p2,c) => Sql.TableAlias(p2.Category) == c.Id)
+    .Join<Page,Page>((p1,p2) => Sql.TableAlias(p1.Rank,"p1") < Sql.TableAlias(p2.Rank,"p2"))
+    .Select<Page>(p => new {
+        ActivityId = Sql.TableAlias(p.ActivityId, "p2")
     });
+
+var rows = db.Select(q);
 ```
 
 ### Unique Constraints
@@ -1682,6 +1704,28 @@ SQLite offers [additional fine-grained behavior](https://sqlite.org/lang_conflic
  - FAIL
  - IGNORE
  - REPLACE
+
+### GetTableNames and GetTableNamesWithRowCounts APIs
+
+As the queries for retrieving table names can vary amongst different RDBMS's, we've abstracted their implementations behind uniform APIs
+where you can now get a list of table names and their row counts for all supported RDBMS's with:
+
+```csharp
+List<string> tableNames = db.GetTableNames();
+
+List<KeyValuePair<string,long>> tableNamesWithRowCounts = db.GetTableNamesWithRowCounts();
+```
+
+> `*Async` variants also available
+
+Both APIs can be called with an optional `schema` if you only want the tables for a specific schema.
+It defaults to using the more efficient RDBMS APIs, which if offered typically returns an approximate estimate of rowcounts in each table. 
+
+If you need exact table row counts, you can specify `live:true`:
+
+```csharp
+var tablesWithRowCounts = db.GetTableNamesWithRowCounts(live:true);
+```
 
 ### Modify Custom Schema
 
@@ -2951,7 +2995,7 @@ whilst the new `[SqlServerCollate]` attribute can be used to specify an SQL Serv
 
 ## PostgreSQL Features
 
-### PostgreSQL Data Types
+### PostgreSQL Rich Data Types
 
 The `[PgSql*]` specific attributes lets you use attributes to define PostgreSQL rich data types, e.g:
 
@@ -2973,6 +3017,139 @@ public class MyPostgreSqlTable
     [PgSqlBigIntArray]
     public long[] AsLongArray { get; set; }
 }
+```
+
+By default all arrays of .NET's built-in **numeric**, **string** and **DateTime** types will be stored in PostgreSQL array types:
+
+```csharp
+public class Table
+{
+    public Guid Id { get; set; }
+
+    public int[] Ints { get; set; }
+    public long[] Longs { get; set; }
+    public float[] Floats { get; set; }
+    public double[] Doubles { get; set; }
+    public decimal[] Decimals { get; set; }
+    public string[] Strings { get; set; }
+    public DateTime[] DateTimes { get; set; }
+    public DateTimeOffset[] DateTimeOffsets { get; set; }
+}
+```
+
+You can opt-in to annotate other collections like `List<T>` to also be stored in array types by annotating them with `[Pgsql*]` attributes, e.g:
+
+```csharp
+public class Table
+{
+    public Guid Id { get; set; }
+
+    [PgSqlIntArray]
+    public List<int> ListInts { get; set; }
+    [PgSqlBigIntArray]
+    public List<long> ListLongs { get; set; }
+    [PgSqlFloatArray]
+    public List<float> ListFloats { get; set; }
+    [PgSqlDoubleArray]
+    public List<double> ListDoubles { get; set; }
+    [PgSqlDecimalArray]
+    public List<decimal> ListDecimals { get; set; }
+    [PgSqlTextArray]
+    public List<string> ListStrings { get; set; }
+    [PgSqlTimestamp]
+    public List<DateTime> ListDateTimes { get; set; }
+    [PgSqlTimestampTz]
+    public List<DateTimeOffset> ListDateTimeOffsets { get; set; }
+}
+```
+
+Alternatively if you **always** want `List<T>` stored in Array types, you can register them in the `PostgreSqlDialect.Provider`:
+
+```csharp
+PostgreSqlDialect.Provider.RegisterConverter<List<string>>(new PostgreSqlStringArrayConverter());
+PostgreSqlDialect.Provider.RegisterConverter<List<int>>(new PostgreSqlIntArrayConverter());
+PostgreSqlDialect.Provider.RegisterConverter<List<long>>(new PostgreSqlLongArrayConverter());
+PostgreSqlDialect.Provider.RegisterConverter<List<float>>(new PostgreSqlFloatArrayConverter());
+PostgreSqlDialect.Provider.RegisterConverter<List<double>>(new PostgreSqlDoubleArrayConverter());
+PostgreSqlDialect.Provider.RegisterConverter<List<decimal>>(new PostgreSqlDecimalArrayConverter());
+PostgreSqlDialect.Provider.RegisterConverter<List<DateTime>>(new PostgreSqlDateTimeTimeStampArrayConverter());
+PostgreSqlDialect.Provider.RegisterConverter<List<DateTimeOffset>>(new PostgreSqlDateTimeOffsetTimeStampTzArrayConverter());
+```
+
+### Hstore support
+
+To use `hstore`, its extension needs to be enabled in your PostgreSQL RDBMS by running:
+
+    CREATE EXTENSION hstore;
+
+Which can then be enabled in OrmLite with:
+
+```csharp
+PostgreSqlDialect.Instance.UseHstore = true;
+```
+
+Where it will now store **string Dictionaries** in `Hstore` columns:
+
+```csharp
+public class TableHstore
+{
+    public int Id { get; set; }
+
+    public Dictionary<string,string> Dictionary { get; set; }
+    public IDictionary<string,string> IDictionary { get; set; }
+}
+
+db.DropAndCreateTable<TableHstore>();
+
+db.Insert(new TableHstore
+{
+    Id = 1,
+    Dictionary = new Dictionary<string, string> { {"A", "1"} },
+    IDictionary = new Dictionary<string, string> { {"B", "2"} },
+});
+```
+
+Where they can than be queried in postgres using [Hstore SQL Syntax](https://www.postgresql.org/docs/9.0/hstore.html):
+
+```csharp
+db.Single(db.From<PostgreSqlTypes>().Where("dictionary -> 'A' = '1'")).Id //= 1
+```
+
+Thanks to [@cthames](https://forums.servicestack.net/users/cthames/activity) for this feature.
+
+### JSON data types
+
+If you instead wanted to store arbitrary complex types in PostgreSQL's rich column types to enable deep querying in postgres, 
+you'd instead annotate them with `[PgSqlJson]` or `[PgSqlJsonB]`, e.g:
+
+```csharp
+public class TableJson
+{
+    public int Id { get; set; }
+
+    [PgSqlJson]
+    public ComplexType ComplexTypeJson { get; set; }
+
+    [PgSqlJsonB]
+    public ComplexType ComplexTypeJsonb { get; set; }
+}
+
+db.Insert(new TableJson
+{
+    Id = 1,
+    ComplexTypeJson = new ComplexType {
+        Id = 2, SubType = new SubType { Name = "JSON" }
+    },
+    ComplexTypeJsonb = new ComplexType {
+        Id = 3, SubType = new SubType { Name = "JSONB" }
+    },
+});
+```
+
+Where they can then be queried on the server with [JSON SQL Syntax and functions](https://www.postgresql.org/docs/9.3/functions-json.html):
+
+```csharp
+var result = db.Single<TableJson>("table_json->'SubType'->>'Name' = 'JSON'");
 ```
 
 # Limitations 
