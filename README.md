@@ -2309,6 +2309,25 @@ Db.ExecuteSql("INSERT INTO page_stats (ref_id, fav_count) VALUES (@refId, @favCo
 Db.ExecuteSqlAsync("UPDATE page_stats SET view_count = view_count + 1 WHERE id = @id", new { id })
 ```
 
+### INSERT INTO SELECT
+
+You can use OrmLite's Typed `SqlExpression` to create a subselect expression that you can use to create and execute a 
+typed **INSERT INTO SELECT** `SqlExpression` with:
+
+```csharp
+var q = db.From<User>()
+    .Where(x => x.UserName == "UserName")
+    .Select(x => new {
+        x.UserName, 
+        x.Email, 
+        GivenName = x.FirstName, 
+        Surname = x.LastName, 
+        FullName = x.FirstName + " " + x.LastName
+    });
+
+var id = db.InsertIntoSelect<CustomUser>(q)
+```
+
 ## Stored Procedures using Custom Raw SQL API's
 
 The Raw SQL API's provide a convenient way for mapping results of any Custom SQL like
