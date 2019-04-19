@@ -8,8 +8,6 @@ services:
 
   firebird3:
     image: "jacobalberty/firebird:3.0.4"
-    networks:
-      - ci-network
     ports:
       - "48101:3050"
     environment:
@@ -20,8 +18,6 @@ services:
 
   mysql10.4:
     image: mariadb:10.4
-    networks:
-      - ci-network
     ports:
      - "48205:3306"
     environment:
@@ -31,8 +27,6 @@ services:
 
   postgres11:
     image: postgres:11-alpine
-    networks:
-      - ci-network
     ports:
      - "48303:5432"
     environment:
@@ -42,8 +36,6 @@ services:
 
   oracle11:
     image: epiclabs/docker-oracle-xe-11g
-    networks:
-      - ci-network
     ports:
      - "48401:1521"
     environment:
@@ -52,8 +44,6 @@ services:
 
   MSSqlServer2017:
     image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
-    networks:
-      - ci-network
     ports:
      - "48501:1433"
     environment:
@@ -63,15 +53,14 @@ services:
 
   redis:
     image: redis
-    networks:
-      - ci-network
-    expose:
-      - 6379
+    ports:
+      - "6379:6379"
+    volumes:
+      - "./data:/data"
+    command: redis-server --appendonly yes
 
   dynamodb:
     image: amazon/dynamodb-local
-    networks:
-      - ci-network
     ports:
      - "48000:8000"
 
@@ -89,6 +78,22 @@ services:
         RABBITMQ_DEFAULT_PASS: guest
         RABBITMQ_DEFAULT_VHOST: /
 
+  server:
+    image: jetbrains/teamcity-server
+    ports:
+      - "2080:8111"
+    volumes:
+      - /root/docker/teamcity/server/data:/data/teamcity_server/datadir
+      - /root/docker/teamcity/server/logs:/opt/teamcity/logs
+
+  ci-agent:
+    image: servicestack/ci-agent
+    volumes:
+        - /root/docker/build/ci-agent/conf:/data/teamcity_agent/conf
+    environment:
+        SERVER_URL: https://build.servicestack.net
+
 
 networks:
-  ci-network:
+ default:
+  driver: bridge
