@@ -53,13 +53,13 @@ namespace ServiceStack.OrmLite
 
         public static int ExecNonQuery(this IDbCommand dbCmd)
         {
-            if (Log.IsDebugEnabled)
-                Log.DebugCommand(dbCmd);
-
             OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
 
             return dbCmd.ExecuteNonQuery();
         }
@@ -70,13 +70,13 @@ namespace ServiceStack.OrmLite
 
             dbCmd.CommandText = sql;
 
-            if (Log.IsDebugEnabled)
-                Log.DebugCommand(dbCmd);
-
             OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd);
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
 
             return dbCmd.ExecuteNonQuery();
         }

@@ -8,11 +8,14 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
+using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite
 {
     public static class OrmLiteResultsFilterExtensionsAsync
     {
+        internal static ILog Log = LogManager.GetLogger(typeof(OrmLiteResultsFilterExtensionsAsync));
+
         public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token = default(CancellationToken))
         {
             if (anonType != null)
@@ -22,6 +25,9 @@ namespace ServiceStack.OrmLite
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
 
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
@@ -33,8 +39,13 @@ namespace ServiceStack.OrmLite
 
             dbCmd.CommandText = sql;
 
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
+
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
 
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
@@ -43,6 +54,9 @@ namespace ServiceStack.OrmLite
         {
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
 
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
