@@ -61,15 +61,6 @@ namespace ServiceStack.OrmLite
                 : DialectProvider;
         }
 
-        public static void AddInterceptor(IEntityInterceptor interceptor)
-        {
-            // avoid duplicate 
-            if (RegisteredInterceptors.Any(p => p.Key == interceptor.Name))
-                return;
-
-            RegisteredInterceptors.TryAdd(interceptor.Name, interceptor);
-        }
-
         public static IOrmLiteExecFilter GetExecFilter(this IOrmLiteDialectProvider dialectProvider)
         {
             return dialectProvider != null
@@ -222,7 +213,21 @@ namespace ServiceStack.OrmLite
         /// <summary>
         ///  Gets a list of currently registered interceptor for this config.
         /// </summary>
-        public static ConcurrentDictionary<string, IEntityInterceptor> RegisteredInterceptors { get; }
+        public static ConcurrentDictionary<string, IEntityInterceptor> RegisteredInterceptors { get; private set; }
             = new ConcurrentDictionary<string, IEntityInterceptor>();
+
+        public static void AddInterceptor(IEntityInterceptor interceptor)
+        {
+            // avoid duplicate 
+            if (RegisteredInterceptors.Any(p => p.Key == interceptor.Name))
+                return;
+
+            RegisteredInterceptors.TryAdd(interceptor.Name, interceptor);
+        }
+
+        public static void RemoveAllInterceptors()
+        {
+            RegisteredInterceptors = new ConcurrentDictionary<string, IEntityInterceptor>();
+        }
     }
 }
