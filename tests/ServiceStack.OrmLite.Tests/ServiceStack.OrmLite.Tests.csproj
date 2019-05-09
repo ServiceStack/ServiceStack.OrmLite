@@ -30,4 +30,7 @@
       <Link>TestConfig.cs</Link>
     </Compile>
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Interceptors\" />
+  </ItemGroup>
 </Project>

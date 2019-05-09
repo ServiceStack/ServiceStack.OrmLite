@@ -10,17 +10,20 @@
 //
 
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using ServiceStack.Logging;
+using ServiceStack.OrmLite.Interceptors;
 
 namespace ServiceStack.OrmLite
 {
     public static class OrmLiteConfig
     {
         public const string IdField = "Id";
-
         private const int DefaultCommandTimeout = 30;
+
         private static int? commandTimeout;
 
         public static int CommandTimeout
@@ -46,7 +49,7 @@ namespace ServiceStack.OrmLite
 
         public static IOrmLiteDialectProvider GetDialectProvider(this IDbCommand dbCmd)
         {
-            return dbCmd is IHasDialectProvider hasDialectProvider 
+            return dbCmd is IHasDialectProvider hasDialectProvider
                 ? hasDialectProvider.DialectProvider
                 : DialectProvider;
         }
@@ -58,20 +61,32 @@ namespace ServiceStack.OrmLite
                 : DialectProvider;
         }
 
-        public static IOrmLiteExecFilter GetExecFilter(this IOrmLiteDialectProvider dialectProvider) {
+        public static void AddInterceptor(IEntityInterceptor interceptor)
+        {
+            // avoid duplicate 
+            if (RegisteredInterceptors.Any(p => p.Key == interceptor.Name))
+                return;
+
+            RegisteredInterceptors.TryAdd(interceptor.Name, interceptor);
+        }
+
+        public static IOrmLiteExecFilter GetExecFilter(this IOrmLiteDialectProvider dialectProvider)
+        {
             return dialectProvider != null
                 ? dialectProvider.ExecFilter ?? ExecFilter
                 : ExecFilter;
         }
 
-        public static IOrmLiteExecFilter GetExecFilter(this IDbCommand dbCmd) {
+        public static IOrmLiteExecFilter GetExecFilter(this IDbCommand dbCmd)
+        {
             var dialect = dbCmd is IHasDialectProvider hasDialectProvider
                 ? hasDialectProvider.DialectProvider
                 : DialectProvider;
             return dialect.GetExecFilter();
         }
 
-        public static IOrmLiteExecFilter GetExecFilter(this IDbConnection db) {
+        public static IOrmLiteExecFilter GetExecFilter(this IDbConnection db)
+        {
             var dialect = db is IHasDialectProvider hasDialectProvider
                 ? hasDialectProvider.DialectProvider
                 : DialectProvider;
@@ -91,7 +106,7 @@ namespace ServiceStack.OrmLite
         public static void SetCommandTimeout(this IDbConnection db, int? commandTimeout)
         {
             if (!(db is OrmLiteConnection ormLiteConn))
-                throw new NotImplementedException(string.Format(RequiresOrmLiteConnection,"CommandTimeout"));
+                throw new NotImplementedException(string.Format(RequiresOrmLiteConnection, "CommandTimeout"));
 
             ormLiteConn.CommandTimeout = commandTimeout;
         }
@@ -140,7 +155,7 @@ namespace ServiceStack.OrmLite
         }
 
         public static bool DisableColumnGuessFallback { get; set; }
-        public static bool StripUpperInLike { get; set; } 
+        public static bool StripUpperInLike { get; set; }
 #if NETSTANDARD2_0
             = true;
 #endif
@@ -158,14 +173,14 @@ namespace ServiceStack.OrmLite
         private static IOrmLiteExecFilter execFilter;
         public static IOrmLiteExecFilter ExecFilter
         {
-            get 
+            get
             {
                 if (execFilter == null)
                     execFilter = new OrmLiteExecFilter();
 
-                return dialectProvider != null 
-                    ? dialectProvider.ExecFilter ?? execFilter 
-                    : execFilter; 
+                return dialectProvider != null
+                    ? dialectProvider.ExecFilter ?? execFilter
+                    : execFilter;
             }
             set => execFilter = value;
         }
@@ -197,11 +212,17 @@ namespace ServiceStack.OrmLite
         public static bool SkipForeignKeys { get; set; }
 
         public static bool IncludeTablePrefixes { get; set; }
-        
+
         public static Action<IUntypedSqlExpression> SqlExpressionInitFilter { get; set; }
 
         public static Func<string, string> ParamNameFilter { get; set; }
-        
+
         public static Action<ModelDefinition> OnModelDefinitionInit { get; set; }
+
+        /// <summary>
+        ///  Gets a list of currently registered interceptor for this config.
+        /// </summary>
+        public static ConcurrentDictionary<string, IEntityInterceptor> RegisteredInterceptors { get; }
+            = new ConcurrentDictionary<string, IEntityInterceptor>();
     }
 }

@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite
 
         internal static void UpdateOnlySql<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields)
         {
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, model);
+            dbCmd.OnUpdate(model);
 
             var fieldsToUpdate = onlyFields.UpdateFields.Count == 0
                 ? onlyFields.GetAllFields()
@@ -79,7 +79,7 @@ namespace ServiceStack.OrmLite
             if (updateFields == null)
                 throw new ArgumentNullException(nameof(updateFields));
 
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateFields.EvalFactoryFn());
+            dbCmd.OnUpdate(updateFields.EvalFactoryFn());
 
             q.CopyParamsTo(dbCmd);
 
@@ -105,7 +105,7 @@ namespace ServiceStack.OrmLite
             if (updateFields == null)
                 throw new ArgumentNullException(nameof(updateFields));
 
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateFields.EvalFactoryFn());
+            dbCmd.OnUpdate(updateFields.EvalFactoryFn());
 
             dbCmd.SetParameters(sqlParams);
 
@@ -114,7 +114,7 @@ namespace ServiceStack.OrmLite
 
             return dbCmd;
         }
-        
+
         public static int UpdateAdd<T>(this IDbCommand dbCmd,
             Expression<Func<T>> updateFields,
             SqlExpression<T> q,
@@ -130,7 +130,7 @@ namespace ServiceStack.OrmLite
             if (updateFields == null)
                 throw new ArgumentNullException(nameof(updateFields));
 
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateFields.EvalFactoryFn());
+            dbCmd.OnUpdate(updateFields.EvalFactoryFn());
 
             q.CopyParamsTo(dbCmd);
 
@@ -148,7 +148,7 @@ namespace ServiceStack.OrmLite
             if (updateFields == null)
                 throw new ArgumentNullException(nameof(updateFields));
 
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateFields.FromObjectDictionary<T>());
+            dbCmd.OnUpdate(updateFields.FromObjectDictionary<T>());
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(where);
@@ -160,7 +160,7 @@ namespace ServiceStack.OrmLite
 
         public static int UpdateNonDefaults<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> where)
         {
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, item);
+            dbCmd.OnUpdate(item);
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(@where);
@@ -170,7 +170,7 @@ namespace ServiceStack.OrmLite
 
         public static int Update<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> expression, Action<IDbCommand> commandFilter = null)
         {
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, item);
+            dbCmd.OnUpdate(item);
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(expression);
@@ -181,7 +181,7 @@ namespace ServiceStack.OrmLite
 
         public static int Update<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where = null, Action<IDbCommand> commandFilter = null)
         {
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateOnly);
+            dbCmd.OnUpdate(updateOnly);
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             var whereSql = q.Where(where).WhereExpression;
@@ -225,7 +225,7 @@ namespace ServiceStack.OrmLite
 
         public static long InsertOnly<T>(this IDbCommand dbCmd, T obj, string[] onlyFields, bool selectIdentity)
         {
-            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
+            dbCmd.OnInsert(obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
             var sql = dialectProvider.ToInsertRowStatement(dbCmd, obj, onlyFields);
@@ -251,7 +251,7 @@ namespace ServiceStack.OrmLite
             if (insertFields == null)
                 throw new ArgumentNullException(nameof(insertFields));
 
-            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, insertFields.EvalFactoryFn());
+            dbCmd.OnInsert(insertFields.EvalFactoryFn());
 
             var fieldValuesMap = insertFields.AssignedValues();
             dbCmd.GetDialectProvider().PrepareInsertRowStatement<T>(dbCmd, fieldValuesMap);

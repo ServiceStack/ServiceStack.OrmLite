@@ -41,7 +41,7 @@ namespace ServiceStack.OrmLite
         internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
         {
             if (anonType != null)
-                dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false, sql:ref sql);
+                dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false, sql: ref sql);
 
             dbCmd.CommandText = sql;
 
@@ -58,7 +58,7 @@ namespace ServiceStack.OrmLite
 
         internal static async Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T obj, CancellationToken token, Action<IDbCommand> commandFilter)
         {
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
+            await dbCmd.OnUpdateAsync(obj).ConfigureAwait(false);
 
             var dialectProvider = dbCmd.GetDialectProvider();
             var hadRowVersion = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
@@ -97,17 +97,17 @@ namespace ServiceStack.OrmLite
             {
                 foreach (var obj in objs)
                 {
-                    OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
-    
+                    await dbCmd.OnUpdateAsync(obj).ConfigureAwait(false);
+
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
                     commandFilter?.Invoke(dbCmd);
                     commandFilter = null;
-    
+
                     var rowsUpdated = await dbCmd.ExecNonQueryAsync(token);
-                        
+
                     if (hadRowVersion && rowsUpdated == 0)
                         throw new OptimisticConcurrencyException();
-    
+
                     count += rowsUpdated;
                 }
 
@@ -155,10 +155,10 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, CancellationToken token, params T[] objs)
         {
-            if (objs.Length == 0) 
+            if (objs.Length == 0)
                 return TaskResult.Zero;
 
-            return DeleteAllAsync(dbCmd, objs, fieldValuesFn:null, token: token);
+            return DeleteAllAsync(dbCmd, objs, fieldValuesFn: null, token: token);
         }
 
         internal static Task<int> DeleteNonDefaultsAsync<T>(this IDbCommand dbCmd, CancellationToken token, params T[] filters)
@@ -169,7 +169,7 @@ namespace ServiceStack.OrmLite
             return DeleteAllAsync(dbCmd, filters, o => o.AllFieldsMap<T>().NonDefaultsOnly(), token);
         }
 
-        private static async Task<int> DeleteAllAsync<T>(IDbCommand dbCmd, IEnumerable<T> objs, Func<object, Dictionary<string, object>> fieldValuesFn = null, CancellationToken token=default(CancellationToken))
+        private static async Task<int> DeleteAllAsync<T>(IDbCommand dbCmd, IEnumerable<T> objs, Func<object, Dictionary<string, object>> fieldValuesFn = null, CancellationToken token = default(CancellationToken))
         {
             IDbTransaction dbTrans = null;
 
@@ -251,7 +251,7 @@ namespace ServiceStack.OrmLite
 
         internal static async Task<long> InsertAsync<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter, bool selectIdentity, CancellationToken token)
         {
-            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
+            await dbCmd.OnInsertAsync(obj).ConfigureAwait(false);
 
             var dialectProvider = dbCmd.GetDialectProvider();
 
@@ -261,7 +261,7 @@ namespace ServiceStack.OrmLite
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
             commandFilter?.Invoke(dbCmd);
-            
+
             if (dialectProvider.HasInsertReturnValues(ModelDefinition<T>.Definition))
             {
                 using (var reader = await dbCmd.ExecReaderAsync(dbCmd.CommandText, token))
@@ -281,7 +281,7 @@ namespace ServiceStack.OrmLite
         {
             return InsertAllAsync(dbCmd, objs, commandFilter, token);
         }
-        
+
         internal static async Task InsertUsingDefaultsAsync<T>(this IDbCommand dbCmd, T[] objs, CancellationToken token)
         {
             IDbTransaction dbTrans = null;
@@ -295,7 +295,7 @@ namespace ServiceStack.OrmLite
             var fieldsWithoutDefaults = modelDef.FieldDefinitionsArray
                 .Where(x => x.DefaultValue == null)
                 .Select(x => x.Name)
-                .ToHashSet(); 
+                .ToHashSet();
 
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, insertFields: fieldsWithoutDefaults);
 
@@ -303,7 +303,7 @@ namespace ServiceStack.OrmLite
             {
                 foreach (var obj in objs)
                 {
-                    OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
+                    await dbCmd.OnInsertAsync(obj).ConfigureAwait(false);
 
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
@@ -313,7 +313,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static async Task<long> InsertIntoSelectAsync<T>(this IDbCommand dbCmd, ISqlExpression query, Action<IDbCommand> commandFilter, CancellationToken token) => 
+        internal static async Task<long> InsertIntoSelectAsync<T>(this IDbCommand dbCmd, ISqlExpression query, Action<IDbCommand> commandFilter, CancellationToken token) =>
             OrmLiteReadCommandExtensions.ToLong(await dbCmd.InsertIntoSelectInternal<T>(query, commandFilter).ExecNonQueryAsync(token: token));
 
         internal static async Task InsertAllAsync<T>(this IDbCommand dbCmd, IEnumerable<T> objs, Action<IDbCommand> commandFilter, CancellationToken token)
@@ -333,8 +333,7 @@ namespace ServiceStack.OrmLite
             {
                 foreach (var obj in objs)
                 {
-                    OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
-
+                    await dbCmd.OnInsertAsync(obj).ConfigureAwait(false);
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
                     await dbCmd.ExecNonQueryAsync(token);
@@ -359,14 +358,14 @@ namespace ServiceStack.OrmLite
                 if (modelDef.HasAutoIncrementId)
                 {
 
-                    var newId = await dbCmd.InsertAsync(obj, commandFilter: null, selectIdentity: true, token:token);
+                    var newId = await dbCmd.InsertAsync(obj, commandFilter: null, selectIdentity: true, token: token);
                     var safeId = dbCmd.GetDialectProvider().FromDbValue(newId, modelDef.PrimaryKey.FieldType);
                     modelDef.PrimaryKey.SetValueFn(obj, safeId);
                     id = newId;
                 }
                 else
                 {
-                    await dbCmd.InsertAsync(obj, commandFilter:null, selectIdentity:false, token:token);
+                    await dbCmd.InsertAsync(obj, commandFilter: null, selectIdentity: false, token: token);
                 }
 
                 modelDef.RowVersion?.SetValueFn(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token));
@@ -415,24 +414,20 @@ namespace ServiceStack.OrmLite
                     var id = modelDef.GetPrimaryKey(row);
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
-                        OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, row);
-
                         await dbCmd.UpdateAsync(row, token, null);
                     }
                     else
                     {
                         if (modelDef.HasAutoIncrementId)
                         {
-                            var newId = await dbCmd.InsertAsync(row, commandFilter:null, selectIdentity:true, token:token);
+                            var newId = await dbCmd.InsertAsync(row, commandFilter: null, selectIdentity: true, token: token);
                             var safeId = dialectProvider.FromDbValue(newId, modelDef.PrimaryKey.FieldType);
                             modelDef.PrimaryKey.SetValueFn(row, safeId);
                             id = newId;
                         }
                         else
                         {
-                            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, row);
-
-                            await dbCmd.InsertAsync(row, commandFilter:null, selectIdentity:false, token:token);
+                            await dbCmd.InsertAsync(row, commandFilter: null, selectIdentity: false, token: token);
                         }
 
                         rowsAdded++;
