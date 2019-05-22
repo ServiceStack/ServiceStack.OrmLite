@@ -714,7 +714,7 @@ namespace ServiceStack.OrmLite
                 var values = new object[reader.FieldCount];
                 var indexCache = reader.GetIndexFieldsCache(modelDef, dialectProvider);
                 obj.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
-                if ((modelDef.PrimaryKey != null) && modelDef.PrimaryKey.AutoIncrement)
+                if ((modelDef.PrimaryKey != null) && (modelDef.PrimaryKey.AutoIncrement || modelDef.PrimaryKey.ReturnOnInsert))
                 {
                     var id = modelDef.GetPrimaryKey(obj);
                     return Convert.ToInt64(id);

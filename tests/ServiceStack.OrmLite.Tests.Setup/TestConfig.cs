@@ -38,8 +38,9 @@ namespace ServiceStack.OrmLite.Tests
         Oracle = 1 << 10,
         
         Firebird = 1 << 11,
+        Firebird4 = 1 << 12,
         
-        VistaDb = 1 << 12,
+        VistaDb = 1 << 13,
         
         // any versions
         AnyPostgreSql = PostgreSql,
@@ -91,6 +92,7 @@ namespace ServiceStack.OrmLite.Tests
                 case Dialect.Oracle:
                     return OracleDb.VersionString(Version); 
                 case Dialect.Firebird:
+                case Dialect.Firebird4:
                     return FirebirdDb.VersionString(Version); 
                 case Dialect.VistaDb:
                     return VistaDb.VersionString(Version); 
@@ -192,10 +194,14 @@ namespace ServiceStack.OrmLite.Tests
     public static class FirebirdDb
     {
         public const int V3 = 3;
-        public static readonly int[] Versions = TestConfig.EnvironmentVariableInto("FIREBIRD_VERSION", new[]{ V3 });
+        public const int V4 = 4;
+        public static readonly int[] Versions = TestConfig.EnvironmentVariableInto("FIREBIRD_VERSION", new[]{ V3, V4 });
         public static readonly string DefaultConnection = TestConfig.GetConnection(Dialect.Firebird, V3);
+        public static readonly string V4Connection = TestConfig.GetConnection(Dialect.Firebird, V4);
         public static string VersionString(int version) => "Firebird " + (version == V3
             ? "v3"
+            : version == V4
+            ? "v4"
             : version.ToString());
     }
     public static class VistaDb
@@ -229,6 +235,7 @@ namespace ServiceStack.OrmLite.Tests
             [Dialect.MySqlConnector] = MySqlConnectorDialect.Provider,
             [Dialect.Oracle] = OracleDialect.Provider,
             [Dialect.Firebird] = FirebirdDialect.Provider,
+            [Dialect.Firebird4] = Firebird4Dialect.Provider,
 #if !NETCORE
             [Dialect.VistaDb] = VistaDbDialect.Provider,
 #endif
@@ -267,6 +274,8 @@ namespace ServiceStack.OrmLite.Tests
             [Tuple.Create(Dialect.Oracle, OracleDb.V11)] = EnvironmentVariable(new[]{ "ORACLE11_CONNECTION", "ORACLE_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
             
             [Tuple.Create(Dialect.Firebird, FirebirdDb.V3)] = EnvironmentVariable(new[]{ "FIREBIRD3_CONNECTION", "FIREBIRD_CONNECTION" }, @"User=SYSDBA;Password=masterkey;Database=/firebird/data/test.gdb;DataSource=localhost;Port=48101;Dialect=3;charset=ISO8859_1;MinPoolSize=0;MaxPoolSize=100;"),
+
+            [Tuple.Create(Dialect.Firebird, FirebirdDb.V4)] = EnvironmentVariable(new[]{ "FIREBIRD4_CONNECTION", "FIREBIRD_CONNECTION" }, @"User=SYSDBA;Password=masterkey;Database=c:\ormlite-tests\firebird\test.fdb;DataSource=localhost;Dialect=3;charset=utf8;MinPoolSize=0;MaxPoolSize=100;"),
             
             [Tuple.Create(Dialect.VistaDb, VistaDb.V5)] = EnvironmentVariable(new[]{ "VISTADB5_CONNECTION", "VISTADB_CONNECTION" }, @"Data Source='|DataDirectory|\Database.vdb5'"),
         });

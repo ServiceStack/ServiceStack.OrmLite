@@ -12,7 +12,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 	{		
 		protected virtual string ConnectionString { get; set; }
 
-		protected string GetFileConnectionString() => FirebirdDb.DefaultConnection;
+		protected virtual string GetFileConnectionString() => FirebirdDb.DefaultConnection;
+		protected virtual IOrmLiteDialectProvider GetDialectProvider() => FirebirdOrmLiteDialectProvider.Instance;
 
 		protected void CreateNewDatabase()
 		{
@@ -24,7 +25,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
 			LogManager.LogFactory = new ConsoleLogFactory();
 
-			OrmLiteConfig.DialectProvider = FirebirdOrmLiteDialectProvider.Instance;
+			OrmLiteConfig.DialectProvider = GetDialectProvider();
 			ConnectionString = GetFileConnectionString();
 		}
 

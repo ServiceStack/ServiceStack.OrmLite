@@ -14,6 +14,14 @@ namespace ServiceStack.OrmLite.Firebird
 {
     public class FirebirdOrmLiteDialectProvider : OrmLiteDialectProviderBase<FirebirdOrmLiteDialectProvider>
     {
+        protected virtual string GetCreateSequenceSql(string sequence) => $@"
+            EXECUTE BLOCK AS BEGIN
+                if (not exists(select 1 FROM RDB$GENERATORS WHERE RDB$GENERATOR_NAME = '{sequence}')) then
+                begin
+                    execute statement 'CREATE SEQUENCE {sequence};';
+                end
+            END";  
+        
         public static List<string> RESERVED = new List<string>(new[] {
             "USER","ORDER","PASSWORD", "ACTIVE","LEFT","DOUBLE", "FLOAT", "DECIMAL","STRING", "DATE","DATETIME", "TYPE","TIMESTAMP",
             "INDEX","UNIQUE", "PRIMARY", "KEY", "ALTER", "DROP", "CREATE", "DELETE", "VALUES", "FUNCTION", "INT", "LONG", "CHAR", "VALUE", "TIME"
@@ -120,21 +128,20 @@ namespace ServiceStack.OrmLite.Firebird
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
             var sbReturningColumns = StringBuilderCacheAlt.Allocate();
-
             var tableType = objWithProperties.GetType();
             var modelDef = GetModel(tableType);
 
             var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
             foreach (var fieldDef in fieldDefs)
             {
-                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && HasInsertReturnValues(modelDef)))
+                if (ShouldReturnOnInsert(modelDef, fieldDef))
                 {
                     if (sbReturningColumns.Length > 0)
                         sbReturningColumns.Append(",");
                     sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (fieldDef.IsComputed)
+                if (ShouldSkipInsert(fieldDef))
                     continue;
 
                 if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence)
@@ -179,13 +186,22 @@ namespace ServiceStack.OrmLite.Firebird
             return sql;
         }
 
-        private void EnsureAutoIncrementSequence(ModelDefinition modelDef, FieldDefinition fieldDef)
+        protected virtual void EnsureAutoIncrementSequence(ModelDefinition modelDef, FieldDefinition fieldDef)
         {
             if (fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
             {
                 fieldDef.Sequence = Sequence(modelDef.ModelName, fieldDef.FieldName, fieldDef.Sequence);
             }
         }
+		
+        protected override bool ShouldSkipInsert(FieldDefinition fieldDef) => 
+            fieldDef.ShouldSkipInsert() || fieldDef.AutoId || fieldDef.IsComputed;
+
+        protected virtual bool ShouldReturnOnInsert(ModelDefinition modelDef, FieldDefinition fieldDef) =>
+            fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && HasInsertReturnValues(modelDef)) || fieldDef.AutoId;
+
+        public override bool HasInsertReturnValues(ModelDefinition modelDef) =>
+            modelDef.FieldDefinitions.Any(x => x.ReturnOnInsert || (x.AutoId && x.FieldType == typeof(Guid)));
 
         public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
         {
@@ -200,14 +216,14 @@ namespace ServiceStack.OrmLite.Firebird
             var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
             foreach (var fieldDef in fieldDefs)
             {
-                if (fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && HasInsertReturnValues(modelDef)))
+                if (ShouldReturnOnInsert(modelDef, fieldDef))
                 {
                     if (sbReturningColumns.Length > 0)
                         sbReturningColumns.Append(",");
                     sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (fieldDef.ShouldSkipInsert() && !fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence))
+                if (ShouldSkipInsert(fieldDef) && !fieldDef.AutoIncrement && !fieldDef.AutoId && string.IsNullOrEmpty(fieldDef.Sequence))
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -257,7 +273,7 @@ namespace ServiceStack.OrmLite.Firebird
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed)
+                if (fieldDef.IsComputed || fieldDef.IgnoreOnUpdate)
                     continue;
 
                 if ((fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField)
@@ -350,13 +366,7 @@ namespace ServiceStack.OrmLite.Firebird
                 {
                     // https://firebirdsql.org/refdocs/langrefupd21-ddl-sequence.html
                     var sequence = Sequence(modelDef.ModelName, fieldDef.FieldName, fieldDef.Sequence).ToUpper();
-                    gens.Add($@"
-EXECUTE BLOCK AS BEGIN
-    if (not exists(select 1 FROM RDB$GENERATORS WHERE RDB$GENERATOR_NAME = '{sequence}')) then
-    begin
-        execute statement 'CREATE SEQUENCE {sequence};';
-    end
-END");
+                    gens.Add(GetCreateSequenceSql(sequence));
                 }
             }
             return gens;
@@ -690,7 +700,7 @@ END");
             return Quote(NamingStrategy.GetColumnName(fieldName));
         }
 
-        private string Sequence(string modelName, string fieldName, string sequence)
+        protected string Sequence(string modelName, string fieldName, string sequence)
         {
             return sequence.IsNullOrEmpty()
                 ? Quote(NamingStrategy.GetSequenceName(modelName, fieldName))
@@ -727,7 +737,7 @@ END");
 //            if (!QuoteNames & !RESERVED.Contains(tableName.ToUpper()))
 //                tableName = tableName.ToUpper();
 
-            var sql = $"SELECT 1 FROM rdb$relations WHERE rdb$system_flag = 0 AND rdb$view_blr IS NULL AND rdb$relation_name = '{tableName}'";
+            var sql = $"SELECT COUNT(*) FROM rdb$relations WHERE rdb$system_flag = 0 AND rdb$view_blr IS NULL AND rdb$relation_name = '{tableName}'";
 
             var result = dbCmd.ExecLongScalar(sql);
             return result == 1;
