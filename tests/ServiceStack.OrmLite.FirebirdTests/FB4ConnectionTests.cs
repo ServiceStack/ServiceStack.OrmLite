@@ -2,13 +2,18 @@ using System;
 using System.IO;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.OrmLite.Firebird;
+using ServiceStack.OrmLite.Tests;
 
 namespace ServiceStack.OrmLite.FirebirdTests
 {
     [TestFixture]
-    public class OrmLiteConnectionTests 
+    public class FB4ConnectionTests 
         : OrmLiteTestBase
     {
+        protected override string GetFileConnectionString() => FirebirdDb.V4Connection;
+        protected override IOrmLiteDialectProvider GetDialectProvider() => Firebird4OrmLiteDialectProvider.Instance;
+        
         [Test]//[Ignore("")]
         public void Can_create_connection_to_blank_database()
         {
@@ -20,9 +25,17 @@ namespace ServiceStack.OrmLite.FirebirdTests
         }
 
         [Test]
+        public void Can_connect_to_database()
+        {
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, Firebird4Dialect.Provider).OpenDbConnection())
+            {
+            }
+        }
+
+        [Test]
         public void Can_create_connection()
         {
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, Firebird4Dialect.Provider).CreateDbConnection())
             {
             }
         }

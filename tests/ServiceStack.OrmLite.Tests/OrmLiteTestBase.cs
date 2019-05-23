@@ -161,6 +161,8 @@ namespace ServiceStack.OrmLite.Tests
                     return Init(OracleDb.DefaultConnection, OracleDialect.Provider);
                 case Dialect.Firebird:
                     return Init(FirebirdDb.DefaultConnection, FirebirdDialect.Provider);
+                case Dialect.Firebird4:
+                    return Init(FirebirdDb.V4Connection, Firebird4Dialect.Provider);
 
 #if !NETCORE                    
                 case Dialect.VistaDb:
