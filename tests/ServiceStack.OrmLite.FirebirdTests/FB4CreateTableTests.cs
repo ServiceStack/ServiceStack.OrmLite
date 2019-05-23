@@ -54,9 +54,16 @@ namespace ServiceStack.OrmLite.FirebirdTests
             using (var db = new OrmLiteConnectionFactory(ConnectionString, Firebird4Dialect.Provider).OpenDbConnection())
 			{
 				db.CreateTable<ModelWithAutoId>(true);
-			}
-		}
+                Assert.That(
+                    OrmLiteConfig.DialectProvider.DoesTableExist(db, typeof(ModelWithAutoId).Name),
+                    Is.True);
 
+                db.DropTable<ModelWithAutoId>();
+                Assert.That(
+                    OrmLiteConfig.DialectProvider.DoesTableExist(db, typeof(ModelWithAutoId).Name),
+                    Is.False);
+            }
+        }
 
 		[Test]
 		public void Check_AutoIncrement_with_Identity()
@@ -80,5 +87,18 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			}
 		}
 
-	}
+        [Test]
+        public void Check_AutoId_generation()
+        {
+            using (var db = new OrmLiteConnectionFactory(ConnectionString, Firebird4Dialect.Provider).OpenDbConnection())
+            {
+                db.CreateTable<ModelWithAutoId>(true);
+
+                db.Insert(new ModelWithAutoId { Name = "Isaac Newton" });
+                db.Insert(new ModelWithAutoId { Name = "Alan Kay" });
+                var rows = db.Select<ModelWithAutoId>();
+                Assert.That(rows, Has.Count.EqualTo(2));
+            }
+        }
+    }
 }

@@ -717,6 +717,8 @@ namespace ServiceStack.OrmLite
                 if ((modelDef.PrimaryKey != null) && (modelDef.PrimaryKey.AutoIncrement || modelDef.PrimaryKey.ReturnOnInsert))
                 {
                     var id = modelDef.GetPrimaryKey(obj);
+                    if (modelDef.PrimaryKey.AutoId)
+                        return 1;
                     return Convert.ToInt64(id);
                 }
             }
