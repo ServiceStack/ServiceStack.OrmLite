@@ -871,7 +871,9 @@ namespace ServiceStack.OrmLite
                 return true;
             }
 
-            dbCmd.Update(obj);
+            var rowsUpdated = dbCmd.Update(obj);
+            if (rowsUpdated == 0)
+                throw new OptimisticConcurrencyException("No rows were inserted or updated");
 
             modelDef.RowVersion?.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
 
