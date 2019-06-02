@@ -871,11 +871,11 @@ namespace ServiceStack.OrmLite
                 return true;
             }
 
-            dbCmd.Update(obj);
+            var rowsUpdated = dbCmd.Update(obj);
 
             modelDef.RowVersion?.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
 
-            return false;
+            return rowsUpdated > 0;
         }
 
         internal static int SaveAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs)
