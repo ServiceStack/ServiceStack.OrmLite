@@ -653,5 +653,32 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(results[0].Orders.Count, Is.EqualTo(2));
             }
         }
+
+        [Test]
+        public void Can_select_subselect()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+
+                var insertedIds = "A,B,B,C,C,C,D,D,E".Split(',').Map(letter => 
+                    db.Insert(new LetterFrequency { Letter = letter }, selectIdentity: true));
+
+                var q = db.From<LetterFrequency>(db.TableAlias("x"));
+                q.Where(x => x.Letter == Sql.Custom(q.Column<LetterFrequency>(c => c.Letter, true)));
+                var subSql = q.Select(Sql.Count("*")).ToSelectStatement();
+                
+                var rows = db.Select<Dictionary<string, object>>(db.From<LetterFrequency>()
+                    .Where(x => x.Letter == "C")
+                    .Select(x => new {
+                        x,
+                        LetterCount = Sql.Custom($"({subSql})"),
+                    }));
+                
+//                rows.PrintDump();
+                Assert.That(rows.Count, Is.EqualTo(3));
+                Assert.That(rows.All(x => x["LetterCount"].ConvertTo<int>() == 3));
+            }
+        }
     }
 }

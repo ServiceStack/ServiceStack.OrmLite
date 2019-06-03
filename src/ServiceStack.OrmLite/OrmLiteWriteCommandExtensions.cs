@@ -18,6 +18,7 @@ using ServiceStack.Data;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
 using ServiceStack.OrmLite.Converters;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -872,7 +873,7 @@ namespace ServiceStack.OrmLite
             }
 
             var rowsUpdated = dbCmd.Update(obj);
-            if (rowsUpdated == 0)
+            if (rowsUpdated == 0 && Env.StrictMode)
                 throw new OptimisticConcurrencyException("No rows were inserted or updated");
 
             modelDef.RowVersion?.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
