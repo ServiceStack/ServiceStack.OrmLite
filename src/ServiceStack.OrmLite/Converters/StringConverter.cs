@@ -42,7 +42,9 @@ namespace ServiceStack.OrmLite.Converters
 
             if (p.Size == default)
             {
-                p.Size = StringLength;
+                p.Size = UseUnicode 
+                    ? Math.Min(StringLength, 4000)
+                    : StringLength;
             }
         }
 
