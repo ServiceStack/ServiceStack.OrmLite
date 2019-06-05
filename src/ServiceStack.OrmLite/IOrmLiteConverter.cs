@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite
         public IOrmLiteDialectProvider DialectProvider { get; set; }
 
         /// <summary>
-        /// SQL Column Definiton used in CREATE Table. 
+        /// SQL Column Definition used in CREATE Table. 
         /// </summary>
         public abstract string ColumnDefinition { get; }
 

@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.Expression;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -29,5 +30,28 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(!rowIds1.SequenceEqual(rowIds2));
             }
         }
+
+        [Test]
+        public void Can_OrderBy_and_ThenBy()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+
+                db.Insert(new LetterFrequency {Letter = "C" });
+                db.Insert(new LetterFrequency {Letter = "C" });
+                db.Insert(new LetterFrequency {Letter = "B" });
+                db.Insert(new LetterFrequency {Letter = "A" });
+
+                var q = db.From<LetterFrequency>();
+                q.OrderBy(nameof(LetterFrequency.Letter))
+                    .ThenBy(nameof(LetterFrequency.Id));
+
+                var tracks = db.Select(q);
+                
+                Assert.That(tracks.First().Letter, Is.EqualTo("A"));
+                Assert.That(tracks.Last().Letter, Is.EqualTo("C"));
+            }
+        }        
     }
 }

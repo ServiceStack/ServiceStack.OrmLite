@@ -683,9 +683,11 @@ namespace ServiceStack.OrmLite
         public virtual SqlExpression<T> UnsafeOrderBy(string orderBy)
         {
             orderByProperties.Clear();
-            this.orderBy = string.IsNullOrEmpty(orderBy)
-                ? null
-                : "ORDER BY " + orderBy;
+            if (!string.IsNullOrEmpty(orderBy))
+            {
+                orderByProperties.Add(orderBy);
+            }
+            BuildOrderByClauseInternal();
             return this;
         }
 
