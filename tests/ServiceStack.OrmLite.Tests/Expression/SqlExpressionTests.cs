@@ -665,10 +665,10 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     db.Insert(new LetterFrequency { Letter = letter }, selectIdentity: true));
 
                 var q = db.From<LetterFrequency>(db.TableAlias("x"));
-                q.Where(x => x.Letter == Sql.Custom(q.Column<LetterFrequency>(c => c.Letter, true)));
+                q.Where(x => x.Letter == Sql.TableAlias(x.Letter, "obj"));
                 var subSql = q.Select(Sql.Count("*")).ToSelectStatement();
                 
-                var rows = db.Select<Dictionary<string, object>>(db.From<LetterFrequency>()
+                var rows = db.Select<Dictionary<string, object>>(db.From<LetterFrequency>(db.TableAlias("obj"))
                     .Where(x => x.Letter == "C")
                     .Select(x => new {
                         x,
