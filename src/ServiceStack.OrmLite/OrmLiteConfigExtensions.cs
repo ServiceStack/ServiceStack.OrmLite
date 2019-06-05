@@ -75,7 +75,7 @@ namespace ServiceStack.OrmLite
             var objProperties = modelType.GetProperties(
                 BindingFlags.Public | BindingFlags.Instance).ToList();
 
-            var hasPkAttr = objProperties.Any(p => p.HasAttribute<PrimaryKeyAttribute>());
+            var hasPkAttr = objProperties.Any(p => p.HasAttributeCached<PrimaryKeyAttribute>());
 
             var hasIdField = CheckForIdField(objProperties);
 
@@ -107,15 +107,17 @@ namespace ServiceStack.OrmLite
                     : propertyInfo.PropertyType;
 
                 Type treatAsType = null;
-                if (propertyType.IsEnumFlags() || propertyType.HasAttribute<EnumAsIntAttribute>())
+                if (propertyType.IsEnumFlags() || propertyType.HasAttributeCached<EnumAsIntAttribute>())
                     treatAsType = Enum.GetUnderlyingType(propertyType);
+                else if (propertyType.HasAttributeCached<EnumAsCharAttribute>())
+                    treatAsType = typeof(char);
 
                 var isReference = referenceAttr != null && propertyType.IsClass;
-                var isIgnored = propertyInfo.HasAttribute<IgnoreAttribute>() || isReference;
+                var isIgnored = propertyInfo.HasAttributeCached<IgnoreAttribute>() || isReference;
 
                 var isFirst = !isIgnored && i++ == 0;
 
-                var isAutoId = propertyInfo.HasAttribute<AutoIdAttribute>();
+                var isAutoId = propertyInfo.HasAttributeCached<AutoIdAttribute>();
 
                 var isPrimaryKey = (!hasPkAttr && (propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)))
                    || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name)
@@ -149,7 +151,7 @@ namespace ServiceStack.OrmLite
                     IsPrimaryKey = isPrimaryKey,
                     AutoIncrement =
                         isPrimaryKey &&
-                        propertyInfo.HasAttribute<AutoIncrementAttribute>(),
+                        propertyInfo.HasAttributeCached<AutoIncrementAttribute>(),
                     AutoId = isAutoId,
                     IsIndexed = !isPrimaryKey && isIndex,
                     IsUniqueIndex = isUnique,
@@ -157,13 +159,13 @@ namespace ServiceStack.OrmLite
                     IsNonClustered = indexAttr?.NonClustered == true,
                     IndexName = indexAttr?.Name, 
                     IsRowVersion = isRowVersion,
-                    IgnoreOnInsert = propertyInfo.HasAttribute<IgnoreOnInsertAttribute>(),
-                    IgnoreOnUpdate = propertyInfo.HasAttribute<IgnoreOnUpdateAttribute>(),
-                    ReturnOnInsert = propertyInfo.HasAttribute<ReturnOnInsertAttribute>(),
+                    IgnoreOnInsert = propertyInfo.HasAttributeCached<IgnoreOnInsertAttribute>(),
+                    IgnoreOnUpdate = propertyInfo.HasAttributeCached<IgnoreOnUpdateAttribute>(),
+                    ReturnOnInsert = propertyInfo.HasAttributeCached<ReturnOnInsertAttribute>(),
                     FieldLength = stringLengthAttr?.MaximumLength,
                     DefaultValue = defaultValueAttr?.DefaultValue,
                     CheckConstraint = chkConstraintAttr?.Constraint,
-                    IsUniqueConstraint = propertyInfo.HasAttribute<UniqueAttribute>(),
+                    IsUniqueConstraint = propertyInfo.HasAttributeCached<UniqueAttribute>(),
                     ForeignKey = fkAttr == null
                         ? referencesAttr != null ? new ForeignKeyConstraint(referencesAttr.Type) : null
                         : new ForeignKeyConstraint(fkAttr.Type, fkAttr.OnDelete, fkAttr.OnUpdate, fkAttr.ForeignKeyName),

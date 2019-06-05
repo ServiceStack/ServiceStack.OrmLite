@@ -500,7 +500,7 @@ namespace ServiceStack.OrmLite.MySql
 
         public override string GetColumnDefinition(FieldDefinition fieldDef)
         {
-            if (fieldDef.PropertyInfo?.HasAttribute<TextAttribute>() == true)
+            if (fieldDef.PropertyInfo?.HasAttributeCached<TextAttribute>() == true)
             {
                 var sql = StringBuilderCache.Allocate();
                 sql.AppendFormat("{0} {1}", GetQuotedName(NamingStrategy.GetColumnName(fieldDef.FieldName)), TextColumnDefinition);

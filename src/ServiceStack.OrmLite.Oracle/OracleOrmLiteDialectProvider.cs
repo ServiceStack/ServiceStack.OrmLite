@@ -178,7 +178,7 @@ namespace ServiceStack.OrmLite.Oracle
             if (value == null || value is DBNull)
                 return null;
 
-            if (type.IsEnum && !type.HasAttribute<EnumAsIntAttribute>())
+            if (type.IsEnum && !type.HasAttributeCached<EnumAsIntAttribute>())
                 return EnumConverter.ToDbValue(type, value);
 
             if (type.IsRefType())

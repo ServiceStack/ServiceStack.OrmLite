@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite.Converters
 
         public override string ToQuotedString(Type fieldType, object value)
         {
-            var isEnumAsInt = fieldType.HasAttribute<EnumAsIntAttribute>();
+            var isEnumAsInt = fieldType.HasAttributeCached<EnumAsIntAttribute>();
             if (isEnumAsInt)
                 return this.ConvertNumber(Enum.GetUnderlyingType(fieldType), value).ToString();
 
@@ -74,7 +74,7 @@ namespace ServiceStack.OrmLite.Converters
         {
             var isIntEnum = intEnums.GetOrAdd(fieldType, type => 
                 type.IsEnumFlags() ||
-                type.HasAttribute<EnumAsIntAttribute>() || 
+                type.HasAttributeCached<EnumAsIntAttribute>() || 
                 !type.IsEnum && 
                 type.IsNumericType()); //i.e. is real int && not Enum)
 
