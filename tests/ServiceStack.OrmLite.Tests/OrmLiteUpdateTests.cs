@@ -702,6 +702,38 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(updatedRow.Age, Is.EqualTo(27));
             }
         }
+
+        [Test]
+        public void Does_use_constant_size_string_params()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+
+                var converter = db.GetDialectProvider().GetStringConverter();
+
+                void AssertDbStringParamSizes(IDbCommand cmd)
+                {
+                    foreach (IDbDataParameter p in cmd.Parameters)
+                    {
+                        if (p.Value is string s)
+                        {
+                            Assert.That(p.Size, Is.EqualTo(converter.StringLength));
+                        }
+                    }
+                }
+                
+                var hendrix = new Person(1, "Jimi", "Hendrix", 27);
+                db.Insert(hendrix, commandFilter: AssertDbStringParamSizes);
+
+                hendrix.FirstName = "Updated";
+
+                db.Update(hendrix, commandFilter: AssertDbStringParamSizes);
+
+                var row = db.SingleById<Person>(hendrix.Id);
+                Assert.That(row.FirstName, Is.EqualTo("Updated"));
+            }
+        }
     }
 
     [CompositeIndex("FirstName", "LastName")]

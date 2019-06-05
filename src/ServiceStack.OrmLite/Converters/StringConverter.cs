@@ -36,6 +36,16 @@ namespace ServiceStack.OrmLite.Converters
                 : $"VARCHAR({stringLength.GetValueOrDefault(StringLength)})";
         }
 
+        public override void InitDbParam(IDbDataParameter p, Type fieldType)
+        {
+            base.InitDbParam(p, fieldType);
+
+            if (p.Size == default)
+            {
+                p.Size = StringLength;
+            }
+        }
+
         public override object FromDbValue(Type fieldType, object value)
         {
             if (value is string strValue)
