@@ -672,12 +672,12 @@ namespace ServiceStack.OrmLite.Tests.Expression
                     .Where(x => x.Letter == "C")
                     .Select(x => new {
                         x,
-                        LetterCount = Sql.Custom($"({subSql})"),
+                        count = Sql.Custom($"({subSql})"),
                     }));
                 
-//                rows.PrintDump();
+                rows.PrintDump();
                 Assert.That(rows.Count, Is.EqualTo(3));
-                Assert.That(rows.All(x => x["LetterCount"].ConvertTo<int>() == 3));
+                Assert.That(rows.All(x => x["count"].ConvertTo<int>() == 3));
             }
         }
     }
