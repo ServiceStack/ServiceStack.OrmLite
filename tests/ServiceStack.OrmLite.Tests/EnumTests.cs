@@ -238,7 +238,6 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Updates_EnumAsChar_with_char_value()
         {
-            OrmLiteUtils.PrintSql();
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<TypeWithEnumAsChar>();
