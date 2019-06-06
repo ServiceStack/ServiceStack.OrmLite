@@ -2,6 +2,7 @@
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -212,6 +213,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Updates_EnumAsInt_with_int_value()
         {
+            OrmLiteUtils.PrintSql();
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<TypeWithEnumAsInt>();
@@ -230,6 +232,35 @@ namespace ServiceStack.OrmLite.Tests
 
                 var row = db.SingleById<TypeWithEnumAsInt>(1);
                 Assert.That(row.EnumValue, Is.EqualTo(SomeEnumAsInt.Value3));
+            }
+        }
+        
+        [Test]
+        public void Updates_EnumAsChar_with_char_value()
+        {
+            OrmLiteUtils.PrintSql();
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<TypeWithEnumAsChar>();
+                Assert.That(db.GetLastSql().ToUpper().IndexOf("CHAR(1)", StringComparison.Ordinal) >= 0);
+
+                db.Insert(new TypeWithEnumAsChar { Id = 1, EnumValue = CharEnum.Value1 });
+                db.Insert(new TypeWithEnumAsChar { Id = 2, EnumValue = CharEnum.Value2 });
+                db.Insert(new TypeWithEnumAsChar { Id = 3, EnumValue = CharEnum.Value3 });
+
+                var row = db.SingleById<TypeWithEnumAsChar>(1);
+                Assert.That(row.EnumValue, Is.EqualTo(CharEnum.Value1));
+
+                db.Update(new TypeWithEnumAsChar { Id = 1, EnumValue = CharEnum.Value1 });
+                Assert.That(db.GetLastSql(), Does.Contain("=@EnumValue").Or.Contain("=:EnumValue"));
+                db.GetLastSql().Print();
+
+                db.UpdateOnly(new TypeWithEnumAsChar { Id = 1, EnumValue = CharEnum.Value3 }, 
+                    onlyFields: q => q.EnumValue);
+                Assert.That(db.GetLastSql().NormalizeSql(), Does.Contain("=@enumvalue"));
+
+                row = db.SingleById<TypeWithEnumAsChar>(1);
+                Assert.That(row.EnumValue, Is.EqualTo(CharEnum.Value3));
             }
         }
 
@@ -375,7 +406,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_save_Enum_as_Integers()
         {
-            using (JsConfig.With(treatEnumAsInteger: true))
+            using (JsConfig.With(new Config { TreatEnumAsInteger = true }))
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<TypeWithTreatEnumAsInt>();
@@ -475,6 +506,14 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
+    [EnumAsChar]
+    public enum CharEnum : int
+    {
+        Value1 = 'A', 
+        Value2 = 'B', 
+        Value3 = 'C', 
+        Value4 = 'D'
+    }
 
     public class DoubleState
     {
@@ -535,6 +574,13 @@ namespace ServiceStack.OrmLite.Tests
         Value1 = 1,
         Value2 = 2,
         Value3 = 3,
+    }
+
+    public class TypeWithEnumAsChar
+    {
+        public int Id { get; set; }
+        
+        public CharEnum EnumValue { get; set; }
     }
 
     public class TypeWithEnumAsInt

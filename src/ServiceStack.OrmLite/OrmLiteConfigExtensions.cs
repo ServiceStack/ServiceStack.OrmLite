@@ -11,10 +11,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Converters;
 
 namespace ServiceStack.OrmLite
 {
@@ -105,12 +107,18 @@ namespace ServiceStack.OrmLite
                 var propertyType = isNullableType
                     ? Nullable.GetUnderlyingType(propertyInfo.PropertyType)
                     : propertyInfo.PropertyType;
+                
 
                 Type treatAsType = null;
-                if (propertyType.IsEnumFlags() || propertyType.HasAttributeCached<EnumAsIntAttribute>())
-                    treatAsType = Enum.GetUnderlyingType(propertyType);
-                else if (propertyType.HasAttributeCached<EnumAsCharAttribute>())
-                    treatAsType = typeof(char);
+
+                if (propertyType.IsEnum)
+                {
+                    var enumKind = Converters.EnumConverter.GetEnumKind(propertyType);
+                    if (enumKind == EnumKind.Int)
+                        treatAsType = Enum.GetUnderlyingType(propertyType);
+                    else if (enumKind == EnumKind.Char)
+                        treatAsType = typeof(char);
+                }
 
                 var isReference = referenceAttr != null && propertyType.IsClass;
                 var isIgnored = propertyInfo.HasAttributeCached<IgnoreAttribute>() || isReference;

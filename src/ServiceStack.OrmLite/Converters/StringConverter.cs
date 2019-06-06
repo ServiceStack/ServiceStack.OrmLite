@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite.Converters
         {
             base.InitDbParam(p, fieldType);
 
-            if (p.Size == default)
+            if (p.Size == default && fieldType == typeof(string))
             {
                 p.Size = UseUnicode 
                     ? Math.Min(StringLength, 4000)
@@ -83,6 +83,16 @@ namespace ServiceStack.OrmLite.Converters
                 return (char) (int) this.ConvertNumber(typeof(int), value);
 
             return (char)value;
+        }
+
+        public override object ToDbValue(Type fieldType, object value)
+        {
+            if (value != null && value.GetType().IsEnum)
+                return EnumConverter.ToCharValue(value);
+            if (value is int i)
+                return (char)i;
+            
+            return base.ToDbValue(fieldType, value);
         }
     }
 
