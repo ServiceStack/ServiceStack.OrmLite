@@ -850,10 +850,13 @@ namespace ServiceStack.OrmLite.Oracle
                 }
                 return retObj;
             }
-            
+            //Get current CommandText
+            var lastSql = dbCmd.CommandText;
             dbCmd.CommandText = $"SELECT {Quote(sequence)}.NEXTVAL FROM dual";
             long result = (long)dbCmd.LongScalar();
             LastInsertId = result;
+            //Set CommandText back
+            dbCmd.CommandText = lastSql;
             return result;
         }
 
