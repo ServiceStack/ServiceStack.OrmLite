@@ -14,6 +14,8 @@ namespace ServiceStack.OrmLite.Oracle.Converters
 
         public override string MaxColumnDefinition => UseUnicode ? "NVARCHAR2(2000)" : "NVARCHAR2(4000)";
 
+        public override int MaxVarCharLength => UseUnicode ? 2000 : 4000;
+
         public override string GetColumnDefinition(int? stringLength)
         {
             if (stringLength.GetValueOrDefault() == StringLengthAttribute.MaxText)
@@ -35,6 +37,8 @@ namespace ServiceStack.OrmLite.Oracle.Converters
         public Oracle12StringConverter() : base(32767) {}
 
         public override string MaxColumnDefinition => UseUnicode ? "NVARCHAR2(16383)" : "NVARCHAR2(32767)";
+
+        public override int MaxVarCharLength => UseUnicode ? 16383 : 32767;
 
         public override string GetColumnDefinition(int? stringLength)
         {

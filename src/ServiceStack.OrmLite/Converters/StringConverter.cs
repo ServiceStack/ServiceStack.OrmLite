@@ -17,6 +17,8 @@ namespace ServiceStack.OrmLite.Converters
 
         public int StringLength { get; set; }
 
+        public virtual int MaxVarCharLength => UseUnicode ? 8000 : 4000;
+
         protected string maxColumnDefinition;
         public virtual string MaxColumnDefinition
         {
