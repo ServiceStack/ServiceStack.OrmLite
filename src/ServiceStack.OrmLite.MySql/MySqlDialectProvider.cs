@@ -42,6 +42,8 @@ namespace ServiceStack.OrmLite.MySql
         public MySql55DialectProvider()
         {
             RegisterConverter<DateTime>(new MySql55DateTimeConverter());
+            RegisterConverter<string>(new MySql55StringConverter());
+            RegisterConverter<char[]>(new MySql55CharArrayConverter());
         }
 
         public override IDbDataParameter CreateParam()
