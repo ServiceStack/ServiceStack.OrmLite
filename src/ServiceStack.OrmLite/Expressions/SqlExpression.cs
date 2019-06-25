@@ -1,14 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.Dapper;
 using ServiceStack.Text;
 
@@ -2799,25 +2800,7 @@ namespace ServiceStack.OrmLite
                 p.SourceVersion = sourceVersion;
             }
 
-            if (p.DbType == DbType.String)
-            {
-                p.Size = DialectProvider.GetStringConverter().StringLength;
-                if (value is string strValue && strValue.Length > p.Size)
-                    p.Size = strValue.Length;
-            }
-
-            if (value != null)
-            {
-                DialectProvider.InitDbParam(p, value.GetType());
-                p.Value = DialectProvider.GetParamValue(value, value.GetType());
-            }
-            else
-            {
-                p.Value = DBNull.Value;
-            }
-
-            if (dbType != null)
-                p.DbType = dbType.Value;
+            DialectProvider.ConfigureParam(p, value, dbType);
 
             return p;
         }
@@ -2983,35 +2966,45 @@ namespace ServiceStack.OrmLite
             byte? scale = null,
             int? size = null)
         {
-            var to = dialectProvider.CreateParam();
+            var p = dialectProvider.CreateParam();
 
-            to.ParameterName = dialectProvider.GetParam(name);
+            p.ParameterName = dialectProvider.GetParam(name);
+            
+            dialectProvider.ConfigureParam(p, value, dbType);
 
-            var valueType = fieldType ?? (value?.GetType() ?? typeof(string));
+            if (precision != null)
+                p.Precision = precision.Value;
+            if (scale != null)
+                p.Scale = scale.Value;
+            if (size != null)
+                p.Size = size.Value;
 
+            return p;
+        }
+
+        internal static void ConfigureParam(this IOrmLiteDialectProvider dialectProvider, IDbDataParameter p, object value, DbType? dbType)
+        {
             if (value != null)
             {
-                dialectProvider.InitDbParam(to, valueType);
-                to.Value = dialectProvider.GetParamValue(value, valueType);
+                dialectProvider.InitDbParam(p, value.GetType());
+                p.Value = dialectProvider.GetParamValue(value, value.GetType());
             }
             else
             {
-                to.Value = DBNull.Value;
+                p.Value = DBNull.Value;
             }
 
-            if (precision != null)
-                to.Precision = precision.Value;
-            if (scale != null)
-                to.Scale = scale.Value;
-            if (size != null)
-                to.Size = size.Value;
-
-            dialectProvider.InitDbParam(to, valueType);
+            // Can't check DbType in PostgreSQL before p.Value is assinged 
+            if (p.Value is string strValue && strValue.Length > p.Size)
+            {
+                var stringConverter = dialectProvider.GetStringConverter();
+                p.Size = strValue.Length > stringConverter.StringLength
+                    ? strValue.Length
+                    : stringConverter.StringLength;
+            }
 
             if (dbType != null)
-                to.DbType = dbType.Value;
-
-            return to;
+                p.DbType = dbType.Value;
         }
 
         public static IDbDataParameter AddQueryParam(this IOrmLiteDialectProvider dialectProvider,
@@ -3040,6 +3033,7 @@ namespace ServiceStack.OrmLite
             dbCmd.Parameters.Add(parameter);
             return parameter;
         }
+
     }
 }
 

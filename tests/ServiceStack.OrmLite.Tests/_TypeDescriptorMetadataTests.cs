@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Text;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
@@ -137,6 +138,97 @@ namespace ServiceStack.OrmLite.Tests
                 {
                     Assert.That(sql, Does.Contain(" NVARCHAR(MAX)"));
                 }
+            }
+        }
+
+        [Test]
+        public void Does_save_cache_data_when_data_exceeds_StringConverter_max_size()
+        {
+            IDbDataParameter GetParam(IDbCommand cmd, string name)
+            {
+                for (var i = 0; i < cmd.Parameters.Count; i++)
+                {
+                    if (cmd.Parameters[i] is IDbDataParameter p 
+                        && p.ParameterName.Substring(1).EqualsIgnoreCase(name))
+                    {
+                        return p;
+                    }
+                }
+                return null;
+            }
+            
+            using (var db = OpenDbConnection())
+            {
+                var stringConverter = db.GetDialectProvider().GetStringConverter();
+                var hold = stringConverter.StringLength;
+                stringConverter.StringLength = 255;
+
+                try
+                {
+                    db.DropAndCreateTable<CacheEntry>();
+                }
+                catch (Exception)
+                {
+                    db.DropAndCreateTable<CacheEntry>();
+                }
+
+                var sb = new StringBuilder();
+                30.Times(i => sb.Append("0123456789"));
+                Assert.That(sb.Length, Is.EqualTo(300));
+
+                var id = "key";
+
+                var original = new CacheEntry {
+                    Id = id,
+                    Data = sb.ToString(), 
+                    CreatedDate = DateTime.Now,
+                    ModifiedDate = DateTime.Now,
+                };
+                db.Insert(original, cmd => {
+                    var idParam = GetParam(cmd, nameof(CacheEntry.Id));
+                    var dataParam = GetParam(cmd, nameof(CacheEntry.Data));
+                    
+                    //MySql auto sets param size based on value
+                    Assert.That(idParam.Size, Is.EqualTo(stringConverter.StringLength)
+                        .Or.EqualTo(Math.Min((idParam.Value as string).Length, stringConverter.StringLength))
+                    ); 
+                    Assert.That(dataParam.Size, Is.EqualTo(300)
+                        .Or.EqualTo(Math.Min((dataParam.Value as string).Length, stringConverter.StringLength))
+                    );
+                });
+
+                var key = db.SingleById<CacheEntry>(id);
+                Assert.That(key.Data, Is.EqualTo(original.Data));
+
+                var updatedData = key.Data + "0123456789";
+                
+                var exists = db.UpdateOnly(new CacheEntry
+                     {
+                         Id = id,
+                         Data = updatedData,
+                         ModifiedDate = DateTime.UtcNow,
+                     },
+                     onlyFields: q => new { q.Data, q.ModifiedDate },
+                     @where: q => q.Id == id, 
+                     cmd => {
+                         var idParam = cmd.Parameters[0] as IDbDataParameter;
+                         var dataParam = cmd.Parameters[1] as IDbDataParameter;
+                    
+                         //MySql auto sets param size based on value
+                         Assert.That(idParam.Size, Is.EqualTo(stringConverter.StringLength)
+                             .Or.EqualTo(Math.Min((idParam.Value as string).Length, stringConverter.StringLength))
+                         ); 
+                         Assert.That(dataParam.Size, Is.EqualTo(310)
+                             .Or.EqualTo(Math.Min((dataParam.Value as string).Length, stringConverter.StringLength))
+                         );
+                     }) == 1;
+                
+                Assert.That(exists);
+                
+                key = db.SingleById<CacheEntry>(id);
+                Assert.That(key.Data, Is.EqualTo(updatedData));
+                
+                stringConverter.StringLength = hold;
             }
         }
     }
