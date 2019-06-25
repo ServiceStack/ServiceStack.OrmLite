@@ -718,7 +718,8 @@ namespace ServiceStack.OrmLite.Tests
                     {
                         if (p.Value is string s)
                         {
-                            Assert.That(p.Size, Is.EqualTo(converter.StringLength));
+                            //MySql sets DB Param to string length
+                            Assert.That(p.Size, Is.EqualTo(converter.StringLength).Or.EqualTo(s.Length));
                         }
                     }
                 }
