@@ -183,6 +183,8 @@ namespace ServiceStack.OrmLite
 
         public static Func<FieldDefinition, object> OnDbNullFilter { get; set; }
 
+        public static Action<object> PopulatedObjectFilter { get; set; }
+
         public static Action<IDbCommand, Exception> ExceptionFilter { get; set; }
 
         public static bool ThrowOnError { get; set; }
