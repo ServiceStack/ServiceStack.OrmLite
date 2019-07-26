@@ -32,8 +32,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(guidA);
                 db.Insert(guidB);
                 
-                Assert.That(guidA.Id, Is.Not.EqualTo(new Guid()));
-                Assert.That(guidB.Id, Is.Not.EqualTo(new Guid()));
+                Assert.That(guidA.Id, Is.Not.EqualTo(Guid.Empty));
+                Assert.That(guidB.Id, Is.Not.EqualTo(Guid.Empty));
                 Assert.That(guidA.Id, Is.Not.EqualTo(guidB));
 
                 var dbA = db.SingleById<GuidAutoId>(guidA.Id);
@@ -57,8 +57,8 @@ namespace ServiceStack.OrmLite.Tests
                 await db.InsertAsync(guidA);
                 await db.InsertAsync(guidB);
                 
-                Assert.That(guidA.Id, Is.Not.EqualTo(new Guid()));
-                Assert.That(guidB.Id, Is.Not.EqualTo(new Guid()));
+                Assert.That(guidA.Id, Is.Not.EqualTo(Guid.Empty));
+                Assert.That(guidB.Id, Is.Not.EqualTo(Guid.Empty));
                 Assert.That(guidA.Id, Is.Not.EqualTo(guidB));
 
                 var dbA = await db.SingleByIdAsync<GuidAutoId>(guidA.Id);
@@ -82,8 +82,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.Save(guidA);
                 db.Save(guidB);
                 
-                Assert.That(guidA.Id, Is.Not.EqualTo(new Guid()));
-                Assert.That(guidB.Id, Is.Not.EqualTo(new Guid()));
+                Assert.That(guidA.Id, Is.Not.EqualTo(Guid.Empty));
+                Assert.That(guidB.Id, Is.Not.EqualTo(Guid.Empty));
                 Assert.That(guidA.Id, Is.Not.EqualTo(guidB));
  
                 var dbA = db.SingleById<GuidAutoId>(guidA.Id);
@@ -107,8 +107,8 @@ namespace ServiceStack.OrmLite.Tests
                 await db.SaveAsync(guidA);
                 await db.SaveAsync(guidB);
                 
-                Assert.That(guidA.Id, Is.Not.EqualTo(new Guid()));
-                Assert.That(guidB.Id, Is.Not.EqualTo(new Guid()));
+                Assert.That(guidA.Id, Is.Not.EqualTo(Guid.Empty));
+                Assert.That(guidB.Id, Is.Not.EqualTo(Guid.Empty));
                 Assert.That(guidA.Id, Is.Not.EqualTo(guidB));
  
                 var dbA = await db.SingleByIdAsync<GuidAutoId>(guidA.Id);
