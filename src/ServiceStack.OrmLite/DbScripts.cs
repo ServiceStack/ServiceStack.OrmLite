@@ -11,6 +11,9 @@ namespace ServiceStack.OrmLite
     
     public class DbScripts : ScriptMethods
     {
+        private const string DbInfo = "__dbinfo"; // Keywords.DbInfo
+        private const string DbConnection = "__dbconnection"; // useDbConnection global
+        
         private IDbConnectionFactory dbFactory;
         public IDbConnectionFactory DbFactory
         {
@@ -20,21 +23,52 @@ namespace ServiceStack.OrmLite
 
         public IDbConnection OpenDbConnection(ScriptScopeContext scope, Dictionary<string, object> options)
         {
+            var dbConn = OpenDbConnectionFromOptions(options);
+            if (dbConn != null)
+                return dbConn;
+
+            if (scope.PageResult != null)
+            {
+                if (scope.PageResult.Args.TryGetValue(DbInfo, out var oDbInfo) && oDbInfo is ConnectionInfo dbInfo)
+                    return DbFactory.OpenDbConnection(dbInfo);
+
+                if (scope.PageResult.Args.TryGetValue(DbConnection, out var oDbConn) && oDbConn is Dictionary<string, object> globalDbConn)
+                    return OpenDbConnectionFromOptions(globalDbConn);
+            }
+
+            return DbFactory.OpenDbConnection();
+        }
+
+        public IgnoreResult useDb(ScriptScopeContext scope, Dictionary<string, object> dbConnOptions)
+        {
+            if (dbConnOptions != null)
+            {
+                if (!dbConnOptions.ContainsKey("connectionString") && !dbConnOptions.ContainsKey("namedConnection"))
+                    throw new NotSupportedException(nameof(useDb) + " requires either 'connectionString' or 'namedConnection' property");
+
+                scope.PageResult.Args[DbConnection] = dbConnOptions;
+            }
+            return IgnoreResult.Value;
+        }
+
+        private IDbConnection OpenDbConnectionFromOptions(Dictionary<string, object> options)
+        {
             if (options != null)
             {
                 if (options.TryGetValue("connectionString", out var connectionString))
+                {
                     return options.TryGetValue("providerName", out var providerName)
-                       ? DbFactory.OpenDbConnectionString((string)connectionString, (string)providerName) 
-                       : DbFactory.OpenDbConnectionString((string)connectionString);
-                
-                if (options.TryGetValue("namedConnection", out var namedConnection))
-                    return DbFactory.OpenDbConnection((string)namedConnection);
-            }
-            
-            if (scope.PageResult != null && scope.PageResult.Args.TryGetValue("__dbinfo", out var oDbInfo) && oDbInfo is ConnectionInfo dbInfo) // Keywords.DbInfo
-                return DbFactory.OpenDbConnection(dbInfo);
+                        ? DbFactory.OpenDbConnectionString((string) connectionString, (string) providerName)
+                        : DbFactory.OpenDbConnectionString((string) connectionString);
+                }
 
-            return DbFactory.OpenDbConnection();
+                if (options.TryGetValue("namedConnection", out var namedConnection))
+                {
+                    return DbFactory.OpenDbConnection((string) namedConnection);
+                }
+            }
+
+            return null;
         }
 
         T exec<T>(Func<IDbConnection, T> fn, ScriptScopeContext scope, object options)

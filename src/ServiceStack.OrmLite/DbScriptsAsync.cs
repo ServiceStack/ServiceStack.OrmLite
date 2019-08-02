@@ -12,6 +12,9 @@ namespace ServiceStack.OrmLite
     
     public class DbScriptsAsync : ScriptMethods
     {
+        private const string DbInfo = "__dbinfo"; // Keywords.DbInfo
+        private const string DbConnection = "__dbconnection"; // useDbConnection global
+
         private IDbConnectionFactory dbFactory;
         public IDbConnectionFactory DbFactory
         {
@@ -21,21 +24,52 @@ namespace ServiceStack.OrmLite
 
         public async Task<IDbConnection> OpenDbConnectionAsync(ScriptScopeContext scope, Dictionary<string, object> options)
         {
+            var dbConn = await OpenDbConnectionFromOptionsAsync(options);
+            if (dbConn != null)
+                return dbConn;
+
+            if (scope.PageResult != null)
+            {
+                if (scope.PageResult.Args.TryGetValue(DbInfo, out var oDbInfo) && oDbInfo is ConnectionInfo dbInfo)
+                    return await DbFactory.OpenDbConnectionAsync(dbInfo);
+
+                if (scope.PageResult.Args.TryGetValue(DbConnection, out var oDbConn) && oDbConn is Dictionary<string, object> globalDbConn)
+                    return await OpenDbConnectionFromOptionsAsync(globalDbConn);
+            }
+
+            return await DbFactory.OpenAsync();
+        }
+
+        public IgnoreResult useDb(ScriptScopeContext scope, Dictionary<string, object> dbConnOptions)
+        {
+            if (dbConnOptions != null)
+            {
+                if (!dbConnOptions.ContainsKey("connectionString") && !dbConnOptions.ContainsKey("namedConnection"))
+                    throw new NotSupportedException(nameof(useDb) + " requires either 'connectionString' or 'namedConnection' property");
+
+                scope.PageResult.Args[DbConnection] = dbConnOptions;
+            }
+            return IgnoreResult.Value;
+        }
+
+        private async Task<IDbConnection> OpenDbConnectionFromOptionsAsync(Dictionary<string, object> options)
+        {
             if (options != null)
             {
                 if (options.TryGetValue("connectionString", out var connectionString))
+                {
                     return options.TryGetValue("providerName", out var providerName)
-                        ? await DbFactory.OpenDbConnectionStringAsync((string)connectionString, (string)providerName) 
-                        : await DbFactory.OpenDbConnectionStringAsync((string)connectionString);
-                
-                if (options.TryGetValue("namedConnection", out var namedConnection))
-                    return await DbFactory.OpenDbConnectionAsync((string)namedConnection);
-            }
-            
-            if (scope.PageResult != null && scope.PageResult.Args.TryGetValue("__dbinfo", out var oDbInfo) && oDbInfo is ConnectionInfo dbInfo) // Keywords.DbInfo
-                return await DbFactory.OpenDbConnectionAsync(dbInfo);
+                        ? await DbFactory.OpenDbConnectionStringAsync((string) connectionString, (string) providerName)
+                        : await DbFactory.OpenDbConnectionStringAsync((string) connectionString);
+                }
 
-            return await DbFactory.OpenAsync();
+                if (options.TryGetValue("namedConnection", out var namedConnection))
+                {
+                    return await DbFactory.OpenDbConnectionStringAsync((string) namedConnection);
+                }
+            }
+
+            return null;
         }
 
         async Task<object> exec<T>(Func<IDbConnection, Task<T>> fn, ScriptScopeContext scope, object options)
