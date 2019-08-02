@@ -41,7 +41,11 @@ namespace ServiceStack.OrmLite
 
         public IgnoreResult useDb(ScriptScopeContext scope, Dictionary<string, object> dbConnOptions)
         {
-            if (dbConnOptions != null)
+            if (dbConnOptions == null)
+            {
+                scope.PageResult.Args.Remove(DbConnection);
+            }
+            else
             {
                 if (!dbConnOptions.ContainsKey("connectionString") && !dbConnOptions.ContainsKey("namedConnection"))
                     throw new NotSupportedException(nameof(useDb) + " requires either 'connectionString' or 'namedConnection' property");
