@@ -803,10 +803,11 @@ namespace ServiceStack.OrmLite
             return OrderByInternal(keySelector);
         }
 
-        public virtual SqlExpression<T> OrderBy<Table>(Expression<Func<Table, object>> keySelector)
-        {
-            return OrderByInternal(keySelector);
-        }
+        public virtual SqlExpression<T> OrderBy<Table>(Expression<Func<Table, object>> fields) => OrderByInternal(fields);
+        public virtual SqlExpression<T> OrderBy<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields) => OrderByInternal(fields);
+        public virtual SqlExpression<T> OrderBy<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields) => OrderByInternal(fields);
+        public virtual SqlExpression<T> OrderBy<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> fields) => OrderByInternal(fields);
+        public virtual SqlExpression<T> OrderBy<Table1, Table2, Table3, Table4, Table5>(Expression<Func<Table1, Table2, Table3, Table4, Table5, object>> fields) => OrderByInternal(fields);
 
         private SqlExpression<T> OrderByInternal(Expression keySelector)
         {
@@ -843,10 +844,11 @@ namespace ServiceStack.OrmLite
             return ThenByInternal(keySelector);
         }
 
-        public virtual SqlExpression<T> ThenBy<Table>(Expression<Func<Table, object>> keySelector)
-        {
-            return ThenByInternal(keySelector);
-        }
+        public virtual SqlExpression<T> ThenBy<Table>(Expression<Func<Table, object>> fields) => ThenByInternal(fields);
+        public virtual SqlExpression<T> ThenBy<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields) => ThenByInternal(fields);
+        public virtual SqlExpression<T> ThenBy<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields) => ThenByInternal(fields);
+        public virtual SqlExpression<T> ThenBy<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> fields) => ThenByInternal(fields);
+        public virtual SqlExpression<T> ThenBy<Table1, Table2, Table3, Table4, Table5>(Expression<Func<Table1, Table2, Table3, Table4, Table5, object>> fields) => ThenByInternal(fields);
 
         private SqlExpression<T> ThenByInternal(Expression keySelector)
         {
@@ -867,10 +869,11 @@ namespace ServiceStack.OrmLite
             return OrderByDescendingInternal(keySelector);
         }
 
-        public virtual SqlExpression<T> OrderByDescending<Table>(Expression<Func<Table, object>> keySelector)
-        {
-            return OrderByDescendingInternal(keySelector);
-        }
+        public virtual SqlExpression<T> OrderByDescending<Table>(Expression<Func<Table, object>> keySelector) => OrderByDescendingInternal(keySelector);
+        public virtual SqlExpression<T> OrderByDescending<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields) => OrderByDescendingInternal(fields);
+        public virtual SqlExpression<T> OrderByDescending<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields) => OrderByDescendingInternal(fields);
+        public virtual SqlExpression<T> OrderByDescending<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> fields) => OrderByDescendingInternal(fields);
+        public virtual SqlExpression<T> OrderByDescending<Table1, Table2, Table3, Table4, Table5>(Expression<Func<Table1, Table2, Table3, Table4, Table5, object>> fields) => OrderByDescendingInternal(fields);
 
         private SqlExpression<T> OrderByDescendingInternal(Expression keySelector)
         {
@@ -919,10 +922,11 @@ namespace ServiceStack.OrmLite
             return ThenByDescendingInternal(keySelector);
         }
 
-        public virtual SqlExpression<T> ThenByDescending<Table>(Expression<Func<Table, object>> keySelector)
-        {
-            return ThenByDescendingInternal(keySelector);
-        }
+        public virtual SqlExpression<T> ThenByDescending<Table>(Expression<Func<Table, object>> fields) => ThenByDescendingInternal(fields);
+        public virtual SqlExpression<T> ThenByDescending<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields) => ThenByDescendingInternal(fields);
+        public virtual SqlExpression<T> ThenByDescending<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields) => ThenByDescendingInternal(fields);
+        public virtual SqlExpression<T> ThenByDescending<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> fields) => ThenByDescendingInternal(fields);
+        public virtual SqlExpression<T> ThenByDescending<Table1, Table2, Table3, Table4, Table5>(Expression<Func<Table1, Table2, Table3, Table4, Table5, object>> fields) => ThenByDescendingInternal(fields);
 
         private SqlExpression<T> ThenByDescendingInternal(Expression keySelector)
         {

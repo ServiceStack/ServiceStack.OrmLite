@@ -52,6 +52,30 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(tracks.First().Letter, Is.EqualTo("A"));
                 Assert.That(tracks.Last().Letter, Is.EqualTo("C"));
             }
-        }        
+        }
+
+        [Test]
+        public void Can_OrderBy_multi_table_expression()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+                db.DropAndCreateTable<LetterWeighting>();
+
+                var letters = "A,B,C,D,E".Split(',');
+                var i = 0;
+                letters.Each(letter => {
+                    var id = db.Insert(new LetterFrequency {Letter = letter}, selectIdentity: true);
+                    db.Insert(new LetterWeighting {LetterFrequencyId = id, Weighting = ++i * 10});
+                });
+
+                var q = db.From<LetterFrequency>()
+                    .Join<LetterWeighting>()
+                    .OrderBy<LetterFrequency, LetterWeighting>((f, w) => f.Id > w.Weighting ? f.Id : w.Weighting);
+
+                var results = db.Select(q);
+            }
+        }
+        
     }
 }
