@@ -1,5 +1,7 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using NUnit.Framework;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests.Expression;
 using ServiceStack.Text;
 
@@ -76,6 +78,5 @@ namespace ServiceStack.OrmLite.Tests
                 var results = db.Select(q);
             }
         }
-        
     }
 }
