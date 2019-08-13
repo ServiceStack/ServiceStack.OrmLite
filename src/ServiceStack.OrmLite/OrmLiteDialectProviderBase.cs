@@ -397,6 +397,9 @@ namespace ServiceStack.OrmLite
             return $"{GetQuotedName(escapedSchema)}.{GetQuotedName(NamingStrategy.GetTableName(tableName))}";
         }
 
+        public virtual string GetQuotedTableName(string tableName, string schema, bool useStrategy) => 
+            GetQuotedName(GetTableName(tableName, schema, useStrategy));
+
         public virtual string GetQuotedColumnName(string columnName)
         {
             return GetQuotedName(NamingStrategy.GetColumnName(columnName));

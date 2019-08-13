@@ -176,10 +176,8 @@ namespace ServiceStack.OrmLite.Sqlite
                 : table;
         }
 
-        public override string GetQuotedTableName(string tableName, string schema = null)
-        {
-            return GetQuotedName(GetTableName(tableName, schema));
-        }
+        public override string GetQuotedTableName(string tableName, string schema = null) =>
+            GetQuotedName(GetTableName(tableName, schema));
 
         public override SqlExpression<T> SqlExpression<T>()
         {

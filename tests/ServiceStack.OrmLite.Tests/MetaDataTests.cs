@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.Shared;
+using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -126,6 +127,29 @@ namespace ServiceStack.OrmLite.Tests
                 tableNames = db.GetTableNamesWithRowCounts(live:false);
                 Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(table1Name)));
                 Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(table2Name)));
+            }
+        }
+
+        [Test]
+        public void Can_get_GetTableNamesWithRowCounts_of_keyword_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                CustomerOrdersUseCase.DropTables(db); //Has conflicting 'Order' table
+                db.CreateTable<Order>();
+
+                3.Times(i => db.Insert(new Order { CustomerId = i + 1, LineItem = $"Field{i+1}"}) );
+                
+                var tableNames = db.GetTableNamesWithRowCounts(live:true);
+                Assert.That(tableNames.Count, Is.GreaterThan(0));
+
+                var table1Name = db.GetDialectProvider().GetTableName(typeof(Order).GetModelMetadata()).StripQuotes();
+                
+                var table1Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(table1Name) && x.Value == 3);
+                Assert.That(table1Pos, Is.GreaterThanOrEqualTo(0));
+                
+                tableNames = db.GetTableNamesWithRowCounts(live:false);
+                Assert.That(tableNames.Any(x => x.Key.EqualsIgnoreCase(table1Name)));
             }
         }
 

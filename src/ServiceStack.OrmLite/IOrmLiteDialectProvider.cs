@@ -101,6 +101,8 @@ namespace ServiceStack.OrmLite
 
         string GetQuotedTableName(string tableName, string schema=null);
 
+        string GetQuotedTableName(string tableName, string schema, bool useStrategy);
+
         string GetQuotedColumnName(string columnName);
 
         string GetQuotedName(string name);
