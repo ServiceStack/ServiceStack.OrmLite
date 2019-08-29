@@ -18,6 +18,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Build", "Build", "{6CEB3EDE
 		ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.Core.csproj = ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.Core.csproj
 		ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.Core.csproj = ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.Core.csproj
 		..\build\build-core.proj = ..\build\build-core.proj
+		ServiceStack.OrmLite.Sqlite.Data\ServiceStack.OrmLite.Sqlite.Data.csproj = ServiceStack.OrmLite.Sqlite.Data\ServiceStack.OrmLite.Sqlite.Data.csproj
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ServiceStack.OrmLite.Sqlite", "ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.csproj", "{CF68A37D-D071-469D-AE04-68594CB95382}"
@@ -72,6 +73,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.T4", "ServiceStack.OrmLite.T4\ServiceStack.OrmLite.T4.csproj", "{196CD5D3-23E5-4C98-83DC-C5397396A574}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Tests.Setup", "..\tests\ServiceStack.OrmLite.Tests.Setup\ServiceStack.OrmLite.Tests.Setup.csproj", "{74A4B761-974C-4AE8-88BE-7B29460D80B4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ServiceStack.OrmLite.Sqlite.Data", "ServiceStack.OrmLite.Sqlite.Data\ServiceStack.OrmLite.Sqlite.Data.csproj", "{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -428,6 +431,24 @@ Global
 		{74A4B761-974C-4AE8-88BE-7B29460D80B4}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{74A4B761-974C-4AE8-88BE-7B29460D80B4}.Release|x86.ActiveCfg = Release|Any CPU
 		{74A4B761-974C-4AE8-88BE-7B29460D80B4}.Release|x86.Build.0 = Release|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Debug|x86.Build.0 = Debug|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Default|Any CPU.ActiveCfg = Debug|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Default|Any CPU.Build.0 = Debug|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Default|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Default|Mixed Platforms.Build.0 = Debug|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Default|x86.ActiveCfg = Debug|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Default|x86.Build.0 = Debug|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Release|x86.ActiveCfg = Release|Any CPU
+		{05F1FC33-8DF2-457D-820D-3C47CCD6D82E}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

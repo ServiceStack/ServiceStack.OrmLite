@@ -96,6 +96,11 @@
              Targets="Build;Pack"
              Properties="Configuration=$(Configuration)" />
 
+    <!-- ServiceStack.OrmLite.Sqlite.Data -->
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.Sqlite.Data/ServiceStack.OrmLite.Sqlite.Data.csproj"
+             Targets="Build;Pack"
+             Properties="Configuration=$(Configuration)" />
+
     <!-- ServiceStack.OrmLite.Sqlite.Windows -->
     <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.Sqlite.Windows/ServiceStack.OrmLite.Sqlite.Windows.csproj"
              Targets="Build;Pack"
