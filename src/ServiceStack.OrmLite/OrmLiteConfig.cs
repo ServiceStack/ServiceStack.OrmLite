@@ -136,9 +136,17 @@ namespace ServiceStack.OrmLite
         public static void ResetLogFactory(ILogFactory logFactory)
         {
             LogManager.LogFactory = logFactory;
-            OrmLiteResultsFilterExtensions.Log = LogManager.LogFactory.GetLogger(typeof(OrmLiteResultsFilterExtensions));
+            OrmLiteResultsFilterExtensions.Log = logFactory.GetLogger(typeof(OrmLiteResultsFilterExtensions));
+            OrmLiteWriteCommandExtensions.Log = logFactory.GetLogger(typeof(OrmLiteWriteCommandExtensions));
+            OrmLiteReadCommandExtensions.Log = logFactory.GetLogger(typeof(OrmLiteReadCommandExtensions));
+            OrmLiteResultsFilterExtensions.Log = logFactory.GetLogger(typeof(OrmLiteResultsFilterExtensions));
+            OrmLiteUtils.Log = logFactory.GetLogger(typeof(OrmLiteUtils));
+            OrmLiteWriteCommandExtensionsAsync.Log = logFactory.GetLogger(typeof(OrmLiteWriteCommandExtensionsAsync));
+            OrmLiteReadCommandExtensionsAsync.Log = logFactory.GetLogger(typeof(OrmLiteReadCommandExtensionsAsync));
+            OrmLiteResultsFilterExtensionsAsync.Log = logFactory.GetLogger(typeof(OrmLiteResultsFilterExtensionsAsync));
+            OrmLiteConverter.Log = logFactory.GetLogger(typeof(OrmLiteConverter));
         }
-
+        
         public static bool DisableColumnGuessFallback { get; set; }
         public static bool StripUpperInLike { get; set; } 
 #if NETSTANDARD2_0
@@ -205,17 +213,5 @@ namespace ServiceStack.OrmLite
         public static Func<string, string> ParamNameFilter { get; set; }
         
         public static Action<ModelDefinition> OnModelDefinitionInit { get; set; }
-        
-        public static void ResetLogFactory()
-        {
-            OrmLiteWriteCommandExtensions.Log = LogManager.GetLogger(typeof(OrmLiteWriteCommandExtensions));
-            OrmLiteReadCommandExtensions.Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensions));
-            OrmLiteResultsFilterExtensions.Log = LogManager.GetLogger(typeof(OrmLiteResultsFilterExtensions));
-            OrmLiteUtils.Log = LogManager.GetLogger(typeof(OrmLiteUtils));
-            OrmLiteWriteCommandExtensionsAsync.Log = LogManager.GetLogger(typeof(OrmLiteWriteCommandExtensionsAsync));
-            OrmLiteReadCommandExtensionsAsync.Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensionsAsync));
-            OrmLiteResultsFilterExtensionsAsync.Log = LogManager.GetLogger(typeof(OrmLiteResultsFilterExtensionsAsync));
-            OrmLiteConverter.Log = LogManager.GetLogger(typeof(OrmLiteConverter));
-        }
     }
 }
