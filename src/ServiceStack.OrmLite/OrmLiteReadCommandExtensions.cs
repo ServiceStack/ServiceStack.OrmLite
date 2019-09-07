@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite
 
     public static class OrmLiteReadCommandExtensions
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensions));
+        internal static ILog Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensions));
         public const string UseDbConnectionExtensions = "Use IDbConnection Extensions instead";
 
         internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql)

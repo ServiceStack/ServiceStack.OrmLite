@@ -8,8 +8,6 @@ namespace ServiceStack.OrmLite.Converters
 {
     public class DateTimeConverter : OrmLiteConverter
     {
-        protected static ILog Log = LogManager.GetLogger(typeof(DateTimeConverter));
-
         public override string ColumnDefinition => "DATETIME";
 
         public override DbType DbType => DbType.DateTime;

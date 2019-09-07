@@ -24,7 +24,7 @@ namespace ServiceStack.OrmLite
 {
     public static class OrmLiteWriteCommandExtensions
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteCommandExtensions));
+        internal static ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteCommandExtensions));
 
         internal static bool CreateSchema<T>(this IDbCommand dbCmd)
         {

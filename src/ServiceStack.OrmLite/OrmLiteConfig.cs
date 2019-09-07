@@ -205,5 +205,17 @@ namespace ServiceStack.OrmLite
         public static Func<string, string> ParamNameFilter { get; set; }
         
         public static Action<ModelDefinition> OnModelDefinitionInit { get; set; }
+        
+        public static void ResetLogFactory()
+        {
+            OrmLiteWriteCommandExtensions.Log = LogManager.GetLogger(typeof(OrmLiteWriteCommandExtensions));
+            OrmLiteReadCommandExtensions.Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensions));
+            OrmLiteResultsFilterExtensions.Log = LogManager.GetLogger(typeof(OrmLiteResultsFilterExtensions));
+            OrmLiteUtils.Log = LogManager.GetLogger(typeof(OrmLiteUtils));
+            OrmLiteWriteCommandExtensionsAsync.Log = LogManager.GetLogger(typeof(OrmLiteWriteCommandExtensionsAsync));
+            OrmLiteReadCommandExtensionsAsync.Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensionsAsync));
+            OrmLiteResultsFilterExtensionsAsync.Log = LogManager.GetLogger(typeof(OrmLiteResultsFilterExtensionsAsync));
+            OrmLiteConverter.Log = LogManager.GetLogger(typeof(OrmLiteConverter));
+        }
     }
 }

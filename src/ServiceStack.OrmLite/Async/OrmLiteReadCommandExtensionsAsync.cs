@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite
 {
     internal static class OrmLiteReadCommandExtensionsAsync
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensionsAsync));
+        internal static ILog Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensionsAsync));
 
         internal static Task<IDataReader> ExecReaderAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
