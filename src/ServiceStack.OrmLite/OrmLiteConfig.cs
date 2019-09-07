@@ -133,8 +133,9 @@ namespace ServiceStack.OrmLite
             return dbConn;
         }
 
-        public static void ResetLogFactory(ILogFactory logFactory)
+        public static void ResetLogFactory(ILogFactory logFactory=null)
         {
+            logFactory = logFactory ?? LogManager.LogFactory;
             LogManager.LogFactory = logFactory;
             OrmLiteResultsFilterExtensions.Log = logFactory.GetLogger(typeof(OrmLiteResultsFilterExtensions));
             OrmLiteWriteCommandExtensions.Log = logFactory.GetLogger(typeof(OrmLiteWriteCommandExtensions));
