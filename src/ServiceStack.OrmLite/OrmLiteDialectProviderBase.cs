@@ -1331,7 +1331,7 @@ namespace ServiceStack.OrmLite
         public virtual string GetUniqueConstraints(ModelDefinition modelDef)
         {
             var constraints = modelDef.UniqueConstraints.Map(x => 
-                $"CONSTRAINT {GetUniqueConstraintName(x, GetTableName(modelDef))} UNIQUE ({x.FieldNames.Map(f => modelDef.GetQuotedName(f,this)).Join(",")})" );
+                $"CONSTRAINT {GetUniqueConstraintName(x, GetTableName(modelDef).StripQuotes())} UNIQUE ({x.FieldNames.Map(f => modelDef.GetQuotedName(f,this)).Join(",")})" );
 
             return constraints.Count > 0
                 ? constraints.Join(",\n")

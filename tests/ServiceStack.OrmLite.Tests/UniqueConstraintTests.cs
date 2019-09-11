@@ -112,5 +112,24 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        [UniqueConstraint(nameof(Environment), nameof(Name))]
+        public class User
+        {
+            [AutoId]
+            public Guid Id { get; set; }
+            public Guid Environment { get; set; }
+            public string Name { get; set; }
+        }
+        
+        [Test]
+        public void Can_create_User_table_with_Unique_constraints()
+        {
+            OrmLiteUtils.PrintSql();
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<User>();
+                db.CreateTableIfNotExists<User>();
+            }
+        }
     }
 }
