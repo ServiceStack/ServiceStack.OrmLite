@@ -124,7 +124,6 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_User_table_with_Unique_constraints()
         {
-            OrmLiteUtils.PrintSql();
             using (var db = OpenDbConnection())
             {
                 db.DropTable<User>();
