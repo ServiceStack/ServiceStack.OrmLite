@@ -2966,21 +2966,21 @@ The Typed SqlExpression bitwise operations support depends on the RDBMS used.
 E.g. all RDBMS's support Bitwise `And` and `Or` operators:
 
 ```csharp
-db.Select<Table>(x => (x.Id | 2) == 3);
-db.Select<Table>(x => (x.Id & 2) == 2);
+db.Select<Table>(x => (x.Flags | 2) == 3);
+db.Select<Table>(x => (x.Flags & 2) == 2);
 ```
 
 All RDBMS Except for SQL Server support bit shift operators:
 
 ```csharp
-db.Select<Table>(x => (x.Id << 1) == 4);
-db.Select<Table>(x => (x.Id >> 1) == 1);
+db.Select<Table>(x => (x.Flags << 1) == 4);
+db.Select<Table>(x => (x.Flags >> 1) == 1);
 ```
 
 Whilst only SQL Server and MySQL Support Exclusive Or:
 
 ```csharp
-db.Select<Table>(x => (x.Id ^ 2) == 3);
+db.Select<Table>(x => (x.Flags ^ 2) == 3);
 ```
 
 ## SQL Server Features
