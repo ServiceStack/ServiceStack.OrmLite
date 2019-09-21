@@ -1530,7 +1530,7 @@ public class UniqueTest
 
 ### Auto populated Guid Ids
 
-Support for Auto populating `Guid` Primary Keys was also added in this release with the new `[AutoId]` attribute, e.g:
+Support for Auto populating `Guid` Primary Keys is available using the `[AutoId]` attribute, e.g:
 
 ```csharp
 public class Table
