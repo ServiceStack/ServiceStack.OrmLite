@@ -1713,6 +1713,15 @@ namespace ServiceStack.OrmLite
             return CheckExpressionForTypes(e, new[] { ExpressionType.Parameter, ExpressionType.Convert });
         }
 
+        /// <summary>
+        /// Check whether the expression is a constant expression to determine
+        /// whether we should use the expression value instead of Column Name 
+        /// </summary>
+        protected virtual bool IsConstantExpression(Expression e)
+        {
+            return CheckExpressionForTypes(e, new[] { ExpressionType.Constant });
+        }
+
         protected bool CheckExpressionForTypes(Expression e, ExpressionType[] types)
         {
             while (e != null)
@@ -1826,7 +1835,11 @@ namespace ServiceStack.OrmLite
                 }
 
                 if (IsParameterOrConvertAccess(m))
-                    return GetMemberExpression(m);
+                {
+                    // We don't want to use the Column Name for constant expressions unless we're in a Sql. method call
+                    if (inSqlMethodCall || !IsConstantExpression(m))
+                        return GetMemberExpression(m);
+                }
             }
 
             return CachedExpressionCompiler.Evaluate(m);
@@ -2213,10 +2226,18 @@ namespace ServiceStack.OrmLite
                    && IsJoinedTable(exp.Expression.Type);
         }
 
+        private bool inSqlMethodCall = false;
+
         protected virtual object VisitMethodCall(MethodCallExpression m)
         {
             if (m.Method.DeclaringType == typeof(Sql))
-                return VisitSqlMethodCall(m);
+            {
+                var hold = inSqlMethodCall;
+                inSqlMethodCall = true;
+                var ret = VisitSqlMethodCall(m);
+                inSqlMethodCall = hold;
+                return ret;
+            }
 
             if (IsStaticArrayMethod(m))
                 return VisitStaticArrayMethodCall(m);
