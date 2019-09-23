@@ -886,6 +886,23 @@ foreach (var person in lazyQuery) {
    //...  
 }
 ```
+ 
+### Save Methods
+ 
+`Save` and `SaveAll` will Insert if no record with **Id** exists, otherwise it Updates. 
+
+`Save` will populate any `[AutoIncrement]` or `[AutoId]` Primary Keys, e.g:
+
+```csharp
+db.Save(item);
+item.Id // RDBMS populated Auto Id 
+```
+
+Alternatively you can also manually Select and Retrieve the Inserted RDBMS Auto Id in a single query with `Insert` APIs by specifying `selectIdentity:true`:
+
+```csharp
+item.Id = db.Insert(item, selectIdentity:true);
+```
 
 #### Other examples
 
@@ -896,7 +913,6 @@ var topVIPs = db.WhereLazy<Person>(new { Age = 27 }).Where(p => IsVip(p)).Take(5
 ### Other Notes
 
  - All **Insert**, **Update**, and **Delete** methods take multiple params, while `InsertAll`, `UpdateAll` and `DeleteAll` take IEnumerables.
- - `Save` and `SaveAll` will Insert if no record with **Id** exists, otherwise it Updates. 
  - Methods containing the word **Each** return an IEnumerable<T> and are lazily loaded (i.e. non-buffered).
 
 # Features
