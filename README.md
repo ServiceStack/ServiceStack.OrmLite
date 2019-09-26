@@ -902,7 +902,15 @@ If using PostgreSQL you can take advantage of its complex Array Types and utiliz
 ```csharp
 var ids = new[]{ 1, 2, 3};
 var q = Db.From<Table>()
-    .And("ARRAY[{0}] && ref_ids", ids.Join(","))
+    .Where("ARRAY[{0}] && ref_ids", ids.Join(","))
+var results = db.Select(q);
+```
+
+When comparing a string collection you can use `SqlInValues` to create a quoted SQL IN list, e.g:
+
+```csharp
+var q = Db.From<Table>()
+    .Where($"ARRAY[{new SqlInValues(cities).ToSqlInString()}] && cities");
 var results = db.Select(q);
 ```
 
