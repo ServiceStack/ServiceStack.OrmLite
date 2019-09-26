@@ -15,7 +15,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
-    <PackageReference Include="FirebirdSql.Data.FirebirdClient" Version="6.6.0" />
+    <PackageReference Include="FirebirdSql.Data.FirebirdClient" Version="7.1.1" />
     <PackageReference Include="ServiceStack.Common" Version="$(Version)" />
   </ItemGroup>
 
