@@ -229,6 +229,37 @@ namespace ServiceStack.OrmLite
             var expr = dbCmd.GetDialectProvider().SqlExpression<T>().Where(predicate);
             return dbCmd.LoadListWithReferences<T, T>(expr, include);
         }
+
+        internal static DataTable GetSchemaTable(this IDbCommand dbCmd, string sql)
+        {
+            using (var reader = dbCmd.ExecReader(sql))
+            {
+                return reader.GetSchemaTable();
+            }
+        }
+
+        public static ColumnSchema[] GetTableColumns(this IDbCommand dbCmd, Type table) => 
+            dbCmd.GetTableColumns($"SELECT * FROM {dbCmd.GetDialectProvider().GetQuotedTableName(table.GetModelDefinition())}");
+
+        public static ColumnSchema[] GetTableColumns(this IDbCommand dbCmd, string sql) => dbCmd.GetSchemaTable(sql).ToColumnSchemas();
+
+        internal static ColumnSchema[] ToColumnSchemas(this DataTable dt)
+        {
+            var ret = new List<ColumnSchema>();
+            foreach (DataRow row in dt.Rows)
+            {
+                var obj = new Dictionary<string, object>();
+                foreach (DataColumn column in dt.Columns)
+                {
+                    obj[column.ColumnName] = row[column.Ordinal];
+                }
+
+                var to = obj.FromObjectDictionary<ColumnSchema>();
+                ret.Add(to);
+            }
+
+            return ret.ToArray();
+        }
     }
 }
 

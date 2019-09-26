@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Threading.Tasks;
 using ServiceStack.Data;
 using ServiceStack.Script;
@@ -148,6 +149,17 @@ namespace ServiceStack.OrmLite
                         live: args.TryGetValue("live", out var oLive) && oLive is bool b && b,
                         schema: args.TryGetValue("schema", out var oSchema) ? oSchema as string : null), 
                 scope, options);
+
+        public Task<object> dbColumnNames(ScriptScopeContext scope, string tableName) => dbColumnNames(scope, tableName, null);
+        public Task<object> dbColumnNames(ScriptScopeContext scope, string tableName, object options) => 
+            exec(async db => (await db.GetTableColumnsAsync($"SELECT * FROM {sqlQuote(tableName)}")).Select(x => x.ColumnName).ToArray(), scope, options);
+
+        public Task<object> dbColumns(ScriptScopeContext scope, string tableName) => dbColumns(scope, tableName, null);
+        public Task<object> dbColumns(ScriptScopeContext scope, string tableName, object options) => 
+            exec(db => db.GetTableColumnsAsync($"SELECT * FROM {sqlQuote(tableName)}"), scope, options);
+
+        public Task<object> dbDesc(ScriptScopeContext scope, string sql) => dbDesc(scope, sql, null);
+        public Task<object> dbDesc(ScriptScopeContext scope, string sql, object options) => exec(db => db.GetTableColumnsAsync(sql), scope, options);
 
         public string sqlQuote(string name) => OrmLiteConfig.DialectProvider.GetQuotedName(name);
         public string sqlConcat(IEnumerable<object> values) => OrmLiteConfig.DialectProvider.SqlConcat(values);

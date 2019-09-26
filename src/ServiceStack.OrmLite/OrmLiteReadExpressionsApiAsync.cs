@@ -180,7 +180,32 @@ namespace ServiceStack.OrmLite
         public static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, string[] include = null, CancellationToken token = default(CancellationToken))
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync<Into, From>(expression, include, token));
-        }         
+        }
+        
+        /// <summary>
+        /// Return ADO.NET reader.GetSchemaTable() in a DataTable
+        /// </summary>
+        /// <param name="dbConn"></param>
+        /// <param name="sql"></param>
+        /// <returns></returns>
+        public static Task<DataTable> GetSchemaTableAsync(this IDbConnection dbConn, string sql, CancellationToken token=default) => 
+            dbConn.Exec(dbCmd => dbCmd.GetSchemaTableAsync(sql, token));
+        
+        /// <summary>
+        /// Get Table Column Schemas for specified table
+        /// </summary>
+        public static Task<ColumnSchema[]> GetTableColumnsAsync<T>(this IDbConnection dbConn, CancellationToken token=default) => 
+            dbConn.Exec(dbCmd => dbCmd.GetTableColumnsAsync(typeof(T), token));
+        /// <summary>
+        /// Get Table Column Schemas for specified table
+        /// </summary>
+        public static Task<ColumnSchema[]> GetTableColumnsAsync(this IDbConnection dbConn, Type type, CancellationToken token=default) => 
+            dbConn.Exec(dbCmd => dbCmd.GetTableColumnsAsync(type, token));
+        /// <summary>
+        /// Get Table Column Schemas for result-set return from specified sql
+        /// </summary>
+        public static Task<ColumnSchema[]> GetTableColumnsAsync(this IDbConnection dbConn, string sql, CancellationToken token=default) => 
+            dbConn.Exec(dbCmd => dbCmd.GetTableColumnsAsync(sql, token));
     }
 
 }

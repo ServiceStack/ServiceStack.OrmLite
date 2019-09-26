@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Tests.Shared;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -134,6 +137,32 @@ namespace ServiceStack.OrmLite.Tests
                     Assert.Fail("Should throw");
                 }
                 catch (Exception) { }
+            }
+        }
+
+        [Test]
+        public void Can_get_Schema_Table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTableIfNotExists<Person>();
+
+                var columnSchemas = db.GetTableColumns<Person>();
+                
+                columnSchemas.Each(x => x.PrintDump());
+            }
+        }
+
+        [Test]
+        public async Task Can_get_Schema_Table_Async()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTableIfNotExists<Person>();
+
+                var columnSchemas = await db.GetTableColumnsAsync<Person>();
+                
+                columnSchemas.Each(x => x.PrintDump());
             }
         }
     }

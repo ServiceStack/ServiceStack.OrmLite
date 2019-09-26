@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using ServiceStack.Data;
 using ServiceStack.Script;
 
@@ -145,6 +146,17 @@ namespace ServiceStack.OrmLite
                         live: args.TryGetValue("live", out var oLive) && oLive is bool b && b,
                         schema: args.TryGetValue("schema", out var oSchema) ? oSchema as string : null), 
                 scope, options);
+
+        public string[] dbColumnNames(ScriptScopeContext scope, string tableName) => dbColumnNames(scope, tableName, null);
+        public string[] dbColumnNames(ScriptScopeContext scope, string tableName, object options) => 
+            dbColumns(scope, tableName, options).Select(x => x.ColumnName).ToArray();
+
+        public ColumnSchema[] dbColumns(ScriptScopeContext scope, string tableName) => dbColumns(scope, tableName, null);
+        public ColumnSchema[] dbColumns(ScriptScopeContext scope, string tableName, object options) => 
+            exec(db => db.GetTableColumns($"SELECT * FROM {sqlQuote(tableName)}"), scope, options);
+
+        public ColumnSchema[] dbDesc(ScriptScopeContext scope, string sql) => dbDesc(scope, sql, null);
+        public ColumnSchema[] dbDesc(ScriptScopeContext scope, string sql, object options) => exec(db => db.GetTableColumns(sql), scope, options);
 
         public string sqlQuote(string name) => OrmLiteConfig.DialectProvider.GetQuotedName(name);
         public string sqlConcat(IEnumerable<object> values) => OrmLiteConfig.DialectProvider.SqlConcat(values);
