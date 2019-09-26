@@ -863,6 +863,26 @@ var track = db.SingleById<Track>(1);
 var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });
 ```
 
+## Nested Typed Sub SqlExpressions
+
+The `Sql.In()` API supports nesting and combining of multiple Typed SQL Expressions together 
+in a single SQL Query, e.g:
+  
+```csharp
+var usaCustomerIds = db.From<Customer>(c => c.Country == "USA").Select(c => c.Id);
+var usaCustomerOrders = db.Select(db.From<Order>()
+    .Where(x => Sql.In(x.CustomerId, usaCustomerIds)));
+``` 
+
+### SQL In Expressions
+
+```csharp
+db.Select<Author>(x => Sql.In(x.City, "London", "Madrid", "Berlin"));
+
+var cities = new[] { "London", "Madrid", "Berlin" };
+db.Select<Author>(x => Sql.In(x.City, cities));
+```
+
 ### Parametrized IN Values
 
 OrmLite also supports providing collection of values which is automatically split into multiple DB parameters to simplify executing parameterized SQL with multiple IN Values, e.g:
@@ -873,6 +893,17 @@ var results = db.Select<Table>("Id in (@ids)", new { ids });
 
 var names = new List<string>{ "foo", "bar", "qux" };
 var results = db.SqlList<Table>("SELECT * FROM Table WHERE Name IN (@names)", new { names });
+```
+
+### Custom SQL using PostgreSQL Arrays
+
+If using PostgreSQL you can take advantage of its complex Array Types and utilize its [Array Functions and Operators](https://www.postgresql.org/docs/9.6/functions-array.html), e.g:
+
+```csharp
+var ids = new[]{ 1, 2, 3};
+var q = Db.From<Table>()
+    .And("ARRAY[{0}] && ref_ids", ids.Join(","))
+var results = db.Select(q);
 ```
 
 ### Lazy Queries
@@ -1633,17 +1664,6 @@ var q = db.From<Table>()
 
 var results = db.Select(q);
 ```
-
-## Nested Typed Sub SqlExpressions
-
-The `Sql.In()` API supports nesting and combining of multiple Typed SQL Expressions together 
-in a single SQL Query, e.g:
-  
-```csharp
-var usaCustomerIds = db.From<Customer>(c => c.Country == "USA").Select(c => c.Id);
-var usaCustomerOrders = db.Select(db.From<Order>()
-    .Where(x => Sql.In(x.CustomerId, usaCustomerIds)));
-``` 
 
 ## Optimistic Concurrency
 
