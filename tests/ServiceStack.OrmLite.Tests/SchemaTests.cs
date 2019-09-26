@@ -149,6 +149,8 @@ namespace ServiceStack.OrmLite.Tests
 
                 var columnSchemas = db.GetTableColumns<Person>();
                 
+                columnSchemas.Each(x => x.ToString().Print());
+                
                 columnSchemas.Each(x => x.PrintDump());
             }
         }

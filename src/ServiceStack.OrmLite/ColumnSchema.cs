@@ -1,4 +1,5 @@
 using System;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -30,6 +31,55 @@ namespace ServiceStack.OrmLite
         public object DefaultValue { get; set; }
         public string DataTypeName { get; set; }
         public string CollationType { get; set; }
+
+        public override string ToString()
+        {
+            var sql = StringBuilderCache.Allocate();
+            
+            sql.Append($"{ColumnName.PadRight(18, ' ')} {DataTypeName}");
+            if (NumericPrecision > 0 || NumericScale > 0)
+            {
+                sql.Append("(");
+                sql.Append(NumericPrecision);
+                if (NumericScale > 0)
+                {
+                    sql.Append(",");
+                    sql.Append(NumericScale);
+                }
+                sql.Append(")");
+            }
+            else if (ColumnSize > 0)
+            {
+                sql.Append("(");
+                sql.Append(ColumnSize);
+                sql.Append(")");
+            }
+
+            if (IsKey)
+            {
+                sql.Append(" PRIMARY KEY");
+                if (IsAutoIncrement)
+                {
+                    sql.Append(" ").Append("AUTOINCREMENT");
+                }
+            }
+            else
+            {
+                sql.Append(AllowDBNull ? " NULL" : " NOT NULL");
+            }
+
+            if (IsUnique)
+            {
+                sql.Append(" UNIQUE");
+            }
+
+            if (DefaultValue != null)
+            {
+                sql.AppendFormat(" DEFAULT ({0})", DefaultValue);
+            }
+            
+            return StringBuilderCache.ReturnAndFree(sql);
+        }
     }
 
 }
