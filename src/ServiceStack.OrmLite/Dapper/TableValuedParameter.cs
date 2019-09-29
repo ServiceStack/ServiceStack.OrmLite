@@ -30,6 +30,7 @@ namespace ServiceStack.OrmLite.Dapper
             this.typeName = typeName;
         }
 
+#if SQLCLIENT        
         private static readonly Action<System.Data.SqlClient.SqlParameter, string> setTypeName;
         static TableValuedParameter()
         {
@@ -40,7 +41,8 @@ namespace ServiceStack.OrmLite.Dapper
                     Delegate.CreateDelegate(typeof(Action<System.Data.SqlClient.SqlParameter, string>), prop.GetSetMethod());
             }
         }
-
+#endif
+        
         void SqlMapper.ICustomQueryParameter.AddParameter(IDbCommand command, string name)
         {
             var param = command.CreateParameter();
@@ -58,11 +60,13 @@ namespace ServiceStack.OrmLite.Dapper
             {
                 typeName = table.GetTypeName();
             }
+#if SQLCLIENT        
             if (!string.IsNullOrEmpty(typeName) && (parameter is System.Data.SqlClient.SqlParameter sqlParam))
             {
                 setTypeName?.Invoke(sqlParam, typeName);
                 sqlParam.SqlDbType = SqlDbType.Structured;
             }
+#endif
         }
     }
 }

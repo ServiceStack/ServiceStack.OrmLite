@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Data;
-using System.Data.SqlClient;
-using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.Converters;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServer.Converters

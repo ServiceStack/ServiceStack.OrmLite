@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+#if MSDATA
+using Microsoft.Data.SqlClient;
+#else
 using System.Data.SqlClient;
+#endif
 using System.IO;
 using System.Linq;
 using System.Threading;

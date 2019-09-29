@@ -237,7 +237,9 @@ namespace ServiceStack.OrmLite.Dapper
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void AddSqlDataRecordsTypeHandler(bool clone)
         {
+#if SQLCLIENT
             AddTypeHandlerImpl(typeof(IEnumerable<Microsoft.SqlServer.Server.SqlDataRecord>), new SqlDataRecordHandler(), clone);
+#endif
         }
 
         /// <summary>
@@ -3690,6 +3692,7 @@ namespace ServiceStack.OrmLite.Dapper
             table?.ExtendedProperties[DataTableTypeNameKey] as string;
 #endif
 
+#if SQLCLIENT        
         /// <summary>
         /// Used to pass a IEnumerable&lt;SqlDataRecord&gt; as a TableValuedParameter.
         /// </summary>
@@ -3697,7 +3700,8 @@ namespace ServiceStack.OrmLite.Dapper
         /// <param name="typeName">The sql parameter type name.</param>
         public static ICustomQueryParameter AsTableValuedParameter(this IEnumerable<Microsoft.SqlServer.Server.SqlDataRecord> list, string typeName = null) =>
             new SqlDataRecordListTVPParameter(list, typeName);
-
+#endif
+        
         // one per thread
         [ThreadStatic]
         private static StringBuilder perThreadStringBuilderCache;

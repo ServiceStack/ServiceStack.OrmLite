@@ -1,9 +1,4 @@
-﻿using System;
-using System.Data;
-using System.Text;
-using ServiceStack.Text;
-
-namespace ServiceStack.OrmLite.SqlServer
+﻿namespace ServiceStack.OrmLite.SqlServer
 {
     public class SqlServer2017OrmLiteDialectProvider : SqlServer2016OrmLiteDialectProvider
     {

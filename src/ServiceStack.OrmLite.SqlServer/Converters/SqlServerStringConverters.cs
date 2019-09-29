@@ -1,6 +1,10 @@
 ﻿using System;
 using System.Data;
+#if MSDATA
+using Microsoft.Data.SqlClient;
+#else
 using System.Data.SqlClient;
+#endif
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Converters;
 

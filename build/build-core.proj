@@ -103,6 +103,12 @@
              Targets="Build;Pack"
              Properties="Configuration=$(Configuration)" />
 
+    <!-- ServiceStack.OrmLite.SqlServer.Data.Core -->
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer.Data/ServiceStack.OrmLite.SqlServer.Data.Core.csproj" Targets="Restore" />
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer.Data/ServiceStack.OrmLite.SqlServer.Data.Core.csproj"
+             Targets="Build;Pack"
+             Properties="Configuration=$(Configuration)" />
+
     <!-- leave .sln in optimal state then NuGet restore .sln to build -->
     <CallTarget Targets="ClearNuGetRestoreCaches" />
 

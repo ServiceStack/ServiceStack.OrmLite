@@ -58,7 +58,6 @@ namespace ServiceStack.OrmLite
                 }
                 throw;
             }
-            return false;
         }
 
         internal static void CreateTables(this IDbCommand dbCmd, bool overwrite, params Type[] tableTypes)

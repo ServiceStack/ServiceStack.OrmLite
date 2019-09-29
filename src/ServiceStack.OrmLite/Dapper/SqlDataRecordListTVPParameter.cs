@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿#if SQLCLIENT
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 
@@ -41,3 +42,4 @@ namespace ServiceStack.OrmLite.Dapper
         }
     }
 }
+#endif

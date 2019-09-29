@@ -111,6 +111,11 @@
              Targets="Build;Pack"
              Properties="Configuration=$(Configuration)" />
 
+    <!-- ServiceStack.OrmLite.SqlServer.Data -->
+    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer.Data/ServiceStack.OrmLite.SqlServer.Data.csproj"
+             Targets="Build;Pack"
+             Properties="Configuration=$(Configuration)" />
+
     <!-- ServiceStack.OrmLite.SqlServer.Converters -->
     <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer.Converters/ServiceStack.OrmLite.SqlServer.Converters.csproj"
              Targets="Build;Pack"
