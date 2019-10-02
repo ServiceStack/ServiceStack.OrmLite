@@ -250,20 +250,23 @@ namespace ServiceStack.OrmLite.Oracle
                 : string.Format("{0} {1}", dateFormat, timeFormat);
         }
 
-        public override string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
+        public override bool IsFullSelectStatement(string sqlFilter)
         {
-            var sql = StringBuilderCache.Allocate();
             const string selectStatement = "SELECT ";
-            var modelDef = GetModel(tableType);
-            var isFullSelectStatement = false;
             if (!string.IsNullOrEmpty(sqlFilter))
             {
                 var cleanFilter = sqlFilter.Trim().Replace('\r', ' ').Replace('\n', ' ').ToUpperInvariant();
-                isFullSelectStatement = cleanFilter.Length > selectStatement.Length
-                    && cleanFilter.Substring(0, selectStatement.Length).Equals(selectStatement);
+                return cleanFilter.Length > selectStatement.Length && cleanFilter.Substring(0, selectStatement.Length).Equals(selectStatement);
             }
+            return false;
+        }
 
-            if (isFullSelectStatement)
+        public override string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
+        {
+            var sql = StringBuilderCache.Allocate();
+            var modelDef = GetModel(tableType);
+
+            if (IsFullSelectStatement(sqlFilter))
             {
                 if (Regex.Matches(sqlFilter.Trim().ToUpperInvariant(), @"(\b|\n)FROM(\b|\n)").Count < 1)
                     sqlFilter += " FROM DUAL";

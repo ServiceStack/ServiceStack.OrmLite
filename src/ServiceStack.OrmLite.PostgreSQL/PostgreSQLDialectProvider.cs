@@ -261,6 +261,16 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 : null;
         }
 
+        public override bool IsFullSelectStatement(string sql)
+        {
+            sql = sql?.TrimStart();
+            if (string.IsNullOrEmpty(sql)) 
+                return false;
+            
+            return sql.StartsWith("SELECT", StringComparison.OrdinalIgnoreCase) ||
+                   sql.StartsWith("WITH ", StringComparison.OrdinalIgnoreCase);
+        }
+
         protected override bool ShouldSkipInsert(FieldDefinition fieldDef) => 
             fieldDef.ShouldSkipInsert() || fieldDef.AutoId;
 

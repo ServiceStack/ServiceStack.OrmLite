@@ -483,16 +483,14 @@ namespace ServiceStack.OrmLite
 
             return "; " + SelectIdentitySql;
         }
+        
+        public virtual bool IsFullSelectStatement(string sql) => !string.IsNullOrEmpty(sql)
+            && sql.TrimStart().StartsWith("SELECT", StringComparison.OrdinalIgnoreCase);
 
         // Fmt
         public virtual string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
-            const string SelectStatement = "SELECT";
-            var isFullSelectStatement =
-                !string.IsNullOrEmpty(sqlFilter)
-                && sqlFilter.TrimStart().StartsWith(SelectStatement, StringComparison.OrdinalIgnoreCase);
-
-            if (isFullSelectStatement)
+            if (IsFullSelectStatement(sqlFilter))
                 return sqlFilter.SqlFmt(this, filterParams);
 
             var modelDef = tableType.GetModelDefinition();

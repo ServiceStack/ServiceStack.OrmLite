@@ -93,15 +93,10 @@ namespace ServiceStack.OrmLite.Firebird
 
         public override string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
         {
-            const string SelectStatement = "SELECT";
             var modelDef = GetModel(tableType);
             sqlFilter = (sqlFilter ?? "").TrimStart();
-            var isFullSelectStatement =
-                !string.IsNullOrEmpty(sqlFilter)
-                && sqlFilter.Length > SelectStatement.Length
-                && sqlFilter.StartsWithIgnoreCase(SelectStatement);
 
-            if (isFullSelectStatement)
+            if (IsFullSelectStatement(sqlFilter))
                 return sqlFilter.SqlFmt(filterParams);
 
             var sql = StringBuilderCache.Allocate()
