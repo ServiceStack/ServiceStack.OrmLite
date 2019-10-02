@@ -17,7 +17,7 @@
         <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
         <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
         <NoWarn>CS8021</NoWarn>
-        <NoBuild>true</NoBuild>
+<!--        <NoBuild>true</NoBuild>-->
         <!--<GeneratePackageOnBuild>true</GeneratePackageOnBuild>-->
     </PropertyGroup>
 
