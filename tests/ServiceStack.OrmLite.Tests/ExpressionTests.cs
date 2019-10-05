@@ -2,22 +2,23 @@
 using NUnit.Framework;
 using ServiceStack.OrmLite.Sqlite;
 using ServiceStack.OrmLite.Tests.Shared;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
     [TestFixture]
     public class ExpressionTests
     {
+        private SqliteOrmLiteDialectProvider _dialectProvider;
+
         [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
-            OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
+            _dialectProvider = new SqliteOrmLiteDialectProvider();
         }
 
-        public static SqlExpression<Person> expr()
+        public SqlExpression<Person> expr()
         {
-            return OrmLiteConfig.DialectProvider.SqlExpression<Person>();
+            return _dialectProvider.SqlExpression<Person>();
         }
 
         [Test]

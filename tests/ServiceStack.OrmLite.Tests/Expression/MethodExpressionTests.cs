@@ -7,8 +7,11 @@ using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
+    [TestFixtureOrmLite]
     public class MethodExpressionTests : ExpressionsTestBase
     {
+        public MethodExpressionTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_select_ints_using_array_contains()
         {

@@ -1,5 +1,6 @@
 using System;
 using System.Data;
+using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite
 {
@@ -34,13 +35,15 @@ namespace ServiceStack.OrmLite
 
     public abstract class OrmLiteConverter : IOrmLiteConverter
     {
+        public static ILog Log = LogManager.GetLogger(typeof(OrmLiteConverter));
+
         /// <summary>
         /// RDBMS Dialect this Converter is for. Injected at registration.
         /// </summary>
         public IOrmLiteDialectProvider DialectProvider { get; set; }
 
         /// <summary>
-        /// SQL Column Definiton used in CREATE Table. 
+        /// SQL Column Definition used in CREATE Table. 
         /// </summary>
         public abstract string ColumnDefinition { get; }
 

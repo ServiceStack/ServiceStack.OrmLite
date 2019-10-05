@@ -5,9 +5,11 @@ using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
 {
-	[TestFixture]
-	public class SimpleUseCase : OrmLiteTestBase
+	[TestFixtureOrmLite]
+	public class SimpleUseCase : OrmLiteProvidersTestBase
 	{
+		public SimpleUseCase(DialectContext context) : base(context) {}
+
 		public class User
 		{
 			public long Id { get; set; }
@@ -21,7 +23,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 		[Test]
 		public void Simple_CRUD_example()
 		{
-			using (IDbConnection db = OpenDbConnection())
+			using (var db = OpenDbConnection())
 			{
 				db.DropAndCreateTable<User>();
 

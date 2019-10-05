@@ -237,7 +237,9 @@ namespace ServiceStack.OrmLite.Dapper
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static void AddSqlDataRecordsTypeHandler(bool clone)
         {
+#if SQLCLIENT
             AddTypeHandlerImpl(typeof(IEnumerable<Microsoft.SqlServer.Server.SqlDataRecord>), new SqlDataRecordHandler(), clone);
+#endif
         }
 
         /// <summary>
@@ -1349,7 +1351,7 @@ namespace ServiceStack.OrmLite.Dapper
             MultiMap<TFirst, TSecond, TThird, TFourth, TFifth, TSixth, DontMap, TReturn>(cnn, sql, map, param, transaction, buffered, splitOn, commandTimeout, commandType);
 
         /// <summary>
-        /// Perform a multi-mapping query with 7 input types. 
+        /// Perform a multi-mapping query with 7 input types. If you need more types -> use Query with Type[] parameter.
         /// This returns a single type, combined from the raw types via <paramref name="map"/>.
         /// </summary>
         /// <typeparam name="TFirst">The first type in the recordset.</typeparam>
@@ -2323,7 +2325,7 @@ namespace ServiceStack.OrmLite.Dapper
                                 return sb.Append(')').__ToStringRecycle();
                             }
                         }
-                        throw new NotSupportedException(value.GetType().Name);
+                        throw new NotSupportedException($"The type '{value.GetType().Name}' is not supported for SQL literals.");
                 }
             }
         }
@@ -2416,7 +2418,7 @@ namespace ServiceStack.OrmLite.Dapper
             il.Emit(OpCodes.Ldarg_1); // stack is now [untyped-param]
             if (isStruct)
             {
-                il.DeclareLocal(type.MakePointerType());
+                il.DeclareLocal(type.MakeByRefType()); // note: ref-local
                 il.Emit(OpCodes.Unbox, type); // stack is now [typed-param]
             }
             else
@@ -2535,7 +2537,9 @@ namespace ServiceStack.OrmLite.Dapper
                 {
                     // need to be a little careful about adding; use a utility method
                     il.Emit(OpCodes.Ldstr, prop.Name); // stack is now [parameters] [parameters] [command] [name]
+#pragma warning disable 612, 618
                     il.EmitCall(OpCodes.Call, typeof(SqlMapper).GetMethod(nameof(SqlMapper.FindOrAddParameter)), null); // stack is [parameters] [parameter]
+#pragma warning restore 612, 618
                 }
                 else
                 {
@@ -2666,9 +2670,9 @@ namespace ServiceStack.OrmLite.Dapper
 
                 if (handler != null)
                 {
-#pragma warning disable 618
+#pragma warning disable 612, 618
                     il.Emit(OpCodes.Call, typeof(TypeHandlerCache<>).MakeGenericType(prop.PropertyType).GetMethod(nameof(TypeHandlerCache<int>.SetValue))); // stack is now [parameters] [[parameters]] [parameter]
-#pragma warning restore 618
+#pragma warning restore 612, 618
                 }
                 else
                 {
@@ -3273,9 +3277,9 @@ namespace ServiceStack.OrmLite.Dapper
                             {
                                 if (hasTypeHandler)
                                 {
-#pragma warning disable 618
+#pragma warning disable 612, 618
                                     il.EmitCall(OpCodes.Call, typeof(TypeHandlerCache<>).MakeGenericType(unboxType).GetMethod(nameof(TypeHandlerCache<int>.Parse)), null); // stack is now [target][target][typed-value]
-#pragma warning restore 618
+#pragma warning restore 612, 618
                                 }
                                 else
                                 {
@@ -3688,6 +3692,7 @@ namespace ServiceStack.OrmLite.Dapper
             table?.ExtendedProperties[DataTableTypeNameKey] as string;
 #endif
 
+#if SQLCLIENT        
         /// <summary>
         /// Used to pass a IEnumerable&lt;SqlDataRecord&gt; as a TableValuedParameter.
         /// </summary>
@@ -3695,7 +3700,8 @@ namespace ServiceStack.OrmLite.Dapper
         /// <param name="typeName">The sql parameter type name.</param>
         public static ICustomQueryParameter AsTableValuedParameter(this IEnumerable<Microsoft.SqlServer.Server.SqlDataRecord> list, string typeName = null) =>
             new SqlDataRecordListTVPParameter(list, typeName);
-
+#endif
+        
         // one per thread
         [ThreadStatic]
         private static StringBuilder perThreadStringBuilderCache;

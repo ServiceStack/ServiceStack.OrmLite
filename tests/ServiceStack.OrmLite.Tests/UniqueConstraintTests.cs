@@ -1,7 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -36,10 +35,10 @@ namespace ServiceStack.OrmLite.Tests
         public string Field6 { get; set; }
     }
 
-    public class UniqueConstraintTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class UniqueConstraintTests : OrmLiteProvidersTestBase
     {
-        //public UniqueConstraintTests() : base(Dialect.Sqlite) {}
-        //[OneTimeSetUp] public void OneTimeSetUp() => LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: true);
+        public UniqueConstraintTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Does_add_individual_Constraints()
@@ -94,7 +93,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<UniqueTest3>();
 
-                var createSql = db.GetDialectProvider().ToCreateTableStatement(typeof(UniqueTest3));
+                var createSql = DialectProvider.ToCreateTableStatement(typeof(UniqueTest3));
                 Assert.That(createSql.ToUpper(), Does.Contain("CONSTRAINT UC_CUSTOM UNIQUE"));
 
                 db.Insert(new UniqueTest3 { Field4 = "A", Field5 = "A", Field6 = "A" });
@@ -113,5 +112,23 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
+        [UniqueConstraint(nameof(Environment), nameof(Name))]
+        public class User
+        {
+            [AutoId]
+            public Guid Id { get; set; }
+            public Guid Environment { get; set; }
+            public string Name { get; set; }
+        }
+        
+        [Test]
+        public void Can_create_User_table_with_Unique_constraints()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropTable<User>();
+                db.CreateTableIfNotExists<User>();
+            }
+        }
     }
 }

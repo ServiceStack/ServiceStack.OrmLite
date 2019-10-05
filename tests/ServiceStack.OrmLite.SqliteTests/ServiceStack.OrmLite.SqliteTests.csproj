@@ -1,86 +1,22 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net45;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net46;netcoreapp2.1</TargetFrameworks>
     <DebugType>portable</DebugType>
     <AssemblyName>ServiceStack.OrmLite.SqliteTests</AssemblyName>
+    <AssemblyTitle>ServiceStack.OrmLite.Sqlite32Tests</AssemblyTitle>
     <OutputType>Library</OutputType>
     <PackageId>ServiceStack.OrmLite.SqliteTests</PackageId>
-    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
-    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
-    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
-    <GenerateAssemblyCompanyAttribute>false</GenerateAssemblyCompanyAttribute>
-    <GenerateAssemblyProductAttribute>false</GenerateAssemblyProductAttribute>
-    <GenerateAssemblyCopyrightAttribute>false</GenerateAssemblyCopyrightAttribute>
-    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
-    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <RuntimeIdentifiers>win;win-x86;ubuntu.16.04-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="ServiceStack" Version="$(Version)" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="15.8.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
     <PackageReference Include="NUnit" Version="3.10.1" />
-  </ItemGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <DefineConstants>$(DefineConstants);NET45</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net45' ">
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.109.1" />
-    <Reference Include="System.Configuration" />
-    <Reference Include="System.Threading" />
-    <Reference Include="System.Threading.Tasks" />
-    <Reference Include="System.Runtime.Serialization" />
-    <Reference Include="System.ComponentModel.DataAnnotations" />
-    <Reference Include="System.Web" />
-    <Reference Include="System.Web.Extensions" />
-    <Reference Include="Microsoft.CSharp" />
-
-    <Reference Include="..\..\lib\net45\ServiceStack.Interfaces.dll" />
-    <Reference Include="..\..\lib\net45\ServiceStack.Text.dll" />
-    <Reference Include="..\..\lib\net45\ServiceStack.Common.dll" />
-    <Reference Include="..\..\lib\net45\ServiceStack.Client.dll" />
-    <Reference Include="..\..\lib\net45\ServiceStack.dll" />
-  </ItemGroup>
-
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
-    <DefineConstants>$(DefineConstants);NETCORE_SUPPORT;NETCORE</DefineConstants>
-  </PropertyGroup>
-
-  <!-- Enable NunitLite build, becase NUnit is not supported on .NET Core SDK 1.0.2 
-   https://github.com/nunit/dotnet-test-nunit/issues/91 
-   To enable NUnitLite pass /p:NUNITLITE=1 into msbuild arguments
-   -->
-  <PropertyGroup Condition=" '$(NUNITLITE)' != '' ">
-    <OutputType>Exe</OutputType>
-    <DefineConstants>$(DefineConstants);NUNITLITE</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup Condition=" '$(NUNITLITE)' != '' ">
-    <PackageReference Include="NUnitLite" Version="3.6.1" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netcoreapp2.1' ">
-    <PackageReference Include="Microsoft.Data.Sqlite" Version="2.1.0" />
-    <PackageReference Include="Microsoft.Extensions.Primitives" Version="2.0.0" />
-    <PackageReference Include="System.Runtime" Version="4.*" />
-    <PackageReference Include="System.Runtime.Serialization.Xml" Version="4.*" />
-    <PackageReference Include="System.Reflection" Version="4.*" />
-    <PackageReference Include="System.Reflection.Primitives" Version="4.*" />
-    <PackageReference Include="System.Runtime.Serialization.Primitives" Version="4.*" />
-
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Interfaces.dll" />
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Text.dll" />
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Common.dll" />
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.Client.dll" />
-    <Reference Include="..\..\lib\netstandard2.0\ServiceStack.dll" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.111" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,8 +8,6 @@ namespace ServiceStack.OrmLite.Converters
 {
     public class DateTimeConverter : OrmLiteConverter
     {
-        protected static ILog Log = LogManager.GetLogger(typeof(DateTimeConverter));
-
         public override string ColumnDefinition => "DATETIME";
 
         public override DbType DbType => DbType.DateTime;
@@ -51,9 +49,8 @@ namespace ServiceStack.OrmLite.Converters
         }
 
         public override object FromDbValue(Type fieldType, object value)
-        {
-            var strValue = value as string;
-            if (strValue != null)
+        {                                                                                                                                                                                                                                                                                                 
+            if (value is string strValue)
             {
                 value = DateTimeSerializer.ParseShortestXsdDateTime(strValue);
             }

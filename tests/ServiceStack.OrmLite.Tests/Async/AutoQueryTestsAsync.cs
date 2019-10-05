@@ -2,13 +2,15 @@
 using System.Text;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    public class AutoQueryTestsAsync : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class AutoQueryTestsAsync : OrmLiteProvidersTestBase
     {
+        public AutoQueryTestsAsync(DialectContext context) : base(context) {}
+
         public static Rockstar[] SeedRockstars = new[] {
             new Rockstar { Id = 1, FirstName = "Jimi", LastName = "Hendrix", LivingStatus = LivingStatus.Dead, Age = 27, DateOfBirth = new DateTime(1942, 11, 27), DateDied = new DateTime(1970, 09, 18), },
             new Rockstar { Id = 2, FirstName = "Jim", LastName = "Morrison", Age = 27, LivingStatus = LivingStatus.Dead, DateOfBirth = new DateTime(1943, 12, 08), DateDied = new DateTime(1971, 07, 03),  },
@@ -56,7 +58,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                 Assert.That(results.Count, Is.EqualTo(3));
                 Assert.That(q.Params.Count, Is.EqualTo(2));
 
-                q = db.From<Rockstar>().Where("FirstName".SqlColumn() + " = {0}", "Kurt");
+                q = db.From<Rockstar>().Where("FirstName".SqlColumn(DialectProvider) + " = {0}", "Kurt");
                 results = await db.SelectAsync(q);
                 Assert.That(results.Count, Is.EqualTo(1));
                 Assert.That(q.Params.Count, Is.EqualTo(1));
@@ -73,7 +75,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                 await db.InsertAllAsync(SeedRockstars);
 
                 var q = db.From<Rockstar>()
-                    .Where("FirstName".SqlColumn() + " LIKE {0}", "Jim%");
+                    .Where("FirstName".SqlColumn(DialectProvider) + " LIKE {0}", "Jim%");
 
                 var results = await db.SelectAsync(q);
                 db.GetLastSql().Print();
@@ -91,7 +93,7 @@ namespace ServiceStack.OrmLite.Tests.Async
                 await db.InsertAllAsync(SeedRockstars);
 
                 var q = db.From<Rockstar>()
-                    .Where("FirstName".SqlColumn() + " IN ({0})", new SqlInValues(new[] { "Jimi", "Kurt", "Jim" }));
+                    .Where("FirstName".SqlColumn(DialectProvider) + " IN ({0})", new SqlInValues(new[] { "Jimi", "Kurt", "Jim" }));
 
                 var results = await db.SelectAsync(q);
                 db.GetLastSql().Print();
@@ -145,13 +147,13 @@ namespace ServiceStack.OrmLite.Tests.Async
                 var sb = new StringBuilder();
                 foreach (var result in results)
                 {
-                    if (Dialect != Dialect.PostgreSql)
+                    if (!Dialect.AnyPostgreSql.HasFlag(Dialect))
                     {
                         sb.AppendLine(result.FirstName + "," + result.LastName + "," + result.Name);
                     }
                     else
                     {
-                        sb.AppendLine(result.first_name + "," + result.last_name + "," + result.name);
+                        sb.AppendLine(result.first_name + "," + result.last_name + "," + result.Name);
                     }
                 }
 
@@ -167,13 +169,13 @@ namespace ServiceStack.OrmLite.Tests.Async
                 sb.Length = 0;
                 foreach (var result in results)
                 {
-                    if (Dialect != Dialect.PostgreSql)
+                    if (Dialect != Dialect.AnyPostgreSql)
                     {
                         sb.AppendLine(result.Name);
                     }
                     else
                     {
-                        sb.AppendLine(result.name);
+                        sb.AppendLine(result.Name);
                     }
                 }
 

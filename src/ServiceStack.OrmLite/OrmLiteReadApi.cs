@@ -356,6 +356,24 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Returns a list KeyValuePairs from the first 2 columns: Column 1 (Keys), Column 2 (Values) using an SqlExpression. E.g:
+        /// <para>db.KeyValuePairs&lt;int, string&gt;(db.From&lt;Person&gt;().Select(x => new { x.Id, x.LastName }).Where(x => x.Age < 50))</para>
+        /// </summary>
+        public static List<KeyValuePair<K, V>> KeyValuePairs<K, V>(this IDbConnection dbConn, ISqlExpression query)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.KeyValuePairs<K, V>(query));
+        }
+
+        /// <summary>
+        /// Returns a list of KeyValuePairs from the first 2 columns: Column 1 (Keys), Column 2 (Values) using sql. E.g:
+        /// <para>db.KeyValuePairs&lt;int, string&gt;("SELECT Id, LastName FROM Person WHERE Age &lt; @age", new { age = 50 })</para>
+        /// </summary>
+        public static List<KeyValuePair<K, V>> KeyValuePairs<K, V>(this IDbConnection dbConn, string sql, object anonType = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.KeyValuePairs<K, V>(sql, anonType));
+        }
+
+        /// <summary>
         /// Returns true if the Query returns any records that match the LINQ expression, E.g:
         /// <para>db.Exists&lt;Person&gt;(x =&gt; x.Age &lt; 50)</para>
         /// </summary>

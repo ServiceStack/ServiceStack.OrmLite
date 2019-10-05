@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
-using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
@@ -10,10 +9,11 @@ namespace ServiceStack.OrmLite.Tests
 {
     using ServiceStack.DataAnnotations;
 
-    [TestFixture]
-    public class OrmLiteCreateTableTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteCreateTableTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteCreateTableTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Does_table_Exists()
         {
@@ -22,13 +22,13 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropTable<ModelWithIdOnly>();
 
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw()),
+                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw(DialectProvider)),
                     Is.False);
 
                 db.CreateTable<ModelWithIdOnly>(true);
 
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw()),
+                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw(DialectProvider)),
                     Is.True);
             }
         }
@@ -158,7 +158,7 @@ namespace ServiceStack.OrmLite.Tests
                 var insertRowA = db.SingleById<AuditTableA>(idA);
                 Assert.That(insertRowA.CreatedDate, Is.EqualTo(insertDate));
 
-                var stringConverter = OrmLiteConfig.DialectProvider.GetStringConverter();
+                var stringConverter = DialectProvider.GetStringConverter();
                 var hold = stringConverter.UseUnicode;
                 stringConverter.UseUnicode = true;
 
@@ -181,13 +181,13 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_ModelWithIdAndName_table_with_specified_DefaultStringLength()
         {
-            var converter = OrmLiteConfig.DialectProvider.GetStringConverter();
+            var converter = DialectProvider.GetStringConverter();
             var hold = converter.StringLength;
             converter.StringLength = 255;
-            var createTableSql = OrmLiteConfig.DialectProvider.ToCreateTableStatement(typeof(ModelWithIdAndName));
+            var createTableSql = DialectProvider.ToCreateTableStatement(typeof(ModelWithIdAndName));
 
             Console.WriteLine("createTableSql: " + createTableSql);
-            if (Dialect != Dialect.PostgreSql)
+            if (Dialect != Dialect.AnyPostgreSql)
             {
                 Assert.That(createTableSql, Does.Contain("VARCHAR(255)").
                                             Or.Contain("VARCHAR2(255)"));
@@ -326,14 +326,8 @@ namespace ServiceStack.OrmLite.Tests
 
             public Object this[string attributeName]
             {
-                get
-                {
-                    return Attributes[attributeName];
-                }
-                set
-                {
-                    Attributes[attributeName] = value;
-                }
+                get => Attributes[attributeName];
+                set => Attributes[attributeName] = value;
             }
 
             Dictionary<string, object> Attributes { get; set; } 
@@ -473,8 +467,8 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<TableWithIgnoredFields>();
 
-                Assert.That(db.GetLastSql(), Does.Contain("DisplayName".SqlColumnRaw()));
-                Assert.That(db.GetLastSql(), Does.Not.Contain("IsIgnored".SqlColumnRaw()));
+                Assert.That(db.GetLastSql(), Does.Contain("DisplayName".SqlColumnRaw(DialectProvider)));
+                Assert.That(db.GetLastSql(), Does.Not.Contain("IsIgnored".SqlColumnRaw(DialectProvider)));
 
                 db.Insert(new TableWithIgnoredFields
                 {

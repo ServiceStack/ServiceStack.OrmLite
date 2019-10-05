@@ -1,3 +1,4 @@
 bin/
 obj/
 _ReSharper.ServiceStack.OrmLite/
+packages/

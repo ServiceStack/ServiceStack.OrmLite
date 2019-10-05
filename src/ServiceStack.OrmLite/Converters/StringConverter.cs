@@ -17,6 +17,8 @@ namespace ServiceStack.OrmLite.Converters
 
         public int StringLength { get; set; }
 
+        public virtual int MaxVarCharLength => UseUnicode ? 8000 : 4000;
+
         protected string maxColumnDefinition;
         public virtual string MaxColumnDefinition
         {
@@ -34,6 +36,18 @@ namespace ServiceStack.OrmLite.Converters
             return UseUnicode
                 ? $"NVARCHAR({stringLength.GetValueOrDefault(StringLength)})"
                 : $"VARCHAR({stringLength.GetValueOrDefault(StringLength)})";
+        }
+
+        public override void InitDbParam(IDbDataParameter p, Type fieldType)
+        {
+            base.InitDbParam(p, fieldType);
+
+            if (p.Size == default && fieldType == typeof(string))
+            {
+                p.Size = UseUnicode 
+                    ? Math.Min(StringLength, 4000)
+                    : StringLength;
+            }
         }
 
         public override object FromDbValue(Type fieldType, object value)
@@ -71,6 +85,16 @@ namespace ServiceStack.OrmLite.Converters
                 return (char) (int) this.ConvertNumber(typeof(int), value);
 
             return (char)value;
+        }
+
+        public override object ToDbValue(Type fieldType, object value)
+        {
+            if (value != null && value.GetType().IsEnum)
+                return EnumConverter.ToCharValue(value);
+            if (value is int i)
+                return (char)i;
+            
+            return base.ToDbValue(fieldType, value);
         }
     }
 

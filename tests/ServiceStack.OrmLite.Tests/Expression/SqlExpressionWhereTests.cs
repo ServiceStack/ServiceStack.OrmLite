@@ -5,8 +5,11 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    public class SqlExpressionWhereTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SqlExpressionWhereTests : OrmLiteProvidersTestBase
     {
+        public SqlExpressionWhereTests(DialectContext context) : base(context) {}
+
         private static void Init(IDbConnection db)
         {
             db.DropAndCreateTable<Table1>();

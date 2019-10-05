@@ -9,9 +9,9 @@ namespace ServiceStack.OrmLite.Tests
         private readonly INamingStrategy _previous;
         private bool _disposed;
 
-        public TemporaryNamingStrategy(INamingStrategy temporary)
+        public TemporaryNamingStrategy(IOrmLiteDialectProvider dialectProvider, INamingStrategy temporary)
         {
-            _dialectProvider = OrmLiteConfig.DialectProvider;
+            _dialectProvider = dialectProvider;
             _previous = _dialectProvider.NamingStrategy;
             _dialectProvider.NamingStrategy = temporary;
         }

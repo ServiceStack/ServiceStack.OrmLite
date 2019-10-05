@@ -32,15 +32,15 @@ namespace ServiceStack.OrmLite.Tests
 
             if (!String.IsNullOrEmpty(sqlServerBuildDb))
             {
-                Config.SqlServerBuildDb = sqlServerBuildDb;
-                Config.DefaultConnection = Config.SqlServerBuildDb;
+                TestConfig.SqlServerBuildDb = sqlServerBuildDb;
+                TestConfig.DefaultConnection = TestConfig.SqlServerBuildDb;
             }
 
             var postgreSqlDb = Environment.GetEnvironmentVariable("POSTGRESQL_DB");
 
             if (!String.IsNullOrEmpty(postgreSqlDb))
             {
-                Config.PostgreSqlDb = postgreSqlDb;
+                TestConfig.PostgreSqlDb = postgreSqlDb;
             }
 
             var dialect = Environment.GetEnvironmentVariable("ORMLITE_DIALECT");
@@ -50,11 +50,11 @@ namespace ServiceStack.OrmLite.Tests
                 Dialect defaultDialect;
 
                 if (Enum.TryParse(dialect, out defaultDialect))
-                    Config.DefaultDialect = defaultDialect;
+                    TestConfig.DefaultDialect = defaultDialect;
 
             }
 
-            Console.WriteLine($"Dialect: {Config.DefaultDialect}");
+            Console.WriteLine($"Dialect: {TestConfig.DefaultDialect}");
 
     	    CultureInfo.DefaultThreadCurrentCulture = new CultureInfo("en-US");
             JsConfig.InitStatics();

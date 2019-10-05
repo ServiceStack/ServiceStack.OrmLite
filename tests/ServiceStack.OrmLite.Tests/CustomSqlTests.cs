@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests.Expression;
-using ServiceStack.OrmLite.Tests.Issues;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -70,10 +70,11 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
-    [TestFixture]
-    public class CustomSqlTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class CustomSqlTests : OrmLiteProvidersTestBase
     {
+        public CustomSqlTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_create_field_with_custom_sql()
         {
@@ -112,17 +113,15 @@ namespace ServiceStack.OrmLite.Tests
                 }
                 catch (Exception)
                 {
-                    Assert.That(!db.TableExists("ModelWithPreCreateSql".SqlColumn()));
+                    Assert.That(!db.TableExists("ModelWithPreCreateSql".SqlColumn(DialectProvider)));
                 }
             }
         }
 
         [Test]
+        [IgnoreDialect(Dialect.AnyOracle | Dialect.AnyPostgreSql, "multiple SQL statements need to be wrapped in an anonymous block")]
         public void Does_execute_CustomSql_after_table_created()
         {
-            SuppressIfOracle("For Oracle need wrap multiple SQL statements in an anonymous block");
-            if (Dialect == Dialect.PostgreSql || Dialect == Dialect.Oracle || Dialect == Dialect.Firebird) return;
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<ModelWithSeedDataSql>();
@@ -134,15 +133,13 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Dialect.AnyOracle | Dialect.AnyPostgreSql, "multiple SQL statements need to be wrapped in an anonymous block")]
         public void Does_execute_CustomSql_after_table_created_using_dynamic_attribute()
         {
-            SuppressIfOracle("For Oracle need wrap multiple SQL statements in an anonymous block");
-            if (Dialect == Dialect.Oracle || Dialect == Dialect.Firebird) return;
-
             typeof(DynamicAttributeSeedData)
                 .AddAttributes(new PostCreateTableAttribute(
-                    "INSERT INTO {0} (Name) VALUES ('Foo');".Fmt("DynamicAttributeSeedData".SqlTable()) +
-                    "INSERT INTO {0} (Name) VALUES ('Bar');".Fmt("DynamicAttributeSeedData".SqlTable())));
+                    "INSERT INTO {0} (Name) VALUES ('Foo');".Fmt("DynamicAttributeSeedData".SqlTable(DialectProvider)) +
+                    "INSERT INTO {0} (Name) VALUES ('Bar');".Fmt("DynamicAttributeSeedData".SqlTable(DialectProvider))));
 
             using (var db = OpenDbConnection())
             {
@@ -167,7 +164,7 @@ namespace ServiceStack.OrmLite.Tests
                 }
                 catch (Exception)
                 {
-                    Assert.That(db.TableExists("ModelWithPreDropSql".SqlTableRaw()));
+                    Assert.That(db.TableExists("ModelWithPreDropSql".SqlTableRaw(DialectProvider)));
                 }
             }
         }
@@ -240,5 +237,32 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
         
+        [Test]
+        public void Does_select_aliases_on_constant_expressions()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+                db.Insert(new LetterFrequency { Letter = "A" });
+
+                var q = db.From<LetterFrequency>()
+                    .Select(x => new
+                    {
+                        param = 1,
+                        descr = x.Letter,
+                        str = "hi",
+                        date = DateTime.UtcNow
+                    });
+
+                var results = db.Select<Dictionary<string,object>>(q)[0];
+                
+                Assert.That(results["param"], Is.EqualTo(1));
+                Assert.That(results["descr"], Is.EqualTo("A"));
+                Assert.That(results["str"], Is.EqualTo("hi"));
+                Assert.That(results["date"], Is.Not.Empty);
+            }
+        }
+
+
     }
 }

@@ -20,15 +20,16 @@ namespace ServiceStack.OrmLite
             return (T)ReflectionExtensions.CreateInstance<T>();
         }
 
-        public static Task<T> ConvertToAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
+        public static async Task<T> ConvertToAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
         {
-            return dialectProvider.ReaderRead(reader, () =>
+            using (reader)
+            return await dialectProvider.ReaderRead(reader, () =>
             {
                 if (typeof(T) == typeof(List<object>))
-                    return (T)(object)reader.ConvertToListObjects();
+                    return (T) (object) reader.ConvertToListObjects();
 
                 if (typeof(T) == typeof(Dictionary<string, object>))
-                    return (T)(object)reader.ConvertToDictionaryObjects();
+                    return (T) (object) reader.ConvertToDictionaryObjects();
 
                 var values = new object[reader.FieldCount];
 
@@ -39,13 +40,10 @@ namespace ServiceStack.OrmLite
                 var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
                 row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                 return row;
-            }, token).Then(t => { 
-                reader.Dispose();
-                return t;
-            });
+            }, token);
         }
 
-        public static Task<List<T>> ConvertToListAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields, CancellationToken token)
+        public static async Task<List<T>> ConvertToListAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields, CancellationToken token)
         {
             var values = new object[reader.FieldCount];
             var isObjectList = typeof(T) == typeof(List<object>);
@@ -65,7 +63,8 @@ namespace ServiceStack.OrmLite
 #else
             var activator = isTuple ? genericTupleMi.GetConstructor(genericArgs).GetActivator() : null;
 #endif
-            return dialectProvider.ReaderEach(reader, () =>
+            using (reader)
+            return await dialectProvider.ReaderEach(reader, () =>
             {
                 if (isObjectList)
                 {
@@ -111,47 +110,43 @@ namespace ServiceStack.OrmLite
                     row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                     return row;
                 }
-            }, token).Then(t => {
-                reader.Dispose();
-                return t;
-            });
+            }, token);
         }
 
-        public static Task<object> ConvertToAsync(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, Type type, CancellationToken token)
+        public static async Task<object> ConvertToAsync(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, Type type, CancellationToken token)
         {
             var modelDef = type.GetModelDefinition();
             var indexCache = reader.GetIndexFieldsCache(modelDef, dialectProvider);
             var values = new object[reader.FieldCount];
-            return dialectProvider.ReaderRead(reader, () =>
+            
+            using (reader)
+            return await dialectProvider.ReaderRead(reader, () =>
             {
                 var row = type.CreateInstance();
                 row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                 return row;
-            }, token).Then<object,object>(t =>
-            {
-                reader.Dispose();
-                return t;
-            });
+            }, token);
         }
 
-        public static Task<IList> ConvertToListAsync(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, Type type, CancellationToken token)
+        public static async Task<IList> ConvertToListAsync(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, Type type, CancellationToken token)
         {
             var modelDef = type.GetModelDefinition();
             var indexCache = reader.GetIndexFieldsCache(modelDef, dialectProvider);
             var values = new object[reader.FieldCount];
-            return dialectProvider.ReaderEach(reader, () =>
+
+            using (reader)
             {
-                var row = type.CreateInstance();
-                row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
-                return row;
-            }, token)
-            .Then(x =>
-            {
-                reader.Dispose();
+                var ret = await dialectProvider.ReaderEach(reader, () =>
+                {
+                    var row = type.CreateInstance();
+                    row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
+                    return row;
+                }, token);
+
                 var to = (IList)typeof(List<>).GetCachedGenericType(type).CreateInstance();
-                x.Each(o => to.Add(o));
+                ret.Each(o => to.Add(o));
                 return to;
-            });
+            }
         }
     }
 }

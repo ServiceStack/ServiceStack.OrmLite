@@ -1,37 +1,41 @@
 ﻿using System;
 using System.Data;
-using System.IO;
 using System.Linq;
 using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    public class ExpressionsTestBase : OrmLiteTestBase
+    [NonParallelizable]
+    public abstract class ExpressionsTestBase : OrmLiteProvidersTestBase
     {
+        public ExpressionsTestBase(DialectContext context) : base(context) {}
+
         [SetUp]
         public void Setup()
         {
             using (var db = OpenDbConnection())
                 db.CreateTable<TestType>(true);
+
+            db = OpenDbConnection();
         }
 
         //Avoid painful refactor to change all tests to use a using pattern
         private IDbConnection db;
 
-        public override IDbConnection OpenDbConnection()
-        {
-            try
-            {
-                if (db != null && db.State != ConnectionState.Open)
-                    db = null;
-            }
-            catch (ObjectDisposedException) //PostgreSQL throws when trying to inspect db.State on a disposed connection. WHY???
-            {
-                db = null;
-            }
-
-            return db ?? (db = base.OpenDbConnection());
-        }
+//        public override IDbConnection OpenDbConnection()
+//        {
+//            try
+//            {
+//                if (db != null && db.State != ConnectionState.Open)
+//                    db = null;
+//            }
+//            catch (ObjectDisposedException) //PostgreSQL throws when trying to inspect db.State on a disposed connection. WHY???
+//            {
+//                db = null;
+//            }
+//
+//            return db ?? (db = base.OpenDbConnection());
+//        }
 
         [TearDown]
         public void TearDown()

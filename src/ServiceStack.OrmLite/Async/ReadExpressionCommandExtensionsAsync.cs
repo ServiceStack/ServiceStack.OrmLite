@@ -154,9 +154,10 @@ namespace ServiceStack.OrmLite
             return GetCountAsync(dbCmd, sql, q.Params, token);
         }
 
-        internal static Task<long> GetCountAsync(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
+        internal static async Task<long> GetCountAsync(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
         {
-            return dbCmd.ColumnAsync<long>(sql, sqlParams, token).Then(x => x.Sum());
+            var ret = await dbCmd.ColumnAsync<long>(sql, sqlParams, token);
+            return ret.Sum();
         }
 
         internal static Task<long> RowCountAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression, CancellationToken token)
@@ -203,6 +204,19 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExprConvertToListAsync<T>(sql, q.Params, q.OnlyFields, token);
         }
 
+        
+        internal static async Task<DataTable> GetSchemaTableAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
+        {
+            using (var reader = await dbCmd.ExecReaderAsync(sql, token))
+            {
+                return reader.GetSchemaTable();
+            }
+        }
+
+        public static Task<ColumnSchema[]> GetTableColumnsAsync(this IDbCommand dbCmd, Type table, CancellationToken token) => 
+            dbCmd.GetTableColumnsAsync($"SELECT * FROM {dbCmd.GetDialectProvider().GetQuotedTableName(table.GetModelDefinition())}", token);
+
+        public static async Task<ColumnSchema[]> GetTableColumnsAsync(this IDbCommand dbCmd, string sql, CancellationToken token) => (await dbCmd.GetSchemaTableAsync(sql, token)).ToColumnSchemas();
     }
 }
 #endif

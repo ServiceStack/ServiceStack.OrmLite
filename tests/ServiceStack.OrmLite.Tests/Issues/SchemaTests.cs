@@ -6,12 +6,22 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    [TestFixture]
-    public class SchemaTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SchemaTests : OrmLiteProvidersTestBase
     {
-        public SchemaTests()
+        public SchemaTests(DialectContext context) : base(context) {}
+
+        [OneTimeSetUp]
+        public void OneTimeSetup()
         {
-            Dialect = Dialect.Sqlite; //Other DB Providers needs creating out-of-band 
+            if (DialectFeatures.SchemaSupport)
+            {
+                using (var db = OpenDbConnection())
+                {
+                    db.CreateSchema<Editable>();
+                    db.CreateSchema<SchemaTable1>();
+                }
+            }
         }
 
         [Schema("Schema")]
@@ -138,7 +148,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     }
 
     [Alias("Editables")]
-    [Schema("MicroSite")]
+    [Schema("Schema")]
     public partial class Editable : IHasId<int>
     {
         public string Content { get; set; }
@@ -163,7 +173,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     }
 
     [Alias("EditableRevisions")]
-    [Schema("MicroSite")]
+    [Schema("Schema")]
     public partial class EditableRevision : IHasId<int>
     {
         public string Content { get; set; }
@@ -188,7 +198,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     }
 
     [Alias("LogEntries")]
-    [Schema("MicroSite")]
+    [Schema("Schema")]
     public class LogEntry : IHasId<int>
     {
         [Required]
@@ -221,7 +231,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     }
 
     [Alias("ReportPages")]
-    [Schema("MicroSite")]
+    [Schema("Schema")]
     public partial class Page : IHasId<int>
     {
         [Required]
@@ -257,7 +267,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     }
 
     [Alias("Reports")]
-    [Schema("MicroSite")]
+    [Schema("Schema")]
     public partial class Report : IHasId<int>
     {
         [Required]
@@ -277,7 +287,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
     }
 
     [Alias("ReportSections")]
-    [Schema("MicroSite")]
+    [Schema("Schema")]
     public class Section : IHasId<int>
     {
         [Alias("ReportSectionID")]

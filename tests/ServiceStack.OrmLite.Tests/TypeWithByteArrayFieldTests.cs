@@ -5,8 +5,11 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class TypeWithByteArrayFieldTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class TypeWithByteArrayFieldTests : OrmLiteProvidersTestBase
     {
+        public TypeWithByteArrayFieldTests(DialectContext context) : base(context) {}
+
         [Test]
         public void CanInsertAndSelectByteArray()
         {
@@ -77,7 +80,7 @@ AS
 begin
 INSERT INTO [Attachment]([FileName], [Type], [Data], [Description])
 VALUES ({0}filename, {0}filetype, {0}filecontent, {0}filename) 
-end".Fmt(OrmLiteConfig.DialectProvider.ParamString));
+end".Fmt(DialectProvider.ParamString));
                 var bytes = "https://www.google.com/images/srpr/logo11w.png".GetBytesFromUrl();
 
                 db.ExecuteNonQuery("EXEC SP_upload_file @filename, @filetype, @filecontent", 
@@ -118,7 +121,7 @@ AS
 begin
 INSERT INTO [Attachment]([FileName], [Type], [Data], [Description])
 VALUES ({0}filename, {0}filetype, {0}filecontent, {0}filename) 
-end".Fmt(OrmLiteConfig.DialectProvider.ParamString));
+end".Fmt(DialectProvider.ParamString));
                 var bytes = "https://www.google.com/images/srpr/logo11w.png".GetBytesFromUrl();
 
                 using (var dbCmd = db.CreateCommand())

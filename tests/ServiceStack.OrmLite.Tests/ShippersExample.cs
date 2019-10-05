@@ -1,16 +1,15 @@
-using System;
-using System.Collections.Generic;
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-	[TestFixture]
-	public class ShippersExample : OrmLiteTestBase
+	[TestFixtureOrmLite]
+	public class ShippersExample : OrmLiteProvidersTestBase
 	{
+		public ShippersExample(DialectContext context) : base(context) {}
+
 		[Alias("Shippers")]
 		public class Shipper
 			: IHasId<int>
@@ -89,7 +88,7 @@ namespace ServiceStack.OrmLite.Tests
 				Assert.That(db.Select<ShipperType>(), Has.Count.EqualTo(2));
 
 
-				//Performing standard Insert's and Selects
+				// Performing standard Insert's and Selects
 				db.Insert(new Shipper { CompanyName = "Trains R Us", Phone = "555-TRAINS", ShipperTypeId = trainsType.Id });
 				db.Insert(new Shipper { CompanyName = "Planes R Us", Phone = "555-PLANES", ShipperTypeId = planesType.Id });
 				db.Insert(new Shipper { CompanyName = "We do everything!", Phone = "555-UNICORNS", ShipperTypeId = planesType.Id });
@@ -97,23 +96,23 @@ namespace ServiceStack.OrmLite.Tests
                 var trainsAreUs = db.Single<Shipper>(q => q.ShipperTypeId == trainsType.Id);
                 Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
 
-                trainsAreUs = db.Single<Shipper>("ShipperTypeId".SqlColumn() + " = @Id".PreNormalizeSql(db), new { trainsType.Id });
+                trainsAreUs = db.Single<Shipper>("ShipperTypeId".SqlColumn(DialectProvider) + " = @Id".PreNormalizeSql(db), new { trainsType.Id });
 				Assert.That(trainsAreUs.CompanyName, Is.EqualTo("Trains R Us"));
 
 
                 Assert.That(db.Select<Shipper>(q => q.CompanyName == "Trains R Us" || q.Phone == "555-UNICORNS"), Has.Count.EqualTo(2));
-                Assert.That(db.Select<Shipper>("CompanyName".SqlColumn() + " = @company OR Phone = @phone".PreNormalizeSql(db), 
+                Assert.That(db.Select<Shipper>("CompanyName".SqlColumn(DialectProvider) + " = @company OR Phone = @phone".PreNormalizeSql(db), 
                     new { company = "Trains R Us", phone = "555-UNICORNS" }), Has.Count.EqualTo(2));
 
                 Assert.That(db.Select<Shipper>(q => q.ShipperTypeId == planesType.Id), Has.Count.EqualTo(2));
-                Assert.That(db.Select<Shipper>("ShipperTypeId".SqlColumn() + " = @Id".PreNormalizeSql(db), new { planesType.Id }), Has.Count.EqualTo(2));
+                Assert.That(db.Select<Shipper>("ShipperTypeId".SqlColumn(DialectProvider) + " = @Id".PreNormalizeSql(db), new { planesType.Id }), Has.Count.EqualTo(2));
 
 				//Lets update a record
 				trainsAreUs.Phone = "666-TRAINS";
 				db.Update(trainsAreUs);
                 Assert.That(db.SingleById<Shipper>(trainsAreUs.Id).Phone, Is.EqualTo("666-TRAINS"));
 				
-				//Then make it dissappear
+				//Then make it disappear
 				db.Delete(trainsAreUs);
                 Assert.That(db.SingleById<Shipper>(trainsAreUs.Id), Is.Null);
 
@@ -126,12 +125,12 @@ namespace ServiceStack.OrmLite.Tests
                 var partialColumns = db.Select<SubsetOfShipper>(db.From<Shipper>().Where(q => q.ShipperTypeId == planesType.Id));
                 Assert.That(partialColumns, Has.Count.EqualTo(2));
 
-                partialColumns = db.Select<SubsetOfShipper>(typeof(Shipper), "ShipperTypeId".SqlColumn() + " = @Id".PreNormalizeSql(db), new { planesType.Id });
+                partialColumns = db.Select<SubsetOfShipper>(typeof(Shipper), "ShipperTypeId".SqlColumn(DialectProvider) + " = @Id".PreNormalizeSql(db), new { planesType.Id });
 				Assert.That(partialColumns, Has.Count.EqualTo(2));
 
 				//Select into another POCO class that matches sql
                 var rows = db.SqlList<ShipperTypeCount>(
-                    "SELECT {0}, COUNT(*) AS Total FROM Shippers GROUP BY {0} ORDER BY Total".Fmt("ShipperTypeId".SqlColumn()));
+                    "SELECT {0}, COUNT(*) AS Total FROM Shippers GROUP BY {0} ORDER BY Total".Fmt("ShipperTypeId".SqlColumn(DialectProvider)));
 
                 Assert.That(rows, Has.Count.EqualTo(2));
                 Assert.That(rows[0].ShipperTypeId, Is.EqualTo(trainsType.Id));

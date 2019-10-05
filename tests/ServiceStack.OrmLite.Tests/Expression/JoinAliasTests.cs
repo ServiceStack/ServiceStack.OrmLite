@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    public class Task
+    public class Tasked
     {
         [AutoIncrement]
         public long Id { get; set; }
@@ -14,28 +15,50 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
         public DateTime Created { get; set; }
     }
-
-    [TestFixture]
-    public class JoinAliasTests : OrmLiteTestBase
+    
+    public class AliasedTable
     {
+        [AutoIncrement]
+        [PrimaryKey]
+        [Alias("MAINID")]
+        public int Id { get; set; }
+
+        [Alias("DESCRIPTION")]
+        public string Description { get; set; }
+    }
+
+    public class AliasedTableAlt
+    {
+        [AutoIncrement]
+        [PrimaryKey]
+        [Alias("ALTID")]
+        public int Id { get; set; }
+
+        [Alias("DESCRIPTION")]
+        public string Description { get; set; }
+    }
+
+    [TestFixtureOrmLite]
+    public class JoinAliasTests : OrmLiteProvidersTestBase
+    {
+        public JoinAliasTests(DialectContext context) : base(context) {}
+
         [Test]
+        [IgnoreDialect(Tests.Dialect.AnyPostgreSql | Tests.Dialect.AnyMySql, "Invalid Custom SQL for provider naming convention")]
         public void Can_use_JoinAlias_in_condition()
         {
-            if (Dialect == Dialect.PostgreSql || Dialect == Dialect.MySql)
-                return; //Invalid Custom SQL for pgsql naming convention 
-
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Task>();
+                db.DropAndCreateTable<Tasked>();
 
-                var parentId = db.Insert(new Task { Created = new DateTime(2000, 01, 01) }, selectIdentity: true);
-                var childId = db.Insert(new Task { ParentId = parentId, Created = new DateTime(2001, 01, 01) }, selectIdentity:true);
+                var parentId = db.Insert(new Tasked { Created = new DateTime(2000, 01, 01) }, selectIdentity: true);
+                var childId = db.Insert(new Tasked { ParentId = parentId, Created = new DateTime(2001, 01, 01) }, selectIdentity:true);
 
                 var fromDateTime = new DateTime(2000, 02, 02);
 
-                var q = db.From<Task>()
-                    .CustomJoin("LEFT JOIN Task history ON (Task.Id = history.ParentId)")
-                    .Where("history.\"Created\" >= {0} OR Task.\"Created\" >= {0}", fromDateTime);
+                var q = db.From<Tasked>()
+                    .CustomJoin("LEFT JOIN Tasked history ON (Tasked.Id = history.ParentId)")
+                    .Where("history.\"Created\" >= {0} OR Tasked.\"Created\" >= {0}", fromDateTime);
 
                 //doesn't work with Self Joins
                 //var q = db.From<Task>()
@@ -56,19 +79,19 @@ namespace ServiceStack.OrmLite.Tests.Expression
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Task>();
+                db.DropAndCreateTable<Tasked>();
 
-                var parentId = db.Insert(new Task { Created = new DateTime(2000, 01, 01) }, selectIdentity: true);
-                var childId = db.Insert(new Task { ParentId = parentId, Created = new DateTime(2001, 01, 01) }, selectIdentity: true);
+                var parentId = db.Insert(new Tasked { Created = new DateTime(2000, 01, 01) }, selectIdentity: true);
+                var childId = db.Insert(new Tasked { ParentId = parentId, Created = new DateTime(2001, 01, 01) }, selectIdentity: true);
 
-                var q = db.From<Task>();
+                var q = db.From<Tasked>();
 
                 var leftJoin = 
-                    $"LEFT JOIN Task history ON ({q.Column<Task>(t => t.Id, prefixTable:true)} = history.{q.Column<Task>(t => t.ParentId)})";
+                    $"LEFT JOIN Tasked history ON ({q.Column<Tasked>(t => t.Id, prefixTable:true)} = history.{q.Column<Tasked>(t => t.ParentId)})";
                 Assert.That(leftJoin, Is.EqualTo(
-                    $"LEFT JOIN Task history ON ({q.Table<Task>()}.{q.Column<Task>(t => t.Id)} = history.{q.Column<Task>(t => t.ParentId)})"));
+                    $"LEFT JOIN Tasked history ON ({q.Table<Tasked>()}.{q.Column<Tasked>(t => t.Id)} = history.{q.Column<Tasked>(t => t.ParentId)})"));
                 Assert.That(leftJoin, Is.EqualTo(
-                    $"LEFT JOIN Task history ON ({q.Table<Task>()}.{q.Column<Task>(nameof(Task.Id))} = history.{q.Column<Task>(nameof(Task.ParentId))})"));
+                    $"LEFT JOIN Tasked history ON ({q.Table<Tasked>()}.{q.Column<Tasked>(nameof(Tasked.Id))} = history.{q.Column<Tasked>(nameof(Tasked.ParentId))})"));
 
                 q.CustomJoin(leftJoin);
 
@@ -77,6 +100,44 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.GetLastSql().Print();
 
                 Assert.That(results.Count, Is.EqualTo(2));
+            }
+        }
+
+        [Test]
+        public async Task Can_get_RowCount_of_duplicate_aliases_in_AliasedTable()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<AliasedTable>();
+                db.DropAndCreateTable<AliasedTableAlt>();
+
+                var q = db.From<AliasedTable>()
+                    .Join<AliasedTable, AliasedTableAlt>((mainTable, altTable) => mainTable.Id == altTable.Id)
+                    .Where(x => x.Id == 1);
+
+                var result = await db.RowCountAsync(q);
+            }
+        }
+
+        [Test]
+        public void Can_use_JoinAlias_on_source_table()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Tasked>();
+
+                var parentId = db.Insert(new Tasked { Created = new DateTime(2000, 01, 01) }, selectIdentity: true);
+                var childId = db.Insert(new Tasked { ParentId = parentId, Created = new DateTime(2001, 01, 01) }, selectIdentity: true);
+
+                var q = db.From<Tasked>(db.TableAlias("s"))
+                    .Join<Tasked>((t1, t2) => t1.ParentId == t2.Id, db.TableAlias("t"));
+
+                var rows = db.Select(q);
+                rows.PrintDump();
+                
+                Assert.That(rows.Count, Is.EqualTo(1));
+                Assert.That(rows[0].Id, Is.EqualTo(2));
+                Assert.That(rows[0].ParentId, Is.EqualTo(1));
             }
         }
     }

@@ -11,14 +11,15 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class MockAllApiTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class MockAllApiTests : OrmLiteProvidersTestBase
     {
+        public MockAllApiTests(DialectContext context) : base(context) {}
+
         private IDbConnection db;
 
         [OneTimeSetUp]
-        public new void TestFixtureSetUp()
+        public void TestFixtureSetUp()
         {
             db = base.OpenDbConnection();
 
@@ -288,7 +289,7 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.SqlScalar<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new { age = 50 }), Is.EqualTo(1000));
                 Assert.That(db.SqlScalar<int>("SELECT COUNT(*) FROM Person WHERE Age < @age", new Dictionary<string, object> { { "age", 50 } }), Is.EqualTo(1000));
 
-                Assert.That(db.ExecuteNonQuery("UPDATE Person SET LastName={0} WHERE Id={1}".SqlFmt("WaterHouse", 7)), Is.EqualTo(10));
+                Assert.That(db.ExecuteNonQuery("UPDATE Person SET LastName={0} WHERE Id={1}".SqlFmt(DialectProvider, "WaterHouse", 7)), Is.EqualTo(10));
                 Assert.That(db.ExecuteNonQuery("UPDATE Person SET LastName=@name WHERE Id=@id", new { name = "WaterHouse", id = 7 }), Is.EqualTo(10));
             }
         }
@@ -369,6 +370,7 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "This seems wrong here as the save actually goes through to the database in Oracle to get the next number from the sequence")]
         public void Can_hijack_References_Apis()
         {
             var customer = new Customer
@@ -403,8 +405,6 @@ namespace ServiceStack.OrmLite.Tests
 
                 i += 2; db.Save(customer);
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));
-
-                SuppressIfOracle("This seems wrong here as the save actually goes through to the database in Oracle to get the next number from the sequence");
 
                 i += 1; db.SaveReferences(customer, customer.PrimaryAddress);
                 Assert.That(sqlStatements.Count, Is.EqualTo(i));

@@ -1,46 +1,51 @@
 using System;
+using System.Collections;
 using System.Data;
 using System.Data.Common;
 using System.IO;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Logging;
-#if !NETCORE
-using ServiceStack.OrmLite.Oracle;
-#endif
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class Config
-    {
-        public static Dialect DefaultDialect = Dialect.Sqlite;
-        public const bool EnableDebugLogging = false;
-
-        public static string SqliteMemoryDb = ":memory:";
-        public static string SqliteFileDir = "~/App_Data/".MapAbsolutePath();
-        public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
-        public static string SqlServerDb = "~/App_Data/Database1.mdf".MapAbsolutePath();
-        public static string SqlServerBuildDb = "Server=localhost;Database=test;User Id=test;Password=test;MultipleActiveResultSets=True;";
-        //public static string SqlServerBuildDb = "Data Source=localhost;Initial Catalog=TestDb;Integrated Security=SSPI;Connect Timeout=120;MultipleActiveResultSets=True";
-
-        public static string OracleDb = "Data Source=localhost:1521/ormlite;User ID=test;Password=test";
-        public static string MySqlDb = "Server=localhost;Database=test;UID=root;Password=test;SslMode=none";
-        public static string PostgreSqlDb = "Server=localhost;Port=5432;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
-        public static string FirebirdDb = @"User=SYSDBA;Password=masterkey;Database=C:\src\ServiceStack.OrmLite\tests\ServiceStack.OrmLite.Tests\App_Data\TEST.FDB;DataSource=localhost;Dialect=3;charset=ISO8859_1;";
-
-
-        public static IOrmLiteDialectProvider DefaultProvider = SqlServerDialect.Provider;
-        public static string DefaultConnection = SqlServerBuildDb;
-        public static string GetDefaultConnection()
-        {
-            OrmLiteConfig.DialectProvider = DefaultProvider;
-            return DefaultConnection;
-        }
-
-        public static IDbConnection OpenDbConnection()
-        {
-            return GetDefaultConnection().OpenDbConnection();
-        }
-    }
+//    public class Config
+//    {
+//        public static Dialect DefaultDialect = Dialect.Sqlite;
+//        public const bool EnableDebugLogging = false;
+//
+//        public static string SqliteFileDir = "~/App_Data/".MapAbsolutePath();
+//        public static string SqliteFileDb = "~/App_Data/db.sqlite".MapAbsolutePath();
+//        public static string SqlServerDb = "~/App_Data/Database1.mdf".MapAbsolutePath();
+//        //public static string SqlServerBuildDb = "Data Source=localhost;Initial Catalog=TestDb;Integrated Security=SSPI;Connect Timeout=120;MultipleActiveResultSets=True";
+//
+//        public static string SqliteMemoryDb = Environment.GetEnvironmentVariable("SQLITE_CONNECTION") ?? ":memory:";
+//        public static string SqlServerBuildDb = Environment.GetEnvironmentVariable("MSSQL_CONNECTION") ?? "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;";
+//        public static string OracleDb = Environment.GetEnvironmentVariable("ORACLE_CONNECTION") ?? "Data Source=localhost:48401/XE;User ID=system;Password=test";
+//        public static string MySqlDb_5_5 = Environment.GetEnvironmentVariable("MYSQL_CONNECTION") ?? "Server=localhost;Port=48201;Database=test;UID=root;Password=test;SslMode=none";
+//        public static string MySqlDb_10_1 = Environment.GetEnvironmentVariable("MYSQL_CONNECTION") ?? "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none";
+//        public static string MySqlDb_10_2 = Environment.GetEnvironmentVariable("MYSQL_CONNECTION") ?? "Server=localhost;Port=48203;Database=test;UID=root;Password=test;SslMode=none";
+//        public static string MySqlDb_10_3 = Environment.GetEnvironmentVariable("MYSQL_CONNECTION") ?? "Server=localhost;Port=48204;Database=test;UID=root;Password=test;SslMode=none";
+//        public static string MySqlDb_10_4 = Environment.GetEnvironmentVariable("MYSQL_CONNECTION") ?? "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none";
+//        public static string PostgresDb_9 = Environment.GetEnvironmentVariable("PGSQL_CONNECTION") ?? "Server=localhost;Port=48301;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
+//        public static string PostgresDb_10 = Environment.GetEnvironmentVariable("PGSQL_CONNECTION") ?? "Server=localhost;Port=48302;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
+//        public static string PostgresDb_11 = Environment.GetEnvironmentVariable("PGSQL_CONNECTION") ?? "Server=localhost;Port=48303;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200";
+//        public static string FirebirdDb_3 = Environment.GetEnvironmentVariable("FIREBIRD_CONNECTION") ?? @"User=SYSDBA;Password=masterkey;Database=/firebird/data/test.gdb;DataSource=localhost;Port=48101;Dialect=3;charset=ISO8859_1;MinPoolSize=0;MaxPoolSize=100;";
+//
+//        public static IOrmLiteDialectProvider DefaultProvider = SqlServerDialect.Provider;
+//        public static string DefaultConnection = SqlServerBuildDb;
+//        
+//        public static string GetDefaultConnection()
+//        {
+//            OrmLiteConfig.DialectProvider = DefaultProvider;
+//            return DefaultConnection;
+//        }
+//
+//        public static IDbConnection OpenDbConnection()
+//        {
+//            return GetDefaultConnection().OpenDbConnection();
+//        }
+//    }
 
     public class OrmLiteTestBase
     {
@@ -61,31 +66,31 @@ namespace ServiceStack.OrmLite.Tests
 
         public static OrmLiteConnectionFactory CreateSqliteMemoryDbFactory()
         {
-            var dbFactory = new OrmLiteConnectionFactory(Config.SqliteMemoryDb, SqliteDialect.Provider);
+            var dbFactory = new OrmLiteConnectionFactory(SqliteDb.MemoryConnection, SqliteDialect.Provider);
             return dbFactory;
         }
 
         public static OrmLiteConnectionFactory CreateSqlServerDbFactory()
         {
-            var dbFactory = new OrmLiteConnectionFactory(Config.SqlServerBuildDb, SqlServerDialect.Provider);
+            var dbFactory = new OrmLiteConnectionFactory(SqlServerDb.DefaultConnection, SqlServerDialect.Provider);
             return dbFactory;
         }
 
         public static OrmLiteConnectionFactory CreateMySqlDbFactory()
         {
-            var dbFactory = new OrmLiteConnectionFactory(Config.MySqlDb, MySqlDialect.Provider);
+            var dbFactory = new OrmLiteConnectionFactory(MySqlDb.DefaultConnection, MySqlDialect.Provider);
             return dbFactory;
         }
 
         public static OrmLiteConnectionFactory CreatePostgreSqlDbFactory()
         {
-            var dbFactory = new OrmLiteConnectionFactory(Config.PostgreSqlDb, PostgreSqlDialect.Provider);
+            var dbFactory = new OrmLiteConnectionFactory(PostgreSqlDb.DefaultConnection, PostgreSqlDialect.Provider);
             return dbFactory;
         }
 
         protected virtual string GetFileConnectionString()
         {
-            var connectionString = Config.SqliteFileDb;
+            var connectionString = SqliteDb.FileConnection;
             if (File.Exists(connectionString))
                 File.Delete(connectionString);
 
@@ -98,7 +103,7 @@ namespace ServiceStack.OrmLite.Tests
                 ConnectionString = GetFileConnectionString();
         }
 
-        public Dialect Dialect = Config.DefaultDialect;
+        public Dialect Dialect = TestConfig.Dialects;
         protected OrmLiteConnectionFactory DbFactory;
 
         OrmLiteConnectionFactory Init(string connStr, IOrmLiteDialectProvider dialectProvider)
@@ -126,38 +131,42 @@ namespace ServiceStack.OrmLite.Tests
             //OrmLiteConfig.UseParameterizeSqlExpressions = false;
 
             //OrmLiteConfig.DeoptimizeReader = true;
-            LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: Config.EnableDebugLogging);
+            LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: TestConfig.EnableDebugLogging);
+            
             switch (Dialect)
             {
                 case Dialect.Sqlite:
-                    var dbFactory = Init(Config.SqliteMemoryDb, SqliteDialect.Provider);
+                    var dbFactory = Init(SqliteDb.MemoryConnection, SqliteDialect.Provider);
                     dbFactory.AutoDisposeConnection = false;
                     return dbFactory;
                 case Dialect.SqlServer:
-                    return Init(Config.SqlServerBuildDb, SqlServerDialect.Provider);
+                    return Init(SqlServerDb.DefaultConnection, SqlServerDialect.Provider);
                 case Dialect.SqlServer2008:
-                    return Init(Config.SqlServerBuildDb, SqlServer2008Dialect.Provider);
+                    return Init(SqlServerDb.DefaultConnection, SqlServer2008Dialect.Provider);
                 case Dialect.SqlServer2012:
-                    return Init(Config.SqlServerBuildDb, SqlServer2012Dialect.Provider);
+                    return Init(SqlServerDb.DefaultConnection, SqlServer2012Dialect.Provider);
                 case Dialect.SqlServer2014:
-                    return Init(Config.SqlServerBuildDb, SqlServer2014Dialect.Provider);
+                    return Init(SqlServerDb.DefaultConnection, SqlServer2014Dialect.Provider);
                 case Dialect.SqlServer2016:
-                    return Init(Config.SqlServerBuildDb, SqlServer2016Dialect.Provider);
+                    return Init(SqlServerDb.DefaultConnection, SqlServer2016Dialect.Provider);
                 case Dialect.SqlServer2017:
-                    return Init(Config.SqlServerBuildDb, SqlServer2017Dialect.Provider);
+                    return Init(SqlServerDb.DefaultConnection, SqlServer2017Dialect.Provider);
                 case Dialect.MySql:
-                    return Init(Config.MySqlDb, MySqlDialect.Provider);
+                    return Init(MySqlDb.DefaultConnection, MySqlDialect.Provider);
                 case Dialect.PostgreSql:
-                    return Init(Config.PostgreSqlDb, PostgreSqlDialect.Provider);
-                case Dialect.SqlServerMdf:
-                    return Init(Config.SqlServerDb, SqlServerDialect.Provider);
-#if !NETCORE                    
+                    return Init(PostgreSqlDb.DefaultConnection, PostgreSqlDialect.Provider);
+//                case Dialect.SqlServerMdf:
+//                    return Init(Config.SqlServerDb, SqlServerDialect.Provider);
                 case Dialect.Oracle:
-                    return Init(Config.OracleDb, OracleDialect.Provider);
+                    return Init(OracleDb.DefaultConnection, OracleDialect.Provider);
                 case Dialect.Firebird:
-                    return Init(Config.FirebirdDb, FirebirdDialect.Provider);
+                    return Init(FirebirdDb.DefaultConnection, FirebirdDialect.Provider);
+                case Dialect.Firebird4:
+                    return Init(FirebirdDb.V4Connection, Firebird4Dialect.Provider);
+
+#if !NETCORE                    
                 case Dialect.VistaDb:
-                    VistaDbDialect.Provider.UseLibraryFromGac = true;
+                    VistaDbDialect.Instance.UseLibraryFromGac = true;
                     var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["myVDBConnection"];
                     var factory = DbProviderFactories.GetFactory(connectionString.ProviderName);
                     using (var db = factory.CreateConnection())
@@ -195,6 +204,21 @@ namespace ServiceStack.OrmLite.Tests
             }
 
             return DbFactory.OpenDbConnection();
+        }
+
+        public virtual Task<IDbConnection> OpenDbConnectionAsync()
+        {
+            if (ConnectionString == ":memory:")
+            {
+                if (InMemoryDbConnection == null || DbFactory.AutoDisposeConnection)
+                {
+                    InMemoryDbConnection = new OrmLiteConnection(DbFactory);
+                    InMemoryDbConnection.Open();
+                }
+                return Task.FromResult(InMemoryDbConnection);
+            }
+
+            return DbFactory.OpenDbConnectionAsync();
         }
 
         protected void SuppressIfOracle(string reason, params object[] args)

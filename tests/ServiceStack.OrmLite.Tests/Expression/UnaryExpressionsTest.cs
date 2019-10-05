@@ -1,10 +1,12 @@
 ﻿using NUnit.Framework;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
+    [TestFixtureOrmLite]
     public class UnaryExpressionsTest : ExpressionsTestBase
     {
+        public UnaryExpressionsTest(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_select_unary_plus_constant_expression()
         {

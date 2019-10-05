@@ -28,8 +28,11 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         public short Rate { get; set; }
     }
 
-    public class ExpressionsAuthorTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ExpressionsAuthorTests : OrmLiteProvidersTestBase
     {
+        public ExpressionsAuthorTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Run_Expressions_Author_tests()
         {
@@ -38,7 +41,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
             using (var db = OpenDbConnection())
             {
-                var dialect = OrmLiteConfig.DialectProvider;
+                var dialect = DialectProvider;
                 var q = db.From<Author>();
 
                 db.DropTable<Author>();
@@ -332,7 +335,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 }
                 catch (Exception e)
                 {
-                    if (Dialect == Dialect.PostgreSql)
+                    if (Dialect.HasFlag(Dialect.AnyPostgreSql))
                         Console.WriteLine("OK PostgreSQL: " + e.Message);
                     else
                         Console.WriteLine("**************  FAILED *************** " + e.Message);

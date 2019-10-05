@@ -7,6 +7,7 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using Oracle.ManagedDataAccess.Client;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.Oracle.Converters;
@@ -16,10 +17,14 @@ namespace ServiceStack.OrmLite.Oracle
 {
     public class OracleOrmLiteDialectProvider : OrmLiteDialectProviderBase<OracleOrmLiteDialectProvider>
     {
-        public const string OdpProvider = "Oracle.DataAccess.Client";
         public const string ManagedProvider = "Oracle.ManagedDataAccess.Client";
-        public const string MicrosoftProvider = "System.Data.OracleClient";
+        public string AutoIdGuidFunction { get; set; } = "SYS_GUID()";
+        public bool UseReturningForLastInsertId { get; set; } = true;
+        
+        public static readonly OracleOrmLiteDialectProvider Instance = new OracleOrmLiteDialectProvider();
+        public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
 
+        // TODO refactor to hashset (case insensitive
         protected readonly List<string> ReservedNames = new List<string>
         {
             "ACCESS", "DEFAULT", "INTEGER", "ONLINE", "START", "ADD", "DELETE", "INTERSECT", "OPTION", "SUCCESSFUL", "ALL", "DESC",
@@ -34,6 +39,7 @@ namespace ServiceStack.OrmLite.Oracle
             "BYTE", "SHORT", "INT", "SUBTYPE"
         };
 
+        // TODO refactor to hashset (case insensitive
         protected readonly List<string> ReservedParameterNames = new List<string>
         {
             "ACCESS", "DEFAULT", "INTEGER", "ONLINE", "START", "ADD", "DELETE", "INTERSECT", "OPTION", "SUCCESSFUL", "ALL", "DESC",
@@ -48,16 +54,9 @@ namespace ServiceStack.OrmLite.Oracle
             "BYTE", "SHORT", "INT", "SUBTYPE"
         };
 
+        internal long LastInsertId { get; set; }
         protected const int MaxNameLength = 30;
         protected const int MaxStringColumnLength = 4000;
-
-        private static OracleOrmLiteDialectProvider _instance;
-        public static OracleOrmLiteDialectProvider Instance
-        {
-            // Constructing extras if we happen to hit this concurrently on separate threads is harmless enough
-            get { return _instance ?? (_instance = new OracleOrmLiteDialectProvider()); }
-        }
-
         private readonly DbProviderFactory _factory;
         private readonly OracleTimestampConverter _timestampConverter;
 
@@ -72,17 +71,34 @@ namespace ServiceStack.OrmLite.Oracle
             OrmLiteContext.UseThreadStatic = true;
             // Not nice to slow down, but need to read some types via Oracle-specific read methods so can't read all fields in single call
             OrmLiteConfig.DeoptimizeReader = true;
-            ClientProvider = clientProvider;
+
             QuoteNames = quoteNames;
             AutoIncrementDefinition = string.Empty;
 
             ParamString = ":";
-
+            
             NamingStrategy = new OracleNamingStrategy(MaxNameLength);
             ExecFilter = new OracleExecFilter();
 
-            _factory = DbProviderFactories.GetFactory(ClientProvider);
-            _timestampConverter = new OracleTimestampConverter(_factory.GetType(), ClientProvider);
+            _factory = OracleClientFactory.Instance;
+#if !NETFRAMEWORK
+            // TODO tune settings 
+            //OracleConfiguration.FetchSize = 1024 * 1024;
+            //OracleConfiguration.SelfTuning = false;
+            OracleConfiguration.BindByName = true;
+            OracleConfiguration.CommandTimeout = OrmLiteConfig.CommandTimeout;
+            //OracleConfiguration.StatementCacheSize = -1;
+            //OracleConfiguration.SendBufferSize = 8192;
+            //OracleConfiguration.ReceiveBufferSize = 8192;
+            //OracleConfiguration.DisableOOB = true;
+            //OracleConfiguration.OnsMode = OnsConfigMode.Unspecified;
+            OracleConfiguration.TraceOption = 1;
+            OracleConfiguration.TraceLevel = 7;
+            //OracleConfiguration.TcpNoDelay = true;
+            OracleConfiguration.TraceFileLocation = "c:\\temp\\ora";
+#endif
+            
+            _timestampConverter = new OracleTimestampConverter(_factory.GetType(), clientProvider);
 
             InitColumnTypeMap();
 
@@ -116,27 +132,22 @@ namespace ServiceStack.OrmLite.Oracle
             this.Variables = new Dictionary<string, string>
             {
                 { OrmLiteVariables.SystemUtc, "sys_extract_utc(systimestamp)" },
-                { OrmLiteVariables.MaxText, "VARCHAR2(2000)" },
-                { OrmLiteVariables.MaxTextUnicode, "NVARCHAR2(2000)" },
+                { OrmLiteVariables.MaxText, $"VARCHAR2({MaxStringColumnLength})" },
+                { OrmLiteVariables.MaxTextUnicode, $"NVARCHAR2({MaxStringColumnLength / 2})" },
                 { OrmLiteVariables.True, SqlBool(true) },                
                 { OrmLiteVariables.False, SqlBool(false) },                
             };
         }
 
-        protected string ClientProvider = OdpProvider;
-        public static string RowVersionTriggerFormat = "{0}RowVersionUpdateTrigger";
-
         public override string ToPostCreateTableStatement(ModelDefinition modelDef)
         {
             if (modelDef.RowVersion != null)
             {
-                var triggerName = NamingStrategy.ApplyNameRestrictions(
-                    RowVersionTriggerFormat.Fmt(modelDef.ModelName));
-                var triggerBody = ":NEW.{0} := :OLD.{0}+1;".Fmt(
-                    modelDef.RowVersion.FieldName.SqlColumn(this));
+                var triggerName = NamingStrategy.ApplyNameRestrictions(RowVersionTriggerFormat.Fmt(modelDef.ModelName));
+                var sqlColumn = modelDef.RowVersion.FieldName.SqlColumn(this);
+                var triggerBody = $":NEW.{sqlColumn} := :OLD.{sqlColumn}+1;";
 
-                var sql = "CREATE TRIGGER {0} BEFORE UPDATE ON {1} FOR EACH ROW BEGIN {2} END;".Fmt(
-                    Quote(triggerName), NamingStrategy.GetTableName(modelDef), triggerBody);
+                var sql = $"CREATE TRIGGER {Quote(triggerName)} BEFORE UPDATE ON {NamingStrategy.GetTableName(modelDef)} FOR EACH ROW BEGIN {triggerBody} END;";
 
                 return sql;
             }
@@ -149,7 +160,7 @@ namespace ServiceStack.OrmLite.Oracle
         {
             if (options != null)
             {
-                connectionString = options.Aggregate(connectionString, (current, option) => current + (option.Key + "=" + option.Value + ";"));
+                connectionString = options.Aggregate(connectionString, (current, option) => $"{current}{option.Key}={option.Value};");
             }
 
             var connection = _factory.CreateConnection();
@@ -159,7 +170,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override long GetLastInsertId(IDbCommand dbCmd)
         {
-            throw new NotSupportedException();
+            return LastInsertId;
         }
 
         public override object ToDbValue(object value, Type type)
@@ -167,7 +178,7 @@ namespace ServiceStack.OrmLite.Oracle
             if (value == null || value is DBNull)
                 return null;
 
-            if (type.IsEnum && !type.HasAttribute<EnumAsIntAttribute>())
+            if (type.IsEnum && !type.HasAttributeCached<EnumAsIntAttribute>())
                 return EnumConverter.ToDbValue(type, value);
 
             if (type.IsRefType())
@@ -239,20 +250,23 @@ namespace ServiceStack.OrmLite.Oracle
                 : string.Format("{0} {1}", dateFormat, timeFormat);
         }
 
-        public override string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
+        public override bool IsFullSelectStatement(string sqlFilter)
         {
-            var sql = StringBuilderCache.Allocate();
             const string selectStatement = "SELECT ";
-            var modelDef = GetModel(tableType);
-            var isFullSelectStatement = false;
             if (!string.IsNullOrEmpty(sqlFilter))
             {
                 var cleanFilter = sqlFilter.Trim().Replace('\r', ' ').Replace('\n', ' ').ToUpperInvariant();
-                isFullSelectStatement = cleanFilter.Length > selectStatement.Length
-                    && cleanFilter.Substring(0, selectStatement.Length).Equals(selectStatement);
+                return cleanFilter.Length > selectStatement.Length && cleanFilter.Substring(0, selectStatement.Length).Equals(selectStatement);
             }
+            return false;
+        }
 
-            if (isFullSelectStatement)
+        public override string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams)
+        {
+            var sql = StringBuilderCache.Allocate();
+            var modelDef = GetModel(tableType);
+
+            if (IsFullSelectStatement(sqlFilter))
             {
                 if (Regex.Matches(sqlFilter.Trim().ToUpperInvariant(), @"(\b|\n)FROM(\b|\n)").Count < 1)
                     sqlFilter += " FROM DUAL";
@@ -277,21 +291,17 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override void PrepareParameterizedInsertStatement<T>(IDbCommand dbCommand, ICollection<string> insertFields = null)
         {
-            if (insertFields == null)
-                insertFields = new List<string>();
-
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
             var modelDef = GetModel(typeof(T));
 
             dbCommand.Parameters.Clear();
             dbCommand.CommandTimeout = OrmLiteConfig.CommandTimeout;
-            foreach (var fieldDef in modelDef.FieldDefinitions)
+
+            var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
+            foreach (var fieldDef in fieldDefs)
             {
                 if (fieldDef.IsComputed || fieldDef.IsRowVersion) continue;
-
-                //insertFields contains Property "Name" of fields to insert (that's how expressions work)
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase)) continue;
 
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
@@ -345,8 +355,7 @@ namespace ServiceStack.OrmLite.Oracle
                     var sql = dbCmd.CommandText.TrimStart().ToUpperInvariant();
                     bool isInsert = sql.StartsWith("INSERT", StringComparison.InvariantCulture);
 
-                    var result = GetNextValue(dbCmd.Connection, dbCmd.Transaction, fieldDef.Sequence,
-                                              pi.GetValue(obj, new object[] { }), isInsert);
+                    var result = GetNextValue(dbCmd, fieldDef.Sequence, pi.GetValue(obj, new object[] { }));
                     if (pi.PropertyType == typeof(String))
                         pi.SetProperty(obj, result.ToString());
                     else if (pi.PropertyType == typeof(Int16) || pi.PropertyType == typeof(Int16?))
@@ -366,20 +375,16 @@ namespace ServiceStack.OrmLite.Oracle
         //TODO: Change to parameterized query to match all other ToInsertRowStatement() impls
         public override string ToInsertRowStatement(IDbCommand dbCommand, object objWithProperties, ICollection<string> insertFields = null)
         {
-            if (insertFields == null)
-                insertFields = new List<string>();
-
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
 
             var tableType = objWithProperties.GetType();
             var modelDef = GetModel(tableType);
 
-            foreach (var fieldDef in modelDef.FieldDefinitions)
+            var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
+            foreach (var fieldDef in fieldDefs)
             {
                 if (fieldDef.IsComputed)
-                    continue;
-                if (insertFields.Count > 0 && !insertFields.Contains(fieldDef.Name, StringComparer.OrdinalIgnoreCase))
                     continue;
 
                 if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence))
@@ -393,8 +398,7 @@ namespace ServiceStack.OrmLite.Oracle
                     var pi = tableType.GetProperty(fieldDef.Name,
                         BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.FlattenHierarchy);
 
-                    var result = GetNextValue(dbCommand.Connection, dbCommand.Transaction, fieldDef.Sequence,
-                                              pi.GetValue(objWithProperties, new object[] { }), isInsert: true);
+                    var result = GetNextValue(dbCommand, fieldDef.Sequence, pi.GetValue(objWithProperties, new object[] { }));
                     if (pi.PropertyType == typeof(String))
                         pi.SetProperty(objWithProperties, result.ToString());
                     else if (pi.PropertyType == typeof(Int16))
@@ -454,7 +458,7 @@ namespace ServiceStack.OrmLite.Oracle
                     sqlFilter
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
+                        .Append(this.AddQueryParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
 
                     continue;
                 }
@@ -468,7 +472,7 @@ namespace ServiceStack.OrmLite.Oracle
                 sql
                     .Append(GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(this.AddParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
+                    .Append(this.AddUpdateParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
             }
 
             var strFilter = StringBuilderCacheAlt.ReturnAndFree(sqlFilter);
@@ -626,6 +630,13 @@ namespace ServiceStack.OrmLite.Oracle
 
             var definition = StringBuilderCache.ReturnAndFree(sql);
             return definition;
+        }
+
+        public override string GetAutoIdDefaultValue(FieldDefinition fieldDef)
+        {
+            return fieldDef.FieldType == typeof(Guid)
+                ? AutoIdGuidFunction
+                : null;
         }
 
         public override List<string> ToCreateIndexStatements(Type tableType)
@@ -810,22 +821,46 @@ namespace ServiceStack.OrmLite.Oracle
             return sql;
         }
 
-        private object GetNextValue(IDbConnection connection, IDbTransaction transaction, string sequence, object value, bool isInsert)
+        public override string GetLastInsertIdSqlSuffix<T>()
         {
-            if (!isInsert)
+            if (SelectIdentitySql == null)
+                throw new NotImplementedException("Returning last inserted identity is not implemented on this DB Provider.");
+
+            if (UseReturningForLastInsertId)
             {
-                return long.TryParse(value.ToString(), out var nv) 
-                    ? nv 
-                    : 0;
+                var modelDef = GetModel(typeof(T));
+                var pkName = NamingStrategy.GetColumnName(modelDef.PrimaryKey.FieldName);
+                return $" RETURNING {pkName} into " + pkName;
             }
 
-            using (var dbCmd = connection.CreateCommand())
+            return "; " + SelectIdentitySql;
+        }
+        
+        private object GetNextValue(IDbCommand dbCmd, string sequence, object value)
+        {
+            if (value.ToString() != "0")
             {
-                dbCmd.Transaction = transaction;
-                dbCmd.CommandText = string.Format("SELECT {0}.NEXTVAL FROM dual", Quote(sequence));
-                var result = dbCmd.LongScalar();
-                return result;
+                object retObj;
+                if (long.TryParse(value.ToString(), out var nv))
+                {
+                    LastInsertId = nv;
+                    retObj = LastInsertId;
+                }
+                else
+                {
+                    LastInsertId = 0;
+                    retObj = value;
+                }
+                return retObj;
             }
+            //Get current CommandText
+            var lastSql = dbCmd.CommandText;
+            dbCmd.CommandText = $"SELECT {Quote(sequence)}.NEXTVAL FROM dual";
+            long result = (long)dbCmd.LongScalar();
+            LastInsertId = result;
+            //Set CommandText back
+            dbCmd.CommandText = lastSql;
+            return result;
         }
 
         public bool QuoteNames { get; set; }
@@ -841,9 +876,9 @@ namespace ServiceStack.OrmLite.Oracle
             return WillQuote(name) ? string.Format("\"{0}\"", name) : name;
         }
 
-        public override string GetQuotedName(string fieldName)
+        public override string GetQuotedName(string name)
         {
-            return Quote(fieldName);
+            return Quote(name);
         }
 
         public override string GetQuotedTableName(ModelDefinition modelDef)
@@ -895,6 +930,19 @@ namespace ServiceStack.OrmLite.Oracle
         public override IDbDataParameter CreateParam()
         {
             return _factory.CreateParameter();
+        }
+        
+        public override bool DoesSchemaExist(IDbCommand dbCmd, string schemaName)
+        {
+            dbCmd.CommandText = $"SELECT 1 FROM sys.schemas WHERE name = {schemaName.Quoted()}";
+            var query = dbCmd.ExecuteNonQuery();
+            return query == 1;
+        }
+
+        public override string ToCreateSchemaStatement(string schemaName)
+        {
+            var sql = $"CREATE SCHEMA {GetSchemaName(schemaName)}";
+            return sql;
         }
 
         public override string ToAddColumnStatement(Type modelType, FieldDefinition fieldDef)
@@ -970,7 +1018,7 @@ namespace ServiceStack.OrmLite.Oracle
             var sql = "SELECT count(*) FROM USER_SEQUENCES WHERE SEQUENCE_NAME = {0}".SqlFmt(sequenceName);
             dbCmd.CommandText = sql;
             var result = dbCmd.LongScalar();
-            return result > 0;
+            return result == 1;
         }
 
         public override string ToAddForeignKeyStatement<T, TForeign>(Expression<Func<T, object>> field,
@@ -1000,11 +1048,7 @@ namespace ServiceStack.OrmLite.Oracle
 
         public override string EscapeWildcards(string value)
         {
-            if (value == null)
-                return null;
-
-            return value
-                .Replace("^", @"^^")
+            return value?.Replace("^", @"^^")
                 .Replace("_", @"^_")
                 .Replace("%", @"^%");
         }
@@ -1077,5 +1121,20 @@ namespace ServiceStack.OrmLite.Oracle
         }
 
         public override string SqlConcat(IEnumerable<object> args) => string.Join(" || ", args);
+        
+        protected OracleConnection Unwrap(IDbConnection db)
+        {
+            return (OracleConnection)db.ToDbConnection();
+        }
+
+        protected OracleCommand Unwrap(IDbCommand cmd)
+        {
+            return (OracleCommand)cmd.ToDbCommand();
+        }
+
+        protected OracleDataReader Unwrap(IDataReader reader)
+        {
+            return (OracleDataReader)reader;
+        }
     }
 }

@@ -1,10 +1,5 @@
 ﻿using NUnit.Framework;
 using ServiceStack.Model;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -20,8 +15,11 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
     }
 
-    public class CanBuildExpressionWithAbstractType : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class CanBuildExpressionWithAbstractType : OrmLiteProvidersTestBase
     {
+        public CanBuildExpressionWithAbstractType(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_Update_Property_In_Abstract_Base_Class()
         {

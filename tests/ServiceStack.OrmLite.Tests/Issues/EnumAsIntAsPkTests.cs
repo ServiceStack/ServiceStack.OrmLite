@@ -1,15 +1,13 @@
-﻿using System.Linq;
-using NUnit.Framework;
+﻿using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class EnumAsIntAsPkTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class EnumAsIntAsPkTests : OrmLiteProvidersTestBase
     {
-        //public EnumAsIntAsPkTests() : base(Dialect.SqlServer) { }
-        //[SetUp] public void SetUp() => LogManager.LogFactory = new ConsoleLogFactory(debugEnabled: true);
-
+        public EnumAsIntAsPkTests(DialectContext context) : base(context) {}
+       
         [Test]
         public void CanCreateTable()
         {

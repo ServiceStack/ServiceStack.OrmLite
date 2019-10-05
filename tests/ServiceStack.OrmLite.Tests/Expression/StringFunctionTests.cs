@@ -2,8 +2,11 @@
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
+    [TestFixtureOrmLite]
     public class StringFunctionTests : ExpressionsTestBase
     {
+        public StringFunctionTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_select_using_contains()
         {
@@ -193,6 +196,29 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.IsNotNull(actual);
                 Assert.AreEqual(1, actual.Count);
                 CollectionAssert.Contains(actual, expected);
+            }
+        }
+
+        [Test]
+        public void Can_select_using_Equals()
+        {
+            var postfix = "postfix";
+
+            var expected = new TestType {
+                IntColumn = 7,
+                BoolColumn = true,
+                StringColumn = postfix
+            };
+
+            Init(10, expected);
+
+            using (var db = OpenDbConnection())
+            {
+                var actual = db.Select<TestType>(q => q.StringColumn.Equals(postfix));
+
+                Assert.That(actual, Is.Not.Null);
+                Assert.That(actual.Count, Is.EqualTo(1));
+                Assert.That(actual, Is.EquivalentTo(new[]{ expected }));
             }
         }
 

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
@@ -21,10 +20,11 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public string Other_Id { get; set; }
     }
 
-    [TestFixture]
-    public class SelectIntoTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SelectIntoTests : OrmLiteProvidersTestBase
     {
+        public SelectIntoTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Dont_guess_column_in_mismatched_Into_model()
         {

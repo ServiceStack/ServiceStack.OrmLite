@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite
 
     public static class OrmLiteReadCommandExtensions
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensions));
+        internal static ILog Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensions));
         public const string UseDbConnectionExtensions = "Use IDbConnection Extensions instead";
 
         internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql)
@@ -837,6 +837,28 @@ namespace ServiceStack.OrmLite
             return map;
         }
 
+        internal static List<KeyValuePair<K, V>> KeyValuePairs<K, V>(this IDbCommand dbCmd, string sql, object anonType = null)
+        {
+            if (anonType != null) SetParameters(dbCmd, anonType.ToObjectDictionary(), excludeDefaults: false, sql:ref sql);
+
+            return dbCmd.KeyValuePairs<K, V>(sql);
+        }
+
+        internal static List<KeyValuePair<K, V>> KeyValuePairs<K, V>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider)
+        {
+            var to = new List<KeyValuePair<K, V>>();
+
+            while (reader.Read())
+            {
+                var key = (K)dialectProvider.FromDbValue(reader, 0, typeof(K));
+                var value = (V)dialectProvider.FromDbValue(reader, 1, typeof(V));
+
+                to.Add(new KeyValuePair<K,V>(key, value));
+            }
+
+            return to;
+        }
+
         internal static bool Exists<T>(this IDbCommand dbCmd, object anonType)
         {
             string sql = null;
@@ -881,6 +903,8 @@ namespace ServiceStack.OrmLite
             return ToLong(result);
         }
 
+        internal static long ToLong(int result) => result;
+        
         internal static long ToLong(object result)
         {
             if (result is DBNull) return default(long);
@@ -993,9 +1017,11 @@ namespace ServiceStack.OrmLite
             DbType? dbType = null,
             byte? precision = null,
             byte? scale = null,
-            int? size=null)
+            int? size=null, 
+            Action<IDbDataParameter> paramFilter = null)
         {
             var p = dbCmd.CreateParam(name, value, direction, dbType, precision, scale, size);
+            paramFilter?.Invoke(p);
             dbCmd.Parameters.Add(p);
             return p;
         }

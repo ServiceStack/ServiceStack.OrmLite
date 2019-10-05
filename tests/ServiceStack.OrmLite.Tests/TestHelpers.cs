@@ -4,25 +4,6 @@ using System.Data;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [Flags]
-    public enum Dialect
-    {
-        Sqlite = 1,
-        SqlServer = 2,
-        SqlServer2008 = 4,
-        SqlServer2012 = 8,
-        PostgreSql = 16,
-        MySql = 32,
-        SqlServerMdf = 64,
-        Oracle = 128,
-        Firebird = 256,
-        VistaDb = 512,
-        SqlServer2014 = 1024,
-        SqlServer2016 = 2048,
-        SqlServer2017 = 4096,
-        AnySqlServer = SqlServer | SqlServer2008 | SqlServer2012 | SqlServer2014 | SqlServer2016 | SqlServer2017 | SqlServerMdf,
-    }
-
     public static class TestHelpers
     {
         public static string NormalizeSql(this string sql)

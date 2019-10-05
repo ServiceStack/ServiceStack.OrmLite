@@ -1,15 +1,17 @@
 ﻿using System;
 using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Logging;
+using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests.Expression;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrderByTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrderByTests : OrmLiteProvidersTestBase
     {
+        public OrderByTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_order_by_random()
         {
@@ -28,6 +30,52 @@ namespace ServiceStack.OrmLite.Tests
                 rowIds2 = db.Select(db.From<LetterFrequency>().OrderByRandom()).Map(x => x.Id);
 
                 Assert.That(!rowIds1.SequenceEqual(rowIds2));
+            }
+        }
+
+        [Test]
+        public void Can_OrderBy_and_ThenBy()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+
+                db.Insert(new LetterFrequency {Letter = "C" });
+                db.Insert(new LetterFrequency {Letter = "C" });
+                db.Insert(new LetterFrequency {Letter = "B" });
+                db.Insert(new LetterFrequency {Letter = "A" });
+
+                var q = db.From<LetterFrequency>();
+                q.OrderBy(nameof(LetterFrequency.Letter))
+                    .ThenBy(nameof(LetterFrequency.Id));
+
+                var tracks = db.Select(q);
+                
+                Assert.That(tracks.First().Letter, Is.EqualTo("A"));
+                Assert.That(tracks.Last().Letter, Is.EqualTo("C"));
+            }
+        }
+
+        [Test]
+        public void Can_OrderBy_multi_table_expression()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<LetterFrequency>();
+                db.DropAndCreateTable<LetterWeighting>();
+
+                var letters = "A,B,C,D,E".Split(',');
+                var i = 0;
+                letters.Each(letter => {
+                    var id = db.Insert(new LetterFrequency {Letter = letter}, selectIdentity: true);
+                    db.Insert(new LetterWeighting {LetterFrequencyId = id, Weighting = ++i * 10});
+                });
+
+                var q = db.From<LetterFrequency>()
+                    .Join<LetterWeighting>()
+                    .OrderBy<LetterFrequency, LetterWeighting>((f, w) => f.Id > w.Weighting ? f.Id : w.Weighting);
+
+                var results = db.Select(q);
             }
         }
     }

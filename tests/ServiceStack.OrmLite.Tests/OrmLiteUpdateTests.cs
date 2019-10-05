@@ -11,10 +11,11 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrmLiteUpdateTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteUpdateTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteUpdateTests(DialectContext context) : base(context) {}
+
         private ModelWithFieldsOfDifferentTypes CreateModelWithFieldsOfDifferentTypes(IDbConnection db)
         {
             db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
@@ -159,33 +160,90 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Supports_different_ways_to_UpdateOnly()
         {
+            void Reset(IDbConnection db)
+            {
+                db.DeleteAll<Person>();
+                db.Insert(new Person {Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100});
+            }
+
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Person>();
-                db.Insert(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
+                db.DropAndCreateTable<Person>();                               
 
+                Reset(db);
                 db.UpdateOnly(() => new Person { FirstName = "UpdatedFirst", Age = 27 });
                 var row = db.Select<Person>().First();
                 Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
 
-                db.DeleteAll<Person>();
-                db.Insert(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
-
+                Reset(db);
                 db.UpdateOnly(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => p.FirstName);
                 row = db.Select<Person>().First();
                 Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 100)));
 
-                db.DeleteAll<Person>();
-                db.Insert(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
-
+                Reset(db);
                 db.UpdateOnly(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => new { p.FirstName, p.Age });
                 row = db.Select<Person>().First();
                 Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
 
-                db.DeleteAll<Person>();
-                db.Insert(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
-
+                Reset(db);
                 db.UpdateOnly(new Person { FirstName = "UpdatedFirst", Age = 27 }, new[] { "FirstName", "Age" });
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+
+                Reset(db);
+                db.UpdateOnly(() => new Person { FirstName = "UpdatedFirst", Age = 27 }, db.From<Person>().Where(x => x.Age == 100));
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+
+                Reset(db);
+                var q = db.From<Person>().Where(x => x.Age == 100);
+                db.UpdateOnly(() => new Person { FirstName = "UpdatedFirst", Age = 27 }, q.WhereExpression, q.Params);
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+            }
+        }
+
+        [Test]
+        public async Task Supports_different_ways_to_UpdateOnly_Async()
+        {
+            void Reset(IDbConnection db)
+            {
+                db.DeleteAll<Person>();
+                db.Insert(new Person {Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100});
+            }
+
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();                               
+
+                Reset(db);
+                await db.UpdateOnlyAsync(() => new Person { FirstName = "UpdatedFirst", Age = 27 });
+                var row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+
+                Reset(db);
+                await db.UpdateOnlyAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => p.FirstName);
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 100)));
+
+                Reset(db);
+                await db.UpdateOnlyAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => new { p.FirstName, p.Age });
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+
+                Reset(db);
+                await db.UpdateOnlyAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, new[] { "FirstName", "Age" });
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+
+                Reset(db);
+                await db.UpdateOnlyAsync(() => new Person { FirstName = "UpdatedFirst", Age = 27 }, db.From<Person>().Where(x => x.Age == 100));
+                row = db.Select<Person>().First();
+                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
+
+                Reset(db);
+                var q = db.From<Person>().Where(x => x.Age == 100);
+                await db.UpdateOnlyAsync(() => new Person { FirstName = "UpdatedFirst", Age = 27 }, q.WhereExpression, q.Params);
                 row = db.Select<Person>().First();
                 Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
             }
@@ -367,25 +425,33 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
-                db.DropAndCreateTable<Poco>();
+                db.DropAndCreateTable<PocoUpdate>();
 
-                db.Insert(new Poco { Id = 1, Name = "A" });
-                db.Insert(new Poco { Id = 2, Name = "B" });
+                db.Insert(new PocoUpdate { Id = 1, Name = "A" });
+                db.Insert(new PocoUpdate { Id = 2, Name = "B" });
 
-                var sql = "UPDATE poco SET name = {0}name WHERE id = {0}id".Fmt(OrmLiteConfig.DialectProvider.ParamString);
+                var paramString = DialectProvider.ParamString;
+                var table = db.GetDialectProvider().GetTableName(nameof(PocoUpdate));
+                var sql = $"UPDATE {table} SET name = {paramString}name WHERE id = {paramString}id";
                 var result = db.ExecuteSql(sql, new { id = 2, name = "UPDATED" });
                 Assert.That(result, Is.EqualTo(1));
 
-                var row = db.SingleById<Poco>(2);
+                var row = db.SingleById<PocoUpdate>(2);
                 Assert.That(row.Name, Is.EqualTo("UPDATED"));
 
-                sql = "UPDATE poco SET name = {0}name WHERE id = {0}id".Fmt(OrmLiteConfig.DialectProvider.ParamString);
+                sql = $"UPDATE {table} SET name = {paramString}name WHERE id = {paramString}id";
                 result = db.ExecuteSql(sql, new Dictionary<string, object> { {"id", 2}, {"name", "RE-UPDATED" } });
                 Assert.That(result, Is.EqualTo(1));
 
-                row = db.SingleById<Poco>(2);
+                row = db.SingleById<PocoUpdate>(2);
                 Assert.That(row.Name, Is.EqualTo("RE-UPDATED"));
             }
+        }
+        
+        private class PocoUpdate
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
         }
 
         [Test]
@@ -634,6 +700,39 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(updatedRow.FirstName, Is.EqualTo("JJ"));
                 Assert.That(updatedRow.LastName, Is.EqualTo("Hendrix"));
                 Assert.That(updatedRow.Age, Is.EqualTo(27));
+            }
+        }
+
+        [Test]
+        public void Does_use_constant_size_string_params()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+
+                var converter = db.GetDialectProvider().GetStringConverter();
+
+                void AssertDbStringParamSizes(IDbCommand cmd)
+                {
+                    foreach (IDbDataParameter p in cmd.Parameters)
+                    {
+                        if (p.Value is string s)
+                        {
+                            //MySql sets DB Param to string length
+                            Assert.That(p.Size, Is.EqualTo(converter.StringLength).Or.EqualTo(s.Length));
+                        }
+                    }
+                }
+                
+                var hendrix = new Person(1, "Jimi", "Hendrix", 27);
+                db.Insert(hendrix, commandFilter: AssertDbStringParamSizes);
+
+                hendrix.FirstName = "Updated";
+
+                db.Update(hendrix, commandFilter: AssertDbStringParamSizes);
+
+                var row = db.SingleById<Person>(hendrix.Id);
+                Assert.That(row.FirstName, Is.EqualTo("Updated"));
             }
         }
     }

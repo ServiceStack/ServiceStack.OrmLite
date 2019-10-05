@@ -23,8 +23,9 @@ namespace ServiceStack.OrmLite
         {
             var dialectProvider = dbConn.GetDialectProvider();
             var modelDef = typeof(T).GetModelDefinition();
+            var schema = modelDef.Schema == null ? null : dialectProvider.NamingStrategy.GetSchemaName(modelDef.Schema);
             var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef);
-            return dialectProvider.DoesTableExist(dbConn, tableName, modelDef.Schema);
+            return dialectProvider.DoesTableExist(dbConn, tableName, schema);
         }
 
         /// <summary>
@@ -44,10 +45,29 @@ namespace ServiceStack.OrmLite
         {
             var dialectProvider = dbConn.GetDialectProvider();
             var modelDef = typeof(T).GetModelDefinition();
+            var schema = modelDef.Schema == null ? null : dialectProvider.NamingStrategy.GetSchemaName(modelDef.Schema);
             var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef);
             var fieldDef = modelDef.GetFieldDefinition(field);
             var fieldName = dialectProvider.NamingStrategy.GetColumnName(fieldDef.FieldName);
-            return dialectProvider.DoesColumnExist(dbConn, fieldName, tableName, modelDef.Schema);
+            return dialectProvider.DoesColumnExist(dbConn, fieldName, tableName, schema);
+        }
+        
+        /// <summary>
+        /// Create a DB Schema from the Schema attribute on the generic type. E.g:
+        /// <para>db.CreateSchema&lt;Person&gt;() //default</para> 
+        /// </summary>
+        public static void CreateSchema<T>(this IDbConnection dbConn)
+        {
+            dbConn.Exec(dbCmd => dbCmd.CreateSchema<T>());
+        }
+
+        /// <summary>
+        /// Create a DB Schema. E.g:
+        /// <para>db.CreateSchema("schemaName")</para> 
+        /// </summary>
+        public static bool CreateSchema(this IDbConnection dbConn, string schemaName)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.CreateSchema(schemaName));
         }
 
         /// <summary>

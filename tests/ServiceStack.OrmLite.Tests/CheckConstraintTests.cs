@@ -1,7 +1,6 @@
 ﻿using System;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -19,16 +18,20 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
-    public class CheckConstraintTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class CheckConstraintTests : OrmLiteProvidersTestBase
     {
+        public CheckConstraintTests(DialectContext context) : base(context) {}
+        
         [Test]
+        [IgnoreDialect(Dialect.MySql, new[]{ MySqlDb.V5_5, MySqlDb.V10_1 }, "Check constraints supported from MariaDb 10.2.1 onwards")]
         public void Does_create_table_with_CheckConstraints()
         {
-            if (Dialect == Dialect.MySql) return; //parsed but not supported http://stackoverflow.com/a/2115641/85785
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<CheckConstraintTest>();
+                
+                db.GetLastSql().Print();
 
                 try
                 {

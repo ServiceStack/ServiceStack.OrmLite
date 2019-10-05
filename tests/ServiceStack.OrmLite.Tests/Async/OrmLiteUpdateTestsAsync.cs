@@ -3,73 +3,16 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using ServiceStack.OrmLite.SqlServer;
-using ServiceStack.OrmLite.SqlServer.Converters;
 using ServiceStack.OrmLite.Tests.Models;
 using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    [Explicit, Ignore("TODO: Fix weird connection hanging issue with these tests")]
-    [TestFixture]
-    public class OrmLiteUpdateTestsAsync
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteUpdateTestsAsync : OrmLiteProvidersTestBase
     {
-        [OneTimeSetUp]
-        public void SetUp()
-        {
-            if (OrmLiteConfig.DialectProvider == SqlServerOrmLiteDialectProvider.Instance
-                || OrmLiteConfig.DialectProvider == SqlServer2012OrmLiteDialectProvider.Instance
-                || OrmLiteConfig.DialectProvider == SqlServer2014OrmLiteDialectProvider.Instance
-                || OrmLiteConfig.DialectProvider == SqlServer2016OrmLiteDialectProvider.Instance)
-                SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTime2Converter());
-        }
-
-        [OneTimeTearDown]
-        public void TearDown()
-        {
-            if (OrmLiteConfig.DialectProvider == SqlServerOrmLiteDialectProvider.Instance
-                || OrmLiteConfig.DialectProvider == SqlServer2012OrmLiteDialectProvider.Instance
-                || OrmLiteConfig.DialectProvider == SqlServer2014OrmLiteDialectProvider.Instance
-                || OrmLiteConfig.DialectProvider == SqlServer2016OrmLiteDialectProvider.Instance)
-                SqlServerDialect.Provider.RegisterConverter<DateTime>(new SqlServerDateTimeConverter());
-        }
-
-        [Test]
-        public async Task Supports_different_ways_to_UpdateOnly()
-        {
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<Person>();
-                await db.InsertAsync(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
-
-                await db.UpdateOnlyAsync(() => new Person { FirstName = "UpdatedFirst", Age = 27 });
-                var row = (await db.SelectAsync<Person>()).First();
-                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
-
-                await db.DeleteAllAsync<Person>();
-                await db.InsertAsync(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
-
-                await db.UpdateOnlyAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => p.FirstName);
-                row = (await db.SelectAsync<Person>()).First();
-                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 100)));
-
-                await db.DeleteAllAsync<Person>();
-                await db.InsertAsync(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
-
-                await db.UpdateOnlyAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => new { p.FirstName, p.Age });
-                row = (await db.SelectAsync<Person>()).First();
-                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
-
-                await db.DeleteAllAsync<Person>();
-                await db.InsertAsync(new Person { Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100 });
-
-                await db.UpdateOnlyAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, new[] { "FirstName", "Age" });
-                row = (await db.SelectAsync<Person>()).First();
-                Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
-            }
-        }
+        public OrmLiteUpdateTestsAsync(DialectContext context) : base(context) {}
 
         [Test]
         public async Task Can_filter_update_method1_to_insert_date()
@@ -78,26 +21,27 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db, 2);
 
-                ResetUpdateDateAsync(db);
-                await db.UpdateAsync(cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)),
-                    new DefaultValues { Id = 1, DefaultInt = 45 }, new DefaultValues { Id = 2, DefaultInt = 72 });
-                VerifyUpdateDateAsync(db);
-                VerifyUpdateDateAsync(db, id: 2);
+                await ResetUpdateDateAsync(db);
+                await db.UpdateAsync(
+                    cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider),
+                    new DefaultValuesUpdate {Id = 1, DefaultInt = 45 }, new DefaultValuesUpdate {Id = 2, DefaultInt = 72 });
+                await VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db, 2);
             }
         }
 
-        private async Task<DefaultValues> CreateAndInitializeAsync(IDbConnection db, int count = 1)
+        private async Task<DefaultValuesUpdate> CreateAndInitializeAsync(IDbConnection db, int count = 1)
         {
-            db.DropAndCreateTable<DefaultValues>();
+            db.DropAndCreateTable<DefaultValuesUpdate>();
             db.GetLastSql().Print();
 
-            DefaultValues firstRow = null;
+            DefaultValuesUpdate firstRow = null;
             for (var i = 1; i <= count; i++)
             {
-                var defaultValues = new DefaultValues { Id = i };
+                var defaultValues = new DefaultValuesUpdate { Id = i };
                 await db.InsertAsync(defaultValues);
 
-                var row = await db.SingleByIdAsync<DefaultValues>(1);
+                var row = await db.SingleByIdAsync<DefaultValuesUpdate>(1);
                 row.PrintDump();
                 Assert.That(row.DefaultInt, Is.EqualTo(1));
                 Assert.That(row.DefaultIntNoDefault, Is.EqualTo(0));
@@ -113,15 +57,15 @@ namespace ServiceStack.OrmLite.Tests.Async
             return firstRow;
         }
 
-        private static async void ResetUpdateDateAsync(IDbConnection db)
+        private async Task ResetUpdateDateAsync(IDbConnection db)
         {
             var updateTime = new DateTime(2011, 1, 1, 1, 1, 1, DateTimeKind.Utc);
-            await db.UpdateAsync<DefaultValues>(new { UpdatedDateUtc = updateTime }, p => p.Id == 1);
+            await db.UpdateAsync<DefaultValuesUpdate>(new { UpdatedDateUtc = updateTime }, p => p.Id == 1);
         }
 
-        private static async void VerifyUpdateDateAsync(IDbConnection db, int id = 1)
+        private async Task VerifyUpdateDateAsync(IDbConnection db, int id = 1)
         {
-            var row = await db.SingleByIdAsync<DefaultValues>(id);
+            var row = await db.SingleByIdAsync<DefaultValuesUpdate>(id);
             row.PrintDump();
             Assert.That(row.UpdatedDateUtc, Is.GreaterThan(DateTime.UtcNow - TimeSpan.FromMinutes(5)));
         }
@@ -133,10 +77,10 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
-                await db.UpdateAsync(new DefaultValues { Id = 1, DefaultInt = 2342 }, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
-                VerifyUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
+                await db.UpdateAsync(new DefaultValuesUpdate { Id = 1, DefaultInt = 2342 }, p => p.Id == 1,
+                    cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
+                await VerifyUpdateDateAsync(db);
             }
         }
 
@@ -147,12 +91,12 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
-                var row = await db.SingleByIdAsync<DefaultValues>(1);
+                await ResetUpdateDateAsync(db);
+                var row = await db.SingleByIdAsync<DefaultValuesUpdate>(1);
                 row.DefaultInt = 3245;
                 row.DefaultDouble = 978.423;
-                await db.UpdateAsync(row, cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
-                VerifyUpdateDateAsync(db);
+                await db.UpdateAsync(row, cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
+                await VerifyUpdateDateAsync(db);
             }
         }
 
@@ -163,10 +107,10 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
-                await db.UpdateAsync<DefaultValues>(new { DefaultInt = 765 }, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
-                VerifyUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
+                await db.UpdateAsync<DefaultValuesUpdate>(new { DefaultInt = 765 }, p => p.Id == 1,
+                    cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
+                await VerifyUpdateDateAsync(db);
             }
         }
 
@@ -177,11 +121,11 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db, 2);
 
-                ResetUpdateDateAsync(db);
-                db.UpdateAll(new[] { new DefaultValues { Id = 1, DefaultInt = 45 }, new DefaultValues { Id = 2, DefaultInt = 72 } },
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
-                VerifyUpdateDateAsync(db);
-                VerifyUpdateDateAsync(db, id: 2);
+                await ResetUpdateDateAsync(db);
+                db.UpdateAll(new[] { new DefaultValuesUpdate { Id = 1, DefaultInt = 45 }, new DefaultValuesUpdate { Id = 2, DefaultInt = 72 } },
+                    cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
+                await VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db, 2);
             }
         }
 
@@ -192,10 +136,10 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
-                db.UpdateOnly(() => new DefaultValues { DefaultInt = 345 }, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
-                VerifyUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
+                db.UpdateOnly(() => new DefaultValuesUpdate { DefaultInt = 345 }, p => p.Id == 1,
+                    cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
+                await VerifyUpdateDateAsync(db);
             }
         }
 
@@ -206,10 +150,24 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
-                await db.UpdateOnlyAsync(() => new DefaultValues { DefaultInt = 345 }, db.From<DefaultValues>().Where(p => p.Id == 1),
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
-                VerifyUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
+                await db.UpdateOnlyAsync(() => new DefaultValuesUpdate { DefaultInt = 345 }, db.From<DefaultValuesUpdate>().Where(p => p.Id == 1),
+                    cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
+                await VerifyUpdateDateAsync(db);
+            }
+        }
+        
+        [Test]
+        public async Task Can_filter_MySql_updateOnly_method2_to_insert_date()
+        {
+            using (var db = OpenDbConnection())
+            {
+                await CreateAndInitializeAsync(db);
+
+                await ResetUpdateDateAsync(db);
+                await db.UpdateOnlyAsync(() => new DefaultValuesUpdate { DefaultInt = 345 }, db.From<DefaultValuesUpdate>().Where(p => p.Id == 1),
+                    cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
+                await VerifyUpdateDateAsync(db);
             }
         }
 
@@ -220,12 +178,12 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
-                var row = await db.SingleByIdAsync<DefaultValues>(1);
+                await ResetUpdateDateAsync(db);
+                var row = await db.SingleByIdAsync<DefaultValuesUpdate>(1);
                 row.DefaultDouble = 978.423;
-                await db.UpdateOnlyAsync(row, db.From<DefaultValues>().Update(p => p.DefaultDouble),
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
-                VerifyUpdateDateAsync(db);
+                await db.UpdateOnlyAsync(row, db.From<DefaultValuesUpdate>().Update(p => p.DefaultDouble),
+                    cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
+                await VerifyUpdateDateAsync(db);
             }
         }
 
@@ -236,12 +194,12 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
-                var row = await db.SingleByIdAsync<DefaultValues>(1);
+                await ResetUpdateDateAsync(db);
+                var row = await db.SingleByIdAsync<DefaultValuesUpdate>(1);
                 row.DefaultDouble = 978.423;
                 await db.UpdateOnlyAsync(row, p => p.DefaultDouble, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
-                VerifyUpdateDateAsync(db);
+                    cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
+                await VerifyUpdateDateAsync(db);
             }
         }
 
@@ -252,12 +210,12 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
-                var row = await db.SingleByIdAsync<DefaultValues>(1);
+                await ResetUpdateDateAsync(db);
+                var row = await db.SingleByIdAsync<DefaultValuesUpdate>(1);
                 row.DefaultDouble = 978.423;
-                await db.UpdateOnlyAsync(row, new[] { nameof(DefaultValues.DefaultDouble) }, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
-                VerifyUpdateDateAsync(db);
+                await db.UpdateOnlyAsync(row, new[] { nameof(DefaultValuesUpdate.DefaultDouble) }, p => p.Id == 1,
+                    cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
+                await VerifyUpdateDateAsync(db);
             }
         }
 
@@ -268,38 +226,89 @@ namespace ServiceStack.OrmLite.Tests.Async
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
 
-                var count = await db.UpdateAddAsync(() => new DefaultValues { DefaultInt = 5, DefaultDouble = 7.2 }, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
+                var count = await db.UpdateAddAsync(() => new DefaultValuesUpdate { DefaultInt = 5, DefaultDouble = 7.2 }, p => p.Id == 1,
+                    cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
 
                 Assert.That(count, Is.EqualTo(1));
-                var row = await db.SingleByIdAsync<DefaultValues>(1);
+                var row = await db.SingleByIdAsync<DefaultValuesUpdate>(1);
                 Assert.That(row.DefaultInt, Is.EqualTo(6));
                 Assert.That(row.DefaultDouble, Is.EqualTo(8.3).Within(0.1));
-                VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db);
             }
         }
 
         [Test]
-        public async Task Can_filter_updateAdd_sqlexpression_to_insert_date()
+        public async Task Can_filter_updateAdd_SqlExpression_to_insert_date()
         {
             using (var db = OpenDbConnection())
             {
                 await CreateAndInitializeAsync(db);
 
-                ResetUpdateDateAsync(db);
+                await ResetUpdateDateAsync(db);
 
-                var where = db.From<DefaultValues>().Where(p => p.Id == 1);
-                var count = await db.UpdateAddAsync(() => new DefaultValues { DefaultInt = 5, DefaultDouble = 7.2 }, where,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc)));
+                var where = db.From<DefaultValuesUpdate>().Where(p => p.Id == 1);
+                var count = await db.UpdateAddAsync(() => new DefaultValuesUpdate { DefaultInt = 5, DefaultDouble = 7.2 }, where,
+                    cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
 
                 Assert.That(count, Is.EqualTo(1));
-                var row = await db.SingleByIdAsync<DefaultValues>(1);
+                var row = await db.SingleByIdAsync<DefaultValuesUpdate>(1);
                 Assert.That(row.DefaultInt, Is.EqualTo(6));
                 Assert.That(row.DefaultDouble, Is.EqualTo(8.3).Within(0.1));
-                VerifyUpdateDateAsync(db);
+                await VerifyUpdateDateAsync(db);
             }
+        }
+        
+        [Test]
+        public async Task Can_updated_with_ExecuteSql_and_db_params_Async()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<PocoUpdateAsync>();
+
+                db.Insert(new PocoUpdateAsync { Id = 1, Name = "A" });
+                db.Insert(new PocoUpdateAsync { Id = 2, Name = "B" });
+
+                var result = await db.ExecuteSqlAsync($"UPDATE {DialectProvider.GetQuotedTableName("PocoUpdateAsync")} SET name = @name WHERE id = @id", new { id = 2, name = "UPDATED" });
+                Assert.That(result, Is.EqualTo(1));
+
+                var row = await db.SingleByIdAsync<PocoUpdateAsync>(2);
+                Assert.That(row.Name, Is.EqualTo("UPDATED"));
+            }
+        }
+
+        [Test]
+        public async Task Does_UpdateAdd_using_AssignmentExpression_async()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                await db.InsertAllAsync(Person.Rockstars);
+
+                var count = await db.UpdateAddAsync(() => new Person { FirstName = "JJ", Age = 1 }, where: p => p.LastName == "Hendrix");
+                Assert.That(count, Is.EqualTo(1));
+
+                var hendrix = Person.Rockstars.First(x => x.LastName == "Hendrix");
+                var kurt = Person.Rockstars.First(x => x.LastName == "Cobain");
+
+                var row = await db.SingleAsync<Person>(p => p.LastName == "Hendrix");
+                Assert.That(row.FirstName, Is.EqualTo("JJ"));
+                Assert.That(row.Age, Is.EqualTo(hendrix.Age + 1));
+
+                count = await db.UpdateAddAsync(() => new Person { FirstName = "KC", Age = hendrix.Age + 1 }, where: p => p.LastName == "Cobain");
+                Assert.That(count, Is.EqualTo(1));
+
+                row = await db.SingleAsync<Person>(p => p.LastName == "Cobain");
+                Assert.That(row.FirstName, Is.EqualTo("KC"));
+                Assert.That(row.Age, Is.EqualTo(kurt.Age + hendrix.Age + 1));
+            }
+        }
+        
+        public class PocoUpdateAsync
+        {
+            public int Id { get; set; }
+            public string Name { get; set; }
         }
     }
 }

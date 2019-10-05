@@ -1,19 +1,19 @@
 using System.Globalization;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
 
-    [TestFixture]
-    public class OrmLiteCreateTableWithNamingStrategyTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteCreateTableWithNamingStrategyTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteCreateTableWithNamingStrategyTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_create_TableWithNamingStrategy_table_prefix()
         {
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -23,7 +23,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_TableWithNamingStrategy_table_lowered()
         {
-            using (new TemporaryNamingStrategy(new LowercaseNamingStrategy()))
+            using (new TemporaryNamingStrategy(DialectProvider, new LowercaseNamingStrategy()))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -32,9 +32,9 @@ namespace ServiceStack.OrmLite.Tests
 
 
         [Test]
-        public void Can_create_TableWithNamingStrategy_table_nameUnderscoreCoumpound()
+        public void Can_create_TableWithNamingStrategy_table_nameUnderscoreCompound()
         {
-            using (new TemporaryNamingStrategy(new UnderscoreSeparatedCompoundNamingStrategy()))
+            using (new TemporaryNamingStrategy(DialectProvider, new UnderscoreSeparatedCompoundNamingStrategy()))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -50,21 +50,18 @@ namespace ServiceStack.OrmLite.Tests
                 ColumnAliases = { { "Name", "ColumnAlias" } },
             };
 
-            using (new TemporaryNamingStrategy(aliasNamingStrategy))
+            using (new TemporaryNamingStrategy(DialectProvider, aliasNamingStrategy))
             using (var db = OpenDbConnection())
             {
-                db.CreateTable<ModelWithOnlyStringFields>(true);
+                db.DropAndCreateTable<ModelWithOnlyStringFields>();
 
                 var sql = db.GetLastSql().NormalizeSql();
                 Assert.That(sql, Does.Contain("CREATE TABLE TableAlias".NormalizeSql()));
                 Assert.That(sql, Does.Contain("ColumnAlias".NormalizeSql()));
 
                 var result = db.SqlList<ModelWithIdAndName>(
-                    "SELECT * FROM {0} WHERE {1} = {2}"
-                        .Fmt("ModelWithOnlyStringFields".SqlTable(),
-                             "Name".SqlColumn(),
-                             "foo".SqlValue()));
-
+                    $"SELECT * FROM {"ModelWithOnlyStringFields".SqlTable(DialectProvider)} WHERE {"Name".SqlColumn(DialectProvider)} = 'foo'");
+                
                 Assert.That(db.GetLastSql().NormalizeSql(),
                     Is.EqualTo("SELECT * FROM TableAlias WHERE ColumnAlias = 'foo'".NormalizeSql()));
 
@@ -82,7 +79,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_get_data_from_TableWithNamingStrategy_with_GetById()
         {
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -99,7 +96,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_get_data_from_TableWithNamingStrategy_with_query_by_example()
         {
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -115,7 +112,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_get_data_from_TableWithUnderscoreSeparatedCompoundNamingStrategy_with_ReadConnectionExtension()
         {
-            using (new TemporaryNamingStrategy(new UnderscoreSeparatedCompoundNamingStrategy()))
+            using (new TemporaryNamingStrategy(DialectProvider, new UnderscoreSeparatedCompoundNamingStrategy()))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -135,22 +132,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_get_data_from_TableWithNamingStrategy_AfterChangingNamingStrategy()
         {
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
-            using (var db = OpenDbConnection())
-            {
-                db.CreateTable<ModelWithOnlyStringFields>(true);
-                var m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
-
-                db.Save(m);
-                var modelFromDb = db.Where<ModelWithOnlyStringFields>(new { Name = "QueryByExample" })[0];
-
-                Assert.AreEqual(m.Name, modelFromDb.Name);
-
-                modelFromDb = db.SingleById<ModelWithOnlyStringFields>("998");
-                Assert.AreEqual(m.Name, modelFromDb.Name);
-
-            }
-
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
@@ -165,11 +147,25 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.AreEqual(m.Name, modelFromDb.Name);
             }
 
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
             using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
                 var m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
+
+                db.Save(m);
+                var modelFromDb = db.Where<ModelWithOnlyStringFields>(new { Name = "QueryByExample" })[0];
+
+                Assert.AreEqual(m.Name, modelFromDb.Name);
+
+                modelFromDb = db.SingleById<ModelWithOnlyStringFields>("998");
+                Assert.AreEqual(m.Name, modelFromDb.Name);
+            }
+
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<ModelWithOnlyStringFields>(true);
+                var m = new ModelWithOnlyStringFields { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
 
                 db.Save(m);
                 var modelFromDb = db.Where<ModelWithOnlyStringFields>(new { Name = "QueryByExample" })[0];

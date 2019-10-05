@@ -13,7 +13,9 @@ namespace ServiceStack.OrmLite.Dapper
 
         public void SetValue(IDbDataParameter parameter, object value)
         {
+#if SQLCLIENT        
             SqlDataRecordListTVPParameter.Set(parameter, value as IEnumerable<Microsoft.SqlServer.Server.SqlDataRecord>, null);
+#endif
         }
     }
 }

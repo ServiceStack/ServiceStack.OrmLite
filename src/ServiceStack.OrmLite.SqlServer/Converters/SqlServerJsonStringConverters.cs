@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Data;
-using System.Data.SqlClient;
-using ServiceStack.DataAnnotations;
-using ServiceStack.OrmLite.Converters;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.SqlServer.Converters
@@ -12,7 +8,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
 		// json string to object
 		public override object FromDbValue(Type fieldType, object value)
 		{
-			if (value is string raw && fieldType.HasAttribute<SqlJsonAttribute>())
+			if (value is string raw && fieldType.HasAttributeCached<SqlJsonAttribute>())
 				return JsonSerializer.DeserializeFromString(raw, fieldType);
 
 			return base.FromDbValue(fieldType, value);
@@ -21,7 +17,7 @@ namespace ServiceStack.OrmLite.SqlServer.Converters
 		// object to json string
 		public override object ToDbValue(Type fieldType, object value)
 		{
-			if (value.GetType().HasAttribute<SqlJsonAttribute>())
+			if (value.GetType().HasAttributeCached<SqlJsonAttribute>())
 				return JsonSerializer.SerializeToString(value, value.GetType());
 
 			return base.ToDbValue(fieldType, value);

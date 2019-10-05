@@ -34,10 +34,11 @@ namespace ServiceStack.OrmLite.Tests
         public string ModifiedBy { get; set; }
     }
 
-    [TestFixture]
-    public class OrmLiteFiltersTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteFiltersTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteFiltersTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Does_call_Filters_on_insert_and_update()
         {

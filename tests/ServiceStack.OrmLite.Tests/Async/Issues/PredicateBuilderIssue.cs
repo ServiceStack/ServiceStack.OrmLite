@@ -3,8 +3,11 @@ using NUnit.Framework;
 
 namespace ServiceStack.OrmLite.Tests.Async.Issues
 {
-    public class PredicateBuilderIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class PredicateBuilderIssue : OrmLiteProvidersTestBase
     {
+        public PredicateBuilderIssue(DialectContext context) : base(context) {}
+
         public class ItemList
         {
             public int Id { get; set; }

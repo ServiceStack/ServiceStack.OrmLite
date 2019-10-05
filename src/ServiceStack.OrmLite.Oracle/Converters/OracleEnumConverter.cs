@@ -8,7 +8,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
     {
         public override string ToQuotedString(Type fieldType, object value)
         {
-            if (fieldType.HasAttribute<EnumAsIntAttribute>())
+            if (fieldType.HasAttributeCached<EnumAsIntAttribute>())
             {
                 return this.ConvertNumber(fieldType.GetEnumUnderlyingType(), value).ToString();
             }
@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.Oracle.Converters
                 value = fieldType.GetEnumName(value);
             }
 
-            if (fieldType.HasAttribute<EnumAsIntAttribute>())
+            if (fieldType.HasAttributeCached<EnumAsIntAttribute>())
             {
                 if (value is string)
                 {

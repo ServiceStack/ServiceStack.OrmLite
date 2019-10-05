@@ -1,6 +1,5 @@
 ﻿using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -16,14 +15,14 @@ namespace ServiceStack.OrmLite.Tests.Issues
     }
 
 
-    [TestFixture]
-    public class ParamNameIssues : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ParamNameIssues : OrmLiteProvidersTestBase
     {
+        public ParamNameIssues(DialectContext context) : base(context) {}
+
         [Test]
         public void Does_use_ParamName_filter()
         {
-            LogManager.LogFactory = new ConsoleLogFactory();
-
             OrmLiteConfig.ParamNameFilter = name => name.Replace("-", "");
 
             using (var db = OpenDbConnection())

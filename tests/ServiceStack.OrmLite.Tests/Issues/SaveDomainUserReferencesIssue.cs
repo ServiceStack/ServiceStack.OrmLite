@@ -51,10 +51,11 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
     }
 
-    [TestFixture]
-    public class SaveDomainUserReferencesIssue
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SaveDomainUserReferencesIssue : OrmLiteProvidersTestBase
     {
+        public SaveDomainUserReferencesIssue(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_save_DomainUser_references()
         {

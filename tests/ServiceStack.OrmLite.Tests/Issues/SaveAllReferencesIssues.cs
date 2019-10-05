@@ -2,12 +2,14 @@
 using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class SaveAllReferencesIssues : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SaveAllReferencesIssues : OrmLiteProvidersTestBase
     {
+        public SaveAllReferencesIssues(DialectContext context) : base(context) {}
+
         public class BranchRef
         {
             [AutoId]
@@ -57,8 +59,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_use_Save_References_with_ForeignKey()
         {
-            OrmLiteConfig.BeforeExecFilter = cmd => cmd.GetDebugString().Print();
-            
             using (var db = OpenDbConnection())
             {
                 CreateRefTables(db);
@@ -131,8 +131,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_use_Save_References_with_ForeignKey_using_Self_Reference_Id()
         {
-            OrmLiteConfig.BeforeExecFilter = cmd => cmd.GetDebugString().Print();
-            
             using (var db = OpenDbConnection())
             {
                 CreateSelfRefTables(db);

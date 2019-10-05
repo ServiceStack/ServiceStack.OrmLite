@@ -1,5 +1,3 @@
-using System;
-
 namespace ServiceStack.Common.Tests.Models
 {
     public class ModelWithFieldsOfDifferentTypesFactory

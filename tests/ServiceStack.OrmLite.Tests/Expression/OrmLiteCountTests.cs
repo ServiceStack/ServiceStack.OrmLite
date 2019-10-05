@@ -8,9 +8,11 @@ using ServiceStack.Model;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    [TestFixture]
-    public class OrmLiteCountTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteCountTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteCountTests(DialectContext context) : base(context) {}
+
         [Test]
         public void CanDoCountWithInterface()
         {

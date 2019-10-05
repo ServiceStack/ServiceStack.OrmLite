@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite
 {
     internal static class OrmLiteReadCommandExtensionsAsync
     {
-        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensionsAsync));
+        internal static ILog Log = LogManager.GetLogger(typeof(OrmLiteReadCommandExtensionsAsync));
 
         internal static Task<IDataReader> ExecReaderAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
@@ -213,10 +213,10 @@ namespace ServiceStack.OrmLite
                 OrmLiteReadCommandExtensions.ToScalar<T>(dialectProvider, reader), token);
         }
 
-        public static Task<long> LongScalarAsync(this IDbCommand dbCmd, CancellationToken token)
+        public static async Task<long> LongScalarAsync(this IDbCommand dbCmd, CancellationToken token)
         {
-            return dbCmd.GetDialectProvider().ExecuteScalarAsync(dbCmd, token)
-                .Then(OrmLiteReadCommandExtensions.ToLong);
+            var ret = await dbCmd.GetDialectProvider().ExecuteScalarAsync(dbCmd, token);
+            return OrmLiteReadCommandExtensions.ToLong(ret);
         }
 
         internal static Task<List<T>> ColumnAsync<T>(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
@@ -226,19 +226,17 @@ namespace ServiceStack.OrmLite
             return dbCmd.ColumnAsync<T>(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql), token);
         }
 
-        internal static Task<List<T>> ColumnAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
+        internal static async Task<List<T>> ColumnAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
         {
-            return dialectProvider.ReaderEach(reader, () =>
+            var ret = await dialectProvider.ReaderEach(reader, () =>
             {
                 var value = dialectProvider.FromDbValue(reader, 0, typeof(T));
                 return value == DBNull.Value ? default(T) : value;
-            }, token)
-            .Then(x =>
-            {
-                var columValues = new List<T>();
-                x.Each(o => columValues.Add((T)o));
-                return columValues;
-            });
+            }, token);
+                
+            var columnValues = new List<T>();
+            ret.Each(o => columnValues.Add((T)o));
+            return columnValues;
         }
 
         internal static Task<HashSet<T>> ColumnDistinctAsync<T>(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
@@ -248,19 +246,17 @@ namespace ServiceStack.OrmLite
             return dbCmd.ColumnDistinctAsync<T>(sql, token);
         }
 
-        internal static Task<HashSet<T>> ColumnDistinctAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
+        internal static async Task<HashSet<T>> ColumnDistinctAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
         {
-            return dialectProvider.ReaderEach(reader, () =>
+            var ret = await dialectProvider.ReaderEach(reader, () =>
             {
                 var value = dialectProvider.FromDbValue(reader, 0, typeof(T));
                 return value == DBNull.Value ? default(T) : value;
-            }, token)
-            .Then(x =>
-            {
-                var columValues = new HashSet<T>();
-                x.Each(o => columValues.Add((T)o));
-                return columValues;
-            });
+            }, token);
+                
+            var columnValues = new HashSet<T>();
+            ret.Each(o => columnValues.Add((T)o));
+            return columnValues;
         }
 
         internal static Task<Dictionary<K, List<V>>> LookupAsync<K, V>(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
@@ -309,22 +305,43 @@ namespace ServiceStack.OrmLite
             }, map, token);
         }
 
-        internal static Task<bool> ExistsAsync<T>(this IDbCommand dbCmd, object anonType, CancellationToken token)
+        internal static Task<List<KeyValuePair<K, V>>> KeyValuePairsAsync<K, V>(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
+        {
+            if (anonType != null) 
+                dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false, sql:ref sql);
+
+            return dbCmd.KeyValuePairsAsync<K, V>(sql, token);
+        }
+
+        internal static Task<List<KeyValuePair<K, V>>> KeyValuePairsAsync<K, V>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, CancellationToken token)
+        {
+            var to = new List<KeyValuePair<K, V>>();
+
+            return dialectProvider.ReaderEach(reader, () =>
+            {
+                var key = (K)dialectProvider.FromDbValue(reader, 0, typeof(K));
+                var value = (V)dialectProvider.FromDbValue(reader, 1, typeof(V));
+                to.Add(new KeyValuePair<K, V>(key, value));
+            }, to, token);
+        }
+
+        internal static async Task<bool> ExistsAsync<T>(this IDbCommand dbCmd, object anonType, CancellationToken token)
         {
             string sql = null;
             if (anonType != null) dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: true, sql:ref sql);
 
             sql = dbCmd.GetFilterSql<T>();
 
-            return dbCmd.ScalarAsync(sql, token).Then(x => x != null);
+            var ret = await dbCmd.ScalarAsync(sql, token);
+            return ret != null;
         }
 
-        internal static Task<bool> ExistsAsync<T>(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
+        internal static async Task<bool> ExistsAsync<T>(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
         {
             if (anonType != null) dbCmd.SetParameters(anonType.ToObjectDictionary(), (bool)false, sql:ref sql);
 
-            return dbCmd.ScalarAsync(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql), token)
-                .Then(x => x != null);
+            var ret = await dbCmd.ScalarAsync(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql), token);
+            return ret != null;
         }
 
         // procedures ...		

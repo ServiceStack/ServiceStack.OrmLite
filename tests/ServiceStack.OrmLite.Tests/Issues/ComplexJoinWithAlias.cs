@@ -24,10 +24,11 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public string ColumnB { get; set; }
     }
 
-    [TestFixture]
-    public class ComplexJoinWithAlias
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ComplexJoinWithAlias : OrmLiteProvidersTestBase
     {
+        public ComplexJoinWithAlias(DialectContext context) : base(context) {}
+
         private static long _classAColumnAId;
 
         private static void Init(IDbConnection db)

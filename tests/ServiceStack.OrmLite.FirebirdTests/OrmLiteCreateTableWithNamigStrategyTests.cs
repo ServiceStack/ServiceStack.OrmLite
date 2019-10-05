@@ -7,26 +7,26 @@ using ServiceStack.OrmLite.Tests;
 namespace ServiceStack.OrmLite.FirebirdTests
 {
 
-	[TestFixture]
-	public class OrmLiteCreateTableWithNamigStrategyTests 
-		: OrmLiteTestBase
+	[TestFixtureOrmLiteDialects(Dialect.Firebird)]
+	public class OrmLiteCreateTableWithNamingStrategyTests : OrmLiteProvidersTestBase 
 	{
-		
+		public OrmLiteCreateTableWithNamingStrategyTests(DialectContext context) : base(context) {}
+
 		[Test]
-		public void Can_create_TableWithNamigStrategy_table_nameUnderscoreCoumpound()
+		public void Can_create_TableWithNamingStrategy_table_nameUnderscoreCompound()
 		{
-            using (new TemporaryNamingStrategy(new UnderscoreSeparatedCompoundNamingStrategy()))
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            using (new TemporaryNamingStrategy(DialectProvider, new UnderscoreSeparatedCompoundNamingStrategy()))
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
             }
 		}
 		 
 		[Test]
-		public void Can_get_data_from_TableWithNamigStrategy_with_GetById()
+		public void Can_get_data_from_TableWithNamingStrategy_with_GetById()
 		{
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+            using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id= "999", AlbumId = "112", AlbumName="ElectroShip", Name = "MyNameIsBatman"};
@@ -40,10 +40,10 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
 
 		[Test]
-		public void Can_get_data_from_TableWithNamigStrategy_with_query_by_example()
+		public void Can_get_data_from_TableWithNamingStrategy_with_query_by_example()
 		{			
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+            using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
@@ -56,10 +56,10 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		}
 		
 		[Test]
-		public void Can_get_data_from_TableWithNamigStrategy_AfterChangingNamingStrategy()
+		public void Can_get_data_from_TableWithNamingStrategy_AfterChangingNamingStrategy()
 		{
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+            using (var db = OpenDbConnection())
             {
                 db.CreateTable<ModelWithOnlyStringFields>(true);
                 ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
@@ -74,7 +74,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
             }
 			
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };
@@ -89,8 +89,8 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				
 			}
 			
-            using (new TemporaryNamingStrategy(new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+            using (new TemporaryNamingStrategy(DialectProvider, new PrefixNamingStrategy { TablePrefix = "tab_", ColumnPrefix = "col_" }))
+            using (var db = OpenDbConnection())
 			{
 				db.CreateTable<ModelWithOnlyStringFields>(true);
 				ModelWithOnlyStringFields m = new ModelWithOnlyStringFields() { Id = "998", AlbumId = "112", AlbumName = "ElectroShip", Name = "QueryByExample" };

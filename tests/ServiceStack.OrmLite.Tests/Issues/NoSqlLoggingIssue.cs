@@ -4,12 +4,16 @@ using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class NoSqlLoggingIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class NoSqlLoggingIssue : OrmLiteProvidersTestBase
     {
+        public NoSqlLoggingIssue(DialectContext context) : base(context) {}
+
         [Test]
         public void Does_log_SQL_Insert_for_Saves()
         {
             var sbLogFactory = new StringBuilderLogFactory();
+            var hold = LogManager.LogFactory;
             OrmLiteConfig.ResetLogFactory(sbLogFactory);
 
             using (var db = OpenDbConnection())
@@ -22,13 +26,14 @@ namespace ServiceStack.OrmLite.Tests.Issues
             var sql = sbLogFactory.GetLogs();
 
             Assert.That(sql, Does.Contain("INSERT INTO"));
-            OrmLiteConfig.ResetLogFactory(null);
+            OrmLiteConfig.ResetLogFactory(hold);
         }
 
         [Test]
         public void Does_log_SQL_Insert_for_Saves_with_Auto_Ids()
         {
             var sbLogFactory = new StringBuilderLogFactory();
+            var hold = LogManager.LogFactory;
             OrmLiteConfig.ResetLogFactory(sbLogFactory);
 
             using (var db = OpenDbConnection())
@@ -41,7 +46,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
             var sql = sbLogFactory.GetLogs();
 
             Assert.That(sql, Does.Contain("INSERT INTO"));
-            OrmLiteConfig.ResetLogFactory(null);
+            OrmLiteConfig.ResetLogFactory(hold);
         }
     }
 }

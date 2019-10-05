@@ -113,11 +113,15 @@ namespace ServiceStack.OrmLite
                 return filter(dbCmd)
                     .ContinueWith(t =>
                     {
-                        DisposeCommand(dbCmd, dbConn);
-
                         if (t.IsFaulted)
-                            throw t.Exception.UnwrapIfSingleException();
+                        {
+                            var ex = t.Exception.UnwrapIfSingleException(); 
+                            OrmLiteConfig.ExceptionFilter?.Invoke(dbCmd, ex);
+                            DisposeCommand(dbCmd, dbConn);
+                            throw ex;
+                        }
 
+                        DisposeCommand(dbCmd, dbConn);
                         return t.Result;
                     });
             }
@@ -142,6 +146,14 @@ namespace ServiceStack.OrmLite
             return filter(dbCmd)
                 .Then(t =>
                 {
+                    if (t.IsFaulted)
+                    {
+                        var ex = t.Exception.UnwrapIfSingleException(); 
+                        OrmLiteConfig.ExceptionFilter?.Invoke(dbCmd, ex);
+                        DisposeCommand(dbCmd, dbConn);
+                        throw ex;
+                    }
+
                     DisposeCommand(dbCmd, dbConn);
                     return t;
                 });

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using NUnit.Framework;
-using ServiceStack.OrmLite.Tests.Shared;
+﻿using NUnit.Framework;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
@@ -15,9 +9,11 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public int Value { get; set; }
     }
 
-    [TestFixture]
-    public class MergeParamsIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class MergeParamsIssue : OrmLiteProvidersTestBase
     {
+        public MergeParamsIssue(DialectContext context) : base(context) {}
+
         [Test]
         public void Does_merge_params_correctly()
         {
@@ -49,7 +45,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
                 for (var i = 0; i < 11; i++)
                 {
-                    Assert.That(expression, Does.Contain(db.GetDialectProvider().ParamString + i));
+                    Assert.That(expression, Does.Contain(DialectProvider.ParamString + i));
                 }
             }
         }

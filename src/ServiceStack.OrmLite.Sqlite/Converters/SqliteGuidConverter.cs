@@ -7,10 +7,7 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
 {
     public class SqliteGuidConverter : GuidConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "CHAR(36)"; }
-        }
+        public override string ColumnDefinition => "CHAR(36)";
 
         public override string ToQuotedString(Type fieldType, object value)
         {
