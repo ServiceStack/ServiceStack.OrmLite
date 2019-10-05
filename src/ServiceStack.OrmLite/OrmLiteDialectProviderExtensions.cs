@@ -46,10 +46,32 @@ namespace ServiceStack.OrmLite
         }
 
         public static string GetQuotedColumnName(this IOrmLiteDialectProvider dialect,
+            ModelDefinition tableDef, string tableAlias, FieldDefinition fieldDef)
+        {
+            if (tableAlias == null)
+                return dialect.GetQuotedColumnName(tableDef, fieldDef);
+            
+            return dialect.GetQuotedTableName(tableAlias) //aliases shouldn't have schemas
+                   + "." +
+                   dialect.GetQuotedColumnName(fieldDef.FieldName);
+        }
+
+        public static string GetQuotedColumnName(this IOrmLiteDialectProvider dialect,
             ModelDefinition tableDef, string fieldName)
         {
             return dialect.GetQuotedTableName(tableDef) +
-                "." +
+                   "." +
+                   dialect.GetQuotedColumnName(fieldName);
+        }
+
+        public static string GetQuotedColumnName(this IOrmLiteDialectProvider dialect,
+            ModelDefinition tableDef, string tableAlias, string fieldName)
+        {
+            if (tableAlias == null)
+                return dialect.GetQuotedColumnName(tableDef, fieldName);
+            
+            return dialect.GetQuotedTableName(tableAlias) //aliases shouldn't have schemas 
+                + "." +
                 dialect.GetQuotedColumnName(fieldName);
         }
 

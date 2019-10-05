@@ -6,8 +6,7 @@ using ServiceStack.OrmLite.Firebird;
 namespace ServiceStack.OrmLite.FirebirdTests
 {
 	[TestFixture]
-	public class OrmLiteCreateTableTests 
-		: OrmLiteTestBase
+	public class OrmLiteCreateTableTests : OrmLiteTestBase
 	{
 		[Test]
 		public void Does_table_Exists()

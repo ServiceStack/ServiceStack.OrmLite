@@ -4,10 +4,11 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class ToInsertAndUpdateStatementTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ToInsertAndUpdateStatementTests : OrmLiteProvidersTestBase
     {
+        public ToInsertAndUpdateStatementTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_use_ToUpdateStatement_to_generate_inline_SQL()
         {

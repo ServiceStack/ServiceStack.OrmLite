@@ -4,7 +4,6 @@ using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests.UseCase;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -28,8 +27,11 @@ namespace ServiceStack.OrmLite.Tests
         public Guid VendorId { get; set; }
     }
 
-    public class SoftDeleteTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SoftDeleteTests : OrmLiteProvidersTestBase
     {
+        public SoftDeleteTests(DialectContext context) : base(context) {}
+
         private static void InitData(IDbConnection db)
         {
             db.DropTable<Product>();
@@ -137,8 +139,8 @@ namespace ServiceStack.OrmLite.Tests
                 var meta = type.GetModelMetadata();
                 if (type.HasInterface(typeof(ISoftDelete)))
                 {
-                    var sqlFalse = OrmLiteConfig.DialectProvider.SqlBool(false);
-                    sql += $" AND ({meta.ModelName.SqlTable()}.{"IsDeleted".SqlColumn()} = {sqlFalse})";
+                    var sqlFalse = DialectProvider.SqlBool(false);
+                    sql += $" AND ({meta.ModelName.SqlTable(DialectProvider)}.{"IsDeleted".SqlColumn(DialectProvider)} = {sqlFalse})";
                 }
 
                 return sql;
@@ -167,8 +169,8 @@ namespace ServiceStack.OrmLite.Tests
                 var meta = type.GetModelMetadata();
                 if (type.HasInterface(typeof(ISoftDelete)))
                 {
-                    var sqlFalse = OrmLiteConfig.DialectProvider.SqlBool(false);
-                    sql += $" AND ({meta.ModelName.SqlTable()}.{"IsDeleted".SqlColumn()} = {sqlFalse})";
+                    var sqlFalse = DialectProvider.SqlBool(false);
+                    sql += $" AND ({meta.ModelName.SqlTable(DialectProvider)}.{"IsDeleted".SqlColumn(DialectProvider)} = {sqlFalse})";
                 }
 
                 return sql;

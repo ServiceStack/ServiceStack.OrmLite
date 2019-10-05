@@ -2,9 +2,11 @@
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    [TestFixture]
-    public class ExpressionTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ExpressionTests : OrmLiteProvidersTestBase
     {
+        public ExpressionTests(DialectContext context) : base(context) {}
+
         public class Person
         {
             public Person() {}

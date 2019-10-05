@@ -3,9 +3,10 @@ using ServiceStack.Common.Tests.Models;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class GeneratedSqlIssues : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class GeneratedSqlIssues : OrmLiteProvidersTestBase
     {
-        public GeneratedSqlIssues() : base(Dialect.SqlServer2012) {}
+        public GeneratedSqlIssues(DialectContext context) : base(context) {}
 
         [Test]
         public void Does_generate_valid_sql_when_param_contains_dollar_char()
@@ -19,10 +20,8 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 };
 
                 var sql = db.ToUpdateStatement(model);
-                Assert.That(sql, Is.EqualTo("UPDATE \"Poco\" SET \"Name\"='Guest$' WHERE \"Id\"=1"));
+                Assert.That(sql, Is.EqualTo($"UPDATE {DialectProvider.GetQuotedTableName("Poco")} SET {DialectProvider.GetQuotedColumnName("Name")}='Guest$' WHERE {DialectProvider.GetQuotedColumnName("Id")}=1"));
             }
-
         }
-
     }
 }

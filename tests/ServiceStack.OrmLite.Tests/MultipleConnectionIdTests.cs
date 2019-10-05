@@ -8,14 +8,16 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class MultipleConnectionIdTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class MultipleConnectionIdTests : OrmLiteProvidersTestBase
     {
+        public MultipleConnectionIdTests(DialectContext context) : base(context) {}
+
         private int _waitingThreadCount;
         private int _waitingThreadsReleasedCounter;
 
-        [SetUp]
-        public void SetUp()
+        [OneTimeSetUp]
+        public void OneTimeSetUp()
         {
             using (var db = OpenDbConnection())
             {
@@ -24,10 +26,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Dialect.Sqlite, "doesn't support concurrent writers")]
         public void TwoSimultaneousInsertsGetDifferentIds()
         {
-            if (Dialect == Dialect.Sqlite) return; // Sqlite doesn't support concurrent writers
-
             var dataArray = new[]
             {
                 new MultipleConnection {Data = "one"},
@@ -37,10 +38,12 @@ namespace ServiceStack.OrmLite.Tests
             var originalExecFilter = OrmLiteConfig.ExecFilter;
             try
             {
-                OrmLiteConfig.ExecFilter = new PostExecuteActionExecFilter(originalExecFilter, cmd => PauseForOtherThreadsAfterInserts(cmd, 2));
-
-                Parallel.ForEach(dataArray, data =>
-                {
+                OrmLiteConfig.ExecFilter = new PostExecuteActionExecFilter(
+                    originalExecFilter, 
+                    cmd => PauseForOtherThreadsAfterInserts(cmd, 2),
+                    DialectProvider);
+                
+                Parallel.ForEach(dataArray, data => {
                     using (var db = OpenDbConnection())
                     {
                         data.Id = db.Insert(new MultipleConnection {Data = data.Data}, selectIdentity: true);
@@ -83,10 +86,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Dialect.Sqlite, "doesn't support concurrent writers")]
         public void TwoSimultaneousSavesGetDifferentIds()
         {
-            if (Dialect == Dialect.Sqlite) return; // Sqlite doesn't support concurrent writers
-
             var dataArray = new[]
             {
                 new MultipleConnection {Data = "one"},
@@ -96,7 +98,10 @@ namespace ServiceStack.OrmLite.Tests
             var originalExecFilter = OrmLiteConfig.ExecFilter;
             try
             {
-                OrmLiteConfig.ExecFilter = new PostExecuteActionExecFilter(originalExecFilter, cmd => PauseForOtherThreadsAfterInserts(cmd, 2));
+                OrmLiteConfig.ExecFilter = new PostExecuteActionExecFilter(
+                    originalExecFilter, 
+                    cmd => PauseForOtherThreadsAfterInserts(cmd, 2),
+                    DialectProvider);
 
                 Parallel.ForEach(dataArray, data =>
                 {
@@ -116,31 +121,33 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dataArray[1].Id, Is.Not.EqualTo(dataArray[0].Id));
         }
 
-        private class PostExecuteActionExecFilter : IOrmLiteExecFilter
+        private class PostExecuteActionExecFilter : IOrmLiteExecFilter, IHasDialectProvider
         {
-            private readonly IOrmLiteExecFilter _inner;
-            private readonly Action<IDbCommand> _postExecuteAction;
+            private readonly IOrmLiteExecFilter inner;
+            private readonly Action<IDbCommand> postExecuteAction;
+            public IOrmLiteDialectProvider DialectProvider { get; }
 
-            public PostExecuteActionExecFilter(IOrmLiteExecFilter inner, Action<IDbCommand> postExecuteAction)
+            public PostExecuteActionExecFilter(IOrmLiteExecFilter inner, Action<IDbCommand> postExecuteAction, IOrmLiteDialectProvider dialectProvider)
             {
-                _inner = inner;
-                _postExecuteAction = postExecuteAction;
+                this.inner = inner;
+                this.postExecuteAction = postExecuteAction;
+                this.DialectProvider = dialectProvider;
             }
 
             public SqlExpression<T> SqlExpression<T>(IDbConnection dbConn)
             {
-                return _inner.SqlExpression<T>(dbConn);
+                return inner.SqlExpression<T>(dbConn);
             }
 
             public IDbCommand CreateCommand(IDbConnection dbConn)
             {
-                var innerCommand = _inner.CreateCommand(dbConn);
-                return new PostExcuteActionCommand(innerCommand, _postExecuteAction);
+                var innerCommand = inner.CreateCommand(dbConn);
+                return new PostExecuteActionCommand(innerCommand, postExecuteAction, DialectProvider);
             }
 
             public void DisposeCommand(IDbCommand dbCmd, IDbConnection dbConn)
             {
-                _inner.DisposeCommand(dbCmd, dbConn);
+                inner.DisposeCommand(dbCmd, dbConn);
             }
 
             public T Exec<T>(IDbConnection dbConn, Func<IDbCommand, T> filter)
@@ -226,104 +233,103 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
-        private class PostExcuteActionCommand : IDbCommand
+        private class PostExecuteActionCommand : IDbCommand, IHasDialectProvider
         {
-            private readonly IDbCommand _inner;
-            private readonly Action<IDbCommand> _postExecuteAction;
+            private readonly IDbCommand inner;
+            private readonly Action<IDbCommand> postExecuteAction;
+            public IOrmLiteDialectProvider DialectProvider { get; }
 
-            public PostExcuteActionCommand(IDbCommand inner, Action<IDbCommand> postExecuteAction)
+            public PostExecuteActionCommand(IDbCommand inner, Action<IDbCommand> postExecuteAction, IOrmLiteDialectProvider dialectProvider)
             {
-                _inner = inner;
-                _postExecuteAction = postExecuteAction;
+                this.inner = inner;
+                this.postExecuteAction = postExecuteAction;
+                this.DialectProvider = dialectProvider;
             }
 
             public void Dispose()
             {
-                _inner.Dispose();
+                inner.Dispose();
             }
 
             public void Prepare()
             {
-                _inner.Prepare();
+                inner.Prepare();
             }
 
             public void Cancel()
             {
-                _inner.Cancel();
+                inner.Cancel();
             }
 
             public IDbDataParameter CreateParameter()
             {
-                return _inner.CreateParameter();
+                return inner.CreateParameter();
             }
 
             public int ExecuteNonQuery()
             {
-                var result = _inner.ExecuteNonQuery();
-                _postExecuteAction(this);
+                var result = inner.ExecuteNonQuery();
+                postExecuteAction(this);
                 return result;
             }
 
             public IDataReader ExecuteReader()
             {
-                var result = _inner.ExecuteReader();
-                _postExecuteAction(this);
+                var result = inner.ExecuteReader();
+                postExecuteAction(this);
                 return result;
             }
 
             public IDataReader ExecuteReader(CommandBehavior behavior)
             {
-                var result = _inner.ExecuteReader(behavior);
-                _postExecuteAction(this);
+                var result = inner.ExecuteReader(behavior);
+                postExecuteAction(this);
                 return result;
             }
 
             public object ExecuteScalar()
             {
-                var result = _inner.ExecuteScalar();
-                _postExecuteAction(this);
+                var result = inner.ExecuteScalar();
+                postExecuteAction(this);
                 return result;
             }
 
             public IDbConnection Connection
             {
-                get { return _inner.Connection; }
-                set { _inner.Connection = value; }
+                get => inner.Connection;
+                set => inner.Connection = value;
             }
 
             public IDbTransaction Transaction
             {
-                get { return _inner.Transaction; }
-                set { _inner.Transaction = value; }
+                get => inner.Transaction;
+                set => inner.Transaction = value;
             }
 
             public string CommandText
             {
-                get { return _inner.CommandText; }
-                set { _inner.CommandText = value; }
+                get => inner.CommandText;
+                set => inner.CommandText = value;
             }
 
             public int CommandTimeout
             {
-                get { return _inner.CommandTimeout; }
-                set { _inner.CommandTimeout = value; }
+                get => inner.CommandTimeout;
+                set => inner.CommandTimeout = value;
             }
 
             public CommandType CommandType
             {
-                get { return _inner.CommandType; }
-                set { _inner.CommandType = value; }
+                get => inner.CommandType;
+                set => inner.CommandType = value;
             }
 
-            public IDataParameterCollection Parameters
-            {
-                get { return _inner.Parameters; }
-            }
+            public IDataParameterCollection Parameters => inner.Parameters;
 
             public UpdateRowSource UpdatedRowSource
             {
-                get { return _inner.UpdatedRowSource; }
-                set { _inner.UpdatedRowSource = value; }
+                get => inner.UpdatedRowSource;
+                set => inner.UpdatedRowSource = value;
             }
         }
     }

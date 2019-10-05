@@ -1,15 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using NUnit.Framework;
-using ServiceStack.Logging;
 using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    [TestFixture]
-    public class MultiColumnOrderByDescending : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class MultiColumnOrderByDescending : OrmLiteProvidersTestBase
     {
+        public MultiColumnOrderByDescending(DialectContext context) : base(context) {}
+
         private List<Person> _people;
 
         [OneTimeSetUp]

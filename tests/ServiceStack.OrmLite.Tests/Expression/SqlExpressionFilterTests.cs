@@ -1,11 +1,13 @@
 ﻿using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.Shared;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    public class SqlExpressionFilterTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SqlExpressionFilterTests : OrmLiteProvidersTestBase
     {
+        public SqlExpressionFilterTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_enhance_SqlExpression_with_Custom_SqlFilter()
         {

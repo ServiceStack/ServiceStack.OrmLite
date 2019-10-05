@@ -36,21 +36,14 @@ namespace ServiceStack.OrmLite
         private static readonly Dictionary<IndexFieldsCacheKey, Tuple<FieldDefinition, int, IOrmLiteConverter>[]> indexFieldsCache 
             = new Dictionary<IndexFieldsCacheKey, Tuple<FieldDefinition, int, IOrmLiteConverter>[]>(maxCachedIndexFields);
 
-        private static readonly ILog Log = LogManager.GetLogger(typeof(OrmLiteUtils));
+        internal static ILog Log = LogManager.GetLogger(typeof(OrmLiteUtils));
 
         public static void HandleException(Exception ex, string message = null)
         {
             if (OrmLiteConfig.ThrowOnError)
                 throw ex;
 
-            if (message != null)
-            {
-                Log.Error(message, ex);
-            }
-            else
-            {
-                Log.Error(ex);
-            }
+            Log.Error(message ?? ex.Message, ex);
         }
 
         public static void DebugCommand(this ILog log, IDbCommand cmd)
@@ -169,7 +162,7 @@ namespace ServiceStack.OrmLite
                 if (field == null) break;
 
                 var fieldType = field.FieldInfo.FieldType;
-                var converter = dialectProvider.GetConverter(fieldType);
+                var converter = dialectProvider.GetConverterBestMatch(fieldType);
                                 
                 var dbValue = converter.GetValue(reader, i, values);
                 if (dbValue == null)
@@ -832,6 +825,27 @@ namespace ServiceStack.OrmLite
             return quotedExpr.Trim(QuotedChars);
         }
 
+        public static void PrintSql() => OrmLiteConfig.BeforeExecFilter = cmd => Console.WriteLine(cmd.GetDebugString());
+
+        public static void UnPrintSql() => OrmLiteConfig.BeforeExecFilter = null;
+
+        public static StringBuilder CaptureSql()
+        {
+            var sb = StringBuilderCache.Allocate();
+            CaptureSql(sb);
+            return sb;
+        }
+        
+        public static void CaptureSql(StringBuilder sb) =>
+            OrmLiteConfig.BeforeExecFilter = cmd => sb.AppendLine(cmd.GetDebugString());
+
+        public static void UnCaptureSql() => OrmLiteConfig.BeforeExecFilter = null;
+
+        public static string UnCaptureSqlAndFree(StringBuilder sb)
+        {
+            OrmLiteConfig.BeforeExecFilter = null;
+            return StringBuilderCache.ReturnAndFree(sb);
+        }
 
         public static ModelDefinition GetModelDefinition(Type modelType)
         {
@@ -1088,5 +1102,20 @@ namespace ServiceStack.OrmLite
             var model = factoryFn();
             return model;
         }
+
+        public static JoinFormatDelegate JoinAlias(string alias)
+        {
+            return (dialect, tableDef, expr) =>
+                $"{dialect.GetQuotedTableName(tableDef)} {alias} {expr.Replace(dialect.GetQuotedTableName(tableDef), dialect.GetQuotedTableName(alias))}";
+        }
+        
+        /// <summary>
+        /// RDBMS Quoted string 'literal' 
+        /// </summary>
+        /// <returns></returns>
+        public static string QuotedLiteral(string text) => text == null || text.IndexOf('\'') >= 0
+            ? text
+            : "'" + text + "'";
+
     }
 }

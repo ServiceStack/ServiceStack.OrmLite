@@ -3,21 +3,20 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
-using ServiceStack.Logging;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
 {
     /// <summary>
     /// Stand-alone class, No other configs, nothing but POCOs.
     /// </summary>
-    [TestFixture]
-    public class CustomerOrdersUseCaseAsync : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class CustomerOrdersUseCaseAsync : OrmLiteProvidersTestBase
     {
+        public CustomerOrdersUseCaseAsync(DialectContext context) : base(context) {}
+
         [Test]
         public async Task Can_run_Customer_Orders_UseCase()
         {
-            LogManager.LogFactory = new ConsoleLogFactory();
-
             using (IDbConnection db = OpenDbConnection())
             {
                 //Re-Create all table schemas:

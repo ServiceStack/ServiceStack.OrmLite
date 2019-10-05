@@ -13,12 +13,12 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
-    public class AutoIdTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    [NonParallelizable]
+    public class AutoIdTests : OrmLiteProvidersTestBase
     {
-        //PostgreSQL / psql on db run: CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
-//        public AutoIdTests() : base(Dialect.SqlServer) {}
+        public AutoIdTests(DialectContext context) : base(context) {}
         
-
         [Test]
         public void Does_populate_and_return_new_guid_on_insert()
         {
@@ -32,8 +32,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.Insert(guidA);
                 db.Insert(guidB);
                 
-                Assert.That(guidA.Id, Is.Not.EqualTo(new Guid()));
-                Assert.That(guidB.Id, Is.Not.EqualTo(new Guid()));
+                Assert.That(guidA.Id, Is.Not.EqualTo(Guid.Empty));
+                Assert.That(guidB.Id, Is.Not.EqualTo(Guid.Empty));
                 Assert.That(guidA.Id, Is.Not.EqualTo(guidB));
 
                 var dbA = db.SingleById<GuidAutoId>(guidA.Id);
@@ -57,8 +57,8 @@ namespace ServiceStack.OrmLite.Tests
                 await db.InsertAsync(guidA);
                 await db.InsertAsync(guidB);
                 
-                Assert.That(guidA.Id, Is.Not.EqualTo(new Guid()));
-                Assert.That(guidB.Id, Is.Not.EqualTo(new Guid()));
+                Assert.That(guidA.Id, Is.Not.EqualTo(Guid.Empty));
+                Assert.That(guidB.Id, Is.Not.EqualTo(Guid.Empty));
                 Assert.That(guidA.Id, Is.Not.EqualTo(guidB));
 
                 var dbA = await db.SingleByIdAsync<GuidAutoId>(guidA.Id);
@@ -82,8 +82,8 @@ namespace ServiceStack.OrmLite.Tests
                 db.Save(guidA);
                 db.Save(guidB);
                 
-                Assert.That(guidA.Id, Is.Not.EqualTo(new Guid()));
-                Assert.That(guidB.Id, Is.Not.EqualTo(new Guid()));
+                Assert.That(guidA.Id, Is.Not.EqualTo(Guid.Empty));
+                Assert.That(guidB.Id, Is.Not.EqualTo(Guid.Empty));
                 Assert.That(guidA.Id, Is.Not.EqualTo(guidB));
  
                 var dbA = db.SingleById<GuidAutoId>(guidA.Id);
@@ -107,8 +107,8 @@ namespace ServiceStack.OrmLite.Tests
                 await db.SaveAsync(guidA);
                 await db.SaveAsync(guidB);
                 
-                Assert.That(guidA.Id, Is.Not.EqualTo(new Guid()));
-                Assert.That(guidB.Id, Is.Not.EqualTo(new Guid()));
+                Assert.That(guidA.Id, Is.Not.EqualTo(Guid.Empty));
+                Assert.That(guidB.Id, Is.Not.EqualTo(Guid.Empty));
                 Assert.That(guidA.Id, Is.Not.EqualTo(guidB));
  
                 var dbA = await db.SingleByIdAsync<GuidAutoId>(guidA.Id);
@@ -135,6 +135,27 @@ namespace ServiceStack.OrmLite.Tests
 
                 var fromDb = db.SingleById<GuidAutoId>(existingGuid);
                 
+                Assert.That(fromDb.Id, Is.EqualTo(existingGuid));
+            }
+        }
+
+        [Test]
+        public void Uses_existing_Guid_Id_if_not_Empty_for_row_inserts()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<GuidAutoId>();
+
+                var existingGuid = Guid.NewGuid();
+                var guidA = new GuidAutoId { Id = existingGuid, Name = "A" };
+
+                db.Exec(cmd => {
+                    cmd.CommandText = DialectProvider.ToInsertRowStatement(cmd, guidA);
+                    DialectProvider.SetParameterValues<GuidAutoId>(cmd, guidA);
+                    cmd.ExecuteNonQuery();
+                });
+
+                var fromDb = db.SingleById<GuidAutoId>(existingGuid);
                 Assert.That(fromDb.Id, Is.EqualTo(existingGuid));
             }
         }

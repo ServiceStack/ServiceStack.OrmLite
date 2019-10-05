@@ -6,15 +6,17 @@ using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    public class ApiSqliteTestsAsync
-        : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.Sqlite)]
+    public class ApiSqliteTestsAsync : OrmLiteProvidersTestBase
     {
+        public ApiSqliteTestsAsync(DialectContext context) : base(context) {}
+
         private IDbConnection db;
 
         [SetUp]
         public void SetUp()
         {
-            db = CreateSqliteMemoryDbFactory().OpenDbConnection();
+            db = OpenDbConnection();
             db.DropAndCreateTable<Person>();
             db.DropAndCreateTable<PersonWithAutoId>();
         }

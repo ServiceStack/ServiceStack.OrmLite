@@ -4,9 +4,11 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.UseCase
 {
-    [TestFixture]
-    public class NestedComplexTypeUseCase : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class NestedComplexTypeUseCase : OrmLiteProvidersTestBase
     {
+        public NestedComplexTypeUseCase(DialectContext context) : base(context) {}
+
         public class Location
         {
             [AutoIncrement]

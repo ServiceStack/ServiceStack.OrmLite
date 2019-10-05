@@ -2,14 +2,17 @@
 
 namespace ServiceStack.OrmLite.Tests
 {
-    public class OrmLiteUtilExtensionsTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteUtilExtensionsTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteUtilExtensionsTests(DialectContext context) : base(context) {}
+
         [Test]
         public void CanCreateStringInStatement()
         {
             var list = new string[] { "A", "B", "C" };
 
-            var sql = "IN ({0})".SqlFmt(list.SqlInValues());
+            var sql = "IN ({0})".SqlFmt(DialectProvider, list.SqlInValues(DialectProvider));
 
             Assert.AreEqual("IN ('A','B','C')", sql);
         }
@@ -19,7 +22,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var list = new int[] { 1, 2, 3 };
 
-            var sql = "IN ({0})".SqlFmt(list.SqlInValues());
+            var sql = "IN ({0})".SqlFmt(DialectProvider, list.SqlInValues(DialectProvider));
 
             Assert.AreEqual("IN (1,2,3)", sql);
         }
@@ -29,7 +32,7 @@ namespace ServiceStack.OrmLite.Tests
         {
             var list = new string[] {};
 
-            var sql = "IN ({0})".SqlFmt(list.SqlInValues());
+            var sql = "IN ({0})".SqlFmt(DialectProvider, list.SqlInValues(DialectProvider));
 
             Assert.AreEqual("IN (NULL)", sql);
         }

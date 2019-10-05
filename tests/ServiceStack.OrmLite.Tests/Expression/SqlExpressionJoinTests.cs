@@ -5,8 +5,11 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
+    [TestFixtureOrmLite]
     public class SqlExpressionJoinTests : ExpressionsTestBase
     {
+        public SqlExpressionJoinTests(DialectContext context) : base(context) {}
+
         public class TableA
         {
             public int Id { get; set; }

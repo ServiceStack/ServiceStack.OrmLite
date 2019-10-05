@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
@@ -8,10 +9,10 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class OrmLiteInsertTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class OrmLiteInsertTests : OrmLiteProvidersTestBase
     {
+        public OrmLiteInsertTests(DialectContext context) : base(context) {}
 
         [Test]
         public void Can_insert_into_ModelWithFieldsOfDifferentTypes_table()
@@ -259,11 +260,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "Need trigger for autoincrement keys to work in Oracle with caller supplied SQL")]
         public void Can_GetLastInsertedId_using_Insert()
         {
-            SuppressIfOracle("Need trigger for autoincrement keys to work in Oracle with caller supplied SQL");
-            if (Dialect == Dialect.Firebird) return; //Requires Generator
-
             var date = new DateTime(2000, 1, 1);
             var testObject = new UserAuth
             {
@@ -278,13 +277,7 @@ namespace ServiceStack.OrmLite.Tests
             {
                 db.DropAndCreateTable<UserAuth>();
 
-                db.ExecuteSql("INSERT INTO {0} ({1},{2},{3},{4}) VALUES ({5},'2000-01-01','2000-01-01',0)"
-                    .Fmt("UserAuth".SqlTable(),
-                         "UserName".SqlColumn(),
-                         "CreatedDate".SqlColumn(),
-                         "ModifiedDate".SqlColumn(),
-                         "InvalidLoginAttempts".SqlColumn(),
-                         testObject.UserName.SqlValue()));
+                db.ExecuteSql($"INSERT INTO {"UserAuth".SqlTable(DialectProvider)} ({"UserName".SqlColumn(DialectProvider)},{"CreatedDate".SqlColumn(DialectProvider)},{"ModifiedDate".SqlColumn(DialectProvider)},{"InvalidLoginAttempts".SqlColumn(DialectProvider)}) VALUES ('{testObject.UserName}','2000-01-01','2000-01-01',0)");
                 var normalLastInsertedId = db.LastInsertId();
                 Assert.Greater(normalLastInsertedId, 0, "normal Insert");
             }
@@ -300,10 +293,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "Need trigger for autoincrement keys to work in Oracle")]
         public void Can_InsertOnly_selected_fields()
         {
-            SuppressIfOracle("Need trigger for autoincrement keys to work in Oracle");
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<PersonWithAutoId>();
@@ -333,10 +325,9 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Tests.Dialect.AnyOracle, "Need trigger for autoincrement keys to work in Oracle")]
         public void Can_InsertOnly_selected_fields_using_AssignmentExpression()
         {
-            SuppressIfOracle("Need trigger for autoincrement keys to work in Oracle");
-
             using (var db = OpenDbConnection())
             {
                 db.DropAndCreateTable<PersonWithAutoId>();
@@ -375,6 +366,105 @@ namespace ServiceStack.OrmLite.Tests
                 fieldDef.IsComputed = true;
             }
         }
+
+        [Test]
+        public void Can_InsertIntoSelect_using_Custom_Select()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<UserAuth>();
+                db.DropAndCreateTable<SubUserAuth>();
+                
+                var userAuth = new UserAuth {
+                    Id = 1,
+                    UserName = "UserName",
+                    Email = "a@b.com",
+                    PrimaryEmail = "c@d.com",
+                    FirstName = "FirstName",
+                    LastName = "LastName",
+                    DisplayName = "DisplayName",
+                    Salt = "Salt",
+                    PasswordHash = "PasswordHash",
+                    CreatedDate = DateTime.Now,
+                    ModifiedDate = DateTime.UtcNow,
+                };
+                db.Insert(userAuth);
+
+//                OrmLiteUtils.PrintSql();
+                
+                var q = db.From<UserAuth>()
+                    .Where(x => x.UserName == "UserName")
+                    .Select(x => new {
+                        FullName = x.FirstName + " " + x.LastName,
+                        GivenName = x.FirstName, 
+                        Surname = x.LastName, 
+                        x.Email, 
+                        x.UserName, 
+                    });
+
+                var rowsInserted = db.InsertIntoSelect<SubUserAuth>(q);
+                Assert.That(rowsInserted, Is.EqualTo(1));
+
+                var result = db.Select<SubUserAuth>()[0];
+                
+                Assert.That(result.Id, Is.GreaterThan(0));
+                Assert.That(result.UserName, Is.EqualTo(userAuth.UserName));
+                Assert.That(result.Email, Is.EqualTo(userAuth.Email));
+                Assert.That(result.GivenName, Is.EqualTo(userAuth.FirstName));
+                Assert.That(result.Surname, Is.EqualTo(userAuth.LastName));
+                Assert.That(result.FullName, Is.EqualTo(userAuth.FirstName + " " + userAuth.LastName));
+            }
+        }
+
+        [Test]
+        public async Task Can_InsertIntoSelect_using_Custom_Select_Async()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<UserAuth>();
+                db.DropAndCreateTable<SubUserAuth>();
+                
+                var userAuth = new UserAuth {
+                    Id = 1,
+                    UserName = "UserName",
+                    Email = "a@b.com",
+                    PrimaryEmail = "c@d.com",
+                    FirstName = "FirstName",
+                    LastName = "LastName",
+                    DisplayName = "DisplayName",
+                    Salt = "Salt",
+                    PasswordHash = "PasswordHash",
+                    CreatedDate = DateTime.Now,
+                    ModifiedDate = DateTime.UtcNow,
+                };
+                await db.InsertAsync(userAuth);
+
+//                OrmLiteUtils.PrintSql();
+                
+                var q = db.From<UserAuth>()
+                    .Where(x => x.UserName == "UserName")
+                    .Select(x => new {
+                        FullName = x.FirstName + " " + x.LastName,
+                        GivenName = x.FirstName, 
+                        Surname = x.LastName, 
+                        x.Email, 
+                        x.UserName, 
+                    });
+
+                var rowsInserted = await db.InsertIntoSelectAsync<SubUserAuth>(q);
+                Assert.That(rowsInserted, Is.EqualTo(1));
+
+                var result = (await db.SelectAsync<SubUserAuth>())[0];
+                
+                Assert.That(result.Id, Is.GreaterThan(0));
+                Assert.That(result.UserName, Is.EqualTo(userAuth.UserName));
+                Assert.That(result.Email, Is.EqualTo(userAuth.Email));
+                Assert.That(result.GivenName, Is.EqualTo(userAuth.FirstName));
+                Assert.That(result.Surname, Is.EqualTo(userAuth.LastName));
+                Assert.That(result.FullName, Is.EqualTo(userAuth.FirstName + " " + userAuth.LastName));
+            }
+        }
+        
     }
 
     public class Market
@@ -457,5 +547,16 @@ namespace ServiceStack.OrmLite.Tests
         public virtual int? RefId { get; set; }
         public virtual string RefIdStr { get; set; }
         public virtual Dictionary<string, string> Meta { get; set; }
+    }
+
+    public class SubUserAuth
+    {
+        [AutoIncrement]
+        public virtual int Id { get; set; }
+        public virtual string UserName { get; set; }
+        public string Email { get; set; }
+        public string GivenName { get; set; }
+        public string Surname { get; set; }
+        public string FullName { get; set; }
     }
 }

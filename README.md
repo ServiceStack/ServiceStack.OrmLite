@@ -1,5 +1,4 @@
-Follow [@ServiceStack](https://twitter.com/servicestack) or join the [Google+ Community](https://plus.google.com/communities/112445368900682590445)
-for updates, or [StackOverflow](http://stackoverflow.com/questions/ask) or the [Customer Forums](https://forums.servicestack.net/) for support.
+Follow [@ServiceStack](https://twitter.com/servicestack) or [view the docs](https://docs.servicestack.net), use [StackOverflow](http://stackoverflow.com/questions/ask) or the [Customer Forums](https://forums.servicestack.net/) for support.
 
 # Fast, Simple, Typed ORM for .NET
 
@@ -322,6 +321,18 @@ var q = db.From<Person>()
           .Select(x => new { x.Age, x.LastName });
 
 Dictionary<int, List<string>> results = db.Lookup<int, string>(q);
+```
+
+The new `db.KeyValuePair<K,V>` API is similar to `db.Dictionary<K,V>` where it uses the **first 2 columns** for its Key/Value Pairs to 
+create a Dictionary but is more appropriate when the results can contain duplicate Keys or when ordering needs to be preserved:
+
+```csharp
+var q = db.From<StatsLog>()
+    .GroupBy(x => x.Name)
+    .Select(x => new { x.Name, Count = Sql.Count("*") })
+    .OrderByDescending("Count");
+
+var results = db.KeyValuePairs<string, int>(q);
 ```
 
 ### INSERT, UPDATE and DELETEs
@@ -852,6 +863,26 @@ var track = db.SingleById<Track>(1);
 var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });
 ```
 
+## Nested Typed Sub SqlExpressions
+
+The `Sql.In()` API supports nesting and combining of multiple Typed SQL Expressions together 
+in a single SQL Query, e.g:
+  
+```csharp
+var usaCustomerIds = db.From<Customer>(c => c.Country == "USA").Select(c => c.Id);
+var usaCustomerOrders = db.Select(db.From<Order>()
+    .Where(x => Sql.In(x.CustomerId, usaCustomerIds)));
+``` 
+
+### SQL In Expressions
+
+```csharp
+db.Select<Author>(x => Sql.In(x.City, "London", "Madrid", "Berlin"));
+
+var cities = new[] { "London", "Madrid", "Berlin" };
+db.Select<Author>(x => Sql.In(x.City, cities));
+```
+
 ### Parametrized IN Values
 
 OrmLite also supports providing collection of values which is automatically split into multiple DB parameters to simplify executing parameterized SQL with multiple IN Values, e.g:
@@ -862,6 +893,25 @@ var results = db.Select<Table>("Id in (@ids)", new { ids });
 
 var names = new List<string>{ "foo", "bar", "qux" };
 var results = db.SqlList<Table>("SELECT * FROM Table WHERE Name IN (@names)", new { names });
+```
+
+### Custom SQL using PostgreSQL Arrays
+
+If using PostgreSQL you can take advantage of its complex Array Types and utilize its [Array Functions and Operators](https://www.postgresql.org/docs/9.6/functions-array.html), e.g:
+
+```csharp
+var ids = new[]{ 1, 2, 3};
+var q = Db.From<Table>()
+    .Where("ARRAY[{0}] && ref_ids", ids.Join(","))
+var results = db.Select(q);
+```
+
+When comparing a string collection you can use `SqlInValues` to create a quoted SQL IN list, e.g:
+
+```csharp
+var q = Db.From<Table>()
+    .Where($"ARRAY[{new SqlInValues(cities).ToSqlInString()}] && cities");
+var results = db.Select(q);
 ```
 
 ### Lazy Queries
@@ -875,6 +925,23 @@ foreach (var person in lazyQuery) {
    //...  
 }
 ```
+ 
+### Save Methods
+ 
+`Save` and `SaveAll` will Insert if no record with **Id** exists, otherwise it Updates. 
+
+`Save` will populate any `[AutoIncrement]` or `[AutoId]` Primary Keys, e.g:
+
+```csharp
+db.Save(item);
+item.Id // RDBMS populated Auto Id 
+```
+
+Alternatively you can also manually Select and Retrieve the Inserted RDBMS Auto Id in a single query with `Insert` APIs by specifying `selectIdentity:true`:
+
+```csharp
+item.Id = db.Insert(item, selectIdentity:true);
+```
 
 #### Other examples
 
@@ -885,7 +952,6 @@ var topVIPs = db.WhereLazy<Person>(new { Age = 27 }).Where(p => IsVip(p)).Take(5
 ### Other Notes
 
  - All **Insert**, **Update**, and **Delete** methods take multiple params, while `InsertAll`, `UpdateAll` and `DeleteAll` take IEnumerables.
- - `Save` and `SaveAll` will Insert if no record with **Id** exists, otherwise it Updates. 
  - Methods containing the word **Each** return an IEnumerable<T> and are lazily loaded (i.e. non-buffered).
 
 # Features
@@ -1090,6 +1156,15 @@ using (var multi = db.QueryMultiple(q.ToSelectStatement()))
         Order custOrder = tuple.Item3;
     }
 }
+```
+
+### SELECT DISTINCT in SelectMulti
+
+[SelectMulti](https://github.com/ServiceStack/ServiceStack.OrmLite#selecting-multiple-columns-across-joined-tables) APIs for populating
+multiple tables now supports **SELECT DISTINCT** with:
+
+```csharp
+var tuples = db.SelectMulti<Customer, CustomerAddress>(q.SelectDistinct());
 ```
 
 ### Select data from multiple tables into a Custom POCO
@@ -1469,22 +1544,23 @@ var q = db.From<Table>()
     .Select(x => x.Join1.Join2.IntValue);
 ```
 
-### JOIN aliases
+### Table aliases
 
-You can specify join aliases when joining same table multiple times together to differentiate from any 
-ambiguous columns, e.g:
+The `TableAlias` APIs lets you specify table aliases when joining same table multiple times together to differentiate from any 
+ambiguous columns in Queries with multiple self-reference joins, e.g:
 
 ```csharp
-var q = db.From<Sale>()
-    .LeftJoin<ContactIssue>((s,c) => s.SellerId == c.Id, db.JoinAlias("seller"))
-    .LeftJoin<ContactIssue>((s,c) => s.BuyerId == c.Id, db.JoinAlias("buyer"))
-    .Select<Sale, ContactIssue>((s,c) => new {
-        s,
-        BuyerFirstName = Sql.JoinAlias(c.FirstName, "buyer"),
-        BuyerLastName = Sql.JoinAlias(c.LastName, "buyer"),
-        SellerFirstName = Sql.JoinAlias(c.FirstName, "seller"),
-        SellerLastName = Sql.JoinAlias(c.LastName, "seller"),
+var q = db.From<Page>(db.TableAlias("p1"))
+    .Join<Page>((p1, p2) => 
+        p1.PageId == p2.PageId && 
+        p2.ActivityId == activityId, db.TableAlias("p2"))
+    .Join<Page,Category>((p2,c) => Sql.TableAlias(p2.Category) == c.Id)
+    .Join<Page,Page>((p1,p2) => Sql.TableAlias(p1.Rank,"p1") < Sql.TableAlias(p2.Rank,"p2"))
+    .Select<Page>(p => new {
+        ActivityId = Sql.TableAlias(p.ActivityId, "p2")
     });
+
+var rows = db.Select(q);
 ```
 
 ### Unique Constraints
@@ -1509,7 +1585,7 @@ public class UniqueTest
 
 ### Auto populated Guid Ids
 
-Support for Auto populating `Guid` Primary Keys was also added in this release with the new `[AutoId]` attribute, e.g:
+Support for Auto populating `Guid` Primary Keys is available using the `[AutoId]` attribute, e.g:
 
 ```csharp
 public class Table
@@ -1597,17 +1673,6 @@ var q = db.From<Table>()
 var results = db.Select(q);
 ```
 
-## Nested Typed Sub SqlExpressions
-
-The `Sql.In()` API supports nesting and combining of multiple Typed SQL Expressions together 
-in a single SQL Query, e.g:
-  
-```csharp
-var usaCustomerIds = db.From<Customer>(c => c.Country == "USA").Select(c => c.Id);
-var usaCustomerOrders = db.Select(db.From<Order>()
-    .Where(x => Sql.In(x.CustomerId, usaCustomerIds)));
-``` 
-
 ## Optimistic Concurrency
 
 Optimistic concurrency can be added to any table by adding the `ulong RowVersion { get; set; }` property, e.g:
@@ -1682,6 +1747,28 @@ SQLite offers [additional fine-grained behavior](https://sqlite.org/lang_conflic
  - FAIL
  - IGNORE
  - REPLACE
+
+### GetTableNames and GetTableNamesWithRowCounts APIs
+
+As the queries for retrieving table names can vary amongst different RDBMS's, we've abstracted their implementations behind uniform APIs
+where you can now get a list of table names and their row counts for all supported RDBMS's with:
+
+```csharp
+List<string> tableNames = db.GetTableNames();
+
+List<KeyValuePair<string,long>> tableNamesWithRowCounts = db.GetTableNamesWithRowCounts();
+```
+
+> `*Async` variants also available
+
+Both APIs can be called with an optional `schema` if you only want the tables for a specific schema.
+It defaults to using the more efficient RDBMS APIs, which if offered typically returns an approximate estimate of rowcounts in each table. 
+
+If you need exact table row counts, you can specify `live:true`:
+
+```csharp
+var tablesWithRowCounts = db.GetTableNamesWithRowCounts(live:true);
+```
 
 ### Modify Custom Schema
 
@@ -2263,6 +2350,25 @@ Db.ExecuteSql("INSERT INTO page_stats (ref_id, fav_count) VALUES (@refId, @favCo
 
 //Async:
 Db.ExecuteSqlAsync("UPDATE page_stats SET view_count = view_count + 1 WHERE id = @id", new { id })
+```
+
+### INSERT INTO SELECT
+
+You can use OrmLite's Typed `SqlExpression` to create a subselect expression that you can use to create and execute a 
+typed **INSERT INTO SELECT** `SqlExpression` with:
+
+```csharp
+var q = db.From<User>()
+    .Where(x => x.UserName == "UserName")
+    .Select(x => new {
+        x.UserName, 
+        x.Email, 
+        GivenName = x.FirstName, 
+        Surname = x.LastName, 
+        FullName = x.FirstName + " " + x.LastName
+    });
+
+var id = db.InsertIntoSelect<CustomUser>(q)
 ```
 
 ## Stored Procedures using Custom Raw SQL API's
@@ -2904,21 +3010,21 @@ The Typed SqlExpression bitwise operations support depends on the RDBMS used.
 E.g. all RDBMS's support Bitwise `And` and `Or` operators:
 
 ```csharp
-db.Select<Table>(x => (x.Id | 2) == 3);
-db.Select<Table>(x => (x.Id & 2) == 2);
+db.Select<Table>(x => (x.Flags | 2) == 3);
+db.Select<Table>(x => (x.Flags & 2) == 2);
 ```
 
 All RDBMS Except for SQL Server support bit shift operators:
 
 ```csharp
-db.Select<Table>(x => (x.Id << 1) == 4);
-db.Select<Table>(x => (x.Id >> 1) == 1);
+db.Select<Table>(x => (x.Flags << 1) == 4);
+db.Select<Table>(x => (x.Flags >> 1) == 1);
 ```
 
 Whilst only SQL Server and MySQL Support Exclusive Or:
 
 ```csharp
-db.Select<Table>(x => (x.Id ^ 2) == 3);
+db.Select<Table>(x => (x.Flags ^ 2) == 3);
 ```
 
 ## SQL Server Features
@@ -2951,7 +3057,7 @@ whilst the new `[SqlServerCollate]` attribute can be used to specify an SQL Serv
 
 ## PostgreSQL Features
 
-### PostgreSQL Data Types
+### PostgreSQL Rich Data Types
 
 The `[PgSql*]` specific attributes lets you use attributes to define PostgreSQL rich data types, e.g:
 
@@ -2973,6 +3079,139 @@ public class MyPostgreSqlTable
     [PgSqlBigIntArray]
     public long[] AsLongArray { get; set; }
 }
+```
+
+By default all arrays of .NET's built-in **numeric**, **string** and **DateTime** types will be stored in PostgreSQL array types:
+
+```csharp
+public class Table
+{
+    public Guid Id { get; set; }
+
+    public int[] Ints { get; set; }
+    public long[] Longs { get; set; }
+    public float[] Floats { get; set; }
+    public double[] Doubles { get; set; }
+    public decimal[] Decimals { get; set; }
+    public string[] Strings { get; set; }
+    public DateTime[] DateTimes { get; set; }
+    public DateTimeOffset[] DateTimeOffsets { get; set; }
+}
+```
+
+You can opt-in to annotate other collections like `List<T>` to also be stored in array types by annotating them with `[Pgsql*]` attributes, e.g:
+
+```csharp
+public class Table
+{
+    public Guid Id { get; set; }
+
+    [PgSqlIntArray]
+    public List<int> ListInts { get; set; }
+    [PgSqlBigIntArray]
+    public List<long> ListLongs { get; set; }
+    [PgSqlFloatArray]
+    public List<float> ListFloats { get; set; }
+    [PgSqlDoubleArray]
+    public List<double> ListDoubles { get; set; }
+    [PgSqlDecimalArray]
+    public List<decimal> ListDecimals { get; set; }
+    [PgSqlTextArray]
+    public List<string> ListStrings { get; set; }
+    [PgSqlTimestamp]
+    public List<DateTime> ListDateTimes { get; set; }
+    [PgSqlTimestampTz]
+    public List<DateTimeOffset> ListDateTimeOffsets { get; set; }
+}
+```
+
+Alternatively if you **always** want `List<T>` stored in Array types, you can register them in the `PostgreSqlDialect.Provider`:
+
+```csharp
+PostgreSqlDialect.Provider.RegisterConverter<List<string>>(new PostgreSqlStringArrayConverter());
+PostgreSqlDialect.Provider.RegisterConverter<List<int>>(new PostgreSqlIntArrayConverter());
+PostgreSqlDialect.Provider.RegisterConverter<List<long>>(new PostgreSqlLongArrayConverter());
+PostgreSqlDialect.Provider.RegisterConverter<List<float>>(new PostgreSqlFloatArrayConverter());
+PostgreSqlDialect.Provider.RegisterConverter<List<double>>(new PostgreSqlDoubleArrayConverter());
+PostgreSqlDialect.Provider.RegisterConverter<List<decimal>>(new PostgreSqlDecimalArrayConverter());
+PostgreSqlDialect.Provider.RegisterConverter<List<DateTime>>(new PostgreSqlDateTimeTimeStampArrayConverter());
+PostgreSqlDialect.Provider.RegisterConverter<List<DateTimeOffset>>(new PostgreSqlDateTimeOffsetTimeStampTzArrayConverter());
+```
+
+### Hstore support
+
+To use `hstore`, its extension needs to be enabled in your PostgreSQL RDBMS by running:
+
+    CREATE EXTENSION hstore;
+
+Which can then be enabled in OrmLite with:
+
+```csharp
+PostgreSqlDialect.Instance.UseHstore = true;
+```
+
+Where it will now store **string Dictionaries** in `Hstore` columns:
+
+```csharp
+public class TableHstore
+{
+    public int Id { get; set; }
+
+    public Dictionary<string,string> Dictionary { get; set; }
+    public IDictionary<string,string> IDictionary { get; set; }
+}
+
+db.DropAndCreateTable<TableHstore>();
+
+db.Insert(new TableHstore
+{
+    Id = 1,
+    Dictionary = new Dictionary<string, string> { {"A", "1"} },
+    IDictionary = new Dictionary<string, string> { {"B", "2"} },
+});
+```
+
+Where they can than be queried in postgres using [Hstore SQL Syntax](https://www.postgresql.org/docs/9.0/hstore.html):
+
+```csharp
+db.Single(db.From<PostgreSqlTypes>().Where("dictionary -> 'A' = '1'")).Id //= 1
+```
+
+Thanks to [@cthames](https://forums.servicestack.net/users/cthames/activity) for this feature.
+
+### JSON data types
+
+If you instead wanted to store arbitrary complex types in PostgreSQL's rich column types to enable deep querying in postgres, 
+you'd instead annotate them with `[PgSqlJson]` or `[PgSqlJsonB]`, e.g:
+
+```csharp
+public class TableJson
+{
+    public int Id { get; set; }
+
+    [PgSqlJson]
+    public ComplexType ComplexTypeJson { get; set; }
+
+    [PgSqlJsonB]
+    public ComplexType ComplexTypeJsonb { get; set; }
+}
+
+db.Insert(new TableJson
+{
+    Id = 1,
+    ComplexTypeJson = new ComplexType {
+        Id = 2, SubType = new SubType { Name = "JSON" }
+    },
+    ComplexTypeJsonb = new ComplexType {
+        Id = 3, SubType = new SubType { Name = "JSONB" }
+    },
+});
+```
+
+Where they can then be queried on the server with [JSON SQL Syntax and functions](https://www.postgresql.org/docs/9.3/functions-json.html):
+
+```csharp
+var result = db.Single<TableJson>("table_json->'SubType'->>'Name' = 'JSON'");
 ```
 
 # Limitations 
@@ -3002,8 +3241,6 @@ OrmLiteConfig.StripUpperInLike = true;
 Allowing all **LIKE** Searches in OrmLite or AutoQuery to use any available RDBMS Index.
 
 ## Oracle Provider Notes
-
-The Oracle provider requires an installation of Oracle's ODP.NET. It has been tested with Oracle 11g but should work with 10g and perhaps even older versions. It has not been tested with Oracle 12c and does not support any new 12c features such as AutoIncrement keys. It also does not support the new Oracle fully-managed client.
 
 By default the Oracle provider stores Guids in the database as character strings and when generating SQL it quotes only table and column names that are reserved words in Oracle. That requires that you use the same quoting if you code your own SQL. Both of these options can be overridden, but overriding them will cause problems: the provider can store Guids as raw(16) but it cannot read them.
 

@@ -4,7 +4,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
 using ServiceStack.OrmLite.SqlServer;
 using ServiceStack.Text;
 
@@ -23,8 +22,11 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public string Name { get; set; }
     }
 
-    public class SqlExpressionSubSqlExpressionIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SqlExpressionSubSqlExpressionIssue : OrmLiteProvidersTestBase
     {
+        public SqlExpressionSubSqlExpressionIssue(DialectContext context) : base(context) {}
+
         private static void RecreateAnyObjectTables(IDbConnection db)
         {
             db.DropTable<AnyObjectClassItem>();
@@ -36,8 +38,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_compare_null_constant_in_subquery()
         {
-            LogManager.LogFactory = new ConsoleLogFactory();
-
             using (var db = OpenDbConnection())
             {
                 RecreateAnyObjectTables(db);
@@ -57,8 +57,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_compare_null_constant_in_subquery_nested_in_SqlExpression()
         {
-            LogManager.LogFactory = new ConsoleLogFactory();
-
             using (var db = OpenDbConnection())
             {
                 RecreateAnyObjectTables(db);

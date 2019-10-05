@@ -17,10 +17,11 @@ namespace ServiceStack.OrmLite.Tests.Async
         public string ContentType { get; set; }
     }
 
-    [TestFixture]
-    public class SelectAsyncTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SelectAsyncTests : OrmLiteProvidersTestBase
     {
+        public SelectAsyncTests(DialectContext context) : base(context) {}
+
         [Test]
         public async Task Can_SELECT_SingleAsync()
         {

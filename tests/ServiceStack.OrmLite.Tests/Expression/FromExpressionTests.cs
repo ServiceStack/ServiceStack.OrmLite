@@ -10,8 +10,11 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public int PersonId { get; set; }
     }
 
+    [TestFixtureOrmLite]
     public class FromExpressionTests : ExpressionsTestBase
     {
+        public FromExpressionTests(DialectContext context) : base(context) {}
+
         public void Init(IDbConnection db)
         {
             db.DropAndCreateTable<Person>();
@@ -30,7 +33,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
             {
                 Init(db);
 
-                var results = db.Select(db.From<Person>("Person INNER JOIN Band ON Person.Id = Band.{0}".Fmt("PersonId".SqlColumn())));
+                var results = db.Select(db.From<Person>("Person INNER JOIN Band ON Person.Id = Band.{0}".Fmt("PersonId".SqlColumn(DialectProvider))));
 
                 Assert.That(results.Count, Is.EqualTo(2));
                 Assert.That(results.ConvertAll(x => x.FirstName), Is.EquivalentTo(new[] { "Kurt", "Jim" }));

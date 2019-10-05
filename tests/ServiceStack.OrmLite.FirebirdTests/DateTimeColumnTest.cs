@@ -9,8 +9,7 @@ using ServiceStack.Model;
 namespace ServiceStack.OrmLite.FirebirdTests
 {
     [TestFixture]
-    public class DateTimeColumnTest
-        : OrmLiteTestBase
+    public class DateTimeColumnTest : OrmLiteTestBase
     {
         [Test]
         public void Can_create_table_containing_DateTime_column()

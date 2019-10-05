@@ -6,9 +6,6 @@ namespace ServiceStack.OrmLite.MySql.Converters
 {
     public class MySqlBoolConverter : BoolAsIntConverter
     {
-        public override string ColumnDefinition
-        {
-            get { return "tinyint(1)"; }
-        }
+        public override string ColumnDefinition => "tinyint(1)";
     }
 }

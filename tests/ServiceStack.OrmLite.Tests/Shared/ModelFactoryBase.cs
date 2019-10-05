@@ -19,21 +19,9 @@ namespace ServiceStack.Common.Tests.Models
 
         public abstract void AssertIsEqual(T actual, T expected);
 
-        public T ExistingValue
-        {
-            get
-            {
-                return CreateInstance(4);
-            }
-        }
+        public T ExistingValue => CreateInstance(4);
 
-        public T NonExistingValue
-        {
-            get
-            {
-                return CreateInstance(5);
-            }
-        }
+        public T NonExistingValue => CreateInstance(5);
 
         public List<T> CreateList()
         {

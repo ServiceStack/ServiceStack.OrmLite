@@ -38,9 +38,11 @@ namespace ServiceStack.OrmLite.Tests.Issues.SP
     }
 
     [NUnit.Framework.Ignore("Requires existing tables / SP at https://gist.github.com/mythz/6f336094f8dd07c22d91")]
-    [TestFixture]
-    public class MappingFieldsFromStoredProcedureTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class MappingFieldsFromStoredProcedureTests : OrmLiteProvidersTestBase
     {
+        public MappingFieldsFromStoredProcedureTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_select_from_Custom_stored_procedure()
         {

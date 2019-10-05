@@ -1,7 +1,5 @@
 using System;
 using System.Data;
-using System.Linq.Expressions;
-using System.Text;
 using ServiceStack.OrmLite.SqlServer.Converters;
 using ServiceStack.Text;
 
@@ -95,7 +93,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 if (setFields.Length > 0)
                     setFields.Append(", ");
 
-                var param = dialectProvider.AddParam(dbCmd, value, fieldDef);
+                var param = dialectProvider.AddUpdateParam(dbCmd, value, fieldDef);
                 setFields
                     .Append(dialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")

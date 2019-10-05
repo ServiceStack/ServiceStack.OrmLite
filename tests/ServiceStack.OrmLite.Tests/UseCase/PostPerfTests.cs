@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
 using System.Linq;
-using System.Reflection;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Dapper;
@@ -28,13 +27,15 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
     }
 
-    [Explicit, NUnit.Framework.Ignore("Integration Test")]
-    public class PostPerfTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnySqlServer), NUnit.Framework.Ignore("Integration Test")]
+    public class PostPerfTests : OrmLiteProvidersTestBase
     {
-        public PostPerfTests()
-        {
-            Dialect = Dialect.SqlServer2012;
-        }
+        public PostPerfTests(DialectContext context) : base(context) {}
+        
+//        public PostPerfTests()
+//        {
+//            Dialect = Dialect.SqlServer2012;
+//        }
 
         private void EnsureDBSetup()
         {
@@ -140,18 +141,26 @@ end
         }
     }
 
-    [Explicit, NUnit.Framework.Ignore("Integration Test")]
-    public class AdventureWorksPerfTests : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnySqlServer), Explicit, NUnit.Framework.Ignore("Integration Test")]
+    public class AdventureWorksPerfTests : OrmLiteProvidersTestBase
     {
+        public AdventureWorksPerfTests(DialectContext context) : base(context) {}
+
         private IDbConnection db;
 
-        public AdventureWorksPerfTests()
-        {
-            var dbFactory = new OrmLiteConnectionFactory(
-                "data source=localhost;initial catalog=AdventureWorks;integrated security=SSPI;persist security info=False;packet size=4096",
-                SqlServer2012Dialect.Provider);
+//        public AdventureWorksPerfTests()
+//        {
+//            var dbFactory = new OrmLiteConnectionFactory(
+//                "data source=localhost;initial catalog=AdventureWorks;integrated security=SSPI;persist security info=False;packet size=4096",
+//                SqlServer2012Dialect.Provider);
+//
+//            db = dbFactory.Open();
+//        }
 
-            db = dbFactory.Open();
+        [SetUp]
+        public void Setup()
+        {
+            db = OpenDbConnection();
         }
 
         [TearDown]

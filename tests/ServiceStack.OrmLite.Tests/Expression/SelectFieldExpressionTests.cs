@@ -5,9 +5,11 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
-    public class SelectFieldExpressionTests
-         : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SelectFieldExpressionTests : OrmLiteProvidersTestBase
     {
+        public SelectFieldExpressionTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_Select_Substring()
         {

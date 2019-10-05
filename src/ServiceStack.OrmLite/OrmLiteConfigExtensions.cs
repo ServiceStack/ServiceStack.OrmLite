@@ -11,10 +11,12 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Converters;
 
 namespace ServiceStack.OrmLite
 {
@@ -75,7 +77,7 @@ namespace ServiceStack.OrmLite
             var objProperties = modelType.GetProperties(
                 BindingFlags.Public | BindingFlags.Instance).ToList();
 
-            var hasPkAttr = objProperties.Any(p => p.HasAttribute<PrimaryKeyAttribute>());
+            var hasPkAttr = objProperties.Any(p => p.HasAttributeCached<PrimaryKeyAttribute>());
 
             var hasIdField = CheckForIdField(objProperties);
 
@@ -91,14 +93,8 @@ namespace ServiceStack.OrmLite
                 var customSelectAttr = propertyInfo.FirstAttribute<CustomSelectAttribute>();
                 var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();
                 var belongToAttribute = propertyInfo.FirstAttribute<BelongToAttribute>();
-                var isFirst = i++ == 0;
-
-                var isAutoId = propertyInfo.HasAttribute<AutoIdAttribute>();
-
-                var isPrimaryKey = (!hasPkAttr && (propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)))
-                    || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name)
-                    || isAutoId;
-
+                var referenceAttr = propertyInfo.FirstAttribute<ReferenceAttribute>();
+                
                 var isRowVersion = propertyInfo.Name == ModelDefinition.RowVersionName
                     && (propertyInfo.PropertyType == typeof(ulong) || propertyInfo.PropertyType == typeof(byte[]));
 
@@ -111,11 +107,31 @@ namespace ServiceStack.OrmLite
                 var propertyType = isNullableType
                     ? Nullable.GetUnderlyingType(propertyInfo.PropertyType)
                     : propertyInfo.PropertyType;
+                
 
                 Type treatAsType = null;
-                if (propertyType.IsEnumFlags() || propertyType.HasAttribute<EnumAsIntAttribute>())
-                    treatAsType = Enum.GetUnderlyingType(propertyType);
 
+                if (propertyType.IsEnum)
+                {
+                    var enumKind = Converters.EnumConverter.GetEnumKind(propertyType);
+                    if (enumKind == EnumKind.Int)
+                        treatAsType = Enum.GetUnderlyingType(propertyType);
+                    else if (enumKind == EnumKind.Char)
+                        treatAsType = typeof(char);
+                }
+
+                var isReference = referenceAttr != null && propertyType.IsClass;
+                var isIgnored = propertyInfo.HasAttributeCached<IgnoreAttribute>() || isReference;
+
+                var isFirst = !isIgnored && i++ == 0;
+
+                var isAutoId = propertyInfo.HasAttributeCached<AutoIdAttribute>();
+
+                var isPrimaryKey = (!hasPkAttr && (propertyInfo.Name == OrmLiteConfig.IdField || (!hasIdField && isFirst)))
+                   || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name)
+                   || isAutoId;
+
+                
                 var aliasAttr = propertyInfo.FirstAttribute<AliasAttribute>();
 
                 var indexAttr = propertyInfo.FirstAttribute<IndexAttribute>();
@@ -127,7 +143,6 @@ namespace ServiceStack.OrmLite
                 var defaultValueAttr = propertyInfo.FirstAttribute<DefaultAttribute>();
 
                 var referencesAttr = propertyInfo.FirstAttribute<ReferencesAttribute>();
-                var referenceAttr = propertyInfo.FirstAttribute<ReferenceAttribute>();
                 var fkAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
                 var customFieldAttr = propertyInfo.FirstAttribute<CustomFieldAttribute>();
                 var chkConstraintAttr = propertyInfo.FirstAttribute<CheckConstraintAttribute>();
@@ -144,7 +159,7 @@ namespace ServiceStack.OrmLite
                     IsPrimaryKey = isPrimaryKey,
                     AutoIncrement =
                         isPrimaryKey &&
-                        propertyInfo.HasAttribute<AutoIncrementAttribute>(),
+                        propertyInfo.HasAttributeCached<AutoIncrementAttribute>(),
                     AutoId = isAutoId,
                     IsIndexed = !isPrimaryKey && isIndex,
                     IsUniqueIndex = isUnique,
@@ -152,17 +167,17 @@ namespace ServiceStack.OrmLite
                     IsNonClustered = indexAttr?.NonClustered == true,
                     IndexName = indexAttr?.Name, 
                     IsRowVersion = isRowVersion,
-                    IgnoreOnInsert = propertyInfo.HasAttribute<IgnoreOnInsertAttribute>(),
-                    IgnoreOnUpdate = propertyInfo.HasAttribute<IgnoreOnUpdateAttribute>(),
-                    ReturnOnInsert = propertyInfo.HasAttribute<ReturnOnInsertAttribute>(),
+                    IgnoreOnInsert = propertyInfo.HasAttributeCached<IgnoreOnInsertAttribute>(),
+                    IgnoreOnUpdate = propertyInfo.HasAttributeCached<IgnoreOnUpdateAttribute>(),
+                    ReturnOnInsert = propertyInfo.HasAttributeCached<ReturnOnInsertAttribute>(),
                     FieldLength = stringLengthAttr?.MaximumLength,
                     DefaultValue = defaultValueAttr?.DefaultValue,
                     CheckConstraint = chkConstraintAttr?.Constraint,
-                    IsUniqueConstraint = propertyInfo.HasAttribute<UniqueAttribute>(),
+                    IsUniqueConstraint = propertyInfo.HasAttributeCached<UniqueAttribute>(),
                     ForeignKey = fkAttr == null
                         ? referencesAttr != null ? new ForeignKeyConstraint(referencesAttr.Type) : null
                         : new ForeignKeyConstraint(fkAttr.Type, fkAttr.OnDelete, fkAttr.OnUpdate, fkAttr.ForeignKeyName),
-                    IsReference = referenceAttr != null && propertyType.IsClass,
+                    IsReference = isReference,
                     GetValueFn = propertyInfo.CreateGetter(),
                     SetValueFn = propertyInfo.CreateSetter(),
                     Sequence = sequenceAttr?.Name,
@@ -175,8 +190,6 @@ namespace ServiceStack.OrmLite
                     IsRefType = propertyType.IsRefType(),
                 };
 
-                var isIgnored = propertyInfo.HasAttribute<IgnoreAttribute>()
-                    || fieldDefinition.IsReference;
                 if (isIgnored)
                     modelDef.IgnoredFieldDefinitions.Add(fieldDefinition);
                 else

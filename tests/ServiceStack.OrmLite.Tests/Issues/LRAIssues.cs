@@ -10,8 +10,11 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class AdhocJoinIssue : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class AdhocJoinIssue : OrmLiteProvidersTestBase
     {
+        public AdhocJoinIssue(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_run_LRA_Query()
         {
@@ -128,17 +131,97 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 var result = await db.RowCountAsync(q);                
             }
         }
-        
-        private static void CreateTables(IDbConnection db)
+
+        [Test]
+        public void Does_InsertIntoSelect_LRARichiesta()
+        {            
+            using (var db = OpenDbConnection())
+            {
+                RecreateLRARichiesta(db);
+
+                long numeroRichieste = db.Count<LRARichiesta>();
+
+                var q = db.From<LRARichiesta>()
+                    .Select(ric => new //LRARisultato
+                    {
+                        AnalisiId = 1,
+                        Commento = ric.Commento,
+                        TipoValore = 1,
+                        Stato = 1,
+                        RisultatoId = 1,
+                        DataOraRicezione = DateTime.UtcNow,
+                        DataModifica = DateTime.UtcNow,
+                        VersioneRecord = 1,
+                        InviareALIS = 1,
+                        RisultatoPrincipale = 1,
+                        TipoInserimento = 1,
+                        Citrato = 1,
+                    });
+
+                long result = db.InsertIntoSelect<LRARisultato>(q);
+
+                Assert.That(result, Is.EqualTo(numeroRichieste));
+            }
+        }
+
+        private static void RecreateLRARichiesta(IDbConnection db)
         {
             db.DropTable<LRAAnalisi>();
             db.DropTable<LRAContenitore>();
             db.DropTable<LRARichiesta>();
+            db.DropTable<LRARisultato>();
+            db.DropTable<LRDLaboratorio>();
             db.DropTable<LRAPaziente>();
             db.DropTable<LRDReparto>();
             db.DropTable<LRDPriorita>();
-            db.DropTable<LRDLaboratorio>();
-            
+
+            db.CreateTable<LRDLaboratorio>();
+            db.CreateTable<LRAPaziente>();
+            db.CreateTable<LRDReparto>();
+            db.CreateTable<LRDPriorita>();
+            db.CreateTable<LRARisultato>();
+            db.CreateTable<LRARichiesta>();
+            db.CreateTable<LRAContenitore>();
+            db.CreateTable<LRAAnalisi>();
+        }
+
+        [Test]
+        public async Task Does_InsertIntoSelect_LRARichiesta_Async()
+        {            
+            using (var db = OpenDbConnection())
+            {
+                RecreateLRARichiesta(db);
+
+                long numeroRichieste = await db.CountAsync<LRARichiesta>();
+
+                var q = db.From<LRARichiesta>()
+                    .Select(ric => new //LRARisultato
+                    {
+                        AnalisiId = 1,
+                        Commento = ric.Commento,
+                        TipoValore = 1,
+                        Stato = 1,
+                        RisultatoId = 1,
+                        DataOraRicezione = DateTime.UtcNow,
+                        DataModifica = DateTime.UtcNow,
+                        VersioneRecord = 1,
+                        InviareALIS = 1,
+                        RisultatoPrincipale = 1,
+                        TipoInserimento = 1,
+                        Citrato = 1,
+                    });
+
+                long result = await db.InsertIntoSelectAsync<LRARisultato>(q);
+
+                Assert.That(result, Is.EqualTo(numeroRichieste));
+            }
+        }
+        
+        private static void CreateTables(IDbConnection db)
+        {
+            DropTables(db);
+
+            db.CreateTable<LRARisultato>();
             db.CreateTable<LRDLaboratorio>();
             db.CreateTable<LRDPriorita>();
             db.CreateTable<LRDReparto>();
@@ -147,10 +230,155 @@ namespace ServiceStack.OrmLite.Tests.Issues
             db.CreateTable<LRAContenitore>();
             db.CreateTable<LRAAnalisi>();
         }
-    }
 
-    public class DBObject
-    {        
+        private static void DropTables(IDbConnection db)
+        {
+            db.DropTable<LRAAnalisi>();
+            db.DropTable<LRAContenitore>();
+            db.DropTable<LRARichiesta>();
+            db.DropTable<LRAPaziente>();
+            db.DropTable<LRDReparto>();
+            db.DropTable<LRDPriorita>();
+            db.DropTable<LRDLaboratorio>();
+            db.DropTable<LRARisultato>();
+        }
+
+        private static void InitAliasTables(IDbConnection db)
+        {
+            db.DropTable<LRDProfiloAnalisi>();
+            db.DropTable<LRDAnalisi>();
+            db.DropTable<LRDContenitore>();
+                
+            db.CreateTable<LRDContenitore>();
+            db.CreateTable<LRDAnalisi>();
+            db.CreateTable<LRDProfiloAnalisi>();
+
+            db.Insert(new LRDAnalisi
+            {
+                Codice = "TEST", 
+                Descrizione = "DESCRIPTION",
+                DataModifica = DateTime.UtcNow
+            });
+
+            db.Insert(new LRDProfiloAnalisi
+            {
+                AnalisiId = 1,
+                DataModifica = DateTime.UtcNow,
+                VersioneRecord = 1,
+                ProfiloAnalisiId = null
+            });
+        }
+        
+        [Test]
+        public void Table_Alias()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitAliasTables(db);
+                
+                var q = db.From<LRDAnalisi>(options => {
+                        options.SetTableAlias("dana");
+                        options.UseSelectPropertiesAsAliases = true;
+                    })
+                    .Join<LRDAnalisi, LRDContenitore>((dana, dcont) => dana.ContenitoreId == dcont.Id, db.TableAlias("c"))
+                    .Join<LRDAnalisi, LRDProfiloAnalisi>((dana, dprofana) => dana.Id == dprofana.AnalisiId, db.TableAlias("dprofana"))
+                    .Where<LRDProfiloAnalisi>(dprofana => Sql.TableAlias(dprofana.ProfiloAnalisiId, "dprofana") == null)
+                    .SelectDistinct<LRDAnalisi, LRDProfiloAnalisi, LRDContenitore>((dana, dprofana, dcont) =>
+                        new //ProfiloAnalisiDTO
+                        {
+                            Id = Sql.TableAlias(dprofana.Id, "dprofana"),
+                            AnalisiId = dana.Id,
+                            Codice = dana.Codice,
+                            Descrizione = dana.Descrizione,
+                            ContenitoreId = dana.ContenitoreId,
+                            ContenitoreCodice = Sql.TableAlias(dcont.Codice, "c"),
+                            ContenitoreDescrizione = Sql.TableAlias(dcont.Descrizione, "c"),
+                            VersioneRecord = Sql.TableAlias(dprofana.VersioneRecord, "dprofana")
+                        });
+                
+                var result = db.Select<ProfiloAnalisiDTO>(q);
+            }
+        }
+        
+        [Test]
+        public void Join_Alias()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitAliasTables(db);
+
+                var q = db.From<LRDAnalisi>()
+                    .Join<LRDAnalisi, LRDContenitore>((dana, dcont) => dana.ContenitoreId == dcont.Id, db.JoinAlias("c"))
+                    .Join<LRDAnalisi, LRDProfiloAnalisi>((dana, dprofana) => dana.Id == dprofana.AnalisiId, db.JoinAlias("dprofana"))
+                    .Where<LRDProfiloAnalisi>(dprofana => Sql.JoinAlias(dprofana.ProfiloAnalisiId, "dprofana") == null)
+                    .SelectDistinct<LRDAnalisi, LRDProfiloAnalisi, LRDContenitore>((dana, dprofana, dcont) =>
+                        new //ProfiloAnalisiDTO
+                        {
+                            Id = Sql.JoinAlias(dprofana.Id, "dprofana"),
+                            AnalisiId = dana.Id,
+                            Codice = dana.Codice,
+                            Descrizione = dana.Descrizione,
+                            ContenitoreId = Sql.JoinAlias(dcont.Id, "c"),
+                            ContenitoreCodice = Sql.JoinAlias(dcont.Codice, "c"),
+                            ContenitoreDescrizione = Sql.JoinAlias(dcont.Descrizione, "c"),
+                            VersioneRecord = Sql.JoinAlias(dprofana.VersioneRecord, "dprofana")
+                        });
+                
+                var result = db.Select<ProfiloAnalisiDTO>(q);
+            }
+        }        
+    }
+    
+    public class ElementoProfiloAnalisiDTO
+    {
+        public int Id { get; set; }
+
+        public int ProfiloAnalisiId { get; set; }
+
+        public int AnalisiId { get; set; }
+
+        public string CodiceAnalisi { get; set; }
+
+        public string DescrizioneAnalisi { get; set; }
+
+        public int VersioneRecord { get; set; }
+    }
+    
+    public class ProfiloAnalisiDTO
+    {
+        public int Id { get; set; }
+
+        public string Codice { get; set; }
+
+        public string Descrizione { get; set; }
+
+        public int ContenitoreId { get; set; }
+
+        public string ContenitoreCodice { get; set; }
+
+        public string ContenitoreDescrizione { get; set; }
+
+        public int VersioneRecord { get; set; }
+
+        public int AnalisiId { get; set; }
+
+        public IEnumerable<ElementoProfiloAnalisiDTO> Elementi { get; set; }
+    }
+    
+
+    public class DBObject : ICloneable
+    {
+        [Alias("DATAMODIFICA")]
+        public DateTime DataModifica { get; set; }
+
+        [Default(1)]
+        [Alias("VERSIONERECORD")]
+        public int VersioneRecord { get; set; }
+
+        public object Clone()
+        {
+            return MemberwiseClone();
+        }
     }
 
     public class SessiPaziente
@@ -164,8 +392,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
     }
     
     [Alias("LRAANALISI")]
-//    [CompositeIndex("AANALISIPADREID", "ACONTENITOREID", Unique = false, Name = "IDXLRAANALISI")]
-//    [CompositeIndex("ACONTENITOREID", "DANALISIID", "AANALISIPADREID", "LIVELLOANALISI", Unique = true, Name = "IDXLRAANALISI2")]
     public class LRAAnalisi : IHasId<int>
     {
         [PrimaryKey]
@@ -180,188 +406,43 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Reference]
         public LRAContenitore Contenitore { get; set; }
 
-//        [Alias("DANALISIID")]
-//        [References(typeof(LRDAnalisi))]
-//        public int AnalisiId { get; set; }
-//
-//        [Reference]
-//        public LRDAnalisi Analisi { get; set; }
-//
-//        [Alias("AANALISIPADREID")]
-//        [References(typeof(LRAAnalisi))]
-//        public int? AnalisiPadreId { get; set; }
-//
-//        [Reference]
-//        public LRAAnalisi AnalisiPadre { get; set; }
-//
-//        [Default(0)]
-//        [Alias("LIVELLOANALISI")]
-//        public int LivelloAnalisi { get; set; }
-//
-//        [Alias("STATO")]
-//        [Default((int) StatiAnalisi.InAttesa)]
-//        public int Stato { get; set; }
-//
-//        [Alias("DTIPOCONVALIDAID")]
-//        [References(typeof(LRDTipoConvalida))]
-//        public int? TipoConvalidaId { get; set; }
-//
-//        [Reference]
-//        public LRDTipoConvalida TipoConvalida { get; set; }
-//
         [Alias("DATAORAVALIDAZIONE")]
         public DateTime? DataOraValidazione { get; set; }
 
-//        [Alias("DOPERATOREVALIDAZIONEID")]
-//        [References(typeof(LRDOperatore))]
-//        public int? OperatoreValidazioneId { get; set; }
-//
-//        [Reference]
-//        public LRDOperatore OperatoreValidazione { get; set; }
-//
         [Alias("DLABORATORIOCANDIDATOID")]
         [References(typeof(LRDLaboratorio))]
         public int? LaboratorioEsecutoreCandidatoId { get; set; }
 
-//        [Reference]
-//        public LRDLaboratorio Laboratorio { get; set; }
-//
         [Alias("DATAORAESECUZIONE")]
         public DateTime? DataOraEsecuzione { get; set; }
-        
-//        [Alias("COMMENTO")]
-//        [StringLength(StringLengthAttribute.MaxText)]
-//        public string Commento { get; set; }
-//
-//        [Alias("VALIDAZIONEAUTOMATICA")]
-//        [Default((int) ModalitaValidazione.ValidatoManualmente)]
-//        public int? ValidazioneAutomatica { get; set; }
-//
-//        [Alias("DATAORACHECKIN")]
-//        public DateTime? DataOraCheckin { get; set; }
-//
-//        [Alias("DATAORAACCETTAZIONE")]
-//        public DateTime DataOraAccettazione { get; set; }
-//
-//        [Alias("DATAORAPRELIEVO")]
-//        public DateTime DataOraPrelievo { get; set; }
     }
     
     [Alias("LRACONTENITORI")]
-//    [CompositeIndex("BARCODE", Unique = false, Name = "NCI_BARCODE")]
-//    [CompositeIndex("ARICHIESTAID", Unique = false, Name = "NCI_ARICHIESTAID")]
     public class LRAContenitore : DBObject, IHasId<int>
     {
-//        private string _barcode;
-//
         [PrimaryKey]
         [AutoIncrement]
         [Alias("IDACONTENITORE")]
         public int Id { get; set; }
 
-//        [Required]
-//        [Alias("BARCODE")]
-//        [StringLength(AppDBModelFieldLength.C_BARCODE)]
-//        public string Barcode
-//        {
-//            get
-//            {
-//                return _barcode;
-//            }
-//            set
-//            {
-//                _barcode = value.Fix(AppDBModelFieldLength.C_BARCODE);
-//            }
-//        }
-
         [Alias("ARICHIESTAID")]
         [References(typeof(LRARichiesta))]
         public int RichiestaId { get; set; }
         
-//        [Reference]
-//        public LRARichiesta Richiesta { get; set; }
-//
-//        [Alias("DCONTENITOREID")]
-//        [References(typeof(LRDContenitore))]
-//        public int ContenitoreId { get; set; }
-//
-//        [Reference]
-//        public LRDContenitore Contenitore { get; set; }
-//
         [Alias("DPRIORITAID")]
         [References(typeof(LRDPriorita))]
         public int PrioritaId { get; set; }
 
-//        [Reference]
-//        public LRDPriorita Priorita { get; set; }
-//
         [Alias("DATAORAPRELIEVO")]
         public DateTime? DataOraPrelievo { get; set; }
 
         [Alias("DATAORAPRIMOCHECKIN")]
         public DateTime? DataOraPrimoCheckin { get; set; }
-
-//        [References(typeof(LRDDevice))]
-//        [Alias("DDEVICEIDPRIMOCHECKIN")]        
-//        public int? DeviceIdPrimoCheckIn { get; set; }
-//
-//        [Reference]
-//        public LRDDevice DevicePrimoCheckIn { get; set; }
-//
-//        [Alias("STATO")]
-//        [Default((int) StatiContenitore.NonPervenuto)]        
-//        public int Stato { get; set; }
-//
-//        [Alias("DTIPOCONVALIDAID")]
-//        [References(typeof(LRDTipoConvalida))]
-//        public int? TipoConvalidaId { get; set; }
-//
-//        [Reference]
-//        public LRDTipoConvalida TipoConvalida { get; set; }
-//
-//        [Alias("DATAORAVALIDAZIONE")]
-//        public DateTime? DataOraValidazione { get; set; }
-//
-//        [Alias("DATAORAESECUZIONE")]
-//        public DateTime? DataOraEsecuzione { get; set; }
-//
-//        [Alias("DATAORAULTIMARIPETIZIONE")]
-//        public DateTime? DataOraUltimaRipetizione { get; set; }
-//
-//        [Default((int) SiNo.No)]
-//        [Alias("RIPETIZIONECITRATO")]
-//        public int RipetizioneCitrato { get; set; }
-//
-//        [Alias("DATAORARICHIESTAVETRINOAUTO")]        
-//        public DateTime? DataOraRichiestaVetrinoAutomatico { get; set; }
-//
-//        [Alias("DATAORARICHIESTAVETRINOMAN")]
-//        public DateTime? DataOraRichiestaVetrinoManuale { get; set; }
-//
-//        [Alias("COMMENTO")]
-//        [StringLength(StringLengthAttribute.MaxText)]
-//        public string Commento { get; set; }
-//
-//        [Alias("COMMENTOINTERNO")]
-//        [StringLength(StringLengthAttribute.MaxText)]
-//        public string CommentoInterno { get; set; }
-//        
-//        [Alias("COMMENTOREFERTO")]
-//        [StringLength(StringLengthAttribute.MaxText)]
-//        public string CommentoReferto { get; set; }
-//
-//        [Alias("VALIDAZIONEAUTOMATICA")]
-//        [Default((int) ModalitaValidazione.ValidatoManualmente)]  
-//        public int? ValidazioneAutomatica { get; set; }
     }
 
     [Alias("LRARICHIESTE")]
-//    [CompositeIndex("NUMERORICHIESTA", "DATAORAACCETTAZIONE", Unique = true, Name = "IDXLRARICHIESTE")]
     public class LRARichiesta : DBObject, IHasId<int>
     {
-//        private string _numero_richiesta;
-//        private string _numero_ricovero;
-//
         [PrimaryKey]
         [AutoIncrement]
         [Alias("IDARICHIESTA")]                
@@ -371,49 +452,10 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [ForeignKey(typeof(LRAPaziente))]
         public int PazienteId { get; set; }
 
-//        [Reference]
-//        public LRAPaziente Paziente { get; set; }
-//             
-//        [Required]
-//        [Alias("NUMERORICHIESTA")]
-//        [StringLength(AppDBModelFieldLength.C_NUMERO_RICHIESTA)]
-//        public string NumeroRichiesta
-//        {
-//            get
-//            {
-//                return _numero_richiesta;
-//            }
-//            set
-//            {
-//                _numero_richiesta = value.Fix(AppDBModelFieldLength.C_NUMERO_RICHIESTA);
-//            }
-//        }
-//              
-//        [Index(Unique = false)]
-//        [Alias("NUMERORICOVERO")]
-//        [StringLength(AppDBModelFieldLength.C_NUMERO_RICOVERO)]
-//        public string NumeroRicovero
-//        {
-//            get
-//            {
-//                return _numero_ricovero;
-//            }
-//            set
-//            {
-//                _numero_ricovero = value.Fix(AppDBModelFieldLength.C_NUMERO_RICOVERO);
-//            }
-//        }
-//
-        [Required]
         [Index(Unique = false)]
         [Alias("DATAORAACCETTAZIONE")]                        
         public DateTime DataOraAccettazione { get; set; }
 
-//        [Required]
-//        [Index(Unique = false)]
-//        [Alias("DATAORAPRELIEVO")]        
-//        public DateTime DataOraPrelievo { get; set; }
-        
         [Alias("ETAPAZIENTE")]
         public int? EtaPaziente { get; set; }
 
@@ -428,150 +470,28 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [References(typeof(LRDReparto))]
         public int? RepartoId { get; set; }
         
-//        [Reference]
-//        public LRDReparto Reparto { get; set; }
-//        
-//        [Alias("DDEVICEID")]
-//        [References(typeof(LRDDevice))]
-//        public int? DeviceId { get; set; }
-//
-//        [Reference]
-//        public LRDDevice Device { get; set; }
-//
         [Required]
         [Alias("DPRIORITAID")]
         [References(typeof(LRDPriorita))]        
         public int PrioritaId { get; set; }
-//
-//        [Reference]
-//        public LRDPriorita Priorita { get; set; }
-//                               
+
         [Required]
         [References(typeof(LRDLaboratorio))]
         [Alias("DLABORATORIORICHIEDENTEID")]        
         public int? LaboratorioRichiedenteId { get; set; }
         
-//        [Reference]
-//        public LRDLaboratorio LaboratorioRichiedente { get; set; }
-//
-//        [Alias("STATO")]
-//        [Default((int) StatiRichiesta.Inserita)]
-//        public int Stato { get; set; }
-//
-//        [Alias("DTIPOCONVALIDAID")]
-//        [References(typeof(LRDTipoConvalida))]
-//        public int? TipoConvalidaId { get; set; }
-//
-//        [Reference]
-//        public LRDTipoConvalida TipoConvalida { get; set; }
-//
-//        [Alias("DATAORAVALIDAZIONE")]        
-//        public DateTime? DataOraValidazione { get; set; }
-//
-//        [Alias("DATAORAESECUZIONE")]
-//        public DateTime? DataOraEsecuzione { get; set; }
-//
-//        [Alias("COMMENTO")]
-//        [StringLength(StringLengthAttribute.MaxText)]
-//        public string Commento { get; set; }
-//        
-//        [Required]
-//        [Alias("ARCHIVIATA")]
-//        [Default((int) SiNo.No)] // default 0: in corso
-//        public int Archiviata { get; set; }
-//
-//        [Alias("VALIDAZIONEAUTOMATICA")]                
-//        [Default((int) ModalitaValidazione.ValidatoManualmente)]
-//        public int? ValidazioneAutomatica { get; set; }
+        [Alias("COMMENTO")]
+        [StringLength(StringLengthAttribute.MaxText)]
+        public string Commento { get; set; }
     }
     
     [Alias("LRAPAZIENTI")]
-//    [CompositeIndex("COGNOME", "NOME", "DATADINASCITA", Unique = false, Name = "IDXLRAPAZIENTI")]
     public class LRAPaziente : DBObject, IHasId<int>
     {
-//        private string _cognome;
-//        private string _nome;
-//        private string _tessera_sanitaria;
-//        private string _codice_fiscale;
-//        private string _cap;
-//        private string _localita;
-//        private string _indirizzo;
-//        private string _provincia;
-//        private string _telefono;
-//        private string _cellulare;
-//        private string _fax;
-//        private string _email;
-//
         [PrimaryKey]
         [AutoIncrement]
         [Alias("IDAPAZIENTE")]               
         public int Id { get; set; }
-                          
-//        [Required]
-//        [Alias("PID")]
-//        [Index(Unique = true)]
-//        [StringLength(AppDBModelFieldLength.C_PID)]        
-//        public string PID { get; set; }
-//
-//        [Index(Unique = false)]
-//        [Alias("CODICEFISCALE")]               
-//        [StringLength(AppDBModelFieldLength.C_CODICE_FISCALE)]
-//        public string CodiceFiscale
-//        {
-//            get
-//            {
-//                return _codice_fiscale;
-//            }
-//            set
-//            {
-//                _codice_fiscale = value.Fix(AppDBModelFieldLength.C_CODICE_FISCALE);
-//            }
-//        }
-//
-//        [Index(Unique = false)]
-//        [Alias("TESSERASANITARIA")]
-//        [StringLength(AppDBModelFieldLength.C_TESSERA_SANITARIA)]        
-//        public string TesseraSanitaria
-//        {
-//            get
-//            {
-//                return _tessera_sanitaria;
-//            }
-//            set
-//            {
-//                _tessera_sanitaria = value.Fix(AppDBModelFieldLength.C_TESSERA_SANITARIA);
-//            }
-//        }
-//        
-//        [Required]
-//        [Alias("COGNOME")]
-//        [StringLength(AppDBModelFieldLength.C_COGNOME)]
-//        public string Cognome
-//        {
-//            get
-//            {
-//                return _cognome;
-//            }
-//            set
-//            {
-//                _cognome = value.Fix(AppDBModelFieldLength.C_COGNOME);
-//            }
-//        }
-//        
-//        [Required]
-//        [Alias("NOME")]
-//        [StringLength(AppDBModelFieldLength.C_NOME)]
-//        public string Nome
-//        {
-//            get
-//            {
-//                return _nome;
-//            }
-//            set
-//            {
-//                _nome = value.Fix(AppDBModelFieldLength.C_NOME);
-//            }
-//        }
                
         [Alias("SESSO")]
         [Default((int) SessiPaziente.NonDichiarato)]
@@ -579,126 +499,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
         [Alias("DATADINASCITA")]
         public DateTime? DataDiNascita { get; set; }
-        
-//        [Alias("INDIRIZZO")]
-//        [StringLength(AppDBModelFieldLength.C_INDIRIZZO)]
-//        public string Indirizzo
-//        {
-//            get
-//            {
-//                return _indirizzo;
-//            }
-//            set
-//            {
-//                _indirizzo = value.Fix(AppDBModelFieldLength.C_INDIRIZZO);
-//            }
-//        }
-//        
-//        [Alias("CAP")]
-//        [StringLength(AppDBModelFieldLength.C_CAP)]
-//        public string CAP
-//        {
-//            get
-//            {
-//                return _cap;
-//            }
-//            set
-//            {
-//                _cap = value.Fix(AppDBModelFieldLength.C_CAP);
-//            }
-//        }
-//        
-//        [Alias("LOCALITA")]
-//        [StringLength(AppDBModelFieldLength.C_LOCALITA)]
-//        public string Localita
-//        {
-//            get
-//            {
-//                return _localita;
-//            }
-//            set
-//            {
-//                _localita = value.Fix(AppDBModelFieldLength.C_LOCALITA);
-//            }
-//        }
-//        
-//        [Alias("PROVINCIA")]
-//        [StringLength(AppDBModelFieldLength.C_PROVINCIA)]
-//        public string Provincia
-//        {
-//            get
-//            {
-//                return _provincia;
-//            }
-//            set
-//            {
-//                _provincia = value.Fix(AppDBModelFieldLength.C_PROVINCIA);
-//            }
-//        }
-//        
-//        [Alias("TELEFONO")]
-//        [StringLength(AppDBModelFieldLength.C_TELEFONO)]
-//        public string Telefono
-//        {
-//            get
-//            {
-//                return _telefono;
-//            }
-//            set
-//            {
-//                _telefono = value.Fix(AppDBModelFieldLength.C_TELEFONO);
-//            }
-//        }
-//        
-//        [Alias("CELLULARE")]
-//        [StringLength(AppDBModelFieldLength.C_CELLULARE)]
-//        public string Cellulare
-//        {
-//            get
-//            {
-//                return _cellulare;
-//            }
-//            set
-//            {
-//                _cellulare = value.Fix(AppDBModelFieldLength.C_CELLULARE);
-//            }
-//        }
-//        
-//        [Alias("FAX")]
-//        [StringLength(AppDBModelFieldLength.C_FAX)]
-//        public string Fax
-//        {
-//            get
-//            {
-//                return _fax;
-//            }
-//            set
-//            {
-//                _fax = value.Fix(AppDBModelFieldLength.C_FAX);
-//            }
-//        }
-//        
-//        [Alias("EMAIL")]
-//        [StringLength(AppDBModelFieldLength.C_EMAIL)]
-//        public string Email
-//        {
-//            get
-//            {
-//                return _email;
-//            }
-//            set
-//            {
-//                _email = value.Fix(AppDBModelFieldLength.C_EMAIL);
-//            }
-//        }
-//
-//        [Alias("COMMENTO")]               
-//        [StringLength(StringLengthAttribute.MaxText)]
-//        public string Commento { get; set; }
-//               
-//        [Alias("DPATOLOGIAID")]
-//        [References(typeof(LRDPatologia))]
-//        public int? PatologiaId { get; set; }
     }
 
     public class LRDReparto
@@ -762,4 +562,268 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public int StatoQC { get; set; }
         public int StatoWarning { get; set; }
     }
+    
+    [Alias("LRARISULTATI")]
+    [CompositeIndex("AANALISIID", "DRISULTATOID", "STATO", Unique = false, Name = "IDXLRARISULTATI")]
+    public class LRARisultato : DBObject, IHasId<int>
+    {
+        [PrimaryKey]
+        [AutoIncrement]
+        [Alias("IDARISULTATO")]
+        public int Id { get; set; }
+
+        [Index]
+        [Alias("AANALISIID")]
+        public int AnalisiId { get; set; }
+
+        [Required]
+        [Alias("TIPOVALORE")]
+        public int TipoValore { get; set; }
+
+        [Alias("OPERATORERELAZIONALE")]
+        public string OperatoreRelazionale { get; set; }
+
+        [Alias("VALORENUMERICO")]
+        public decimal? ValoreNumerico { get; set; }
+
+        [Index]
+        [Alias("DTESTOCODIFICATOID")]
+        public int? TestoCodificatoId { get; set; }
+
+        [Alias("TESTOLIBERO")]
+        [StringLength(StringLengthAttribute.MaxText)]
+        public string TestoLibero { get; set; }
+
+        [Index]
+        [Alias("DRISULTATOID")]
+        public int RisultatoId { get; set; }
+
+        [Required]
+        [Alias("STATO")]
+        public int Stato { get; set; }
+
+        [Alias("INVIAREALIS")]
+        public int InviareALIS { get; set; }
+
+        [Alias("RISULTATOPRINCIPALE")]
+        public int RisultatoPrincipale { get; set; }
+
+        [Alias("TIPOINSERIMENTO")]
+        public int TipoInserimento { get; set; }
+
+        [Index]
+        [Alias("DOPERATOREINSERIMENTOID")]
+        public int? OperatoreInserimentoId { get; set; }
+
+        [Index]
+        [Alias("DDEVICEID")]
+        public int? DeviceId { get; set; }
+
+        [Index]
+        [Alias("DLABORATORIOESECUTOREID")]
+        public int? LaboratorioEsecutoreId { get; set; }
+
+        [Alias("CITRATO")]
+        public int Citrato { get; set; }
+
+        [Alias("DATAORARIPETIZIONE")]
+        public DateTime? DataOraRipetizione { get; set; }
+
+        [Alias("DATAORAESECUZIONE")]
+        public DateTime? DataOraEsecuzione { get; set; }
+
+        [Alias("DATAORARICEZIONE")]
+        public DateTime DataOraRicezione { get; set; }
+
+        [Alias("IDENTIFICATIVODEVICE")]
+        public string IdentificativoDevice { get; set; }
+
+        [Alias("POSIZIONESUDEVICE")]
+        public string PosizioneSuDevice { get; set; }
+
+        [Alias("REAGENTE")]
+        public string Reagente { get; set; }
+
+        [Alias("LOTTOREAGENTE")]
+        public string LottoReagente { get; set; }
+
+        [Alias("DATASCADENZAREAGENTE")]
+        public DateTime? DataScadenzaReagente { get; set; }
+
+        [Alias("CURVADICALIBRAZIONE")]
+        public string CurvaDiCalibrazione { get; set; }
+
+        [Index]
+        [Alias("DDILUIZIONEID")]
+        public int? DiluizioneId { get; set; }
+
+        [Index]
+        [Alias("DRANGENORMALITAID")]
+        public int? RangeNormalitaId { get; set; }
+
+        [Index]
+        [Alias("DRANGECONVALIDAID")]
+        public int? RangeConvalidaId { get; set; }
+
+        [Index]
+        [Alias("DDELTACHECKSTORICOID")]
+        public int? DeltaCheckStoricoId { get; set; }
+
+        [Index]
+        [Alias("DDELTACHECKROUTINEID")]
+        public int? DeltaCheckRoutineId { get; set; }
+
+        [Index]
+        [Alias("DREGOLACONVALIDAID")]
+        public int? RegolaConvalidaId { get; set; }
+
+        [Alias("COMMENTO")]
+        [StringLength(StringLengthAttribute.MaxText)]
+        public string Commento { get; set; }
+
+        [StringLength(250)]
+        [Alias("RISULTATORAW")]
+        public string RisultatoRaw { get; set; }
+
+        [Index]
+        [References(typeof(LRARisultato))]
+        [Alias("ADELTARISULTATOSTORICODID")]
+        public int? DeltaRisultatoStoricoId { get; set; }
+
+        [Index]
+        [References(typeof(LRARisultato))]
+        [Alias("ADELTARISULTATOPRECEDENTEID")]
+        public int? DeltaRisultatoPrecedenteId { get; set; }
+    }
+    
+    [Alias("LRDPROFILOANALISI")]
+    [CompositeIndex("DPROFILOANALISIID", "DANALISIID", Unique = true, Name = "IDXPROFILO")]
+    public class LRDProfiloAnalisi : DBObject, IHasId<int>
+    {
+        [Alias("IDDPROFILOANALISI")]
+        [AutoIncrement]
+        [PrimaryKey]
+        public int Id { get; set; }
+
+        [ApiMember(Description = "Analisi profilo a cui appartiene l'analisi")]
+        [Alias("DPROFILOANALISIID")]
+        [References(typeof(LRDProfiloAnalisi))]
+        public int? ProfiloAnalisiId { get; set; } // dove NULL allora DANALISIID e' l'analisi profilo
+
+        [ApiMember(Description = "Analisi dal dizionario")]
+        [Alias("DANALISIID")]
+        [References(typeof(LRDAnalisi))]
+        public int AnalisiId { get; set; }
+    }
+    
+    [Alias("LRDCONTENITORI")]
+    public class LRDContenitore : DBObject, IHasId<int>
+    {
+        private const int CColore = 7; // lunghezza colore HTML es. #AABBCC
+        private const int CPrefisso = 5;
+
+        [Alias("IDDCONTENITORE")]
+        [AutoIncrement]
+        [PrimaryKey]
+        public int Id { get; set; }
+
+        [Alias("CODICE")]
+        [Required]
+        [Index(Unique = true)]
+        public string Codice { get; set; }
+
+        [Required]
+        [Alias("DESCRIZIONE")]
+        public string Descrizione { get; set; }
+
+        [Alias("DESCRIZIONEESTESA")]
+        public string DescrizioneEstesa { get; set; }
+
+        [Alias("ORDINE")]
+        [Required]
+        public int Ordine { get; set; }
+
+        [Required]
+        [Alias("TIPOCONTENITORE")]
+        public int TipoContenitore { get; set; }
+
+        [Alias("COLORE")]
+        [StringLength(CColore)]
+        public string Colore { get; set; }
+
+        [Alias("PREFISSO")]
+        [StringLength(CPrefisso)]
+        public string Prefisso { get; set; }
+
+        [Alias("PROGRESSIVOBARCODEMIN")]
+        [DecimalLength(30, 0)]
+        public decimal ProgressivoBarcodeMin { get; set; }
+
+        [Alias("PROGRESSIVOBARCODEMAX")]
+        [DecimalLength(30, 0)]
+        [Default(int.MaxValue)]
+        public decimal ProgressivoBarcodeMax { get; set; }
+
+        [Alias("DMATERIALEID")]
+        public int? MaterialeId { get; set; }
+
+        [Alias("DETICHETTAID")]
+        public int? EtichettaId { get; set; }
+
+        [Required]
+        [Alias("EMATOLOGIA")]
+        public int Ematologia { get; set; }
+
+        [Required]
+        [Alias("URINE")]
+        public int Urine { get; set; }
+    }    
+
+    [Alias("LRDANALISI")]
+    public class LRDAnalisi : DBObject, IHasId<int>
+    {
+        [Alias("IDDANALISI")]
+        [AutoIncrement]
+        [PrimaryKey]
+        public int Id { get; set; }
+
+        [Alias("CODICE")]
+        [Required]
+        [Index(Unique = true)]
+        public string Codice { get; set; }
+
+        [Alias("DESCRIZIONE")]
+        [Required]
+        public string Descrizione { get; set; }
+
+        [Alias("DESCRIZIONEESTESA")]
+        public string DescrizioneEstesa { get; set; }
+
+        [Alias("CODICEREGIONALE")]
+        public string CodiceRegionale { get; set; }
+
+        [Alias("DCONTENITOREID")]
+        public int ContenitoreId { get; set; }
+
+        [Alias("ORDINE")]
+        public int Ordine { get; set; }
+
+        [Alias("DMETODOID")]
+        public int? MetodoId { get; set; }
+
+        [Alias("DPANNELLOANALISIID")]
+        public int? PannelloAnalisiId { get; set; }
+
+        [Alias("DCLASSEANALISIID")]
+        public int? ClasseAnalisiId { get; set; }
+
+        [Alias("QCREGISTRAZIONERISULTATI")]
+        public int QCRegistrazioneRisultati { get; set; }
+
+        [Alias("QCVERIFICA")]
+        public int QCVerifica { get; set; }
+
+        [Alias("QCOREINTERVALLOVERIFICA")]
+        public int? QCOreIntervalloVerifica { get; set; }
+    }    
 }

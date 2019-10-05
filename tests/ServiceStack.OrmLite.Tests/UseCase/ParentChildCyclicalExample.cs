@@ -33,8 +33,11 @@ namespace ServiceStack.OrmLite.Tests.UseCase
         public string Description { get; set; }
     }
 
-    public class ParentChildCyclicalExample : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ParentChildCyclicalExample : OrmLiteProvidersTestBase
     {
+        public ParentChildCyclicalExample(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_create_Parent_Child_Tables()
         {

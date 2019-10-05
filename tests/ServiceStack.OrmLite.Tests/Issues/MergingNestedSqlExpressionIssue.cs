@@ -1,6 +1,5 @@
 ﻿using System;
 using NUnit.Framework;
-using ServiceStack.OrmLite.Sqlite;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
@@ -20,33 +19,34 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public bool HasC { get; set; }
     }
 
-    public class MergingNestedSqlExpressionIssue : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.Sqlite)]
+    public class MergingNestedSqlExpressionIssue : OrmLiteProvidersTestBase
     {
+        public MergingNestedSqlExpressionIssue(DialectContext context) : base(context) {}
+
         [Test]
         public void Does_merge_subselect_params_correctly()
         {
-            OrmLiteConfig.DialectProvider = new SqliteOrmLiteDialectProvider();
-
             // select a group of ids
-            var ids = OrmLiteConfig.DialectProvider.SqlExpression<OrganizationMembership>();
+            var ids = DialectProvider.SqlExpression<OrganizationMembership>();
             ids.Where(x => x.HasA == true && x.HasB == true && x.HasC == true);
             ids.SelectDistinct(x => x.OrganizationId);
 
             //0 params
-            var q = OrmLiteConfig.DialectProvider.SqlExpression<Organization>(); 
+            var q = DialectProvider.SqlExpression<Organization>(); 
             q.Where(x => Sql.In(x.Id, ids));
             Assert.That(q.WhereExpression, Is.EqualTo(
                 "WHERE \"Id\" IN (SELECT DISTINCT \"OrganizationId\" \nFROM \"OrganizationMembership\"\nWHERE (((\"HasA\" = @0) AND (\"HasB\" = @1)) AND (\"HasC\" = @2)))"));
 
             //1 param
-            q = OrmLiteConfig.DialectProvider.SqlExpression<Organization>();
+            q = DialectProvider.SqlExpression<Organization>();
             q.Where(x => x.IsActive == true);
             q.Where(x => Sql.In(x.Id, ids));
             Assert.That(q.WhereExpression, Is.EqualTo(
                 "WHERE (\"IsActive\" = @0) AND \"Id\" IN (SELECT DISTINCT \"OrganizationId\" \nFROM \"OrganizationMembership\"\nWHERE (((\"HasA\" = @1) AND (\"HasB\" = @2)) AND (\"HasC\" = @3)))"));
 
             //2 params
-            q = OrmLiteConfig.DialectProvider.SqlExpression<Organization>();
+            q = DialectProvider.SqlExpression<Organization>();
             q.Where(x => x.IsActive == true);
             q.Where(x => x.IsActive == true);
             q.Where(x => Sql.In(x.Id, ids));
@@ -54,7 +54,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                 "WHERE (\"IsActive\" = @0) AND (\"IsActive\" = @1) AND \"Id\" IN (SELECT DISTINCT \"OrganizationId\" \nFROM \"OrganizationMembership\"\nWHERE (((\"HasA\" = @2) AND (\"HasB\" = @3)) AND (\"HasC\" = @4)))"));
 
             //3 params
-            q = OrmLiteConfig.DialectProvider.SqlExpression<Organization>();
+            q = DialectProvider.SqlExpression<Organization>();
             q.Where(x => x.IsActive == true);
             q.Where(x => x.IsActive == true);
             q.Where(x => x.IsActive == true);

@@ -1,9 +1,7 @@
-using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using NUnit.Framework;
-using ServiceStack.Common;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -14,15 +12,17 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
-    [TestFixture]
-    public class SqlServerProviderTests
+    [TestFixtureOrmLiteDialects(Dialect.AnySqlServer)]
+    public class SqlServerProviderTests : OrmLiteProvidersTestBase
     {
+        public SqlServerProviderTests(DialectContext context) : base(context) {}
+
         private IDbConnection db;
 
         [OneTimeSetUp]
         public void TestFixtureSetUp()
         {
-            db = Config.OpenDbConnection();
+            db = OpenDbConnection();
         }
 
         [OneTimeTearDown]

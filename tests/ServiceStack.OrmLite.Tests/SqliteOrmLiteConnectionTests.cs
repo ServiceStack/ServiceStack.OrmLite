@@ -1,21 +1,14 @@
 using System;
 using System.Data;
-using System.IO;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 
 namespace ServiceStack.OrmLite.Tests
 {
-	[TestFixture]
-	public class SqliteOrmLiteConnectionTests 
-		: OrmLiteTestBase
+	[TestFixtureOrmLiteDialects(Dialect.Sqlite)]
+	public class SqliteOrmLiteConnectionTests : OrmLiteProvidersTestBase
 	{
-        [SetUp]
-        public void SetUp()
-        {
-            OrmLiteConfig.DialectProvider = SqliteDialect.Provider;
-            ConnectionString = "test.sqlite";
-        }
+		public SqliteOrmLiteConnectionTests(DialectContext context) : base(context) {}
 
 		[Test]
 		public void Can_create_connection()
@@ -28,7 +21,8 @@ namespace ServiceStack.OrmLite.Tests
 		[Test, Ignore("Not supported in latest sqlite")]
 		public void Can_create_ReadOnly_connection()
 		{
-			using (var db = ConnectionString.OpenReadOnlyDbConnection()) 
+			var connectionString = OpenDbConnection().ConnectionString;
+			using (var db = connectionString.OpenReadOnlyDbConnection()) 
 			{
 			}
 		}
@@ -36,7 +30,8 @@ namespace ServiceStack.OrmLite.Tests
         [Test, Ignore("Not supported in latest sqlite")]
         public void Can_create_table_with_ReadOnly_connection()
 		{
-			using (var db = ConnectionString.OpenReadOnlyDbConnection())
+			var connectionString = OpenDbConnection().ConnectionString;
+			using (var db = connectionString.OpenReadOnlyDbConnection())
 			{
 				try
 				{
@@ -45,7 +40,7 @@ namespace ServiceStack.OrmLite.Tests
 				}
 				catch (Exception ex)
 				{
-					Log(ex.Message);
+					Console.Write(ex);
 					return;
 				}
 				Assert.Fail("Should not be able to create a table with a readonly connection");

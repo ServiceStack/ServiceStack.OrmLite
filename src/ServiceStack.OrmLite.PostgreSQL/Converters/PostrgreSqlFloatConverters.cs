@@ -25,7 +25,7 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
             {
                 return base.GetValue(reader, columnIndex, values);
             }
-            catch (OverflowException e)
+            catch (OverflowException)
             {
                 return decimal.MaxValue;
             }

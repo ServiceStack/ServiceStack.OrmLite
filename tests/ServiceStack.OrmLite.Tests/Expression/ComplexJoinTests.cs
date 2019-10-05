@@ -126,9 +126,11 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public string ManufacturerName { get; set; }
     }
 
-    [TestFixture]
-    public class ComplexJoinTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ComplexJoinTests : OrmLiteProvidersTestBase
     {
+        public ComplexJoinTests(DialectContext context) : base(context) {}
+
         private static int _baz1Id;
         private static int _baz2Id;
         private static int _fooBar1Id;
@@ -198,7 +200,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 InitTables(db);
 
                 /* This gives the expected values for BazId */
-                var jn = new JoinSqlBuilder<JoinResult, FooBar>()
+                var jn = new JoinSqlBuilder<JoinResult, FooBar>(DialectProvider)
                     .Join<FooBar, BarJoin>(
                         sourceColumn: dp => dp.BarId,
                         destinationColumn: p => p.Id,

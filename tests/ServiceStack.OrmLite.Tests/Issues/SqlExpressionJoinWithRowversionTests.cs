@@ -1,13 +1,13 @@
 using NUnit.Framework;
-using ServiceStack.Logging;
-using ServiceStack.OrmLite;
 using ServiceStack.OrmLite.Tests.Expression;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
+    [TestFixtureOrmLite]
     public class SqlExpressionJoinWithRowversionTests : ExpressionsTestBase
     {
+        public SqlExpressionJoinWithRowversionTests(DialectContext context) : base(context) {}
+
         public class TableA
         {
             public int Id { get; set; }

@@ -2,8 +2,11 @@
 
 namespace ServiceStack.OrmLite.Tests.Expression
 {
+    [TestFixtureOrmLite]
     public class MultiplicativeExpressionsTest : ExpressionsTestBase
     {
+        public MultiplicativeExpressionsTest(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_select_constant_multiply_expression()
         {

@@ -6,9 +6,11 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    [TestFixture]
-    public class CsvTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class CsvTests : OrmLiteProvidersTestBase
     {
+        public CsvTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_serialize_Dapper_results_to_CSV()
         {

@@ -67,6 +67,23 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
         /// 
+        ///   var q = db.From&gt;Person&lt;().Where(p => p.LastName == "Hendrix");
+        ///   db.UpdateOnlyAsync(() => new Person { FirstName = "JJ" }, q.WhereExpression, q.Params);
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')
+        /// </summary>
+        public static Task<int> UpdateOnlyAsync<T>(this IDbConnection dbConn,
+            Expression<Func<T>> updateFields,
+            string whereExpression,
+            IEnumerable<IDbDataParameter> sqlParams,
+            Action<IDbCommand> commandFilter = null,
+            CancellationToken token = default(CancellationToken))
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(updateFields, whereExpression, sqlParams, commandFilter, token));
+        }
+
+        /// <summary>
+        /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+        /// 
         ///   db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
         ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')
         ///

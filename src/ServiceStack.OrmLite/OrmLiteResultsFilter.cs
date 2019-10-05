@@ -33,6 +33,8 @@ namespace ServiceStack.OrmLite
         HashSet<T> GetColumnDistinct<T>(IDbCommand dbCmd);
 
         Dictionary<K, V> GetDictionary<K, V>(IDbCommand dbCmd);
+        
+        List<KeyValuePair<K, V>> GetKeyValuePairs<K, V>(IDbCommand dbCmd);
 
         Dictionary<K, List<V>> GetLookup<K, V>(IDbCommand dbCmd);
 
@@ -272,6 +274,8 @@ namespace ServiceStack.OrmLite
             return to;
         }
 
+        public List<KeyValuePair<K, V>> GetKeyValuePairs<K, V>(IDbCommand dbCmd) => GetDictionary<K, V>(dbCmd).ToList();
+
         public Dictionary<K, List<V>> GetLookup<K, V>(IDbCommand dbCmd)
         {
             Filter(dbCmd);
@@ -284,8 +288,7 @@ namespace ServiceStack.OrmLite
             {
                 var key = (K)entry.Key;
 
-                List<V> list;
-                if (!to.TryGetValue(key, out list))
+                if (!to.TryGetValue(key, out var list))
                 {
                     to[key] = list = new List<V>();
                 }

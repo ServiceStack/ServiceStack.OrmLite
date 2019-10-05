@@ -27,21 +27,15 @@ namespace ServiceStack.OrmLite.Firebird
 			Init();
 		}
 
-		public List<Table> Tables
-		{
-			get
-			{
-                return Connection.SelectFmt<Table>(sqlTables);
-            }
-		}
+		public List<Table> Tables => Connection.Select<Table>(sqlTables);
 
 		public Table GetTable(string name)
 		{
 
 			string sql = sqlTables +
-						string.Format("    AND a.rdb$relation_name ='{0}' ", name);
+			             $"    AND a.rdb$relation_name ='{name}' ";
 
-            var query = Connection.SelectFmt<Table>(sql);
+            var query = Connection.Select<Table>(sql);
             return query.FirstOrDefault();
         }
 		
@@ -49,20 +43,17 @@ namespace ServiceStack.OrmLite.Firebird
 		{
 
 			string sql = string.Format(sqlColumns.ToString(),
-									   string.IsNullOrEmpty(tableName) ? "idx.rdb$relation_name" :
-									   string.Format("'{0}'", tableName),
-									   string.IsNullOrEmpty(tableName) ? "r.rdb$relation_name" :
-									   string.Format("'{0}'", tableName));
+									   string.IsNullOrEmpty(tableName) ? "idx.rdb$relation_name" : $"'{tableName}'",
+									   string.IsNullOrEmpty(tableName) ? "r.rdb$relation_name" : $"'{tableName}'");
 
-            List<Column> columns =Connection.SelectFmt<Column>(sql);
+            List<Column> columns =Connection.Select<Column>(sql);
 
-            List<Generador> gens = Connection.SelectFmt<Generador>(sqlGenerator.ToString());
+            List<Generador> gens = Connection.Select<Generador>(sqlGenerator.ToString());
 
             sql = string.Format(sqlFieldGenerator.ToString(),
-                                string.IsNullOrEmpty(tableName) ? "TRIGGERS.RDB$RELATION_NAME" :
-                                   string.Format("'{0}'", tableName));
+                                string.IsNullOrEmpty(tableName) ? "TRIGGERS.RDB$RELATION_NAME" : $"'{tableName}'");
 
-            List<FieldGenerator> fg = Connection.SelectFmt<FieldGenerator>(sql);
+            List<FieldGenerator> fg = Connection.Select<FieldGenerator>(sql);
 
             foreach (var record in columns)
             {
@@ -75,7 +66,7 @@ namespace ServiceStack.OrmLite.Firebird
                 else
                 {
                     string g = (from gen in gens
-                                where gen.Name == tableName + "_" + record.Name + "_GEN"
+                                where gen.Name == $"{tableName}_{record.Name}_GEN"
                                 select gen.Name).FirstOrDefault();
 
                     if (!string.IsNullOrEmpty(g)) record.Sequence = g.Trim();
@@ -94,19 +85,13 @@ namespace ServiceStack.OrmLite.Firebird
 		public Procedure GetProcedure(string name)
 		{
 			string sql= sqlProcedures.ToString() +
-						string.Format("WHERE  b.rdb$procedure_name ='{0}'", name);
+			            $"WHERE  b.rdb$procedure_name ='{name}'";
 
-            var query = Connection.SelectFmt<Procedure>(sql);
+            var query = Connection.Select<Procedure>(sql);
             return query.FirstOrDefault();
         }
 
-		public List<Procedure> Procedures
-		{
-			get
-			{
-                return Connection.SelectFmt<Procedure>(sqlProcedures.ToString());
-            }
-		}
+		public List<Procedure> Procedures => Connection.Select<Procedure>(sqlProcedures.ToString());
 
 		public List<Parameter> GetParameters(Procedure procedure)
 		{
@@ -117,10 +102,9 @@ namespace ServiceStack.OrmLite.Firebird
 		{
 
 			string sql = string.Format(sqlParameters.ToString(),
-									   string.IsNullOrEmpty(procedureName) ? "a.rdb$procedure_name" :
-									   string.Format("'{0}'", procedureName));
+									   string.IsNullOrEmpty(procedureName) ? "a.rdb$procedure_name" : $"'{procedureName}'");
 
-            return Connection.SelectFmt<Parameter>(sql);
+            return Connection.Select<Parameter>(sql);
         }
 		
 		private void Init()

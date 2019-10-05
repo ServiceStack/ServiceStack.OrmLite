@@ -33,9 +33,12 @@ namespace ServiceStack.OrmLite.Tests.UseCase
             return q.Where(x => x.IsDeleted != true);
         }
     }
-
-    public class SoftDeleteUseCase : OrmLiteTestBase
+    
+    [TestFixtureOrmLite]
+    public class SoftDeleteUseCase : OrmLiteProvidersTestBase
     {
+        public SoftDeleteUseCase(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_add_generic_soft_delete_filter_to_SqlExpression()
         {

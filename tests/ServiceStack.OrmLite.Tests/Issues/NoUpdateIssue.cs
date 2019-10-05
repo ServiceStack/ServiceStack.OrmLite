@@ -20,9 +20,10 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public string Codice { get; set; }
     }
 
-    public class NoUpdateIssue : OrmLiteTestBase
+    [TestFixtureOrmLiteDialects(Dialect.AnySqlServer)]
+    public class NoUpdateIssue : OrmLiteProvidersTestBase
     {
-        public NoUpdateIssue() : base(Dialect.SqlServer) {}
+        public NoUpdateIssue(DialectContext context) : base(context) {}
 
         [Test]
         public void Does_update_record()

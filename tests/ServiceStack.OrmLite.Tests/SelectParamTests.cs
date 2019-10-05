@@ -1,13 +1,14 @@
 ﻿using System.Collections.Generic;
-using System.Dynamic;
 using NUnit.Framework;
 using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class SelectParamTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class SelectParamTests : OrmLiteProvidersTestBase
     {
+        public SelectParamTests(DialectContext context) : base(context) {}
+
         [Test]
         public void Can_Select_with_Different_APIs()
         {

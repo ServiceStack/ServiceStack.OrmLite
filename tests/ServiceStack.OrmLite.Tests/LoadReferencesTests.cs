@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests.UseCase;
@@ -182,9 +181,11 @@ namespace ServiceStack.OrmLite.Tests
     }
 
 
-    public class LoadReferencesTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class LoadReferencesTests : OrmLiteProvidersTestBase
     {
+        public LoadReferencesTests(DialectContext context) : base(context) {}
+
         private IDbConnection db;
 
         [OneTimeSetUp]
@@ -219,6 +220,9 @@ namespace ServiceStack.OrmLite.Tests
             db.DeleteAll<Order>();
             db.DeleteAll<CustomerAddress>();
             db.DeleteAll<Customer>();
+            db.DeleteAll<MultiSelfCustomer>();
+            db.DeleteAll<SelfCustomerAddress>();
+            db.DeleteAll<SelfCustomer>();
         }
 
         [OneTimeTearDown]

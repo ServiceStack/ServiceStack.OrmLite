@@ -1,13 +1,13 @@
 ﻿using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Logging;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
-    [TestFixture]
-    public class ForeignKeyAttributeTests : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class ForeignKeyAttributeTests : OrmLiteProvidersTestBase
     {
+        public ForeignKeyAttributeTests(DialectContext context) : base(context) {}
+
         [OneTimeSetUp]
         public void Setup()
         {
@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite.Tests
                 dbConn.DropTable<TypeWithSimpleForeignKey>();
                 dbConn.DropTable<ReferencedType>();
 
-                dbConn.DropAndCreateTable<ReferencedType>();
+                dbConn.CreateTable<ReferencedType>();
             }
         }
 
@@ -45,26 +45,24 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        [IgnoreDialect(Dialect.Sqlite, "no support for cascade deletes")]
         public void CascadesOnDelete()
         {
-            //Ignore for Sqlite who doesn't support Cascade deletes. TODO: group tests around db features
-            if (OrmLiteConfig.DialectProvider == SqliteDialect.Provider)
-                return;
-
-            using (var dbConn = OpenDbConnection())
+            // TODO: group tests around db features
+            Setup();
+            using (var db = OpenDbConnection())
             {
-                dbConn.DropAndCreateTable<TypeWithOnDeleteCascade>();
+                db.CreateTableIfNotExists<TypeWithOnDeleteCascade>();
+                db.Save(new ReferencedType { Id = 1 });
+                db.Save(new TypeWithOnDeleteCascade { RefId = 1 });
 
-                dbConn.Save(new ReferencedType { Id = 1 });
-                dbConn.Save(new TypeWithOnDeleteCascade { RefId = 1 });
+                Assert.AreEqual(1, db.Select<ReferencedType>().Count);
+                Assert.AreEqual(1, db.Select<TypeWithOnDeleteCascade>().Count);
 
-                Assert.AreEqual(1, dbConn.Select<ReferencedType>().Count);
-                Assert.AreEqual(1, dbConn.Select<TypeWithOnDeleteCascade>().Count);
+                db.Delete<ReferencedType>(r => r.Id == 1);
 
-                dbConn.Delete<ReferencedType>(r => r.Id == 1);
-
-                Assert.AreEqual(0, dbConn.Select<ReferencedType>().Count);
-                Assert.AreEqual(0, dbConn.Select<TypeWithOnDeleteCascade>().Count);
+                Assert.AreEqual(0, db.Select<ReferencedType>().Count);
+                Assert.AreEqual(0, db.Select<TypeWithOnDeleteCascade>().Count);
             }
         }
 
@@ -77,8 +75,8 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
 
-        [NUnit.Framework.Ignore("Not supported in sqlite?")]
         [Test]
+        [IgnoreDialect(Tests.Dialect.Sqlite, "Not supported in sqlite?")]
         public void CanCreateForeignWithOnDeleteNoAction()
         {
             using (var dbConn = OpenDbConnection())
@@ -95,12 +93,16 @@ namespace ServiceStack.OrmLite.Tests
                 dbConn.DropAndCreateTable<TypeWithOnDeleteRestrict>();
             }
         }
-        
+
         [Test]
         public void CanCreateForeignWithOnDeleteSetDefault()
         {
-            //ignoring Not supported in InnoDB: http://stackoverflow.com/a/1498015/85785
-            if (OrmLiteConfig.DialectProvider == MySqlDialect.Provider) return;
+            // ignoring Not supported in InnoDB: http://stackoverflow.com/a/1498015/85785
+            if (DialectProvider == MySqlDialect.Provider)
+            {
+                Assert.Ignore("MySql FK's not supported, skipping");
+                return;
+            }
 
             using (var dbConn = OpenDbConnection())
             {
@@ -121,14 +123,11 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_Skip_creating_ForeignKeys()
         {
             OrmLiteConfig.SkipForeignKeys = true;
+            Setup();
 
             using (var db = OpenDbConnection())
             {
-                db.DropTable<TypeWithOnDeleteCascade>();
-                db.DropTable<ReferencedType>();
-                db.CreateTable<ReferencedType>();
-                db.CreateTable<TypeWithOnDeleteCascade>();
-
+                db.CreateTableIfNotExists<TypeWithOnDeleteCascade>();
                 db.Save(new ReferencedType { Id = 1 });
                 db.Save(new TypeWithOnDeleteCascade { RefId = 1 });
 

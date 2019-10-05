@@ -10,10 +10,11 @@ using ServiceStack.OrmLite.Tests.Shared;
 
 namespace ServiceStack.OrmLite.Tests.Async
 {
-    [TestFixture]
-    public class AsyncTests
-        : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class AsyncTests : OrmLiteProvidersTestBase
     {
+        public AsyncTests(DialectContext context) : base(context) {}
+
         [Test]
         public async Task Can_Insert_and_SelectAsync()
         {

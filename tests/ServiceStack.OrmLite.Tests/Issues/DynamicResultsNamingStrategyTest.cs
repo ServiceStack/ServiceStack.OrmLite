@@ -4,8 +4,11 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    public class DynamicResultsNamingStrategyTest : OrmLiteTestBase
+    [TestFixtureOrmLite]
+    public class DynamicResultsNamingStrategyTest : OrmLiteProvidersTestBase
     {
+        public DynamicResultsNamingStrategyTest(DialectContext context) : base(context) {}
+
         public class Menu : EntityBase<Menu>
         {
             [AutoIncrement]

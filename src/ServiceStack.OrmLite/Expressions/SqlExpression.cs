@@ -1,14 +1,15 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Data;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Collections.ObjectModel;
 using System.Linq.Expressions;
 using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.OrmLite.Dapper;
 using ServiceStack.Text;
 
@@ -41,6 +42,7 @@ namespace ServiceStack.OrmLite
         protected bool CustomSelect { get; set; }
         protected ModelDefinition modelDef;
         public bool PrefixFieldWithTableName { get; set; }
+        public string TableAlias { get; set; }
         public bool WhereStatementWithoutWhereString { get; set; }
         public IOrmLiteDialectProvider DialectProvider { get; set; }
         public List<IDbDataParameter> Params { get; set; }
@@ -48,6 +50,7 @@ namespace ServiceStack.OrmLite
         public static Action<SqlExpression<T>> SelectFilter { get; set; }
         public int? Rows { get; set; }
         public int? Offset { get; set; }
+        public bool UseSelectPropertiesAsAliases { get; set; }
 
         protected string Sep => sep;
 
@@ -57,12 +60,18 @@ namespace ServiceStack.OrmLite
             InsertFields = new List<string>();
 
             modelDef = typeof(T).GetModelDefinition();
-            PrefixFieldWithTableName = false;
+            PrefixFieldWithTableName = OrmLiteConfig.IncludeTablePrefixes;
             WhereStatementWithoutWhereString = false;
 
             DialectProvider = dialectProvider;
             Params = new List<IDbDataParameter>();
             tableDefs.Add(modelDef);
+
+            var initFilter = OrmLiteConfig.SqlExpressionInitFilter;
+            if (initFilter != null)
+            {
+                initFilter(this.GetUntyped());
+            }
         }
 
         public SqlExpression<T> Clone()
@@ -90,12 +99,14 @@ namespace ServiceStack.OrmLite
             to.CustomSelect = CustomSelect;
             to.modelDef = modelDef;
             to.PrefixFieldWithTableName = PrefixFieldWithTableName;
+            to.TableAlias = TableAlias;
             to.WhereStatementWithoutWhereString = WhereStatementWithoutWhereString;
             to.Params = new List<IDbDataParameter>(Params);
             to.SqlFilter = SqlFilter;
             to.Offset = Offset;
             to.Rows = Rows;
             to.tableDefs = tableDefs;
+            to.UseSelectPropertiesAsAliases = UseSelectPropertiesAsAliases;
             return to;
         }
 
@@ -106,6 +117,9 @@ namespace ServiceStack.OrmLite
         {
             return Select(string.Empty);
         }
+
+        internal SqlExpression<T> SelectIfDistinct(string selectExpression) => 
+            selectDistinct ? SelectDistinct(selectExpression) : Select(selectExpression);
 
         /// <summary>
         /// set the specified selectExpression.
@@ -393,6 +407,19 @@ namespace ServiceStack.OrmLite
             return UnsafeFrom(tables);
         }
 
+        public virtual SqlExpression<T> IncludeTablePrefix()
+        {
+            PrefixFieldWithTableName = true;
+            return this;
+        }
+
+        public virtual SqlExpression<T> SetTableAlias(string tableAlias)
+        {
+            PrefixFieldWithTableName = tableAlias != null;
+            TableAlias = tableAlias;
+            return this;
+        }
+
         public virtual SqlExpression<T> UnsafeFrom(string rawFrom)
         {
             if (string.IsNullOrEmpty(rawFrom))
@@ -530,8 +557,8 @@ namespace ServiceStack.OrmLite
 
         private static string WhereExpressionToString(object expression)
         {
-            if (expression is bool)
-                return (bool)expression ? TrueLiteral : FalseLiteral;
+            if (expression is bool b)
+                return b ? TrueLiteral : FalseLiteral;
             return expression.ToString();
         }
 
@@ -657,9 +684,11 @@ namespace ServiceStack.OrmLite
         public virtual SqlExpression<T> UnsafeOrderBy(string orderBy)
         {
             orderByProperties.Clear();
-            this.orderBy = string.IsNullOrEmpty(orderBy)
-                ? null
-                : "ORDER BY " + orderBy;
+            if (!string.IsNullOrEmpty(orderBy))
+            {
+                orderByProperties.Add(orderBy);
+            }
+            BuildOrderByClauseInternal();
             return this;
         }
 
@@ -774,10 +803,11 @@ namespace ServiceStack.OrmLite
             return OrderByInternal(keySelector);
         }
 
-        public virtual SqlExpression<T> OrderBy<Table>(Expression<Func<Table, object>> keySelector)
-        {
-            return OrderByInternal(keySelector);
-        }
+        public virtual SqlExpression<T> OrderBy<Table>(Expression<Func<Table, object>> fields) => OrderByInternal(fields);
+        public virtual SqlExpression<T> OrderBy<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields) => OrderByInternal(fields);
+        public virtual SqlExpression<T> OrderBy<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields) => OrderByInternal(fields);
+        public virtual SqlExpression<T> OrderBy<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> fields) => OrderByInternal(fields);
+        public virtual SqlExpression<T> OrderBy<Table1, Table2, Table3, Table4, Table5>(Expression<Func<Table1, Table2, Table3, Table4, Table5, object>> fields) => OrderByInternal(fields);
 
         private SqlExpression<T> OrderByInternal(Expression keySelector)
         {
@@ -814,10 +844,11 @@ namespace ServiceStack.OrmLite
             return ThenByInternal(keySelector);
         }
 
-        public virtual SqlExpression<T> ThenBy<Table>(Expression<Func<Table, object>> keySelector)
-        {
-            return ThenByInternal(keySelector);
-        }
+        public virtual SqlExpression<T> ThenBy<Table>(Expression<Func<Table, object>> fields) => ThenByInternal(fields);
+        public virtual SqlExpression<T> ThenBy<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields) => ThenByInternal(fields);
+        public virtual SqlExpression<T> ThenBy<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields) => ThenByInternal(fields);
+        public virtual SqlExpression<T> ThenBy<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> fields) => ThenByInternal(fields);
+        public virtual SqlExpression<T> ThenBy<Table1, Table2, Table3, Table4, Table5>(Expression<Func<Table1, Table2, Table3, Table4, Table5, object>> fields) => ThenByInternal(fields);
 
         private SqlExpression<T> ThenByInternal(Expression keySelector)
         {
@@ -838,10 +869,11 @@ namespace ServiceStack.OrmLite
             return OrderByDescendingInternal(keySelector);
         }
 
-        public virtual SqlExpression<T> OrderByDescending<Table>(Expression<Func<Table, object>> keySelector)
-        {
-            return OrderByDescendingInternal(keySelector);
-        }
+        public virtual SqlExpression<T> OrderByDescending<Table>(Expression<Func<Table, object>> keySelector) => OrderByDescendingInternal(keySelector);
+        public virtual SqlExpression<T> OrderByDescending<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields) => OrderByDescendingInternal(fields);
+        public virtual SqlExpression<T> OrderByDescending<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields) => OrderByDescendingInternal(fields);
+        public virtual SqlExpression<T> OrderByDescending<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> fields) => OrderByDescendingInternal(fields);
+        public virtual SqlExpression<T> OrderByDescending<Table1, Table2, Table3, Table4, Table5>(Expression<Func<Table1, Table2, Table3, Table4, Table5, object>> fields) => OrderByDescendingInternal(fields);
 
         private SqlExpression<T> OrderByDescendingInternal(Expression keySelector)
         {
@@ -890,10 +922,11 @@ namespace ServiceStack.OrmLite
             return ThenByDescendingInternal(keySelector);
         }
 
-        public virtual SqlExpression<T> ThenByDescending<Table>(Expression<Func<Table, object>> keySelector)
-        {
-            return ThenByDescendingInternal(keySelector);
-        }
+        public virtual SqlExpression<T> ThenByDescending<Table>(Expression<Func<Table, object>> fields) => ThenByDescendingInternal(fields);
+        public virtual SqlExpression<T> ThenByDescending<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields) => ThenByDescendingInternal(fields);
+        public virtual SqlExpression<T> ThenByDescending<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields) => ThenByDescendingInternal(fields);
+        public virtual SqlExpression<T> ThenByDescending<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> fields) => ThenByDescendingInternal(fields);
+        public virtual SqlExpression<T> ThenByDescending<Table1, Table2, Table3, Table4, Table5>(Expression<Func<Table1, Table2, Table3, Table4, Table5, object>> fields) => ThenByDescendingInternal(fields);
 
         private SqlExpression<T> ThenByDescendingInternal(Expression keySelector)
         {
@@ -1118,6 +1151,7 @@ namespace ServiceStack.OrmLite
             var paramValue = value;
 
             var parameter = CreateParam(paramName, paramValue);
+            DialectProvider.InitQueryParam(parameter);
             Params.Add(parameter);
             return parameter;
         }
@@ -1195,7 +1229,7 @@ namespace ServiceStack.OrmLite
                 setFields
                     .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(DialectProvider.AddParam(dbCmd, value, fieldDef).ParameterName);
+                    .Append(DialectProvider.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
             }
 
             if (setFields.Length == 0)
@@ -1234,7 +1268,7 @@ namespace ServiceStack.OrmLite
                 setFields
                     .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(DialectProvider.AddParam(dbCmd, value, fieldDef).ParameterName);
+                    .Append(DialectProvider.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
             }
             
             if (setFields.Length == 0)
@@ -1299,13 +1333,10 @@ namespace ServiceStack.OrmLite
 
         public string FromExpression
         {
-            get
-            {
-                return string.IsNullOrEmpty(fromExpression)
-                    ? " \nFROM " + DialectProvider.GetQuotedTableName(modelDef)
-                    : fromExpression;
-            }
-            set { fromExpression = value; }
+            get => string.IsNullOrEmpty(fromExpression)
+                ? " \nFROM " + DialectProvider.GetQuotedTableName(modelDef) + (TableAlias != null ? " " + DialectProvider.GetQuotedName(TableAlias) : "")
+                : fromExpression;
+            set => fromExpression = value;
         }
 
         public string BodyExpression => FromExpression
@@ -1315,75 +1346,39 @@ namespace ServiceStack.OrmLite
 
         public string WhereExpression
         {
-            get
-            {
-                return whereExpression;
-            }
-            set
-            {
-                whereExpression = value;
-            }
+            get => whereExpression;
+            set => whereExpression = value;
         }
 
         public string GroupByExpression
         {
-            get
-            {
-                return groupBy;
-            }
-            set
-            {
-                groupBy = value;
-            }
+            get => groupBy;
+            set => groupBy = value;
         }
 
         public string HavingExpression
         {
-            get
-            {
-                return havingExpression;
-            }
-            set
-            {
-                havingExpression = value;
-            }
+            get => havingExpression;
+            set => havingExpression = value;
         }
 
 
         public string OrderByExpression
         {
-            get
-            {
-                return string.IsNullOrEmpty(orderBy) ? "" : "\n" + orderBy;
-            }
-            set
-            {
-                orderBy = value;
-            }
+            get => string.IsNullOrEmpty(orderBy) ? "" : "\n" + orderBy;
+            set => orderBy = value;
         }
 
         public ModelDefinition ModelDef
         {
-            get
-            {
-                return modelDef;
-            }
-            protected set
-            {
-                modelDef = value;
-            }
+            get => modelDef;
+            protected set => modelDef = value;
         }
 
         protected internal bool UseFieldName
         {
-            get
-            {
-                return useFieldName;
-            }
-            set
-            {
-                useFieldName = value;
-            }
+            get => useFieldName;
+            set => useFieldName = value;
         }
 
         public virtual object Visit(Expression exp)
@@ -1718,6 +1713,15 @@ namespace ServiceStack.OrmLite
             return CheckExpressionForTypes(e, new[] { ExpressionType.Parameter, ExpressionType.Convert });
         }
 
+        /// <summary>
+        /// Check whether the expression is a constant expression to determine
+        /// whether we should use the expression value instead of Column Name 
+        /// </summary>
+        protected virtual bool IsConstantExpression(Expression e)
+        {
+            return CheckExpressionForTypes(e, new[] { ExpressionType.Constant });
+        }
+
         protected bool CheckExpressionForTypes(Expression e, ExpressionType[] types)
         {
             while (e != null)
@@ -1831,7 +1835,11 @@ namespace ServiceStack.OrmLite
                 }
 
                 if (IsParameterOrConvertAccess(m))
-                    return GetMemberExpression(m);
+                {
+                    // We don't want to use the Column Name for constant expressions unless we're in a Sql. method call
+                    if (inSqlMethodCall || !IsConstantExpression(m))
+                        return GetMemberExpression(m);
+                }
             }
 
             return CachedExpressionCompiler.Evaluate(m);
@@ -1854,11 +1862,41 @@ namespace ServiceStack.OrmLite
 
             var tableDef = modelType.GetModelDefinition();
 
-            if (propertyInfo != null && propertyInfo.PropertyType.IsEnum)
-                return new EnumMemberAccess(
-                    GetQuotedColumnName(tableDef, m.Member.Name), propertyInfo.PropertyType);
+            var tableAlias = GetTableAlias(m);
+            var columnName = tableAlias == null
+                ? GetQuotedColumnName(tableDef, m.Member.Name)
+                : GetQuotedColumnName(tableDef, tableAlias, m.Member.Name);
 
-            return new PartialSqlString(GetQuotedColumnName(tableDef, m.Member.Name));
+            if (propertyInfo != null && propertyInfo.PropertyType.IsEnum)
+                return new EnumMemberAccess(columnName, propertyInfo.PropertyType);
+            
+            return new PartialSqlString(columnName);
+        }
+
+        protected virtual string GetTableAlias(MemberExpression m)
+        {
+            if (originalLambda == null)
+                return null;
+
+            if (m.Expression is ParameterExpression pe)
+            {
+                var tableParamName = originalLambda.Parameters.Count > 0 && originalLambda.Parameters[0].Type == ModelDef.ModelType
+                    ? originalLambda.Parameters[0].Name
+                    : null;
+
+                if (pe.Type == ModelDef.ModelType && pe.Name == tableParamName)
+                    return TableAlias;
+
+                var joinType = joinAlias?.ModelDef?.ModelType;
+                var joinParamName = originalLambda.Parameters.Count > 1 && originalLambda.Parameters[1].Type == joinType
+                    ? originalLambda.Parameters[1].Name
+                    : null;
+
+                if (pe.Type == joinType && pe.Name == joinParamName)
+                    return joinAlias.Alias;
+            }
+
+            return null;
         }
 
         protected virtual void OnVisitMemberType(Type modelType)
@@ -1891,13 +1929,41 @@ namespace ServiceStack.OrmLite
             return CachedExpressionCompiler.Evaluate(nex);
         }
 
+        bool IsLambdaArg(Expression expr)
+        {
+            if (expr is ParameterExpression pe)
+                return IsLambdaArg(pe.Name);
+            if (expr is UnaryExpression ue && ue.Operand is ParameterExpression uepe)
+                return IsLambdaArg(uepe.Name);
+            return false;
+        }
+
+        bool IsLambdaArg(string name)
+        {
+            var args = originalLambda?.Parameters;
+            if (args != null)
+            {
+                foreach (var x in args)
+                {
+                    if (x.Name == name)
+                        return true;
+                }
+            }
+            return false;
+        }
+
         private object SetAnonTypePropertyNamesForSelectExpression(object expr, Expression arg, MemberInfo member)
         {
             // When selecting a column use the anon type property name, rather than the table property name, as the returned column name
+            if (arg is MemberExpression propExpr && IsLambdaArg(propExpr.Expression))
+            {
+                if (UseSelectPropertiesAsAliases ||                    // Use anon property alias when explicitly requested
+                    propExpr.Member.Name != member.Name ||           // or when names don't match 
+                    propExpr.Expression.Type != ModelDef.ModelType)  // or when selecting a field from a different table
+                    return new SelectItemExpression(DialectProvider, expr.ToString(), member.Name);
 
-            MemberExpression propertyExpr;
-            if ((propertyExpr = arg as MemberExpression) != null && propertyExpr.Member.Name != member.Name)
-                return new SelectItemExpression(DialectProvider, expr.ToString(), member.Name);
+                return expr;
+            }
 
             // When selecting an entire table use the anon type property name as a prefix for the returned column name
             // to allow the caller to distinguish properties with the same names from different tables
@@ -1930,15 +1996,24 @@ namespace ServiceStack.OrmLite
             var mi = methodCallExpr?.Method;
             var declareType = mi?.DeclaringType;
             if (declareType != null && declareType.Name == "Sql" && mi.Name != "Desc" && mi.Name != "Asc" && mi.Name != "As" && mi.Name != "AllFields") 
-                return new PartialSqlString(expr + " AS " + member.Name); // new { Alias = Sql.Count("*") }
+                return new PartialSqlString(expr + " AS " + member.Name);    // new { Alias = Sql.Count("*") }
 
-            if (arg is ConditionalExpression ||                           // new { Alias = x.Value > 1 ? 1 : x.Value }
-                arg is BinaryExpression)                                  // new { Alias = x.First + " " + x.Last }
+            if (arg is ConditionalExpression ce ||                           // new { Alias = x.Value > 1 ? 1 : x.Value }
+                arg is BinaryExpression      be ||                           // new { Alias = x.First + " " + x.Last }
+                arg is MemberExpression      me ||                           // new { Alias = DateTime.UtcNow }
+                arg is ConstantExpression ct)                                // new { Alias = 1 }
             {
-                return new PartialSqlString(expr + " AS " + member.Name);
+                IOrmLiteConverter converter;
+                var strExpr = !(expr is PartialSqlString) && (converter = DialectProvider.GetConverterBestMatch(expr.GetType())) != null
+                    ? converter.ToQuotedString(expr.GetType(), expr)
+                    : expr.ToString();
+                
+                return new PartialSqlString(strExpr + " AS " + member.Name);
             } 
 
-            return expr;
+            return UseSelectPropertiesAsAliases
+                ? new SelectItemExpression(DialectProvider, expr.ToString(), member.Name)
+                : expr;
         }
 
         private static void StripAliases(SelectList selectList)
@@ -1974,7 +2049,12 @@ namespace ServiceStack.OrmLite
         {
             var paramModelDef = p.Type.GetModelDefinition();
             if (paramModelDef != null)
-                return new SelectList(DialectProvider.GetColumnNames(paramModelDef, true));
+            {
+                var tablePrefix = paramModelDef == ModelDef && TableAlias != null
+                    ? TableAlias
+                    : paramModelDef.ModelName;
+                return new SelectList(DialectProvider.GetColumnNames(paramModelDef, tablePrefix));
+            }
 
             return p.Name;
         }
@@ -2146,10 +2226,18 @@ namespace ServiceStack.OrmLite
                    && IsJoinedTable(exp.Expression.Type);
         }
 
+        private bool inSqlMethodCall = false;
+
         protected virtual object VisitMethodCall(MethodCallExpression m)
         {
             if (m.Method.DeclaringType == typeof(Sql))
-                return VisitSqlMethodCall(m);
+            {
+                var hold = inSqlMethodCall;
+                inSqlMethodCall = true;
+                var ret = VisitSqlMethodCall(m);
+                inSqlMethodCall = hold;
+                return ret;
+            }
 
             if (IsStaticArrayMethod(m))
                 return VisitStaticArrayMethodCall(m);
@@ -2172,7 +2260,7 @@ namespace ServiceStack.OrmLite
             {
                 return CachedExpressionCompiler.Evaluate(m);
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
                 if (originalLambda == null)
                     throw;
@@ -2299,8 +2387,11 @@ namespace ServiceStack.OrmLite
                     return e.ToString();
             }
         }
-
-        protected virtual string GetQuotedColumnName(ModelDefinition tableDef, string memberName)
+        
+        protected virtual string GetQuotedColumnName(ModelDefinition tableDef, string memberName) => // Always call if no tableAlias to exec overrides  
+            GetQuotedColumnName(tableDef, null, memberName);
+        
+        protected virtual string GetQuotedColumnName(ModelDefinition tableDef, string tableAlias, string memberName)
         {
             if (useFieldName)
             {
@@ -2319,7 +2410,9 @@ namespace ServiceStack.OrmLite
 
                 var includePrefix = PrefixFieldWithTableName && !tableDef.ModelType.IsInterface;
                 return includePrefix
-                    ? DialectProvider.GetQuotedColumnName(tableDef, fieldName)
+                    ? (tableAlias == null 
+                        ? DialectProvider.GetQuotedColumnName(tableDef, fieldName) 
+                        : DialectProvider.GetQuotedColumnName(tableDef, tableAlias, fieldName))
                     : DialectProvider.GetQuotedColumnName(fieldName);
             }
             return memberName;
@@ -2384,9 +2477,11 @@ namespace ServiceStack.OrmLite
         {
             OnlyFields = null;
             selectDistinct = distinct;
-
+            
             selectExpression = $"SELECT {(selectDistinct ? "DISTINCT " : "")}" +
-                               (string.IsNullOrEmpty(fields) ? DialectProvider.GetColumnNames(modelDef) : fields);
+               (string.IsNullOrEmpty(fields) 
+                    ? DialectProvider.GetColumnNames(modelDef, PrefixFieldWithTableName ? TableAlias ?? ModelDef.ModelName : null).ToSelectString() 
+                    : fields);
         }
 
         public IList<string> GetAllFields()
@@ -2564,6 +2659,7 @@ namespace ServiceStack.OrmLite
                     statement = DialectProvider.GetQuotedTableName(argDef) + ".*";
                     break;
                 case nameof(Sql.JoinAlias):
+                case nameof(Sql.TableAlias):
                     statement = args[0] + "." + quotedColName.ToString().LastRightPart('.');
                     break;
                 case nameof(Sql.Custom):
@@ -2641,7 +2737,8 @@ namespace ServiceStack.OrmLite
 
             var statement = "";
 
-            var wildcardArg = args.Count > 0 ? DialectProvider.EscapeWildcards(args[0].ToString()) : "";
+            var arg = args.Count > 0 ? args[0] : null;
+            var wildcardArg = arg != null ? DialectProvider.EscapeWildcards(arg.ToString()) : "";
             var escapeSuffix = wildcardArg.IndexOf('^') >= 0 ? " escape '^'" : "";
             switch (m.Method.Name)
             {
@@ -2660,6 +2757,15 @@ namespace ServiceStack.OrmLite
                 case "ToLower":
                     statement = $"lower({quotedColName})";
                     break;
+                case "Equals":
+                    var argType = arg?.GetType();
+                    var converter = argType != null && argType != typeof(string) 
+                        ? DialectProvider.GetConverterBestMatch(argType) 
+                        : null;
+                    statement = converter != null
+                        ? $"{quotedColName}={ConvertToParam(converter.ToDbValue(argType, arg))}"
+                        : $"{quotedColName}={ConvertToParam(arg)}";
+                    break;                
                 case "StartsWith":
                     statement = !OrmLiteConfig.StripUpperInLike
                         ? $"upper({quotedColName}) like {ConvertToParam(wildcardArg.ToUpper() + "%")}{escapeSuffix}"
@@ -2719,25 +2825,7 @@ namespace ServiceStack.OrmLite
                 p.SourceVersion = sourceVersion;
             }
 
-            if (p.DbType == DbType.String)
-            {
-                p.Size = DialectProvider.GetStringConverter().StringLength;
-                if (value is string strValue && strValue.Length > p.Size)
-                    p.Size = strValue.Length;
-            }
-
-            if (value != null)
-            {
-                DialectProvider.InitDbParam(p, value.GetType());
-                p.Value = DialectProvider.GetParamValue(value, value.GetType());
-            }
-            else
-            {
-                p.Value = DBNull.Value;
-            }
-
-            if (dbType != null)
-                p.DbType = dbType.Value;
+            DialectProvider.ConfigureParam(p, value, dbType);
 
             return p;
         }
@@ -2826,7 +2914,8 @@ namespace ServiceStack.OrmLite
         {
             var text = SelectExpression;
             if (!string.IsNullOrEmpty(Alias)) // Note that even though Alias must be non-empty in the constructor it may be set to null/empty later
-                text += " AS " + DialectProvider.GetQuotedName(Alias);
+                return text + " AS " + DialectProvider.GetQuotedName(Alias);
+
             return text;
         }
     }
@@ -2902,44 +2991,66 @@ namespace ServiceStack.OrmLite
             byte? scale = null,
             int? size = null)
         {
-            var to = dialectProvider.CreateParam();
+            var p = dialectProvider.CreateParam();
 
-            to.ParameterName = dialectProvider.GetParam(name);
+            p.ParameterName = dialectProvider.GetParam(name);
+            
+            dialectProvider.ConfigureParam(p, value, dbType);
 
-            var valueType = fieldType ?? (value?.GetType() ?? typeof(string));
+            if (precision != null)
+                p.Precision = precision.Value;
+            if (scale != null)
+                p.Scale = scale.Value;
+            if (size != null)
+                p.Size = size.Value;
 
+            return p;
+        }
+
+        internal static void ConfigureParam(this IOrmLiteDialectProvider dialectProvider, IDbDataParameter p, object value, DbType? dbType)
+        {
             if (value != null)
             {
-                dialectProvider.InitDbParam(to, valueType);
-                to.Value = dialectProvider.GetParamValue(value, valueType);
+                dialectProvider.InitDbParam(p, value.GetType());
+                p.Value = dialectProvider.GetParamValue(value, value.GetType());
             }
             else
             {
-                to.Value = DBNull.Value;
+                p.Value = DBNull.Value;
             }
 
-            if (precision != null)
-                to.Precision = precision.Value;
-            if (scale != null)
-                to.Scale = scale.Value;
-            if (size != null)
-                to.Size = size.Value;
-
-            dialectProvider.InitDbParam(to, valueType);
+            // Can't check DbType in PostgreSQL before p.Value is assinged 
+            if (p.Value is string strValue && strValue.Length > p.Size)
+            {
+                var stringConverter = dialectProvider.GetStringConverter();
+                p.Size = strValue.Length > stringConverter.StringLength
+                    ? strValue.Length
+                    : stringConverter.StringLength;
+            }
 
             if (dbType != null)
-                to.DbType = dbType.Value;
-
-            return to;
+                p.DbType = dbType.Value;
         }
+
+        public static IDbDataParameter AddQueryParam(this IOrmLiteDialectProvider dialectProvider,
+            IDbCommand dbCmd,
+            object value,
+            FieldDefinition fieldDef) => dialectProvider.AddParam(dbCmd, value, fieldDef, paramFilter: dialectProvider.InitQueryParam);
+
+        public static IDbDataParameter AddUpdateParam(this IOrmLiteDialectProvider dialectProvider,
+            IDbCommand dbCmd,
+            object value,
+            FieldDefinition fieldDef) => dialectProvider.AddParam(dbCmd, value, fieldDef, paramFilter: dialectProvider.InitUpdateParam);
 
         public static IDbDataParameter AddParam(this IOrmLiteDialectProvider dialectProvider,
             IDbCommand dbCmd,
             object value,
-            FieldDefinition fieldDef)
+            FieldDefinition fieldDef, Action<IDbDataParameter> paramFilter)
         {
             var paramName = dbCmd.Parameters.Count.ToString();
             var parameter = dialectProvider.CreateParam(paramName, value, fieldDef?.ColumnType);
+            
+            paramFilter?.Invoke(parameter);
 
             if (fieldDef != null)
                 dialectProvider.SetParameter(fieldDef, parameter);
@@ -2947,6 +3058,7 @@ namespace ServiceStack.OrmLite
             dbCmd.Parameters.Add(parameter);
             return parameter;
         }
+
     }
 }
 
