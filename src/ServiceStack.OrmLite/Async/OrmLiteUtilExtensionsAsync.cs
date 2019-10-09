@@ -45,72 +45,85 @@ namespace ServiceStack.OrmLite
 
         public static async Task<List<T>> ConvertToListAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields, CancellationToken token)
         {
-            var values = new object[reader.FieldCount];
-            var isObjectList = typeof(T) == typeof(List<object>);
-            var isObjectDict = typeof(T) == typeof(Dictionary<string,object>);
-            var isDynamic = typeof(T) == typeof(object);
-            var isValueTuple = typeof(T).IsValueTuple();
-            var isTuple = typeof(T).IsTuple();
-            var indexCache = isObjectDict || isObjectDict || isValueTuple || isTuple
-                ? null
-                : reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider, onlyFields);
-
-            var genericArgs = isTuple ? typeof(T).GetGenericArguments() : null;
-            var modelIndexCaches = isTuple ? reader.GetMultiIndexCaches(dialectProvider, onlyFields, genericArgs) : null;
-            var genericTupleMi = isTuple ? typeof(T).GetGenericTypeDefinition().GetCachedGenericType(genericArgs) : null;
-#if NETSTANDARD2_0
-            var activator = isTuple ? System.Reflection.TypeExtensions.GetConstructor(genericTupleMi, genericArgs).GetActivator() : null;
-#else
-            var activator = isTuple ? genericTupleMi.GetConstructor(genericArgs).GetActivator() : null;
-#endif
-            using (reader)
-            return await dialectProvider.ReaderEach(reader, () =>
+            if (typeof(T) == typeof(List<object>))
             {
-                if (isObjectList)
+                using (reader)
                 {
-                    var row = new List<object>();
-                    for (var i = 0; i < reader.FieldCount; i++)
+                    return await dialectProvider.ReaderEach(reader, () =>
                     {
-                        row.Add(reader.GetValue(i));
-                    }
-                    return (T)(object)row;
+                        var row = reader.ConvertToListObjects();
+                        return (T) (object) row;
+                    }, token);
                 }
-                if (isObjectDict)
+            }
+            if (typeof(T) == typeof(Dictionary<string, object>))
+            {
+                using (reader)
                 {
-                    var row = new Dictionary<string,object>();
-                    for (var i = 0; i < reader.FieldCount; i++)
+                    return await dialectProvider.ReaderEach(reader, () =>
                     {
-                        row[reader.GetName(i).Trim()] = reader.GetValue(i);
-                    }
-                    return (T)(object)row;
+                        var row = reader.ConvertToDictionaryObjects();
+                        return (T) (object) row;
+                    }, token);
                 }
-                if (isDynamic)
+            }
+            if (typeof(T) == typeof(object))
+            {
+                using (reader)
                 {
-                    var row = (IDictionary<string, object>) new ExpandoObject();
-                    for (var i = 0; i < reader.FieldCount; i++)
+                    return await dialectProvider.ReaderEach(reader, () =>
                     {
-                        row[reader.GetName(i).Trim()] = reader.GetValue(i);
-                    }
-                    return (T)(object)row;
+                        var row = reader.ConvertToExpandoObject();
+                        return (T) (object) row;
+                    }, token);
                 }
-                if (isValueTuple)
+            }
+            if (typeof(T).IsValueTuple())
+            {
+                using (reader)
                 {
-                    var row = reader.ConvertToValueTuple<T>(values, dialectProvider);
-                    return (T)row;
+                    var values = new object[reader.FieldCount];
+                    return await dialectProvider.ReaderEach(reader, () =>
+                    {
+                        var row = reader.ConvertToValueTuple<T>(values, dialectProvider);
+                        return row;
+                    }, token);
                 }
-                if (isTuple)
+            }
+            if (typeof(T).IsTuple())
+            {
+                var genericArgs = typeof(T).GetGenericArguments();
+                var modelIndexCaches = reader.GetMultiIndexCaches(dialectProvider, onlyFields, genericArgs);
+
+                var values = new object[reader.FieldCount];
+                var genericTupleMi = typeof(T).GetGenericTypeDefinition().GetCachedGenericType(genericArgs);
+                var activator = genericTupleMi.GetConstructor(genericArgs).GetActivator();
+
+                using (reader)
                 {
-                    var tupleArgs = reader.ToMultiTuple(dialectProvider, modelIndexCaches, genericArgs, values);
-                    var tuple = activator(tupleArgs.ToArray());
-                    return (T)tuple;
+                    return await dialectProvider.ReaderEach(reader, () =>
+                    {
+                        var tupleArgs = reader.ToMultiTuple(dialectProvider, modelIndexCaches, genericArgs, values);
+                        var tuple = activator(tupleArgs.ToArray());
+                        return (T) tuple;
+                    }, token);
                 }
-                else
+            }
+            else
+            {
+                var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider, onlyFields:onlyFields);
+                var values = new object[reader.FieldCount];
+
+                using (reader)
                 {
-                    var row = CreateInstance<T>();
-                    row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
-                    return row;
+                    return await dialectProvider.ReaderEach(reader, () =>
+                    {
+                        var row = CreateInstance<T>();
+                        row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
+                        return row;
+                    }, token);
                 }
-            }, token);
+            }
         }
 
         public static async Task<object> ConvertToAsync(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, Type type, CancellationToken token)
