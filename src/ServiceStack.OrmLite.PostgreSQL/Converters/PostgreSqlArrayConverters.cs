@@ -59,7 +59,12 @@ namespace ServiceStack.OrmLite.PostgreSQL.Converters
             return this.ToArray(integerArray);
         }
     }
-
+    
+    public class PostgreSqlShortArrayConverter : PostgreSqlArrayConverterBase<short>
+    {
+        public override string ColumnDefinition => "short[]";
+    }
+    
     public class PostgreSqlIntArrayConverter : PostgreSqlArrayConverterBase<int>
     {
         public override string ColumnDefinition => "integer[]";
