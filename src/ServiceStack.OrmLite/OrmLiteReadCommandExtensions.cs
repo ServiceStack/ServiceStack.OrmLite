@@ -1052,10 +1052,6 @@ namespace ServiceStack.OrmLite
                 p.Value = value;
                 dialectProvider.InitDbParam(p, value.GetType());
             }
-            else
-            {
-                p.Value = DBNull.Value;
-            }
 
             if (dbType != null)
                 p.DbType = dbType.Value;
