@@ -35,5 +35,20 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.SqlList<Person>("SELECT * FROM Person WHERE Age = @age", new[] { db.CreateParam("age", 27) }).Count, Is.EqualTo(4));
             }
         }
+
+        [Test]
+        public void Can_Select_with_Null_param()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+
+                var dbCmd = db.CreateCommand();//demo code, just for dbCmd.CreateParam
+
+                // for sqlite that works with paramter with DBNull.Value and usual null.
+                Assert.That(db.Select<Person>("FirstName = @firstname", new List<System.Data.IDbDataParameter> { dbCmd.CreateParam("firstname", null) }).Count, Is.EqualTo(0));
+            }
+        }
     }
 }
