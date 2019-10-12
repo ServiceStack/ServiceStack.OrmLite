@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>net46;netcoreapp2.1</TargetFrameworks>
+        <TargetFrameworks>net461;netcoreapp2.1</TargetFrameworks>
         <DebugType>portable</DebugType>
         <AssemblyName>ServiceStack.OrmLite.Tests.Setup</AssemblyName>
         <OutputType>Library</OutputType>
@@ -27,7 +27,7 @@
         <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.csproj" />
     </ItemGroup>
 
-    <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
+    <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
         <ProjectReference Include="..\..\src\ServiceStack.OrmLite.VistaDB\ServiceStack.OrmLite.VistaDB.csproj" />
     </ItemGroup>
 

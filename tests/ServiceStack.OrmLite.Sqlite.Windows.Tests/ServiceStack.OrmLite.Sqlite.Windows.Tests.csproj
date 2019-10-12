@@ -1,6 +1,6 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFramework>net46</TargetFramework>
+    <TargetFramework>net461</TargetFramework>
     <AssemblyName>ServiceStack.OrmLite.Sqlite.Windows.Testss</AssemblyName>
     <PackageId>ServiceStack.OrmLite.Sqlite.Windows.Tests</PackageId>
   </PropertyGroup>
