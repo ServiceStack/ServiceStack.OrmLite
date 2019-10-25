@@ -68,6 +68,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
             RegisterConverter<decimal[]>(new PostgreSqlDecimalArrayConverter());
             RegisterConverter<DateTime[]>(new PostgreSqlDateTimeTimeStampArrayConverter());
             RegisterConverter<DateTimeOffset[]>(new PostgreSqlDateTimeOffsetTimeStampTzArrayConverter());
+            
+            RegisterConverter<XmlValue>(new PostgreSqlXmlConverter());
 
             this.Variables = new Dictionary<string, string>
             {
@@ -575,6 +577,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             { "jsonb", NpgsqlDbType.Jsonb },
             { "hstore", NpgsqlDbType.Hstore },
             { "text[]", NpgsqlDbType.Array | NpgsqlDbType.Text },
+            { "short[]", NpgsqlDbType.Array | NpgsqlDbType.Smallint },
             { "integer[]", NpgsqlDbType.Array | NpgsqlDbType.Integer },
             { "bigint[]", NpgsqlDbType.Array | NpgsqlDbType.Bigint },
             { "real[]", NpgsqlDbType.Array | NpgsqlDbType.Real },
