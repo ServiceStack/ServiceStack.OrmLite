@@ -6,13 +6,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.Serialization;
-using static ServiceStack.OrmLite.Tests.Issues.LoadSelectIssue;
 
 namespace ServiceStack.OrmLite.Tests
 {
     [TestFixture]
     public class OrmLiteConfigExtensionsTests
     {
+        public OrmLiteConfigExtensionsTests()
+        {
+            OrmLiteConfig.ClearCache();
+        }
+
         private readonly List<Type> _attributes = new List<Type>{
             typeof(PreCreateTableAttribute),
             typeof(PostCreateTableAttribute),
@@ -50,7 +54,6 @@ namespace ServiceStack.OrmLite.Tests
         private readonly List<Type> _modelTypes = new List<Type>
         {
             typeof(Movie),
-            typeof(Person),
             typeof(Shipper),
             typeof(ModelWithAliasedRowVersion),
             typeof(ModelWithComplexType),
@@ -87,12 +90,6 @@ namespace ServiceStack.OrmLite.Tests
             typeof(PocoTable),
             typeof(PocoWithTime)
         };
-
-        [SetUp]
-        public void SetUp()
-        {
-            OrmLiteConfig.ClearCache();
-        }
 
         /// <summary>
         /// It takes 2600-2800 ms: it's 5 times longer that usual <see cref="PlatformExtensions.HasAttribute"/>.
