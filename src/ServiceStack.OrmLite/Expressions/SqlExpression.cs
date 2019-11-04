@@ -2711,7 +2711,8 @@ namespace ServiceStack.OrmLite
                 }
 
                 // regex replace doesn't work when param is at end of string "AND a = :0"
-                if (!char.IsWhiteSpace(subSelect[subSelect.Length - 1]))
+                var lastChar = subSelect[subSelect.Length - 1];
+                if (!(char.IsWhiteSpace(lastChar) || lastChar == ')'))
                     subSelect += " ";
                 
                 for (var i = renameParams.Count - 1; i >= 0; i--)
