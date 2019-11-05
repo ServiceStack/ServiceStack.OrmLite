@@ -93,6 +93,7 @@ namespace ServiceStack.OrmLite.Tests
 
         /// <summary>
         /// It takes 2600-2800 ms: it's 5 times longer that usual <see cref="PlatformExtensions.HasAttribute"/>.
+        /// The performance problem was gone after update ServiceStack.Text to v.5.7.1.
         /// </summary>
         [Test]
         public void HasAttributeCached()
