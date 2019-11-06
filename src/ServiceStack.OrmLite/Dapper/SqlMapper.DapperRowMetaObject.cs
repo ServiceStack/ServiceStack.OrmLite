@@ -1,11 +1,19 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Reflection;
-
 namespace ServiceStack.OrmLite.Dapper
 {
     public static partial class SqlMapper
     {
+        private sealed partial class DapperRow : System.Dynamic.IDynamicMetaObjectProvider
+        {
+            System.Dynamic.DynamicMetaObject System.Dynamic.IDynamicMetaObjectProvider.GetMetaObject(
+    System.Linq.Expressions.Expression parameter)
+            {
+                return new DapperRowMetaObject(parameter, System.Dynamic.BindingRestrictions.Empty, this);
+            }
+        }
+
         private sealed class DapperRowMetaObject : System.Dynamic.DynamicMetaObject
         {
             private static readonly MethodInfo getValueMethod = typeof(IDictionary<string, object>).GetProperty("Item").GetGetMethod();
@@ -79,6 +87,13 @@ namespace ServiceStack.OrmLite.Dapper
                 var callMethod = CallMethod(setValueMethod, parameters);
 
                 return callMethod;
+            }
+
+            static readonly string[] s_nixKeys = new string[0];
+            public override IEnumerable<string> GetDynamicMemberNames()
+            {
+                if(HasValue && Value is IDictionary<string, object> lookup) return lookup.Keys;
+                return s_nixKeys;
             }
         }
     }

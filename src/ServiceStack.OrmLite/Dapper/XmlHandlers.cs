@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using System.Xml;
 using System.Xml.Linq;
 

@@ -1,14 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
-
-#if NETSTANDARD1_3
-using ApplicationException = System.InvalidOperationException;
-#endif
 
 namespace ServiceStack.OrmLite.Dapper
 {
@@ -411,10 +407,9 @@ namespace ServiceStack.OrmLite.Dapper
             il.Emit(OpCodes.Castclass, typeof(T));    // [T]
 
             // Count - 1 to skip the last member access
-            var i = 0;
-            for (; i < (chain.Count - 1); i++)
+            for (var i = 0; i < chain.Count - 1; i++)
             {
-                var member = chain[0].Member;
+                var member = chain[i].Member;
 
                 if (member is PropertyInfo)
                 {
