@@ -2008,7 +2008,7 @@ namespace ServiceStack.OrmLite
                     ? converter.ToQuotedString(expr.GetType(), expr)
                     : expr.ToString();
                 
-                return new PartialSqlString(strExpr.StripQuotes() != member.Name 
+                return new PartialSqlString(OrmLiteUtils.UnquotedColumnName(strExpr) != member.Name 
                     ? strExpr + " AS " + member.Name 
                     : strExpr);
             } 

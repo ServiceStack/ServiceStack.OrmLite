@@ -1117,5 +1117,6 @@ namespace ServiceStack.OrmLite
             ? text
             : "'" + text + "'";
 
+        public static string UnquotedColumnName(string columnExpr) => columnExpr.LastRightPart('.').StripQuotes();
     }
 }
