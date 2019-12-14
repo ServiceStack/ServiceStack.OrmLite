@@ -59,13 +59,6 @@ namespace ServiceStack.OrmLite.SqlServer
                     sql.Append($" HASH WITH (BUCKET_COUNT = {bucketCount.Value})");
                 }
             }
-            else if (!isMemoryTable && fieldDef.IsUniqueIndex)
-            {
-                sql.Append(" UNIQUE");
-
-                if (fieldDef.IsNonClustered)
-                    sql.Append(" NONCLUSTERED");
-            }
             else
             {
                 if (isMemoryTable && bucketCount.HasValue)
