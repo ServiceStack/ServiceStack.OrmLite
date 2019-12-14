@@ -268,6 +268,10 @@ namespace ServiceStack.OrmLite.SqlServer
             if (fieldDef.IsPrimaryKey)
             {
                 sql.Append(" PRIMARY KEY");
+
+                if (fieldDef.IsNonClustered)
+                    sql.Append(" NONCLUSTERED");
+ 
                 if (fieldDef.AutoIncrement)
                 {
                     sql.Append(" ").Append(GetAutoIncrementDefinition(fieldDef));
