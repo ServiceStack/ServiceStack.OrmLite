@@ -196,7 +196,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<UniqueTest4>();
             }
             
-            sb.ToString().Print();
+//            sb.ToString().Print();
             var sql = sb.ToString();
             Assert.That(sql, Does.Contain("PRIMARY KEY NONCLUSTERED"));
             Assert.That(sql, Does.Contain("VARCHAR(100) NOT NULL,"));
