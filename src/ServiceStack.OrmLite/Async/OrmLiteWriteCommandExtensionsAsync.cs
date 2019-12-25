@@ -58,13 +58,14 @@ namespace ServiceStack.OrmLite
 
         internal static async Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T obj, CancellationToken token, Action<IDbCommand> commandFilter)
         {
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
+
             var dialectProvider = dbCmd.GetDialectProvider();
             var hadRowVersion = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
             if (string.IsNullOrEmpty(dbCmd.CommandText))
                 return 0;
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
             commandFilter?.Invoke(dbCmd);
 
             var rowsUpdated = await dialectProvider.ExecuteNonQueryAsync(dbCmd, token);
@@ -250,6 +251,8 @@ namespace ServiceStack.OrmLite
 
         internal static async Task<long> InsertAsync<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter, bool selectIdentity, CancellationToken token)
         {
+            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
+
             var dialectProvider = dbCmd.GetDialectProvider();
 
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
@@ -257,7 +260,6 @@ namespace ServiceStack.OrmLite
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
             commandFilter?.Invoke(dbCmd);
             
             if (dialectProvider.HasInsertReturnValues(ModelDefinition<T>.Definition))
@@ -413,6 +415,8 @@ namespace ServiceStack.OrmLite
                     var id = modelDef.GetPrimaryKey(row);
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
+                        OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, row);
+
                         await dbCmd.UpdateAsync(row, token, null);
                     }
                     else
@@ -426,6 +430,8 @@ namespace ServiceStack.OrmLite
                         }
                         else
                         {
+                            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, row);
+
                             await dbCmd.InsertAsync(row, commandFilter:null, selectIdentity:false, token:token);
                         }
 
