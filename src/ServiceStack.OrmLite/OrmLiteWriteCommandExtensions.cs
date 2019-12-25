@@ -410,8 +410,6 @@ namespace ServiceStack.OrmLite
 
         internal static int Update<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter = null)
         {
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
-
             var dialectProvider = dbCmd.GetDialectProvider();
             var hadRowVersion = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
             if (string.IsNullOrEmpty(dbCmd.CommandText))
@@ -419,6 +417,7 @@ namespace ServiceStack.OrmLite
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
             commandFilter?.Invoke(dbCmd);
             var rowsUpdated = dbCmd.ExecNonQuery();
 
@@ -675,14 +674,13 @@ namespace ServiceStack.OrmLite
         
         internal static long Insert<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter, bool selectIdentity = false)
         {
-            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
-
             var dialectProvider = dbCmd.GetDialectProvider();
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, 
                 insertFields: dialectProvider.GetNonDefaultValueInsertFields(obj));
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
+            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
             commandFilter?.Invoke(dbCmd); //dbCmd.OnConflictInsert() needs to be applied before last insert id
 
             if (dialectProvider.HasInsertReturnValues(ModelDefinition<T>.Definition))
@@ -910,7 +908,6 @@ namespace ServiceStack.OrmLite
                     var id = modelDef.GetPrimaryKey(row);
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
-                        OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, row);
                         dbCmd.Update(row);
                     }
                     else
@@ -925,7 +922,6 @@ namespace ServiceStack.OrmLite
                         }
                         else
                         {
-                            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, row);
                             dbCmd.Insert(row, commandFilter: null);
                         }
 
