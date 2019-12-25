@@ -910,7 +910,6 @@ namespace ServiceStack.OrmLite
                     var id = modelDef.GetPrimaryKey(row);
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
-                        OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, row);
                         dbCmd.Update(row);
                     }
                     else
@@ -925,7 +924,6 @@ namespace ServiceStack.OrmLite
                         }
                         else
                         {
-                            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, row);
                             dbCmd.Insert(row, commandFilter: null);
                         }
 
