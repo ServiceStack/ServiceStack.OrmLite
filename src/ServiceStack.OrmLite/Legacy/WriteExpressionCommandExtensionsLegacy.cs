@@ -94,8 +94,7 @@ namespace ServiceStack.OrmLite.Legacy
         [Obsolete(Messages.LegacyApi)]
         public static void InsertOnly<T>(this IDbCommand dbCmd, T obj, SqlExpression<T> onlyFields)
         {
-            if (OrmLiteConfig.InsertFilter != null)
-                OrmLiteConfig.InsertFilter(dbCmd, obj);
+            dbCmd.OnInsert(obj);
 
             var sql = dbCmd.GetDialectProvider().ToInsertRowStatement(dbCmd, obj, onlyFields.InsertFields);
             dbCmd.ExecuteSql(sql);
