@@ -2435,7 +2435,7 @@ namespace ServiceStack.OrmLite
         protected virtual bool IsFieldName(object quotedExp)
         {
             var fieldExpr = quotedExp.ToString().StripTablePrefixes();
-            var unquotedExpr = fieldExpr.StripQuotes();
+            var unquotedExpr = fieldExpr.StripDbQuotes();
 
             var isTableField = modelDef.FieldDefinitionsArray
                 .Any(x => GetColumnName(x.FieldName) == unquotedExpr);

@@ -143,7 +143,7 @@ namespace ServiceStack.OrmLite.Tests
                 var tableNames = db.GetTableNamesWithRowCounts(live:true);
                 Assert.That(tableNames.Count, Is.GreaterThan(0));
 
-                var table1Name = db.GetDialectProvider().GetTableName(typeof(Order).GetModelMetadata()).StripQuotes();
+                var table1Name = db.GetDialectProvider().GetTableName(typeof(Order).GetModelMetadata()).StripDbQuotes();
                 
                 var table1Pos = IndexOf(tableNames, x => x.Key.EqualsIgnoreCase(table1Name) && x.Value == 3);
                 Assert.That(table1Pos, Is.GreaterThanOrEqualTo(0));
@@ -201,8 +201,8 @@ namespace ServiceStack.OrmLite.Tests
                 tableNames.TextDump().Print();
                 Assert.That(tableNames.Count, Is.GreaterThan(0));
 
-                var table1Name = db.GetDialectProvider().GetTableName(typeof(Schematable1).GetModelMetadata()).LastRightPart('.').StripQuotes();
-                var table2Name = db.GetDialectProvider().GetTableName(typeof(Schematable2).GetModelMetadata()).LastRightPart('.').StripQuotes();
+                var table1Name = db.GetDialectProvider().GetTableName(typeof(Schematable1).GetModelMetadata()).LastRightPart('.').StripDbQuotes();
+                var table2Name = db.GetDialectProvider().GetTableName(typeof(Schematable2).GetModelMetadata()).LastRightPart('.').StripDbQuotes();
 
                 var table1Pos = IndexOf(tableNames, x => x.Key.IndexOf(table1Name, StringComparison.OrdinalIgnoreCase) >=0 && x.Value == 3);
                 Assert.That(table1Pos, Is.GreaterThanOrEqualTo(0));

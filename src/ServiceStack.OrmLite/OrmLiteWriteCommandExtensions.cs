@@ -743,7 +743,7 @@ namespace ServiceStack.OrmLite
                 .ParseCommands();
 
             var fieldsOrAliases = selectFields
-                .Map(x => x.Original.ToString().LastRightPart(" AS ").Trim().StripQuotes());
+                .Map(x => x.Original.ToString().LastRightPart(" AS ").Trim().StripDbQuotes());
 
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, insertFields: fieldsOrAliases);
 

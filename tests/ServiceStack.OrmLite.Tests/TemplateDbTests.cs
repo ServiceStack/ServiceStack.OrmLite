@@ -39,7 +39,7 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<Rockstar>();
                 db.InsertAll(AutoQueryTests.SeedRockstars);
 
-                var firstName = "FirstName".SqlColumn(DialectProvider).StripQuotes();
+                var firstName = "FirstName".SqlColumn(DialectProvider).StripDbQuotes();
 
                 var args = new Dictionary<string, object> { { "id", 3 }};
 

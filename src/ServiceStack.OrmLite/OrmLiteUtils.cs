@@ -818,9 +818,9 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sb).Trim();
         }
 
-        public static char[] QuotedChars = new[] { '"', '`', '[', ']' };
+        public static char[] QuotedChars = { '"', '`', '[', ']' };
 
-        public static string StripQuotes(this string quotedExpr)
+        public static string StripDbQuotes(this string quotedExpr)
         {
             return quotedExpr.Trim(QuotedChars);
         }
@@ -1117,6 +1117,6 @@ namespace ServiceStack.OrmLite
             ? text
             : "'" + text + "'";
 
-        public static string UnquotedColumnName(string columnExpr) => columnExpr.LastRightPart('.').StripQuotes();
+        public static string UnquotedColumnName(string columnExpr) => columnExpr.LastRightPart('.').StripDbQuotes();
     }
 }
