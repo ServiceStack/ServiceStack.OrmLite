@@ -93,7 +93,7 @@ namespace ServiceStack.OrmLite.Oracle
             //OracleConfiguration.DisableOOB = true;
             //OracleConfiguration.OnsMode = OnsConfigMode.Unspecified;
             OracleConfiguration.TraceOption = 1;
-            OracleConfiguration.TraceLevel = 7;
+            //OracleConfiguration.TraceLevel = 7;
             //OracleConfiguration.TcpNoDelay = true;
             OracleConfiguration.TraceFileLocation = "c:\\temp\\ora";
 #endif
