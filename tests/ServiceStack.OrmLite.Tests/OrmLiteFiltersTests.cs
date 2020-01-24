@@ -1,6 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -86,6 +89,33 @@ namespace ServiceStack.OrmLite.Tests
             }
 
             OrmLiteConfig.InsertFilter = OrmLiteConfig.UpdateFilter = null;
+        }
+
+        [Test]
+        public async Task Does_fire_filters_for_SaveAll()
+        {
+            var sbInsert = new List<string>(); 
+            var sbUpdate = new List<string>();
+            OrmLiteConfig.InsertFilter = (cmd, o) => sbInsert.Add(cmd.CommandText);
+            OrmLiteConfig.UpdateFilter = (cmd, o) => sbUpdate.Add(cmd.CommandText);
+
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<AuditTableA>();
+                await db.SaveAllAsync(new[] {
+                    new AuditTableA {Id = 1, ModifiedBy = "A1"},
+                    new AuditTableA {Id = 2, ModifiedBy = "B1"},
+                });
+                
+                Assert.That(sbInsert.Count, Is.EqualTo(2));
+
+                await db.SaveAllAsync(new[] {
+                    new AuditTableA {Id = 1, ModifiedBy = "A2"},
+                    new AuditTableA {Id = 2, ModifiedBy = "B2"},
+                });
+                
+                Assert.That(sbUpdate.Count, Is.EqualTo(2));
+            }
         }
 
         [Test]

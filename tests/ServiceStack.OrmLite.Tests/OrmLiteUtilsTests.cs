@@ -14,5 +14,14 @@ namespace ServiceStack.OrmLite.Tests
 
             Assert.AreEqual(1,  tokens.Count);
         }
+
+        [Test]
+        public void Can_UnquotedColumnName()
+        {
+            Assert.That(OrmLiteUtils.UnquotedColumnName("Col"), Is.EqualTo("Col"));
+            Assert.That(OrmLiteUtils.UnquotedColumnName("\"Col\""), Is.EqualTo("Col"));
+            Assert.That(OrmLiteUtils.UnquotedColumnName("Table.Col"), Is.EqualTo("Col"));
+            Assert.That(OrmLiteUtils.UnquotedColumnName("\"Table\".\"Col\""), Is.EqualTo("Col"));
+        }
     }
 }

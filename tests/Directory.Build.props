@@ -1,10 +1,10 @@
 <Project>
 
   <PropertyGroup>
-    <Version>5.7.1</Version>
+    <Version>5.8.1</Version>
     <AssemblyVersion>5.0.0.0</AssemblyVersion>
     <LangVersion>latest</LangVersion>
-	<Authors>ServiceStack</Authors>
+  	<Authors>ServiceStack</Authors>
     <Company>ServiceStack, Inc.</Company>
     <Copyright>&#169; 2008-2018 ServiceStack, Inc</Copyright>
   </PropertyGroup>

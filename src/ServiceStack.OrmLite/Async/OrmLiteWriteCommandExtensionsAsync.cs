@@ -415,8 +415,6 @@ namespace ServiceStack.OrmLite
                     var id = modelDef.GetPrimaryKey(row);
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
-                        OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, row);
-
                         await dbCmd.UpdateAsync(row, token, null);
                     }
                     else
@@ -430,8 +428,6 @@ namespace ServiceStack.OrmLite
                         }
                         else
                         {
-                            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, row);
-
                             await dbCmd.InsertAsync(row, commandFilter:null, selectIdentity:false, token:token);
                         }
 

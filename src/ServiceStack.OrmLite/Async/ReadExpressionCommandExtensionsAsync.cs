@@ -163,7 +163,7 @@ namespace ServiceStack.OrmLite
         internal static Task<long> RowCountAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression, CancellationToken token)
         {
             var countExpr = expression.Clone().OrderBy();
-            return dbCmd.ScalarAsync<long>(dbCmd.GetDialectProvider().ToRowCountStatement(countExpr.ToSelectStatement()), expression.Params, token);
+            return dbCmd.ScalarAsync<long>(dbCmd.GetDialectProvider().ToRowCountStatement(countExpr.ToSelectStatement()), countExpr.Params, token);
         }
 
         internal static Task<long> RowCountAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)

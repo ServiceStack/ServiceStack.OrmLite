@@ -1,8 +1,5 @@
-﻿using System;
 using System.Data;
-using System.Reflection;
 
-#if !NETSTANDARD1_3
 namespace ServiceStack.OrmLite.Dapper
 {
     /// <summary>
@@ -30,19 +27,6 @@ namespace ServiceStack.OrmLite.Dapper
             this.typeName = typeName;
         }
 
-#if SQLCLIENT        
-        private static readonly Action<System.Data.SqlClient.SqlParameter, string> setTypeName;
-        static TableValuedParameter()
-        {
-            var prop = typeof(System.Data.SqlClient.SqlParameter).GetProperty("TypeName", BindingFlags.Instance | BindingFlags.Public);
-            if (prop != null && prop.PropertyType == typeof(string) && prop.CanWrite)
-            {
-                setTypeName = (Action<System.Data.SqlClient.SqlParameter, string>)
-                    Delegate.CreateDelegate(typeof(Action<System.Data.SqlClient.SqlParameter, string>), prop.GetSetMethod());
-            }
-        }
-#endif
-        
         void SqlMapper.ICustomQueryParameter.AddParameter(IDbCommand command, string name)
         {
             var param = command.CreateParameter();
@@ -60,14 +44,7 @@ namespace ServiceStack.OrmLite.Dapper
             {
                 typeName = table.GetTypeName();
             }
-#if SQLCLIENT        
-            if (!string.IsNullOrEmpty(typeName) && (parameter is System.Data.SqlClient.SqlParameter sqlParam))
-            {
-                setTypeName?.Invoke(sqlParam, typeName);
-                sqlParam.SqlDbType = SqlDbType.Structured;
-            }
-#endif
+            if (!string.IsNullOrEmpty(typeName)) StructuredHelper.ConfigureTVP(parameter, typeName);
         }
     }
 }
-#endif

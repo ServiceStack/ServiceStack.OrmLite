@@ -1957,7 +1957,7 @@ namespace ServiceStack.OrmLite
             // When selecting a column use the anon type property name, rather than the table property name, as the returned column name
             if (arg is MemberExpression propExpr && IsLambdaArg(propExpr.Expression))
             {
-                if (UseSelectPropertiesAsAliases ||                    // Use anon property alias when explicitly requested
+                if (UseSelectPropertiesAsAliases ||                  // Use anon property alias when explicitly requested
                     propExpr.Member.Name != member.Name ||           // or when names don't match 
                     propExpr.Expression.Type != ModelDef.ModelType)  // or when selecting a field from a different table
                     return new SelectItemExpression(DialectProvider, expr.ToString(), member.Name);
@@ -2008,7 +2008,9 @@ namespace ServiceStack.OrmLite
                     ? converter.ToQuotedString(expr.GetType(), expr)
                     : expr.ToString();
                 
-                return new PartialSqlString(strExpr + " AS " + member.Name);
+                return new PartialSqlString(OrmLiteUtils.UnquotedColumnName(strExpr) != member.Name 
+                    ? strExpr + " AS " + member.Name 
+                    : strExpr);
             } 
 
             return UseSelectPropertiesAsAliases
@@ -2433,7 +2435,7 @@ namespace ServiceStack.OrmLite
         protected virtual bool IsFieldName(object quotedExp)
         {
             var fieldExpr = quotedExp.ToString().StripTablePrefixes();
-            var unquotedExpr = fieldExpr.StripQuotes();
+            var unquotedExpr = fieldExpr.StripDbQuotes();
 
             var isTableField = modelDef.FieldDefinitionsArray
                 .Any(x => GetColumnName(x.FieldName) == unquotedExpr);

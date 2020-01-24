@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Text;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.Model;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -131,4 +133,79 @@ namespace ServiceStack.OrmLite.Tests
             }
         }
     }
+    
+
+    public class UniqueTest4 : IHasId<int>
+    {
+        [AutoIncrement, Index(NonClustered = true)]
+        public int Id { get; set; }
+
+        [Index(Unique = true)]
+        [Required]
+        [StringLength(100)]
+        public string UniqueDefault { get; set; }
+
+        [Index(Unique = true, Clustered = true)]
+        [Required]
+        [StringLength(200)]
+        public string UniqueClustered { get; set; }
+
+        [Index(Unique = true, NonClustered = true)]
+        [Required]
+        [StringLength(300)]
+        public string UniqueNonClustered { get; set; }
+    }    
+
+    public class SqlServer2012UniqueTests : OrmLiteTestBase
+    {
+        public SqlServer2012UniqueTests() : base(Dialect.SqlServer2012) { }
+
+        [Test]
+        public void Does_create_unique_non_null_constraint()
+        {
+            var sb = new StringBuilder();
+            OrmLiteConfig.BeforeExecFilter = cmd => sb.AppendLine(cmd.GetDebugString());
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<UniqueTest4>();
+            }
+            
+//            sb.ToString().Print();
+            var sql = sb.ToString();
+            Assert.That(sql, Does.Contain("PRIMARY KEY NONCLUSTERED"));
+            Assert.That(sql, Does.Contain("VARCHAR(100) NOT NULL,"));
+            Assert.That(sql, Does.Contain("VARCHAR(200) NOT NULL,"));
+            Assert.That(sql, Does.Contain("VARCHAR(300) NOT NULL"));
+            Assert.That(sql, Does.Contain("CREATE UNIQUE INDEX "));
+            Assert.That(sql, Does.Contain("CREATE UNIQUE CLUSTERED INDEX "));
+            Assert.That(sql, Does.Contain("CREATE UNIQUE NONCLUSTERED INDEX "));
+        }
+    }
+
+    public class SqlServer2014UniqueTests : OrmLiteTestBase
+    {
+        public SqlServer2014UniqueTests() : base(Dialect.SqlServer2014) { }
+
+        [Test]
+        public void Does_create_unique_non_null_constraint()
+        {
+            var sb = new StringBuilder();
+            OrmLiteConfig.BeforeExecFilter = cmd => sb.AppendLine(cmd.GetDebugString());
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<UniqueTest4>();
+            }
+            
+//            sb.ToString().Print();
+            var sql = sb.ToString();
+            Assert.That(sql, Does.Contain("PRIMARY KEY NONCLUSTERED"));
+            Assert.That(sql, Does.Contain("VARCHAR(100) NOT NULL,"));
+            Assert.That(sql, Does.Contain("VARCHAR(200) NOT NULL,"));
+            Assert.That(sql, Does.Contain("VARCHAR(300) NOT NULL"));
+            Assert.That(sql, Does.Contain("CREATE UNIQUE INDEX "));
+            Assert.That(sql, Does.Contain("CREATE UNIQUE CLUSTERED INDEX "));
+            Assert.That(sql, Does.Contain("CREATE UNIQUE NONCLUSTERED INDEX "));
+        }
+    }
+    
 }
