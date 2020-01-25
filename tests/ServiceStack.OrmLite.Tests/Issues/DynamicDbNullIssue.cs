@@ -9,12 +9,11 @@ namespace ServiceStack.OrmLite.Tests.Issues
     {
         public class Test
         {
-            public int Id { get; set; }
+            public int id { get; set; }
 
-            public string Name { get; set; }
+            public string name { get; set; }
         }
 
-        
         [Test]
         public async Task Does_convert_DbNull_Values_in_Async_Results()
         {
@@ -22,14 +21,14 @@ namespace ServiceStack.OrmLite.Tests.Issues
             {
                 db.DropAndCreateTable<Test>();
 
-                db.Insert(new Test {Id = 1, Name = "A"},
-                    new Test {Id = 2, Name = null});
+                db.Insert(new Test { id = 1, name = "A" },
+                    new Test { id = 2, name = null });
 
-                var rows = db.Select<dynamic>("select Id, Name from Test");
-                Assert.That(rows.Any(x => x.Name == null));
+                var rows = db.Select<dynamic>("select id, name from Test");
+                Assert.That(rows.Any(x => x.name == null));
 
-                rows = await db.SelectAsync<dynamic>("select Id, Name from Test");
-                Assert.That(rows.Any(x => x.Name == null));
+                rows = await db.SelectAsync<dynamic>("select id, name from Test");
+                Assert.That(rows.Any(x => x.name == null));
             }
         }
     }
