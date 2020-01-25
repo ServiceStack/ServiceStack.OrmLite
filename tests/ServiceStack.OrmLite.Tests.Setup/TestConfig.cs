@@ -30,26 +30,28 @@ namespace ServiceStack.OrmLite.Tests
         SqlServer2016 = 1 << 5,
         SqlServer2017 = 1 << 6,
         
-        PostgreSql = 1 << 7,
+        PostgreSql9 = 1 << 8,
+        PostgreSql10 = 1 << 9,
+        PostgreSql11 = 1 << 10,
         
-        MySql = 1 << 8,
-        MySqlConnector = 1 << 9,
+        MySql = 1 << 11,
+        MySqlConnector = 1 << 12,
         
-        Oracle = 1 << 10,
+        Oracle = 1 << 13,
         
-        Firebird = 1 << 11,
-        Firebird4 = 1 << 12,
+        Firebird = 1 << 14,
+        Firebird4 = 1 << 15,
         
-        VistaDb = 1 << 13,
+        VistaDb = 1 << 16,
         
         // any versions
-        AnyPostgreSql = PostgreSql,
+        AnyPostgreSql = PostgreSql9 | PostgreSql10 | PostgreSql11,
         AnyMySql = MySql | MySqlConnector, 
         AnySqlServer = SqlServer | SqlServer2008 | SqlServer2012 | SqlServer2014 | SqlServer2016 | SqlServer2017,
         AnyOracle = Oracle,
         
         // db groups
-        BaseSupported = Sqlite | SqlServer | PostgreSql | MySql | MySqlConnector,
+        BaseSupported = Sqlite | SqlServer | AnyPostgreSql | MySql | MySqlConnector,
         Supported = Sqlite | AnySqlServer | AnyMySql | AnyPostgreSql,
         Community = Firebird | Oracle | VistaDb,
         
@@ -87,7 +89,9 @@ namespace ServiceStack.OrmLite.Tests
                     return SqlServerDb.VersionString(Dialect, Version); 
                 case Dialect.MySql:
                     return MySqlDb.VersionString(Version); 
-                case Dialect.PostgreSql:
+                case Dialect.PostgreSql9:
+                case Dialect.PostgreSql10:
+                case Dialect.PostgreSql11:
                     return PostgreSqlDb.VersionString(Version); 
                 case Dialect.Oracle:
                     return OracleDb.VersionString(Version); 
@@ -173,7 +177,11 @@ namespace ServiceStack.OrmLite.Tests
         public const int V10 = 10;
         public const int V11 = 11;
         public static readonly int[] Versions = TestConfig.EnvironmentVariableInto("PGSQL_VERSION", new[]{ V9, V10, V11 });
-        public static readonly string DefaultConnection = TestConfig.GetConnection(Dialect.PostgreSql, V11);
+        public static readonly string DefaultConnection = TestConfig.GetConnection(Dialect.PostgreSql11, V11);
+        public static int[] V9Versions = Versions.Where(x => x == V9).ToArray();
+        public static int[] V10Versions = Versions.Where(x => x == V10).ToArray();
+        public static int[] V11Versions = Versions.Where(x => x == V11).ToArray();
+        
         public static string VersionString(int version) => "PostgreSQL " + (version == V9
             ? "v9"
             : version == V10
@@ -230,7 +238,9 @@ namespace ServiceStack.OrmLite.Tests
             [Dialect.SqlServer2014] = SqlServer2014Dialect.Provider,
             [Dialect.SqlServer2016] = SqlServer2016Dialect.Provider,
             [Dialect.SqlServer2017] = SqlServer2017Dialect.Provider,
-            [Dialect.PostgreSql] = PostgreSqlDialect.Provider,
+            [Dialect.PostgreSql9] = PostgreSqlDialect.Provider,
+            [Dialect.PostgreSql10] = PostgreSqlDialect.Provider,
+            [Dialect.PostgreSql11] = PostgreSqlDialect.Provider,
             [Dialect.MySql] = MySqlDialect.Provider,
             [Dialect.MySqlConnector] = MySqlConnectorDialect.Provider,
             [Dialect.Oracle] = OracleDialect.Provider,
@@ -259,9 +269,9 @@ namespace ServiceStack.OrmLite.Tests
             [Tuple.Create(Dialect.SqlServer2016, SqlServerDb.V2016)] = EnvironmentVariable(new[]{ "MSSQL2016_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
             [Tuple.Create(Dialect.SqlServer2017, SqlServerDb.V2017)] = EnvironmentVariable(new[]{ "MSSQL2017_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
 
-            [Tuple.Create(Dialect.PostgreSql, PostgreSqlDb.V9)]  = EnvironmentVariable(new[]{ "PGSQL9_CONNECTION",  "PGSQL_CONNECTION" }, "Server=localhost;Port=48301;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
-            [Tuple.Create(Dialect.PostgreSql, PostgreSqlDb.V10)] = EnvironmentVariable(new[]{ "PGSQL10_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48302;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
-            [Tuple.Create(Dialect.PostgreSql, PostgreSqlDb.V11)] = EnvironmentVariable(new[]{ "PGSQL11_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48303;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
+            [Tuple.Create(Dialect.PostgreSql9, PostgreSqlDb.V9)]  = EnvironmentVariable(new[]{ "PGSQL9_CONNECTION",  "PGSQL_CONNECTION" }, "Server=localhost;Port=48301;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
+            [Tuple.Create(Dialect.PostgreSql10, PostgreSqlDb.V10)] = EnvironmentVariable(new[]{ "PGSQL10_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48302;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
+            [Tuple.Create(Dialect.PostgreSql11, PostgreSqlDb.V11)] = EnvironmentVariable(new[]{ "PGSQL11_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48303;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
             
             [Tuple.Create(Dialect.MySql, MySqlDb.V5_5)]  = EnvironmentVariable(new[]{ "MYSQL55_CONNECTION",  "MYSQL_CONNECTION" }, "Server=localhost;Port=48201;Database=test;UID=root;Password=test;SslMode=none;Convert Zero Datetime=True;"),
             [Tuple.Create(Dialect.MySql, MySqlDb.V10_1)] = EnvironmentVariable(new[]{ "MYSQL101_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none"),
@@ -289,7 +299,9 @@ namespace ServiceStack.OrmLite.Tests
             [Dialect.SqlServer2014] = SqlServerDb.V2014Versions,
             [Dialect.SqlServer2016] = SqlServerDb.V2016Versions,
             [Dialect.SqlServer2017] = SqlServerDb.V2017Versions,
-            [Dialect.PostgreSql] = PostgreSqlDb.Versions,
+            [Dialect.PostgreSql9] = PostgreSqlDb.V9Versions,
+            [Dialect.PostgreSql10] = PostgreSqlDb.V10Versions,
+            [Dialect.PostgreSql11] = PostgreSqlDb.V11Versions,
             [Dialect.MySql] = MySqlDb.Versions,
             [Dialect.MySqlConnector] = MySqlDb.MySqlConnectorVersions,
             
@@ -377,19 +389,22 @@ namespace ServiceStack.OrmLite.Tests
         {
             if ((Dialects & Dialect.AnyPostgreSql) != 0)
             {
-                foreach (var version in DialectVersions[Dialect.PostgreSql])
+                void SetupPostgreSql(Dialect dialect, int version)
                 {
-                    try
+                    if ((Dialects & dialect) != 0)
                     {
-                        using (var db = dbFactory.OpenDbConnectionString(
-                            DialectConnections[Tuple.Create(Dialect.PostgreSql, version)] + ";Timeout=10",
-                            Dialect.PostgreSql.ToString()))
+                        if (DialectConnections.TryGetValue(Tuple.Create(dialect, version), out var connString))
                         {
-                            InitPostgres(Dialect.PostgreSql, db);
+                            using (var db = dbFactory.OpenDbConnectionString(connString + ";Timeout=10", dialect.ToString()))
+                            {
+                                InitPostgres(dialect, db);
+                            }
                         }
                     }
-                    catch {}
                 }
+                SetupPostgreSql(Dialect.PostgreSql9, PostgreSqlDb.V9);
+                SetupPostgreSql(Dialect.PostgreSql10, PostgreSqlDb.V10);
+                SetupPostgreSql(Dialect.PostgreSql11, PostgreSqlDb.V11);
             }
 
             if ((Dialects & Dialect.MySqlConnector) != 0)
@@ -402,7 +417,7 @@ namespace ServiceStack.OrmLite.Tests
                             DialectConnections[Tuple.Create(Dialect.MySqlConnector, version)] + ";Timeout=10",
                             Dialect.MySqlConnector.ToString()))
                         {
-                            InitMySqlConnector(Dialect.PostgreSql, db);
+                            InitMySqlConnector(Dialect.MySqlConnector, db);
                         }
                     }
                 }

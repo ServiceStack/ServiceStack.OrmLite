@@ -189,7 +189,9 @@ namespace ServiceStack.OrmLite.Tests
             AddTestDataVersions(Dialect.SqlServer2014, SqlServerDb.V2014Versions);
             AddTestDataVersions(Dialect.SqlServer2016, SqlServerDb.V2016Versions);
             AddTestDataVersions(Dialect.SqlServer2017, SqlServerDb.V2017Versions);
-            AddTestDataVersions(Dialect.PostgreSql, PostgreSqlDb.Versions);
+            AddTestDataVersions(Dialect.PostgreSql9, PostgreSqlDb.V9Versions);
+            AddTestDataVersions(Dialect.PostgreSql10, PostgreSqlDb.V10Versions);
+            AddTestDataVersions(Dialect.PostgreSql11, PostgreSqlDb.V11Versions);
             AddTestDataVersions(Dialect.MySql, MySqlDb.Versions);
             AddTestDataVersions(Dialect.MySqlConnector, MySqlDb.MySqlConnectorVersions);
             AddTestDataVersions(Dialect.Oracle, OracleDb.Versions);

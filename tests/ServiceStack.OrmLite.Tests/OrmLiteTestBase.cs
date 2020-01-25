@@ -153,7 +153,9 @@ namespace ServiceStack.OrmLite.Tests
                     return Init(SqlServerDb.DefaultConnection, SqlServer2017Dialect.Provider);
                 case Dialect.MySql:
                     return Init(MySqlDb.DefaultConnection, MySqlDialect.Provider);
-                case Dialect.PostgreSql:
+                case Dialect.PostgreSql9:
+                case Dialect.PostgreSql10:
+                case Dialect.PostgreSql11:
                     return Init(PostgreSqlDb.DefaultConnection, PostgreSqlDialect.Provider);
 //                case Dialect.SqlServerMdf:
 //                    return Init(Config.SqlServerDb, SqlServerDialect.Provider);

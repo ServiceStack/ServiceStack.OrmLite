@@ -6,7 +6,6 @@ namespace ServiceStack.OrmLite.Tests
 {
     public class _Adhoc : OrmLiteTestBase
     {
-        public _Adhoc() : base(Dialect.PostgreSql) { }
-
+        public _Adhoc() : base(Dialect.PostgreSql11) { }
     }
 }
