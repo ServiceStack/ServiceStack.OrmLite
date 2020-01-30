@@ -187,7 +187,7 @@ namespace ServiceStack.OrmLite.Tests
             var createTableSql = DialectProvider.ToCreateTableStatement(typeof(ModelWithIdAndName));
 
             Console.WriteLine("createTableSql: " + createTableSql);
-            if ((Dialect & Dialect.AnyPostgreSql) == Dialect)
+            if ((Dialect & Dialect.AnyPostgreSql) != Dialect)
             {
                 Assert.That(createTableSql, Does.Contain("VARCHAR(255)").
                                             Or.Contain("VARCHAR2(255)"));
