@@ -132,8 +132,8 @@ namespace ServiceStack.OrmLite.Tests
                 var results = db.Select<UserEntity>();
                 var animals = results.OrderBy(x => x.Id).Map(x => x.MyPrimaryAnimal);
                 Assert.That(animals[0] is BirdEntity b && b.Bird == "B");
-                Assert.That(animals[0] is CatEntity c && c.Cat == "C");
-                Assert.That(animals[0] is DogEntity d && d.Dog == "D");
+                Assert.That(animals[1] is CatEntity c && c.Cat == "C");
+                Assert.That(animals[2] is DogEntity d && d.Dog == "D");
             }
         }
 
