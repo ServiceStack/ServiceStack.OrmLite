@@ -10,15 +10,12 @@
       .NET Standard 2.0 version of ServiceStack.OrmLite.SqlServer.Data
     </PackageDescription>
     <PackageTags>SQLServer;OrmLite;RDBMS;SQL;POCO;Code-First;ORM;Schema-less;Blobs</PackageTags>
-    <DefineConstants>$(DefineConstants);ASYNC</DefineConstants>
+    <DefineConstants>$(DefineConstants);ASYNC;MSDATA</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.Core.csproj" />
     <PackageReference Include="ServiceStack.Common.Core" Version="$(Version)" />
-  </ItemGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="Microsoft.Data.SqlClient" Version="1.1.0" />
   </ItemGroup>
 
@@ -86,6 +83,6 @@
     <Compile Include="..\ServiceStack.OrmLite.SqlServer\SqlServerTableHint.cs">
       <Link>SqlServerTableHint.cs</Link>
     </Compile>
-  </ItemGroup>  
+  </ItemGroup>
 
 </Project>
