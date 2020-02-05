@@ -2,9 +2,9 @@
 
   <PropertyGroup>
     <PackageId>ServiceStack.OrmLite.SqlServer.Data</PackageId>
-    <AssemblyName>ServiceStack.OrmLite.SqlServer</AssemblyName>
-    <RootNamespace>ServiceStack.OrmLite.SqlServer</RootNamespace>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>ServiceStack.OrmLite.SqlServer.Data</AssemblyName>
+    <RootNamespace>ServiceStack.OrmLite.SqlServer</RootNamespace>
     <Title>OrmLite.SqlServer - Fast, code-first, config-free POCO ORM</Title>
     <PackageDescription>
       Uses Microsoft.Data.SqlClient.
