@@ -104,16 +104,6 @@
              Targets="Build;Pack"
              Properties="Configuration=$(Configuration)" />
 
-    <!-- ServiceStack.OrmLite.SqlServer.Data.Core -->
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer.Data/ServiceStack.OrmLite.SqlServer.Data.Core.csproj" Targets="Restore" />
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer.Data/ServiceStack.OrmLite.SqlServer.Data.Core.csproj" Targets="Build" />
-    <!-- For reasons beyond explanation project fails to pack with <MSBuild> task, failing with: 
-         The type 'Object' is defined in an assembly that is not referenced. You must add a reference to assembly 'netstandard, Version=2.0.0.0 -->
-    <Exec Command="dotnet pack $(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer.Data/ServiceStack.OrmLite.SqlServer.Data.Core.csproj" />
-    <!--<MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer.Data/ServiceStack.OrmLite.SqlServer.Data.Core.csproj"
-            Targets="Build;Pack"
-            Properties="Configuration=$(Configuration)" />-->
-
     <!-- leave .sln in optimal state then NuGet restore .sln to build -->
     <CallTarget Targets="ClearNuGetRestoreCaches" />
 
