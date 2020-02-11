@@ -819,7 +819,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_Where_using_Constant_in_Conditional_order5()
         {
             var i = 0;
-            System.Linq.Expressions.Expression<Func<TestType, object>> order = x => i > 0 ? x.TextCol : "www";
+            System.Linq.Expressions.Expression<Func<TestType, object>> order = x => i > 0 ? x.TextCol : "";
             var q = Db.From<TestType>().OrderBy(order).ThenBy(x => x.Id);
             Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain("="));
             Assert.That(q.ToSelectStatement().ToLower(), Does.Not.Contain(Db.GetDialectProvider().ParamString + "0"));
