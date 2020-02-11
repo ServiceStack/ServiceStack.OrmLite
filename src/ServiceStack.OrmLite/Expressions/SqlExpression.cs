@@ -589,12 +589,16 @@ namespace ServiceStack.OrmLite
         {
             Reset(sep=string.Empty);
 
-            var groupByKey = Visit(keySelector);
-            if (IsSqlClass(groupByKey))
+            var groupByExpr = Visit(keySelector);
+            if (IsSqlClass(groupByExpr))
             {
-                StripAliases(groupByKey as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names/expressions
+                StripAliases(groupByExpr as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names/expressions
 
-                return GroupBy(groupByKey.ToString());
+                return GroupBy(groupByExpr.ToString());
+            }
+            if (groupByExpr is string s)
+            {
+                return GroupBy(s);
             }
 
             return this;
@@ -2029,6 +2033,17 @@ namespace ServiceStack.OrmLite
                 {
                     selectItem.Alias = null;
                 }
+                else if (item is PartialSqlString p)
+                {
+                    if (p.Text.IndexOf(' ') >= 0)
+                    {
+                        var right = p.Text.RightPart(' ');
+                        if (right.StartsWithIgnoreCase("AS "))
+                        {
+                            p.Text = p.Text.LeftPart(' ');
+                        }
+                    }
+                }
             }
         }
 
@@ -2862,7 +2877,7 @@ namespace ServiceStack.OrmLite
         {
             Text = text;
         }
-        public string Text { get; }
+        public string Text { get; internal set; }
         public override string ToString() => Text;
     }
 
