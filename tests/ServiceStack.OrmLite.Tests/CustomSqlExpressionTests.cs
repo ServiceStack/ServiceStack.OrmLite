@@ -345,7 +345,7 @@ namespace ServiceStack.OrmLite.Tests
                 Expression<Func<WaybillBase, bool>> filter = x => !x.BoolVirtProperty &&
                                                                   x.VirtPropertyEmpty != "WaybillVirtPropertyValue" &&
                                                                   x.Number == 100;
-                Expression<Func<WaybillBase, object>> orderBy = x => x.VirtProperty;
+                Expression<Func<WaybillBase, object>> orderBy = x => x.VirtPropertyEmpty;
                 var q = db.From<WaybillBase>().Where(filter).OrderBy(orderBy);
                 var target = db.Select(q);
                 Assert.AreEqual(1, target.Count);
@@ -468,7 +468,9 @@ namespace ServiceStack.OrmLite.Tests
             {
                 Expression<Func<WaybillBase, bool>> filter = x =>
                     (x.Number > 0 ? x.DecimalVirtProperty : x.Amount) == 10M;
-                var q = db.From<WaybillBase>().Where(filter).GroupBy(x => x.VirtProperty);
+                var q = db.From<WaybillBase>()
+                    .Where(filter)
+                    .GroupBy(x => x.VirtPropertyEmpty);
                 var target = db.Select(q);
                 Assert.AreEqual(3, target.Count);
             }
@@ -479,9 +481,11 @@ namespace ServiceStack.OrmLite.Tests
         {
             using (var db = OpenDbConnection())
             {
+                OrmLiteUtils.PrintSql();
                 Expression<Func<WaybillBase, bool>> filter = x =>
                     (x.Number > 0 ? x.DecimalVirtProperty : x.Amount) == 10M;
-                var q = db.From<WaybillBase>().Where(filter).Select(x => x.Name).GroupBy(x => x.Name)
+                var q = db.From<WaybillBase>().Where(filter).Select(x => x.Name)
+                    .GroupBy(x => x.Name)
                     .Having(x => x.VirtProperty == "WaybillVirtPropertyValue");
                 var target = db.Column<string>(q);
                 Assert.AreEqual(3, target.Count);

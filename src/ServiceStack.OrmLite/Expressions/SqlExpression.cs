@@ -572,6 +572,21 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        private string ListExpression(Expression expr, string strExpr)
+        {
+            if (expr is LambdaExpression lambdaExpr)
+            {
+                if (lambdaExpr.Parameters.Count == 1 && lambdaExpr.Body is MemberExpression me)
+                {
+                    var tableDef = lambdaExpr.Parameters[0].Type.GetModelMetadata();
+                    var fieldDef = tableDef?.GetFieldDefinition(me.Member.Name);
+                    if (fieldDef != null)
+                        return DialectProvider.GetQuotedColumnName(tableDef, me.Member.Name);
+                }
+            }
+            return strExpr;
+        }
+
         public virtual SqlExpression<T> GroupBy()
         {
             return GroupBy(string.Empty);
@@ -585,20 +600,20 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        private SqlExpression<T> InternalGroupBy(Expression keySelector)
+        private SqlExpression<T> InternalGroupBy(Expression expr)
         {
             Reset(sep=string.Empty);
 
-            var groupByExpr = Visit(keySelector);
+            var groupByExpr = Visit(expr);
             if (IsSqlClass(groupByExpr))
             {
                 StripAliases(groupByExpr as SelectList); // No "AS ColumnAlias" in GROUP BY, just the column names/expressions
 
                 return GroupBy(groupByExpr.ToString());
             }
-            if (groupByExpr is string s)
+            if (groupByExpr is string strExpr)
             {
-                return GroupBy(s);
+                return GroupBy(ListExpression(expr, strExpr));
             }
 
             return this;
@@ -813,17 +828,21 @@ namespace ServiceStack.OrmLite
         public virtual SqlExpression<T> OrderBy<Table1, Table2, Table3, Table4>(Expression<Func<Table1, Table2, Table3, Table4, object>> fields) => OrderByInternal(fields);
         public virtual SqlExpression<T> OrderBy<Table1, Table2, Table3, Table4, Table5>(Expression<Func<Table1, Table2, Table3, Table4, Table5, object>> fields) => OrderByInternal(fields);
 
-        private SqlExpression<T> OrderByInternal(Expression keySelector)
+        private SqlExpression<T> OrderByInternal(Expression expr)
         {
             Reset(sep=string.Empty);
 
             orderByProperties.Clear();
-            var orderBySql = Visit(keySelector);
+            var orderBySql = Visit(expr);
             if (IsSqlClass(orderBySql))
             {
                 var fields = orderBySql.ToString();
                 orderByProperties.Add(fields);
                 BuildOrderByClauseInternal();
+            }
+            else if (orderBySql is string strExpr)
+            {
+                return GroupBy(ListExpression(expr, strExpr));
             }
             return this;
         }

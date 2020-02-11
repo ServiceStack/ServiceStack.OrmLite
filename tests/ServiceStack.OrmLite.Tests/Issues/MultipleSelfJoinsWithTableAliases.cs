@@ -216,7 +216,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
             if (string.IsNullOrEmpty(customFmt))
                 return;
-            OrmLiteUtils.PrintSql();
+            // OrmLiteUtils.PrintSql();
 
             using (var db = OpenDbConnection())
             {
@@ -227,7 +227,8 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.TableAlias("seller"))
                     .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.TableAlias("buyer"))
                     // .GroupBy<Sale, ContactIssue>((s,c) => new object[] { s.Id, "BuyerFirstName", "BuyerLastName" })
-                    .GroupBy<Sale, ContactIssue>((s,c) => new  { s.Id, BuyerFirstName = "BuyerFirstName", BuyerLastName = "BuyerLastName" })
+                    // .GroupBy<Sale, ContactIssue>((s,c) => new  { s.Id, BuyerFirstName = "BuyerFirstName", BuyerLastName = "BuyerLastName" })
+                    .GroupBy<Sale, ContactIssue>((s,c) => new  { s.Id, BuyerFirstName = Sql.TableAlias(c.FirstName, "buyer"), BuyerLastName = Sql.TableAlias(c.LastName, "buyer") })
                     .Select<Sale, ContactIssue>((s, c) => new
                     {
                         s,
