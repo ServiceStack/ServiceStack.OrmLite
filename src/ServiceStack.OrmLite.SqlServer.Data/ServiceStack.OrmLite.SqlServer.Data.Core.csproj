@@ -71,6 +71,9 @@
     <Compile Include="..\ServiceStack.OrmLite.SqlServer\SqlServer2017OrmLiteDialectProvider.cs">
       <Link>SqlServer2017OrmLiteDialectProvider.cs</Link>
     </Compile>
+    <Compile Include="..\ServiceStack.OrmLite.SqlServer\SqlServer2019OrmLiteDialectProvider.cs">
+      <Link>SqlServer2019OrmLiteDialectProvider.cs</Link>
+    </Compile>
     <Compile Include="..\ServiceStack.OrmLite.SqlServer\SqlServerDialect.cs">
       <Link>SqlServerDialect.cs</Link>
     </Compile>
