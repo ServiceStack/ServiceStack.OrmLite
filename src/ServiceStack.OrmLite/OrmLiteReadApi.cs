@@ -204,7 +204,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a single scalar value using an SqlExpression. E.g:
-        /// <para>db.Column&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => Sql.Count("*")).Where(q => q.Age > 40))</para>
+        /// <para>db.Column&lt;int&gt;(db.From&lt;Person&gt;().Select(x => Sql.Count("*")).Where(q => q.Age > 40))</para>
         /// </summary>
         public static T Scalar<T>(this IDbConnection dbConn, ISqlExpression sqlExpression)
         {
@@ -231,7 +231,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the distinct first column values in a HashSet using an SqlExpression. E.g:
-        /// <para>db.Column&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => x.LastName).Where(q => q.Age == 27))</para>
+        /// <para>db.Column&lt;int&gt;(db.From&lt;Person&gt;().Select(x => x.LastName).Where(q => q.Age == 27))</para>
         /// </summary>
         public static List<T> Column<T>(this IDbConnection dbConn, ISqlExpression query)
         {
@@ -249,7 +249,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the distinct first column values in a HashSet using an SqlExpression. E.g:
-        /// <para>db.ColumnLazy&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => x.LastName).Where(q => q.Age == 27))</para>
+        /// <para>db.ColumnLazy&lt;int&gt;(db.From&lt;Person&gt;().Select(x => x.LastName).Where(q => q.Age == 27))</para>
         /// </summary>
         public static IEnumerable<T> ColumnLazy<T>(this IDbConnection dbConn, ISqlExpression query)
         {
@@ -285,7 +285,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the distinct first column values in a HashSet using an SqlExpression. E.g:
-        /// <para>db.ColumnDistinct&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => x.Age).Where(q => q.Age < 50))</para>
+        /// <para>db.ColumnDistinct&lt;int&gt;(db.From&lt;Person&gt;().Select(x => x.Age).Where(q => q.Age < 50))</para>
         /// </summary>
         public static HashSet<T> ColumnDistinct<T>(this IDbConnection dbConn, ISqlExpression query)
         {

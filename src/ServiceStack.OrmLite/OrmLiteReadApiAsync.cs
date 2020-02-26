@@ -183,7 +183,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns a single scalar value using an SqlExpression. E.g:
-        /// <para>db.ScalarAsync&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => Sql.Count("*")).Where(q => q.Age > 40))</para>
+        /// <para>db.ScalarAsync&lt;int&gt;(db.From&lt;Person&gt;().Select(x => Sql.Count("*")).Where(q => q.Age > 40))</para>
         /// </summary>
         public static Task<T> ScalarAsync<T>(this IDbConnection dbConn, ISqlExpression sqlExpression, CancellationToken token = default(CancellationToken))
         {
@@ -210,7 +210,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the distinct first column values in a HashSet using an SqlExpression. E.g:
-        /// <para>db.ColumnAsync&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => x.LastName).Where(q => q.Age == 27))</para>
+        /// <para>db.ColumnAsync&lt;int&gt;(db.From&lt;Person&gt;().Select(x => x.LastName).Where(q => q.Age == 27))</para>
         /// </summary>
         public static Task<List<T>> ColumnAsync<T>(this IDbConnection dbConn, ISqlExpression query, CancellationToken token = default(CancellationToken))
         {
@@ -237,7 +237,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns the distinct first column values in a HashSet using an SqlExpression. E.g:
-        /// <para>db.ColumnDistinctAsync&lt;int&gt;(db.From&lt;Persion&gt;().Select(x => x.Age).Where(q => q.Age < 50))</para>
+        /// <para>db.ColumnDistinctAsync&lt;int&gt;(db.From&lt;Person&gt;().Select(x => x.Age).Where(q => q.Age < 50))</para>
         /// </summary>
         public static Task<HashSet<T>> ColumnDistinctAsync<T>(this IDbConnection dbConn, ISqlExpression query, CancellationToken token = default(CancellationToken))
         {
