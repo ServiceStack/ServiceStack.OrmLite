@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override bool DoesSequenceExist(IDbCommand dbCmd, string sequenceName)
         {
-            var sql = "SELECT CASE WHEN EXISTS (SELECT 1 FROM SYS.SEQUENCES WHERE object_id=object_id({0})) THEN 1 ELSE 0 END"
+            var sql = "SELECT CASE WHEN EXISTS (SELECT 1 FROM sys.sequences WHERE object_id=object_id({0})) THEN 1 ELSE 0 END"
                 .SqlFmt(this, sequenceName);
 
             dbCmd.CommandText = sql;
