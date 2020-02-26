@@ -29,16 +29,6 @@ namespace ServiceStack.OrmLite.SqlServerTests
         }
 
         [Test]
-        public void Can_use_SqlServer2008DialectProvider()
-        {
-            var dbFactory = new OrmLiteConnectionFactory(ConnectionString, SqlServer2008Dialect.Provider);
-            using (var db = dbFactory.Open())
-            {
-                DbPocoTest(db);
-            }
-        }
-
-        [Test]
         public void Can_use_SqlServer2012DialectProvider()
         {
             var dbFactory = new OrmLiteConnectionFactory(ConnectionString, SqlServer2012Dialect.Provider);
@@ -72,6 +62,16 @@ namespace ServiceStack.OrmLite.SqlServerTests
         public void Can_use_SqlServer2017DialectProvider()
         {
             var dbFactory = new OrmLiteConnectionFactory(ConnectionString, SqlServer2017Dialect.Provider);
+            using (var db = dbFactory.Open())
+            {
+                DbPocoTest(db);
+            }
+        }
+
+        [Test]
+        public void Can_use_SqlServer2019DialectProvider()
+        {
+            var dbFactory = new OrmLiteConnectionFactory(ConnectionString, SqlServer2019Dialect.Provider);
             using (var db = dbFactory.Open())
             {
                 DbPocoTest(db);

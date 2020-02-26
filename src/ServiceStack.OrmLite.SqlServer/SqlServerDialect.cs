@@ -8,12 +8,6 @@ namespace ServiceStack.OrmLite
         public static SqlServerOrmLiteDialectProvider Instance => SqlServerOrmLiteDialectProvider.Instance;
     }
 
-    public static class SqlServer2008Dialect
-    {
-        public static IOrmLiteDialectProvider Provider => SqlServer2008OrmLiteDialectProvider.Instance;
-        public static SqlServer2008OrmLiteDialectProvider Instance => SqlServer2008OrmLiteDialectProvider.Instance;
-    }
-
     public static class SqlServer2012Dialect
     {
         public static IOrmLiteDialectProvider Provider => SqlServer2012OrmLiteDialectProvider.Instance;
@@ -37,4 +31,11 @@ namespace ServiceStack.OrmLite
         public static IOrmLiteDialectProvider Provider => SqlServer2017OrmLiteDialectProvider.Instance;
         public static SqlServer2017OrmLiteDialectProvider Instance => SqlServer2017OrmLiteDialectProvider.Instance;
     }
+
+    public static class SqlServer2019Dialect
+    {
+        public static IOrmLiteDialectProvider Provider => SqlServer2019OrmLiteDialectProvider.Instance;
+        public static SqlServer2019OrmLiteDialectProvider Instance => SqlServer2019OrmLiteDialectProvider.Instance;
+    }
+
 }

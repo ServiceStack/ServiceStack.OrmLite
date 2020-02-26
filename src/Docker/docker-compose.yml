@@ -116,8 +116,8 @@ services:
      ORACLE_ALLOW_REMOTE: "true"
      ORACLE_PASSWORD : "test"
  
-  MSSqlServer2017:
-    image: mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+  MSSqlServer2019:
+    image: mcr.microsoft.com/mssql/server:2019-latest
     networks:
       - servicestack_test
     ports:
@@ -126,5 +126,6 @@ services:
      MSSQL_PID: "Express"
      ACCEPT_EULA: "Y"
      SA_PASSWORD : "Test!tesT"
+     
 networks:
   servicestack_test:
