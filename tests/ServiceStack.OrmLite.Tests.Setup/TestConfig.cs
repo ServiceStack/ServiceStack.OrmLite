@@ -135,9 +135,8 @@ namespace ServiceStack.OrmLite.Tests
         public static int[] V2016Versions = Versions.Where(x => x == V2016).ToArray();
         public static int[] V2017Versions = Versions.Where(x => x == V2017).ToArray();
         public static int[] V2019Versions = Versions.Where(x => x == V2019).ToArray();
-        
 
-        public static string DefaultConnection => TestConfig.DialectConnections[Tuple.Create(Dialect.SqlServer2016, V2016)];
+        public static string DefaultConnection => TestConfig.DialectConnections[Tuple.Create(Dialect.SqlServer2019, V2019)];
 
         public static string VersionString(Dialect dialect, int version) => "SQL Server " + version;
         
