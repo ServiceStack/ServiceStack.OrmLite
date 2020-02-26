@@ -183,8 +183,7 @@ namespace ServiceStack.OrmLite.Tests
             }
 
             AddTestDataVersions(Dialect.Sqlite, SqliteDb.Versions);
-            AddTestDataVersions(Dialect.SqlServer, SqlServerDb.V2008Versions);
-            AddTestDataVersions(Dialect.SqlServer2008, SqlServerDb.V2008Versions);
+            AddTestDataVersions(Dialect.SqlServer, SqlServerDb.V2012Versions);
             AddTestDataVersions(Dialect.SqlServer2012, SqlServerDb.V2012Versions);
             AddTestDataVersions(Dialect.SqlServer2014, SqlServerDb.V2014Versions);
             AddTestDataVersions(Dialect.SqlServer2016, SqlServerDb.V2016Versions);

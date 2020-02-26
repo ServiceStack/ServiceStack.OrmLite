@@ -141,8 +141,6 @@ namespace ServiceStack.OrmLite.Tests
                     return dbFactory;
                 case Dialect.SqlServer:
                     return Init(SqlServerDb.DefaultConnection, SqlServerDialect.Provider);
-                case Dialect.SqlServer2008:
-                    return Init(SqlServerDb.DefaultConnection, SqlServer2008Dialect.Provider);
                 case Dialect.SqlServer2012:
                     return Init(SqlServerDb.DefaultConnection, SqlServer2012Dialect.Provider);
                 case Dialect.SqlServer2014:
@@ -151,6 +149,8 @@ namespace ServiceStack.OrmLite.Tests
                     return Init(SqlServerDb.DefaultConnection, SqlServer2016Dialect.Provider);
                 case Dialect.SqlServer2017:
                     return Init(SqlServerDb.DefaultConnection, SqlServer2017Dialect.Provider);
+                case Dialect.SqlServer2019:
+                    return Init(SqlServerDb.DefaultConnection, SqlServer2019Dialect.Provider);
                 case Dialect.MySql:
                     return Init(MySqlDb.DefaultConnection, MySqlDialect.Provider);
                 case Dialect.PostgreSql9:

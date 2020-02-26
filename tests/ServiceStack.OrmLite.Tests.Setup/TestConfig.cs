@@ -24,11 +24,11 @@ namespace ServiceStack.OrmLite.Tests
         Sqlite = 1,
         
         SqlServer = 1 << 1,
-        SqlServer2008 = 1 << 2,
-        SqlServer2012 = 1 << 3,
-        SqlServer2014 = 1 << 4,
-        SqlServer2016 = 1 << 5,
-        SqlServer2017 = 1 << 6,
+        SqlServer2012 = 1 << 2,
+        SqlServer2014 = 1 << 3,
+        SqlServer2016 = 1 << 4,
+        SqlServer2017 = 1 << 5,
+        SqlServer2019 = 1 << 6,
         
         PostgreSql9 = 1 << 8,
         PostgreSql10 = 1 << 9,
@@ -47,7 +47,7 @@ namespace ServiceStack.OrmLite.Tests
         // any versions
         AnyPostgreSql = PostgreSql9 | PostgreSql10 | PostgreSql11,
         AnyMySql = MySql | MySqlConnector, 
-        AnySqlServer = SqlServer | SqlServer2008 | SqlServer2012 | SqlServer2014 | SqlServer2016 | SqlServer2017,
+        AnySqlServer = SqlServer | SqlServer2012 | SqlServer2014 | SqlServer2016 | SqlServer2017 | SqlServer2019,
         AnyOracle = Oracle,
         
         // db groups
@@ -81,11 +81,11 @@ namespace ServiceStack.OrmLite.Tests
                 case Dialect.Sqlite:
                     return SqliteDb.VersionString(Version); 
                 case Dialect.SqlServer:
-                case Dialect.SqlServer2008:
                 case Dialect.SqlServer2012:
                 case Dialect.SqlServer2014:
                 case Dialect.SqlServer2016:
                 case Dialect.SqlServer2017:
+                case Dialect.SqlServer2019:
                     return SqlServerDb.VersionString(Dialect, Version); 
                 case Dialect.MySql:
                     return MySqlDb.VersionString(Version); 
@@ -124,27 +124,30 @@ namespace ServiceStack.OrmLite.Tests
     }
     public static class SqlServerDb
     {
-        public const int V2008 = 2008;
         public const int V2012 = 2012;
         public const int V2014 = 2014;
         public const int V2016 = 2016;
         public const int V2017 = 2017;
-        public static int[] Versions = TestConfig.EnvironmentVariableInto("MSSQL_VERSION", new[]{ V2008, V2012, V2014, V2016, V2017 });
-        public static int[] V2008Versions = Versions.Where(x => x == V2008).ToArray();
+        public static int V2019 = 2019;
+        public static int[] Versions = TestConfig.EnvironmentVariableInto("MSSQL_VERSION", new[]{ V2012, V2014, V2016, V2017, V2019 });
         public static int[] V2012Versions = Versions.Where(x => x == V2012).ToArray();
         public static int[] V2014Versions = Versions.Where(x => x == V2014).ToArray();
         public static int[] V2016Versions = Versions.Where(x => x == V2016).ToArray();
         public static int[] V2017Versions = Versions.Where(x => x == V2017).ToArray();
+        public static int[] V2019Versions = Versions.Where(x => x == V2019).ToArray();
+        
+
         public static string DefaultConnection => TestConfig.DialectConnections[Tuple.Create(Dialect.SqlServer2016, V2016)];
+
         public static string VersionString(Dialect dialect, int version) => "SQL Server " + version;
         
         public static Dictionary<Dialect, int> CompatibilityLevels = new Dictionary<Dialect, int> 
         {
-            [Dialect.SqlServer2008] = 100,
             [Dialect.SqlServer2012] = 110,
             [Dialect.SqlServer2014] = 120,
             [Dialect.SqlServer2016] = 130,
             [Dialect.SqlServer2017] = 140,
+            [Dialect.SqlServer2019] = 150,
         };
     }
     public static class MySqlDb
@@ -233,11 +236,11 @@ namespace ServiceStack.OrmLite.Tests
         {
             [Dialect.Sqlite] = SqliteDialect.Provider,
             [Dialect.SqlServer] = SqlServerDialect.Provider,
-            [Dialect.SqlServer2008] = SqlServer2008Dialect.Provider,
             [Dialect.SqlServer2012] = SqlServer2012Dialect.Provider,
             [Dialect.SqlServer2014] = SqlServer2014Dialect.Provider,
             [Dialect.SqlServer2016] = SqlServer2016Dialect.Provider,
             [Dialect.SqlServer2017] = SqlServer2017Dialect.Provider,
+            [Dialect.SqlServer2019] = SqlServer2019Dialect.Provider,
             [Dialect.PostgreSql9] = PostgreSqlDialect.Provider,
             [Dialect.PostgreSql10] = PostgreSqlDialect.Provider,
             [Dialect.PostgreSql11] = PostgreSqlDialect.Provider,
@@ -265,9 +268,9 @@ namespace ServiceStack.OrmLite.Tests
             [Tuple.Create(Dialect.Sqlite, SqliteDb.Memory)] = EnvironmentVariable(new[]{ "SQLITE_MEMORY_CONNECTION", "SQLITE_CONNECTION" }, ":memory:"),
             [Tuple.Create(Dialect.Sqlite, SqliteDb.File)] = EnvironmentVariable(new[]{ "SQLITE_FILE_CONNECTION", "SQLITE_CONNECTION" }, "~/App_Data/db.sqlite".MapAbsolutePath()),
 
-            [Tuple.Create(Dialect.SqlServer, SqlServerDb.V2008)] = EnvironmentVariable(new[]{ "MSSQL2008_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
-            [Tuple.Create(Dialect.SqlServer2016, SqlServerDb.V2016)] = EnvironmentVariable(new[]{ "MSSQL2016_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
+            [Tuple.Create(Dialect.SqlServer, SqlServerDb.V2012)] = EnvironmentVariable(new[]{ "MSSQL2012_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
             [Tuple.Create(Dialect.SqlServer2017, SqlServerDb.V2017)] = EnvironmentVariable(new[]{ "MSSQL2017_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
+            [Tuple.Create(Dialect.SqlServer2019, SqlServerDb.V2019)] = EnvironmentVariable(new[]{ "MSSQL2019_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
 
             [Tuple.Create(Dialect.PostgreSql9, PostgreSqlDb.V9)]  = EnvironmentVariable(new[]{ "PGSQL9_CONNECTION",  "PGSQL_CONNECTION" }, "Server=localhost;Port=48301;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
             [Tuple.Create(Dialect.PostgreSql10, PostgreSqlDb.V10)] = EnvironmentVariable(new[]{ "PGSQL10_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48302;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
@@ -293,12 +296,11 @@ namespace ServiceStack.OrmLite.Tests
         public static Dictionary<Dialect, int[]> DialectVersions = new Dictionary<Dialect, int[]> 
         {
             [Dialect.Sqlite] = SqliteDb.Versions,
-            [Dialect.SqlServer] = SqlServerDb.V2008Versions,
-            [Dialect.SqlServer2008] = SqlServerDb.V2008Versions,
             [Dialect.SqlServer2012] = SqlServerDb.V2012Versions,
             [Dialect.SqlServer2014] = SqlServerDb.V2014Versions,
             [Dialect.SqlServer2016] = SqlServerDb.V2016Versions,
             [Dialect.SqlServer2017] = SqlServerDb.V2017Versions,
+            [Dialect.SqlServer2019] = SqlServerDb.V2019Versions,
             [Dialect.PostgreSql9] = PostgreSqlDb.V9Versions,
             [Dialect.PostgreSql10] = PostgreSqlDb.V10Versions,
             [Dialect.PostgreSql11] = PostgreSqlDb.V11Versions,
@@ -439,11 +441,11 @@ namespace ServiceStack.OrmLite.Tests
                         }
                     }
                 }
-                SetupSqlServer(Dialect.SqlServer, SqlServerDb.V2008);
                 SetupSqlServer(Dialect.SqlServer2012, SqlServerDb.V2012);
                 SetupSqlServer(Dialect.SqlServer2014, SqlServerDb.V2014);
                 SetupSqlServer(Dialect.SqlServer2016, SqlServerDb.V2016);
                 SetupSqlServer(Dialect.SqlServer2017, SqlServerDb.V2017);
+                SetupSqlServer(Dialect.SqlServer2019, SqlServerDb.V2019);
             }
         }
         
