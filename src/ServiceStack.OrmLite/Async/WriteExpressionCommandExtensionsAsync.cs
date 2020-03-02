@@ -85,7 +85,7 @@ namespace ServiceStack.OrmLite
             Dictionary<string, object> updateFields,
             Expression<Func<T, bool>> where,
             Action<IDbCommand> commandFilter = null, 
-            CancellationToken token = default(CancellationToken))
+            CancellationToken token = default)
         {
             if (updateFields == null)
                 throw new ArgumentNullException(nameof(updateFields));
@@ -98,6 +98,35 @@ namespace ServiceStack.OrmLite
             commandFilter?.Invoke(cmd);
 
             return cmd.ExecNonQueryAsync(token);
+        }
+
+        public static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd,
+            Dictionary<string, object> updateFields,
+            Action<IDbCommand> commandFilter = null,
+            CancellationToken token = default)
+        {
+            var pkField = updateFields.GetRequiredPrimaryKeyValue<T>(out var idValue);
+            return dbCmd.UpdateOnlyAsync<T>(updateFields, "(" + pkField.FieldName + " = {0})", new[]{ idValue }, commandFilter, token);
+        }
+
+        public static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd,
+            Dictionary<string, object> updateFields,
+            string whereExpression,
+            object[] whereParams,
+            Action<IDbCommand> commandFilter = null,
+            CancellationToken token = default)
+        {
+            if (updateFields == null)
+                throw new ArgumentNullException(nameof(updateFields));
+
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateFields.FromObjectDictionary<T>());
+
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Where(whereExpression, whereParams);
+            q.PrepareUpdateStatement(dbCmd, updateFields);
+            commandFilter?.Invoke(dbCmd);
+
+            return dbCmd.ExecNonQueryAsync(token);
         }
 
         internal static Task<int> UpdateNonDefaultsAsync<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> obj, CancellationToken token)

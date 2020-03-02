@@ -538,6 +538,83 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public void Does_UpdateOnly_using_Object_Dictionary_containing_Id()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+                
+                var fields = new Dictionary<string, object> {
+                    [nameof(Person.Id)] = 1,
+                    [nameof(Person.FirstName)] = "JJ",
+                    [nameof(Person.LastName)] = null,
+                };
+
+                db.UpdateOnly<Person>(fields);
+
+                var sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Does.Contain("where (id = @0)"));
+                Assert.That(sql, Does.Contain("firstname=@firstname"));
+
+                var row = db.SingleById<Person>(1);
+                Assert.That(row.FirstName, Is.EqualTo("JJ"));
+                Assert.That(row.LastName, Is.Null);
+            }
+        }
+
+        [Test]
+        public async Task Does_UpdateOnly_using_Object_Dictionary_containing_Id_Async()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                await db.InsertAllAsync(Person.Rockstars);
+                
+                var fields = new Dictionary<string, object> {
+                    [nameof(Person.Id)] = 1,
+                    [nameof(Person.FirstName)] = "JJ",
+                    [nameof(Person.LastName)] = null,
+                };
+
+                await db.UpdateOnlyAsync<Person>(fields);
+
+                var sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Does.Contain("where (id = @0)"));
+                Assert.That(sql, Does.Contain("firstname=@firstname"));
+
+                var row = db.SingleById<Person>(1);
+                Assert.That(row.FirstName, Is.EqualTo("JJ"));
+                Assert.That(row.LastName, Is.Null);
+            }
+        }
+
+        [Test]
+        public void Does_UpdateOnly_using_Object_Dictionary_and_id()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Person>();
+                db.InsertAll(Person.Rockstars);
+                
+                var fields = new Dictionary<string, object> {
+                    [nameof(Person.FirstName)] = "JJ",
+                    [nameof(Person.LastName)] = null,
+                };
+
+                db.UpdateOnly<Person>(fields, p => p.LastName == "Hendrix");
+
+                var sql = db.GetLastSql().NormalizeSql();
+                Assert.That(sql, Does.Contain("where (lastname = @0)"));
+                Assert.That(sql, Does.Contain("firstname=@firstname"));
+
+                var row = db.SingleById<Person>(1);
+                Assert.That(row.FirstName, Is.EqualTo("JJ"));
+                Assert.That(row.LastName, Is.Null);
+            }
+        }
+
+        [Test]
         public async Task Does_UpdateOnly_using_Object_Dictionary_Async()
         {
             using (var db = OpenDbConnection())

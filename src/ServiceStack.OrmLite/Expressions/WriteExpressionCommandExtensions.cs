@@ -158,6 +158,60 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecNonQuery();
         }
 
+        internal static FieldDefinition GetRequiredPrimaryKeyValue<T>(this Dictionary<string, object> updateFields, out object idValue)
+        {
+            var pkField = typeof(T).GetModelDefinition().PrimaryKey;
+            if (pkField == null)
+                throw new NotSupportedException($"'{typeof(T).Name}' does not have a primary key");
+
+            idValue = updateFields.TryRemove(pkField.Name, out var nameValue)
+                ? nameValue
+                : pkField.Alias != null && updateFields.TryRemove(pkField.Alias, out var aliasValue)
+                    ? aliasValue
+                    : null;
+
+            if (idValue == null)
+            {
+                var caseInsensitiveMap =
+                    new Dictionary<string, object>(updateFields, StringComparer.InvariantCultureIgnoreCase);
+                idValue = caseInsensitiveMap.TryRemove(pkField.Name, out nameValue)
+                    ? nameValue
+                    : pkField.Alias != null && caseInsensitiveMap.TryRemove(pkField.Alias, out aliasValue)
+                        ? aliasValue
+                        : new NotSupportedException(
+                            $"UpdateOnly<{typeof(T).Name}> requires a '{pkField.Name}' Primary Key Value");
+            }
+
+            return pkField;
+        }
+
+        public static int UpdateOnly<T>(this IDbCommand dbCmd,
+            Dictionary<string, object> updateFields,
+            Action<IDbCommand> commandFilter = null)
+        {
+            var pkField = updateFields.GetRequiredPrimaryKeyValue<T>(out var idValue);
+            return dbCmd.UpdateOnly<T>(updateFields, "(" + pkField.FieldName + " = {0})", new[]{ idValue }, commandFilter);
+        }
+
+        public static int UpdateOnly<T>(this IDbCommand dbCmd,
+            Dictionary<string, object> updateFields,
+            string whereExpression,
+            object[] whereParams,
+            Action<IDbCommand> commandFilter = null)
+        {
+            if (updateFields == null)
+                throw new ArgumentNullException(nameof(updateFields));
+
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateFields.FromObjectDictionary<T>());
+
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Where(whereExpression, whereParams);
+            q.PrepareUpdateStatement(dbCmd, updateFields);
+            commandFilter?.Invoke(dbCmd);
+
+            return dbCmd.ExecNonQuery();
+        }
+
         public static int UpdateNonDefaults<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> where)
         {
             OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, item);

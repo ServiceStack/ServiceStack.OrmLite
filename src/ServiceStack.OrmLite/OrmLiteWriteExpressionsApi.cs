@@ -152,6 +152,28 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Updates all values from Object Dictionary, Requires Id which is used as a Primary Key Filter. E.g
+        /// 
+        ///   db.UpdateOnly&lt;Person&gt;(new Dictionary&lt;string,object&lt; { {"Id", 1}, {"FirstName", "JJ"} });
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("Id" = 1)
+        /// </summary>
+        public static int UpdateOnly<T>(this IDbConnection dbConn, Dictionary<string, object> updateFields, Action<IDbCommand> commandFilter = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly<T>(updateFields, commandFilter));
+        }
+
+        /// <summary>
+        /// Updates all values from Object Dictionary matching the where condition. E.g
+        /// 
+        ///   db.UpdateOnly&lt;Person&gt;(new Dictionary&lt;string,object&lt; { {"FirstName", "JJ"} }, "FirstName == {0}", new[] { "Jimi" });
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
+        /// </summary>
+        public static int UpdateOnly<T>(this IDbConnection dbConn, Dictionary<string, object> updateFields, string whereExpression, object[] whereParams, Action<IDbCommand> commandFilter = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly<T>(updateFields, whereExpression, whereParams, commandFilter));
+        }
+
+        /// <summary>
         /// Updates all non-default values set on item matching the where condition (if any). E.g
         /// 
         ///   db.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.FirstName == "Jimi");
