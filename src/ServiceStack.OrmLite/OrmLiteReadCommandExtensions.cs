@@ -328,7 +328,9 @@ namespace ServiceStack.OrmLite
         internal static Dictionary<string, object> AllFieldsMap<T>(this object anonType)
         {
             var ret = new Dictionary<string, object>();
-            anonType.ToObjectDictionary().ForEachParam(typeof(T).GetModelDefinition(), excludeDefaults: false, fn: (propName, columnName, value) => ret[propName] = value);
+            anonType.ToObjectDictionary()
+                .ForEachParam(typeof(T).GetModelDefinition(), excludeDefaults: false, fn: 
+                    (propName, columnName, value) => ret[propName] = value);
             return ret;
         }
 

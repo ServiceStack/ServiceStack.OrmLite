@@ -192,6 +192,16 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Delete rows using an Object Dictionary filters. E.g:
+        /// <para>db.Delete&lt;Person&gt;(new Dictionary&lt;string,object&gt; { ["FirstName"] = "Jimi", ["Age"] = 27 })</para>
+        /// </summary>
+        /// <returns>number of rows deleted</returns>
+        public static int Delete<T>(this IDbConnection dbConn, Dictionary<string, object> filters)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Delete<T>(filters));
+        }
+
+        /// <summary>
         /// Delete 1 row using all fields in the filter. E.g:
         /// <para>db.Delete(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 })</para>
         /// </summary>

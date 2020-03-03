@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 
@@ -193,6 +194,40 @@ namespace ServiceStack.OrmLite.Tests
 
             rows = db.SelectByIds<ModelWithFieldsOfNullableTypes>(rows.Map(x => x.Id));
             Assert.That(rows.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public void Can_delete_from_Object_Dictionary()
+        {
+            db.DropAndCreateTable<Rockstar>();
+            db.InsertAll(AutoQueryTests.SeedRockstars);
+
+            var club27 = db.Select<Rockstar>(x => x.Age == 27);
+            Assert.That(club27.Count, Is.GreaterThan(0));
+
+            db.Delete<Rockstar>(new Dictionary<string, object> {
+                ["Age"] = 27
+            });
+            
+            club27 = db.Select<Rockstar>(x => x.Age == 27);
+            Assert.That(club27.Count, Is.EqualTo(0));
+        }
+
+        [Test]
+        public async Task Can_delete_from_Object_Dictionary_Async()
+        {
+            db.DropAndCreateTable<Rockstar>();
+            await db.InsertAllAsync(AutoQueryTests.SeedRockstars);
+
+            var club27 = await db.SelectAsync<Rockstar>(x => x.Age == 27);
+            Assert.That(club27.Count, Is.GreaterThan(0));
+
+            await db.DeleteAsync<Rockstar>(new Dictionary<string, object> {
+                ["Age"] = 27
+            });
+            
+            club27 = await db.SelectAsync<Rockstar>(x => x.Age == 27);
+            Assert.That(club27.Count, Is.EqualTo(0));
         }
 
     }

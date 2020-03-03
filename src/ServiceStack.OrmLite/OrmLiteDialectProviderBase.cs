@@ -10,6 +10,7 @@
 //
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
@@ -1052,6 +1053,9 @@ namespace ServiceStack.OrmLite
 
         protected virtual object GetAnonValue(FieldDefinition fieldDef, object obj)
         {
+            if (obj is IDictionary d)
+                return d[fieldDef.Name];
+            
             var anonType = obj.GetType();
             var key = anonType.Name + "." + fieldDef.Name;
 
