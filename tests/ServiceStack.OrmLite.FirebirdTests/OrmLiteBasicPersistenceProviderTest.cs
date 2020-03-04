@@ -10,18 +10,13 @@ namespace ServiceStack.OrmLite.FirebirdTests
 	public class OrmLiteBasicPersistenceProviderTests
 		: OrmLiteTestBase
 	{
-		[SetUp]
-		public void SetUp()
-		{
-			
-		}
 
 		[Test]
 		public void Can_GetById_from_basic_persistence_provider()
 		{
-            using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
+			using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
 				//var basicProvider = new OrmLitePersistenceProvider(db);
 
@@ -40,7 +35,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
             using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
 				var basicProvider = new OrmLitePersistenceProvider(db);
 
@@ -63,7 +58,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
             using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
 				var basicProvider = new OrmLitePersistenceProvider(db);
 
@@ -86,7 +81,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 		{
             using (var db = new OrmLiteConnectionFactory(ConnectionString, FirebirdDialect.Provider).Open())
 			{
-				db.CreateTable<ModelWithFieldsOfDifferentTypes>(true);
+				db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
 
 				var basicProvider = new OrmLitePersistenceProvider(db);
 

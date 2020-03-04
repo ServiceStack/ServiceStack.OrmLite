@@ -681,6 +681,21 @@ namespace ServiceStack.OrmLite
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, 
                 insertFields: dialectProvider.GetNonDefaultValueInsertFields(obj));
 
+            return InsertInternal<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity);
+        }
+        
+        internal static long Insert<T>(this IDbCommand dbCmd, Dictionary<string,object> obj, Action<IDbCommand> commandFilter, bool selectIdentity = false)
+        {
+            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
+
+            var dialectProvider = dbCmd.GetDialectProvider();
+            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, insertFields: obj.Keys);
+            
+            return InsertInternal<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity);
+        }
+
+        private static long InsertInternal<T>(IOrmLiteDialectProvider dialectProvider, IDbCommand dbCmd, object obj, Action<IDbCommand> commandFilter, bool selectIdentity)
+        {
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
             commandFilter?.Invoke(dbCmd); //dbCmd.OnConflictInsert() needs to be applied before last insert id

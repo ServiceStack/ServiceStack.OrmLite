@@ -52,6 +52,24 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Insert 1 POCO, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
+        /// <para>var id = db.Insert(new Dictionary&lt;string,object&gt; { ["Id"] = 1, ["FirstName"] = "Jimi }, selectIdentity:true)</para>
+        /// </summary>
+        public static Task<long> InsertAsync<T>(this IDbConnection dbConn, Dictionary<string,object> obj, bool selectIdentity = false, CancellationToken token = default)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.InsertAsync<T>(obj, commandFilter: null, selectIdentity: selectIdentity, token));
+        }
+
+        /// <summary>
+        /// Insert 1 POCO, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
+        /// <para>var id = db.Insert(new Dictionary&lt;string,object&gt; { ["Id"] = 1, ["FirstName"] = "Jimi }, dbCmd => applyFilter(dbCmd))</para>
+        /// </summary>
+        public static Task<long> InsertAsync<T>(this IDbConnection dbConn, Action<IDbCommand> commandFilter, Dictionary<string,object> obj, bool selectIdentity = false, CancellationToken token = default)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.InsertAsync<T>(obj, commandFilter: commandFilter, selectIdentity: selectIdentity, token));
+        }
+
+        /// <summary>
         /// Insert 1 or more POCOs in a transaction. E.g:
         /// <para>db.InsertAsync(new Person { Id = 1, FirstName = "Tupac", LastName = "Shakur", Age = 25 },</para>
         /// <para>               new Person { Id = 2, FirstName = "Biggie", LastName = "Smalls", Age = 24 })</para>

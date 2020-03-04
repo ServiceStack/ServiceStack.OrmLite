@@ -258,10 +258,27 @@ namespace ServiceStack.OrmLite
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
                 insertFields: dialectProvider.GetNonDefaultValueInsertFields(obj));
 
+            return await InsertInternalAsync<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity, token);
+        }
+
+        internal static async Task<long> InsertAsync<T>(this IDbCommand dbCmd, Dictionary<string,object> obj, Action<IDbCommand> commandFilter, bool selectIdentity, CancellationToken token)
+        {
+            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
+
+            var dialectProvider = dbCmd.GetDialectProvider();
+
+            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, insertFields: obj.Keys);
+
+            return await InsertInternalAsync<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity, token);
+        }
+
+        private static async Task<long> InsertInternalAsync<T>(IOrmLiteDialectProvider dialectProvider,
+            IDbCommand dbCmd, object obj, Action<IDbCommand> commandFilter, bool selectIdentity, CancellationToken token)
+        {
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
             commandFilter?.Invoke(dbCmd);
-            
+
             if (dialectProvider.HasInsertReturnValues(ModelDefinition<T>.Definition))
             {
                 using (var reader = await dbCmd.ExecReaderAsync(dbCmd.CommandText, token))

@@ -464,6 +464,44 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(result.FullName, Is.EqualTo(userAuth.FirstName + " " + userAuth.LastName));
             }
         }
+
+        [Test]
+        public void Can_Insert_ObjectDictionary()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
+
+                var row = ModelWithFieldsOfDifferentTypes.Create(0);
+                var obj = row.ToObjectDictionary();
+
+                row.Id = (int) db.Insert<ModelWithFieldsOfDifferentTypes>(obj, selectIdentity:true);
+                Assert.That(row.Id, Is.Not.EqualTo(0));
+
+                var fromDb = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
+
+                ModelWithFieldsOfDifferentTypes.AssertIsEqual(fromDb, row);
+            }
+        }
+
+        [Test]
+        public async Task Can_Insert_ObjectDictionary_Async()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
+
+                var row = ModelWithFieldsOfDifferentTypes.Create(0);
+                var obj = row.ToObjectDictionary();
+
+                row.Id = (int) await db.InsertAsync<ModelWithFieldsOfDifferentTypes>(obj, selectIdentity:true);
+                Assert.That(row.Id, Is.Not.EqualTo(0));
+
+                var fromDb = await db.SingleByIdAsync<ModelWithFieldsOfDifferentTypes>(row.Id);
+
+                ModelWithFieldsOfDifferentTypes.AssertIsEqual(fromDb, row);
+            }
+        }
         
     }
 

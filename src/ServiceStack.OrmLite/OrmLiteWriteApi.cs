@@ -82,6 +82,24 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Insert 1 POCO, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
+        /// <para>var id = db.Insert(new Dictionary&lt;string,object&gt; { ["Id"] = 1, ["FirstName"] = "Jimi }, selectIdentity:true)</para>
+        /// </summary>
+        public static long Insert<T>(this IDbConnection dbConn, Dictionary<string,object> obj, bool selectIdentity = false)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Insert<T>(obj, commandFilter: null, selectIdentity: selectIdentity));
+        }
+
+        /// <summary>
+        /// Insert 1 POCO, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
+        /// <para>var id = db.Insert(new Dictionary&lt;string,object&gt; { ["Id"] = 1, ["FirstName"] = "Jimi }, dbCmd => applyFilter(dbCmd))</para>
+        /// </summary>
+        public static long Insert<T>(this IDbConnection dbConn, Action<IDbCommand> commandFilter, Dictionary<string,object> obj, bool selectIdentity = false)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Insert<T>(obj, commandFilter: commandFilter, selectIdentity: selectIdentity));
+        }
+
+        /// <summary>
         /// Insert 1 or more POCOs in a transaction using Table default values when defined. E.g:
         /// <para>db.InsertUsingDefaults(new Person { FirstName = "Tupac", LastName = "Shakur" },</para>
         /// <para>                       new Person { FirstName = "Biggie", LastName = "Smalls" })</para>
