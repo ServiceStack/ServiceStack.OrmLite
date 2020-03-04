@@ -9,7 +9,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
         private static class TestClass
         {
-            public static int StaticProperty { get { return 12; } }
+            public static int StaticProperty => 12;
             public static int staticField = 12;
         }
 
@@ -22,9 +22,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             public T Property { get; set; }
 
-            public T field;
+            public readonly T field;
 
-            public T Mehtod()
+            public T Method()
             {
                 return field;
             }
@@ -38,11 +38,11 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
         private struct TestStruct<T>
         {
-            public T Property { get { return field; } }
+            public T Property => field;
 
-            public T field;
+            public readonly T field;
 
-            public T Mehtod()
+            public T Method()
             {
                 return field;
             }
@@ -52,8 +52,6 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 field = value;
             }
         }
-
-        #region int
 
         [Test]
         public void Can_select_int_property_expression()
@@ -119,7 +117,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             using (var db = OpenDbConnection())
             {
-                var actual = db.Select<TestType>(q => q.IntColumn == tmp.Mehtod());
+                var actual = db.Select<TestType>(q => q.IntColumn == tmp.Method());
 
                 Assert.IsNotNull(actual);
                 Assert.AreEqual(1, actual.Count);
@@ -279,18 +277,13 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             using (var db = OpenDbConnection())
             {
-                var actual = db.Select<TestType>(q => q.IntColumn == tmp.Mehtod());
+                var actual = db.Select<TestType>(q => q.IntColumn == tmp.Method());
 
                 Assert.IsNotNull(actual);
                 Assert.AreEqual(1, actual.Count);
                 CollectionAssert.Contains(actual, expected);
             }
         }
-
-        #endregion int
-
-
-        #region bool
 
         [Test]
         public void Can_select_bool_property_expression()
@@ -356,7 +349,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
 
             using (var db = OpenDbConnection())
             {
-                var actual = db.Select<TestType>(q => q.BoolColumn == tmp.Mehtod());
+                var actual = db.Select<TestType>(q => q.BoolColumn == tmp.Method());
 
                 Assert.IsNotNull(actual);
                 Assert.Greater(actual.Count, 1);
@@ -407,7 +400,5 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 CollectionAssert.Contains(actual, expected);
             }
         }
-
-        #endregion bool
     }
 }

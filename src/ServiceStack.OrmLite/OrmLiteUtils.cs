@@ -13,6 +13,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -985,11 +986,13 @@ namespace ServiceStack.OrmLite
         [Obsolete("Use dialectProvider.GetNonDefaultValueInsertFields()")]
         public static List<string> GetNonDefaultValueInsertFields<T>(T obj)
         {
-            return OrmLiteConfig.DialectProvider.GetNonDefaultValueInsertFields(obj);
+            return OrmLiteConfig.DialectProvider.GetNonDefaultValueInsertFields<T>(obj);
         }
         
-        public static List<string> GetNonDefaultValueInsertFields<T>(this IOrmLiteDialectProvider dialectProvider, T obj)
+        public static List<string> GetNonDefaultValueInsertFields<T>(this IOrmLiteDialectProvider dialectProvider, object obj)
         {
+            Debug.Assert(typeof(T) != typeof(object), "T == object");
+            
             var insertFields = new List<string>();
             var modelDef = typeof(T).GetModelDefinition();
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)

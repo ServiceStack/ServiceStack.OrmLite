@@ -6,6 +6,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -256,7 +257,7 @@ namespace ServiceStack.OrmLite
             var dialectProvider = dbCmd.GetDialectProvider();
 
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
-                insertFields: dialectProvider.GetNonDefaultValueInsertFields(obj));
+                insertFields: dialectProvider.GetNonDefaultValueInsertFields<T>(obj));
 
             return await InsertInternalAsync<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity, token);
         }
@@ -266,8 +267,8 @@ namespace ServiceStack.OrmLite
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
-            obj.RemovePrimaryKeyWithDefaultValue<T>();
-            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, insertFields: obj.Keys);
+            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
+                insertFields: dialectProvider.GetNonDefaultValueInsertFields<T>(obj));
 
             return await InsertInternalAsync<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity, token);
         }
@@ -275,17 +276,16 @@ namespace ServiceStack.OrmLite
         private static async Task<long> InsertInternalAsync<T>(IOrmLiteDialectProvider dialectProvider,
             IDbCommand dbCmd, object obj, Action<IDbCommand> commandFilter, bool selectIdentity, CancellationToken token)
         {
+            Debug.Assert(typeof(T) != typeof(object), "T == object");
+
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
             commandFilter?.Invoke(dbCmd);
 
             if (dialectProvider.HasInsertReturnValues(ModelDefinition<T>.Definition))
             {
-                using (var reader = await dbCmd.ExecReaderAsync(dbCmd.CommandText, token))
-                using (reader)
-                {
-                    return reader.PopulateReturnValues<T>(dialectProvider, obj);
-                }
+                using var reader = await dbCmd.ExecReaderAsync(dbCmd.CommandText, token);
+                return reader.PopulateReturnValues<T>(dialectProvider, obj);
             }
 
             if (selectIdentity)

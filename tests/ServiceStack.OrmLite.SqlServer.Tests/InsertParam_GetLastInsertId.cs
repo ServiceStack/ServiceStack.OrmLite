@@ -54,7 +54,7 @@ namespace ServiceStack.OrmLite.SqlServerTests
                 var obj = new ServerGuid { Name = "foo" };
 
                 cmd.GetDialectProvider().PrepareParameterizedInsertStatement<ServerGuid>(cmd,
-                    insertFields: db.GetDialectProvider().GetNonDefaultValueInsertFields(obj));
+                    insertFields: db.GetDialectProvider().GetNonDefaultValueInsertFields<ServerGuid>(obj));
 
                 cmd.CommandText = cmd.CommandText.Replace("VALUES", "OUTPUT inserted.Id VALUES");
 

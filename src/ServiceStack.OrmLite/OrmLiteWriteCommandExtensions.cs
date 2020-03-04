@@ -686,7 +686,7 @@ namespace ServiceStack.OrmLite
 
             var dialectProvider = dbCmd.GetDialectProvider();
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, 
-                insertFields: dialectProvider.GetNonDefaultValueInsertFields(obj));
+                insertFields: dialectProvider.GetNonDefaultValueInsertFields<T>(obj));
 
             return InsertInternal<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity);
         }
@@ -696,12 +696,12 @@ namespace ServiceStack.OrmLite
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
-            obj.RemovePrimaryKeyWithDefaultValue<T>();
-            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, insertFields: obj.Keys);
+            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, 
+                insertFields: dialectProvider.GetNonDefaultValueInsertFields<T>(obj));
             
             return InsertInternal<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity);
         }
-
+        
         internal static void RemovePrimaryKeyWithDefaultValue<T>(this Dictionary<string, object> obj)
         {
             var pkField = typeof(T).GetModelDefinition().PrimaryKey;
