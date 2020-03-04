@@ -327,8 +327,17 @@ namespace ServiceStack.OrmLite
         }
 
         private const int NotFound = -1;
-        public static T PopulateWithSqlReader<T>(this T objWithProperties, 
-            IOrmLiteDialectProvider dialectProvider, IDataReader reader, 
+
+        public static T PopulateWithSqlReader<T>(this T objWithProperties,
+            IOrmLiteDialectProvider dialectProvider, IDataReader reader,
+            Tuple<FieldDefinition, int, IOrmLiteConverter>[] indexCache, object[] values)
+        {
+            dialectProvider.PopulateObjectWithSqlReader<T>(objWithProperties, reader, indexCache, values);
+            return objWithProperties;
+        }
+        
+        public static void PopulateObjectWithSqlReader<T>(this IOrmLiteDialectProvider dialectProvider, 
+            object objWithProperties, IDataReader reader, 
             Tuple<FieldDefinition, int, IOrmLiteConverter>[] indexCache, object[] values)
         {
             values = PopulateValues(reader, values, dialectProvider);
@@ -378,8 +387,6 @@ namespace ServiceStack.OrmLite
             }
             
             OrmLiteConfig.PopulatedObjectFilter?.Invoke(objWithProperties);
-
-            return objWithProperties;
         }
 
         internal static object[] PopulateValues(this IDataReader reader, object[] values, IOrmLiteDialectProvider dialectProvider)
@@ -689,9 +696,24 @@ namespace ServiceStack.OrmLite
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
+            obj.RemovePrimaryKeyWithDefaultValue<T>();
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, insertFields: obj.Keys);
             
             return InsertInternal<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity);
+        }
+
+        internal static void RemovePrimaryKeyWithDefaultValue<T>(this Dictionary<string, object> obj)
+        {
+            var pkField = typeof(T).GetModelDefinition().PrimaryKey;
+            if (pkField != null && (pkField.AutoIncrement || pkField.AutoId))
+            {
+                // Don't insert Primary Key with Default Value
+                if (obj.TryGetValue(pkField.Name, out var idValue) &&
+                    idValue != null && !idValue.Equals(pkField.DefaultValue))
+                {
+                    obj.Remove(pkField.Name);
+                }
+            }
         }
 
         private static long InsertInternal<T>(IOrmLiteDialectProvider dialectProvider, IDbCommand dbCmd, object obj, Action<IDbCommand> commandFilter, bool selectIdentity)
@@ -705,7 +727,7 @@ namespace ServiceStack.OrmLite
                 using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
                 using (reader)
                 {
-                    return reader.PopulateReturnValues(dialectProvider, obj);
+                    return reader.PopulateReturnValues<T>(dialectProvider, obj);
                 }
             }
 
@@ -719,14 +741,14 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecNonQuery();
         }
 
-        internal static long PopulateReturnValues<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, T obj)
+        internal static long PopulateReturnValues<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, object obj)
         {
             if (reader.Read())
             {
                 var modelDef = ModelDefinition<T>.Definition;
                 var values = new object[reader.FieldCount];
                 var indexCache = reader.GetIndexFieldsCache(modelDef, dialectProvider);
-                obj.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
+                dialectProvider.PopulateObjectWithSqlReader<T>(obj, reader, indexCache, values);
                 if ((modelDef.PrimaryKey != null) && (modelDef.PrimaryKey.AutoIncrement || modelDef.PrimaryKey.ReturnOnInsert))
                 {
                     var id = modelDef.GetPrimaryKey(obj);

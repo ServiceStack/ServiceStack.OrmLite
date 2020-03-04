@@ -266,7 +266,7 @@ namespace ServiceStack.OrmLite
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
-
+            obj.RemovePrimaryKeyWithDefaultValue<T>();
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, insertFields: obj.Keys);
 
             return await InsertInternalAsync<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity, token);
@@ -284,7 +284,7 @@ namespace ServiceStack.OrmLite
                 using (var reader = await dbCmd.ExecReaderAsync(dbCmd.CommandText, token))
                 using (reader)
                 {
-                    return reader.PopulateReturnValues(dialectProvider, obj);
+                    return reader.PopulateReturnValues<T>(dialectProvider, obj);
                 }
             }
 

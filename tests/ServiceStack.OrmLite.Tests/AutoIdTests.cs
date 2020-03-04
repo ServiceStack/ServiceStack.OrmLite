@@ -80,7 +80,7 @@ namespace ServiceStack.OrmLite.Tests
                 var guidB = new GuidAutoId { Name = "B" }.ToObjectDictionary();
 
                 db.Insert<GuidAutoId>(guidA);
-                db.Insert<GuidAutoId>(guidB);
+                db.Insert<GuidAutoId>(guidB, selectIdentity:true);
                 
                 Assert.That(guidA[nameof(GuidAutoId.Id)], Is.Not.EqualTo(Guid.Empty));
                 Assert.That(guidB[nameof(GuidAutoId.Id)], Is.Not.EqualTo(Guid.Empty));
@@ -105,7 +105,7 @@ namespace ServiceStack.OrmLite.Tests
                 var guidB = new GuidAutoId { Name = "B" }.ToObjectDictionary();
 
                 await db.InsertAsync<GuidAutoId>(guidA);
-                await db.InsertAsync<GuidAutoId>(guidB);
+                await db.InsertAsync<GuidAutoId>(guidB, selectIdentity:true);
                 
                 Assert.That(guidA[nameof(GuidAutoId.Id)], Is.Not.EqualTo(Guid.Empty));
                 Assert.That(guidB[nameof(GuidAutoId.Id)], Is.Not.EqualTo(Guid.Empty));
