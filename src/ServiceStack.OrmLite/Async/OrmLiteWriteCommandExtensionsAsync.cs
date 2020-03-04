@@ -378,7 +378,7 @@ namespace ServiceStack.OrmLite
 
                     var newId = await dbCmd.InsertAsync(obj, commandFilter: null, selectIdentity: true, token:token);
                     var safeId = dbCmd.GetDialectProvider().FromDbValue(newId, modelDef.PrimaryKey.FieldType);
-                    modelDef.PrimaryKey.SetValueFn(obj, safeId);
+                    modelDef.PrimaryKey.SetValue(obj, safeId);
                     id = newId;
                 }
                 else
@@ -386,14 +386,14 @@ namespace ServiceStack.OrmLite
                     await dbCmd.InsertAsync(obj, commandFilter:null, selectIdentity:false, token:token);
                 }
 
-                modelDef.RowVersion?.SetValueFn(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token));
+                modelDef.RowVersion?.SetValue(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token));
 
                 return true;
             }
 
             await dbCmd.UpdateAsync(obj, token, null);
 
-            modelDef.RowVersion?.SetValueFn(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token));
+            modelDef.RowVersion?.SetValue(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token));
 
             return false;
         }
@@ -440,7 +440,7 @@ namespace ServiceStack.OrmLite
                         {
                             var newId = await dbCmd.InsertAsync(row, commandFilter:null, selectIdentity:true, token:token);
                             var safeId = dialectProvider.FromDbValue(newId, modelDef.PrimaryKey.FieldType);
-                            modelDef.PrimaryKey.SetValueFn(row, safeId);
+                            modelDef.PrimaryKey.SetValue(row, safeId);
                             id = newId;
                         }
                         else
@@ -451,7 +451,7 @@ namespace ServiceStack.OrmLite
                         rowsAdded++;
                     }
 
-                    modelDef.RowVersion?.SetValueFn(row, await dbCmd.GetRowVersionAsync(modelDef, id, token));
+                    modelDef.RowVersion?.SetValue(row, await dbCmd.GetRowVersionAsync(modelDef, id, token));
                 }
 
                 dbTrans?.Commit();
@@ -481,7 +481,7 @@ namespace ServiceStack.OrmLite
                     {
                         foreach (var oRef in results)
                         {
-                            refField.SetValueFn(oRef, pkValue);
+                            refField.SetValue(oRef, pkValue);
                         }
 
                         await dbCmd.CreateTypedApi(refType).SaveAllAsync(results, token);
@@ -501,7 +501,7 @@ namespace ServiceStack.OrmLite
 
                     if (result != null)
                     {
-                        refField?.SetValueFn(result, pkValue);
+                        refField?.SetValue(result, pkValue);
 
                         await dbCmd.CreateTypedApi(refType).SaveAsync(result, token);
 
@@ -509,7 +509,7 @@ namespace ServiceStack.OrmLite
                         if (refSelf != null)
                         {
                             var refPkValue = refModelDef.PrimaryKey.GetValue(result);
-                            refSelf.SetValueFn(instance, refPkValue);
+                            refSelf.SetValue(instance, refPkValue);
                             await dbCmd.UpdateAsync(instance, token, null);
                         }
                     }
@@ -533,7 +533,7 @@ namespace ServiceStack.OrmLite
                     ? modelDef.GetRefFieldDef(refModelDef, refType)
                     : modelDef.GetRefFieldDefIfExists(refModelDef);
 
-                refField?.SetValueFn(oRef, pkValue);
+                refField?.SetValue(oRef, pkValue);
             }
 
             await dbCmd.SaveAllAsync(refs, token);
@@ -544,7 +544,7 @@ namespace ServiceStack.OrmLite
                 if (refSelf != null)
                 {
                     var refPkValue = refModelDef.PrimaryKey.GetValue(oRef);
-                    refSelf.SetValueFn(instance, refPkValue);
+                    refSelf.SetValue(instance, refPkValue);
                     await dbCmd.UpdateAsync(instance, token, null);
                 }
             }

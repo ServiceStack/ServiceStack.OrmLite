@@ -350,7 +350,7 @@ namespace ServiceStack.OrmLite
                         if (useValue != null)
                             value = useValue;
 
-                        fieldDef.SetValueFn(objWithProperties, value);
+                        fieldDef.SetValue(objWithProperties, value);
                     }
                     else
                     {
@@ -362,12 +362,12 @@ namespace ServiceStack.OrmLite
                             var useValue = dbNullFilter?.Invoke(fieldDef);
                             if (useValue != null)
                                 value = useValue;
-                            fieldDef.SetValueFn(objWithProperties, value);
+                            fieldDef.SetValue(objWithProperties, value);
                         }
                         else
                         {
                             var fieldValue = converter.FromDbValue(fieldDef.FieldType, value);
-                            fieldDef.SetValueFn(objWithProperties, fieldValue);
+                            fieldDef.SetValue(objWithProperties, fieldValue);
                         }
                     }
                 }
@@ -871,7 +871,7 @@ namespace ServiceStack.OrmLite
                     var dialectProvider = dbCmd.GetDialectProvider();
                     var newId = dbCmd.Insert(obj, commandFilter:null, selectIdentity: true);
                     var safeId = dialectProvider.FromDbValue(newId, modelDef.PrimaryKey.FieldType);
-                    modelDef.PrimaryKey.SetValueFn(obj, safeId);
+                    modelDef.PrimaryKey.SetValue(obj, safeId);
                     id = newId;
                 }
                 else
@@ -879,7 +879,7 @@ namespace ServiceStack.OrmLite
                     dbCmd.Insert(obj, commandFilter:null);
                 }
 
-                modelDef.RowVersion?.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
+                modelDef.RowVersion?.SetValue(obj, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
 
                 return true;
             }
@@ -888,7 +888,7 @@ namespace ServiceStack.OrmLite
             if (rowsUpdated == 0 && Env.StrictMode)
                 throw new OptimisticConcurrencyException("No rows were inserted or updated");
 
-            modelDef.RowVersion?.SetValueFn(obj, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
+            modelDef.RowVersion?.SetValue(obj, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
 
             return false;
         }
@@ -934,7 +934,7 @@ namespace ServiceStack.OrmLite
                             var dialectProvider = dbCmd.GetDialectProvider();
                             var newId = dbCmd.Insert(row, commandFilter: null, selectIdentity: true);
                             var safeId = dialectProvider.FromDbValue(newId, modelDef.PrimaryKey.FieldType);
-                            modelDef.PrimaryKey.SetValueFn(row, safeId);
+                            modelDef.PrimaryKey.SetValue(row, safeId);
                             id = newId;
                         }
                         else
@@ -945,7 +945,7 @@ namespace ServiceStack.OrmLite
                         rowsAdded++;
                     }
 
-                    modelDef.RowVersion?.SetValueFn(row, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
+                    modelDef.RowVersion?.SetValue(row, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
                 }
 
                 dbTrans?.Commit();
@@ -983,7 +983,7 @@ namespace ServiceStack.OrmLite
                     {
                         foreach (var oRef in results)
                         {
-                            refField.SetValueFn(oRef, pkValue);
+                            refField.SetValue(oRef, pkValue);
                         }
 
                         dbCmd.CreateTypedApi(refType).SaveAll(results);
@@ -1004,7 +1004,7 @@ namespace ServiceStack.OrmLite
                     if (result != null)
                     {
                         if (refField != null && refSelf == null) 
-                            refField.SetValueFn(result, pkValue);
+                            refField.SetValue(result, pkValue);
 
                         dbCmd.CreateTypedApi(refType).Save(result);
 
@@ -1012,7 +1012,7 @@ namespace ServiceStack.OrmLite
                         if (refSelf != null)
                         {
                             var refPkValue = refModelDef.PrimaryKey.GetValue(result);
-                            refSelf.SetValueFn(instance, refPkValue);
+                            refSelf.SetValue(instance, refPkValue);
                             updateInstance = true;
                         }
                     }
@@ -1041,7 +1041,7 @@ namespace ServiceStack.OrmLite
                     ? modelDef.GetRefFieldDef(refModelDef, refType)
                     : modelDef.GetRefFieldDefIfExists(refModelDef);
 
-                refField?.SetValueFn(oRef, pkValue);
+                refField?.SetValue(oRef, pkValue);
             }
 
             dbCmd.SaveAll(refs);
@@ -1052,7 +1052,7 @@ namespace ServiceStack.OrmLite
                 if (refSelf != null)
                 {
                     var refPkValue = refModelDef.PrimaryKey.GetValue(oRef);
-                    refSelf.SetValueFn(instance, refPkValue);
+                    refSelf.SetValue(instance, refPkValue);
                     dbCmd.Update(instance);
                 }
             }

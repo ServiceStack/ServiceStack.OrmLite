@@ -937,7 +937,7 @@ namespace ServiceStack.OrmLite
                 if (map.TryGetValue(pkValue, out refValues))
                 {
                     var castResults = untypedApi.Cast(refValues);
-                    fieldDef.SetValueFn(result, castResults);
+                    fieldDef.SetValue(result, castResults);
                 }
             }
         }
@@ -956,7 +956,7 @@ namespace ServiceStack.OrmLite
                 var fkValue = refSelf.GetValue(result);
                 if (fkValue != null && map.TryGetValue(fkValue, out var childResult))
                 {
-                    fieldDef.SetValueFn(result, childResult);
+                    fieldDef.SetValue(result, childResult);
                 }
             }
         }
@@ -977,7 +977,7 @@ namespace ServiceStack.OrmLite
                 var pkValue = modelDef.PrimaryKey.GetValue(result);
                 if (map.TryGetValue(pkValue, out var childResult))
                 {
-                    fieldDef.SetValueFn(result, childResult);
+                    fieldDef.SetValue(result, childResult);
                 }
             }
         }

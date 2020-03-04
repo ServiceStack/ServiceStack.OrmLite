@@ -10,6 +10,7 @@
 //
 
 using System;
+using System.Collections;
 using System.Reflection;
 
 namespace ServiceStack.OrmLite
@@ -68,9 +69,23 @@ namespace ServiceStack.OrmLite
 
         public SetMemberDelegate SetValueFn { get; set; }
 
-        public object GetValue(object onInstance)
+        public object GetValue(object instance)
         {
-            return this.GetValueFn?.Invoke(onInstance);
+            if (instance is IDictionary d)
+                return d[Name];
+            
+            return this.GetValueFn?.Invoke(instance);
+        }
+
+        public void SetValue(object instance, object value)
+        {
+            if (instance is IDictionary d)
+            {
+                d[Name] = value;
+                return;
+            }
+            
+            this.SetValueFn?.Invoke(instance, value);
         }
 
         public string GetQuotedName(IOrmLiteDialectProvider dialectProvider)
