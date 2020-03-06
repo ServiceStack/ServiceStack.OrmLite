@@ -173,13 +173,14 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecNonQuery();
         }
 
-        internal static FieldDefinition GetRequiredPrimaryKeyValue<T>(this Dictionary<string, object> updateFields, out object idValue)
+        internal static string GetUpdateOnlyWhereExpression<T>(this Dictionary<string, object> updateFields, out object[] args)
         {
-            var pkField = typeof(T).GetModelDefinition().PrimaryKey;
+            var modelDef = typeof(T).GetModelDefinition();
+            var pkField = modelDef.PrimaryKey;
             if (pkField == null)
                 throw new NotSupportedException($"'{typeof(T).Name}' does not have a primary key");
 
-            idValue = updateFields.TryRemove(pkField.Name, out var nameValue)
+            var idValue = updateFields.TryRemove(pkField.Name, out var nameValue)
                 ? nameValue
                 : pkField.Alias != null && updateFields.TryRemove(pkField.Alias, out var aliasValue)
                     ? aliasValue
@@ -197,15 +198,22 @@ namespace ServiceStack.OrmLite
                             $"UpdateOnly<{typeof(T).Name}> requires a '{pkField.Name}' Primary Key Value");
             }
 
-            return pkField;
+            if (modelDef.RowVersion == null || !updateFields.TryGetValue(modelDef.RowVersion.Name, out var rowVersion))
+            {
+                args = new[] { idValue };
+                return "(" + pkField.FieldName + " = {0})";
+            }
+
+            args = new[] { idValue, rowVersion };
+            return "(" + pkField.FieldName + " = {0} AND " + modelDef.RowVersion.Name + " = {1})";
         }
 
         public static int UpdateOnly<T>(this IDbCommand dbCmd,
             Dictionary<string, object> updateFields,
             Action<IDbCommand> commandFilter = null)
         {
-            var pkField = updateFields.GetRequiredPrimaryKeyValue<T>(out var idValue);
-            return dbCmd.UpdateOnly<T>(updateFields, "(" + pkField.FieldName + " = {0})", new[]{ idValue }, commandFilter);
+            var whereExpr = updateFields.GetUpdateOnlyWhereExpression<T>(out var exprArgs);
+            return dbCmd.UpdateOnly<T>(updateFields, whereExpr, exprArgs, commandFilter);
         }
 
         public static int UpdateOnly<T>(this IDbCommand dbCmd,

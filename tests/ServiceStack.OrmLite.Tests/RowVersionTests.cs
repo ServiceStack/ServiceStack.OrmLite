@@ -292,11 +292,39 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public async Task Can_update_with_current_rowversion_base_ObjectDictionary_Async()
         {
+            var rowId = await db.InsertAsync(new ModelWithRowVersionBase { Text = "Two", MoreData = "Fred" }, selectIdentity: true);
+            var row = await db.SingleByIdAsync<ModelWithRowVersionBase>(rowId);
+
+            row.Text = "Three";
+            await db.UpdateAsync<ModelWithRowVersionBase>(row.ToObjectDictionary());
+
+            var actual = await db.SingleByIdAsync<ModelWithRowVersionBase>(rowId);
+            Assert.That(actual.Text, Is.EqualTo("Three"));
+            Assert.That(actual.RowVersion, Is.Not.EqualTo(row.RowVersion));
+        }
+
+        [Test]
+        public void Can_update_with_current_rowversion_base_UpdateOnly_ObjectDictionary()
+        {
             var rowId = db.Insert(new ModelWithRowVersionBase { Text = "Two", MoreData = "Fred" }, selectIdentity: true);
             var row = db.SingleById<ModelWithRowVersionBase>(rowId);
 
             row.Text = "Three";
-            await db.UpdateAsync<ModelWithRowVersionBase>(row.ToObjectDictionary());
+            db.UpdateOnly<ModelWithRowVersionBase>(row.ToObjectDictionary());
+
+            var actual = db.SingleById<ModelWithRowVersionBase>(rowId);
+            Assert.That(actual.Text, Is.EqualTo("Three"));
+            Assert.That(actual.RowVersion, Is.Not.EqualTo(row.RowVersion));
+        }
+
+        [Test]
+        public async Task Can_update_with_current_rowversion_base_UpdateOnly_ObjectDictionary_Async()
+        {
+            var rowId = await db.InsertAsync(new ModelWithRowVersionBase { Text = "Two", MoreData = "Fred" }, selectIdentity: true);
+            var row = await db.SingleByIdAsync<ModelWithRowVersionBase>(rowId);
+
+            row.Text = "Three";
+            await db.UpdateOnlyAsync<ModelWithRowVersionBase>(row.ToObjectDictionary());
 
             var actual = await db.SingleByIdAsync<ModelWithRowVersionBase>(rowId);
             Assert.That(actual.Text, Is.EqualTo("Three"));
