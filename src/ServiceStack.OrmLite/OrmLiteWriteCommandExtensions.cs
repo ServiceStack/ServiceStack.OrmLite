@@ -442,6 +442,7 @@ namespace ServiceStack.OrmLite
 
         internal static int UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs, Action<IDbCommand> commandFilter = null)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
             IDbTransaction dbTrans = null;
 
             int count = 0;
@@ -535,6 +536,8 @@ namespace ServiceStack.OrmLite
 
         private static int DeleteAll<T>(IDbCommand dbCmd, IEnumerable<T> objs, Func<object,Dictionary<string,object>> fieldValuesFn=null)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             IDbTransaction dbTrans = null;
 
             int count = 0;
@@ -602,6 +605,8 @@ namespace ServiceStack.OrmLite
 
         internal static string DeleteByIdSql<T>(this IDbCommand dbCmd, object id, ulong rowVersion)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             var modelDef = ModelDefinition<T>.Definition;
             var dialectProvider = dbCmd.GetDialectProvider();
 
@@ -634,6 +639,8 @@ namespace ServiceStack.OrmLite
 
         internal static int DeleteByIds<T>(this IDbCommand dbCmd, IEnumerable idValues)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             var sqlIn = dbCmd.SetIdsInSqlParams(idValues);
             if (string.IsNullOrEmpty(sqlIn))
                 return 0;
@@ -654,6 +661,8 @@ namespace ServiceStack.OrmLite
 
         internal static int DeleteAll<T>(this IDbCommand dbCmd)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             return DeleteAll(dbCmd, typeof(T));
         }
 
@@ -670,6 +679,8 @@ namespace ServiceStack.OrmLite
 
         internal static int Delete<T>(this IDbCommand dbCmd, string sql, object anonType = null)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false, sql: ref sql);
             return dbCmd.ExecuteSql(dbCmd.GetDialectProvider().ToDeleteStatement(typeof(T), sql));
         }
@@ -682,6 +693,8 @@ namespace ServiceStack.OrmLite
         
         internal static long Insert<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter, bool selectIdentity = false)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
@@ -693,6 +706,8 @@ namespace ServiceStack.OrmLite
         
         internal static long Insert<T>(this IDbCommand dbCmd, Dictionary<string,object> obj, Action<IDbCommand> commandFilter, bool selectIdentity = false)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();

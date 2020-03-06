@@ -12,6 +12,8 @@ namespace ServiceStack.OrmLite
     {
         internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields, Action<IDbCommand> commandFilter, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             dbCmd.UpdateOnlySql(model, onlyFields);
             commandFilter?.Invoke(dbCmd);
             return dbCmd.ExecNonQueryAsync(token);
@@ -23,6 +25,8 @@ namespace ServiceStack.OrmLite
             Action<IDbCommand> commandFilter,
             CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             if (onlyFields == null)
                 throw new ArgumentNullException(nameof(onlyFields));
 
@@ -38,6 +42,8 @@ namespace ServiceStack.OrmLite
             Action<IDbCommand> commandFilter,
             CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             if (onlyFields == null)
                 throw new ArgumentNullException(nameof(onlyFields));
 
@@ -53,6 +59,8 @@ namespace ServiceStack.OrmLite
             Action<IDbCommand> commandFilter,
             CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             var cmd = dbCmd.InitUpdateOnly(updateFields, q);
             commandFilter?.Invoke(cmd);
             return cmd.ExecNonQueryAsync(token);
@@ -65,6 +73,8 @@ namespace ServiceStack.OrmLite
             Action<IDbCommand> commandFilter,
             CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             var cmd = dbCmd.InitUpdateOnly(updateFields, whereExpression, sqlParams);
             commandFilter?.Invoke(cmd);
             return cmd.ExecNonQueryAsync(token);
@@ -76,6 +86,8 @@ namespace ServiceStack.OrmLite
             Action<IDbCommand> commandFilter,
             CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             var cmd = dbCmd.InitUpdateAdd(updateFields, q);
             commandFilter?.Invoke(cmd);
             return cmd.ExecNonQueryAsync(token);
@@ -87,6 +99,8 @@ namespace ServiceStack.OrmLite
             Action<IDbCommand> commandFilter = null, 
             CancellationToken token = default)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             if (updateFields == null)
                 throw new ArgumentNullException(nameof(updateFields));
 
@@ -105,6 +119,8 @@ namespace ServiceStack.OrmLite
             Action<IDbCommand> commandFilter = null,
             CancellationToken token = default)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+
             var pkField = updateFields.GetRequiredPrimaryKeyValue<T>(out var idValue);
             return dbCmd.UpdateOnlyAsync<T>(updateFields, "(" + pkField.FieldName + " = {0})", new[]{ idValue }, commandFilter, token);
         }
@@ -116,6 +132,8 @@ namespace ServiceStack.OrmLite
             Action<IDbCommand> commandFilter = null,
             CancellationToken token = default)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             if (updateFields == null)
                 throw new ArgumentNullException(nameof(updateFields));
 
@@ -131,6 +149,8 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> UpdateNonDefaultsAsync<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> obj, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+
             OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, item);
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
@@ -141,6 +161,8 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> expression, Action<IDbCommand> commandFilter, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+
             OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, item);
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
@@ -152,6 +174,8 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where, Action<IDbCommand> commandFilter, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+
             OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateOnly);
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
@@ -165,6 +189,8 @@ namespace ServiceStack.OrmLite
 
         internal static Task InsertOnlyAsync<T>(this IDbCommand dbCmd, T obj, string[] onlyFields, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var sql = dbCmd.GetDialectProvider().ToInsertRowStatement(dbCmd, obj, onlyFields);
@@ -173,6 +199,8 @@ namespace ServiceStack.OrmLite
 
         public static Task<int> InsertOnlyAsync<T>(this IDbCommand dbCmd, Expression<Func<T>> insertFields, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+
             return dbCmd.InitInsertOnly(insertFields).ExecNonQueryAsync(token);
         }
 

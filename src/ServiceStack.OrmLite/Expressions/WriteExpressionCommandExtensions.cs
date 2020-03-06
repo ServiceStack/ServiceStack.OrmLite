@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
@@ -15,6 +16,8 @@ namespace ServiceStack.OrmLite
             SqlExpression<T> onlyFields,
             Action<IDbCommand> commandFilter = null)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             UpdateOnlySql(dbCmd, model, onlyFields);
             commandFilter?.Invoke(dbCmd);
             return dbCmd.ExecNonQuery();
@@ -22,6 +25,8 @@ namespace ServiceStack.OrmLite
 
         internal static void UpdateOnlySql<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, model);
 
             var fieldsToUpdate = onlyFields.UpdateFields.Count == 0
@@ -41,6 +46,8 @@ namespace ServiceStack.OrmLite
             Expression<Func<T, bool>> where = null,
             Action<IDbCommand> commandFilter = null)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             if (onlyFields == null)
                 throw new ArgumentNullException(nameof(onlyFields));
 
@@ -55,6 +62,8 @@ namespace ServiceStack.OrmLite
             Expression<Func<T, bool>> where = null,
             Action<IDbCommand> commandFilter = null)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             if (onlyFields == null)
                 throw new ArgumentNullException(nameof(onlyFields));
 
@@ -69,6 +78,8 @@ namespace ServiceStack.OrmLite
             SqlExpression<T> q,
             Action<IDbCommand> commandFilter = null)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             var cmd = dbCmd.InitUpdateOnly(updateFields, q);
             commandFilter?.Invoke(cmd);
             return cmd.ExecNonQuery();
@@ -95,6 +106,8 @@ namespace ServiceStack.OrmLite
             IEnumerable<IDbDataParameter> dbParams,
             Action<IDbCommand> commandFilter = null)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             var cmd = dbCmd.InitUpdateOnly(updateFields, whereExpression, dbParams);
             commandFilter?.Invoke(cmd);
             return cmd.ExecNonQuery();
@@ -145,6 +158,8 @@ namespace ServiceStack.OrmLite
             Expression<Func<T, bool>> where,
             Action<IDbCommand> commandFilter = null)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             if (updateFields == null)
                 throw new ArgumentNullException(nameof(updateFields));
 
@@ -235,32 +250,58 @@ namespace ServiceStack.OrmLite
 
         public static int Update<T>(this IDbCommand dbCmd, object updateOnly, Expression<Func<T, bool>> where = null, Action<IDbCommand> commandFilter = null)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateOnly);
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             var whereSql = q.Where(where).WhereExpression;
             q.CopyParamsTo(dbCmd);
-            dbCmd.PrepareUpdateAnonSql<T>(dbCmd.GetDialectProvider(), updateOnly, whereSql);
+            var hadRowVersion = dbCmd.PrepareUpdateAnonSql<T>(dbCmd.GetDialectProvider(), updateOnly, whereSql);
 
-            commandFilter?.Invoke(dbCmd);
-            return dbCmd.ExecNonQuery();
+            return dbCmd.UpdateAndVerify<T>(commandFilter, hadRowVersion);
         }
 
-        internal static void PrepareUpdateAnonSql<T>(this IDbCommand dbCmd, IOrmLiteDialectProvider dialectProvider, object updateOnly, string whereSql)
+        internal static bool PrepareUpdateAnonSql<T>(this IDbCommand dbCmd, IOrmLiteDialectProvider dialectProvider, object updateOnly, string whereSql)
         {
             var sql = StringBuilderCache.Allocate();
             var modelDef = typeof(T).GetModelDefinition();
             var fields = modelDef.FieldDefinitionsArray;
 
-            foreach (var setField in updateOnly.GetType().GetPublicProperties())
+            var fieldDefs = new List<FieldDefinition>();
+            if (updateOnly is IDictionary d)
             {
-                var fieldDef = fields.FirstOrDefault(x => string.Equals(x.Name, setField.Name, StringComparison.OrdinalIgnoreCase));
-                if (fieldDef == null || fieldDef.ShouldSkipUpdate()) continue;
-
-                var value = setField.CreateGetter()(updateOnly);
-                if (string.IsNullOrEmpty(whereSql) && (fieldDef.IsPrimaryKey || fieldDef.AutoIncrement))
+                foreach (DictionaryEntry entry in d)
                 {
-                    whereSql = $"WHERE {dialectProvider.GetQuotedColumnName(fieldDef.FieldName)} = {dialectProvider.AddQueryParam(dbCmd, value, fieldDef).ParameterName}";
+                    var fieldDef = modelDef.GetFieldDefinition((string)entry.Key);
+                    if (fieldDef == null || fieldDef.ShouldSkipUpdate()) 
+                        continue;
+                    fieldDefs.Add(fieldDef);
+                }
+            }
+            else
+            {
+                foreach (var setField in updateOnly.GetType().GetPublicProperties())
+                {
+                    var fieldDef = fields.FirstOrDefault(x =>
+                        string.Equals(x.Name, setField.Name, StringComparison.OrdinalIgnoreCase));
+                    if (fieldDef == null || fieldDef.ShouldSkipUpdate())
+                        continue;
+                    fieldDefs.Add(fieldDef);
+                }
+            }
+            
+            var hadRowVersion = false;
+            foreach (var fieldDef in fieldDefs)
+            {
+                var value = fieldDef.GetValue(updateOnly);
+                if (fieldDef.IsPrimaryKey || fieldDef.AutoIncrement || fieldDef.IsRowVersion)
+                {
+                    if (fieldDef.IsRowVersion)
+                        hadRowVersion = true;
+
+                    whereSql += string.IsNullOrEmpty(whereSql) ? "WHERE " : " AND ";
+                    whereSql += $"{dialectProvider.GetQuotedColumnName(fieldDef.FieldName)} = {dialectProvider.AddQueryParam(dbCmd, value, fieldDef).ParameterName}";
                     continue;
                 }
 
@@ -275,6 +316,8 @@ namespace ServiceStack.OrmLite
 
             dbCmd.CommandText = $"UPDATE {dialectProvider.GetQuotedTableName(modelDef)} " +
                                 $"SET {StringBuilderCache.ReturnAndFree(sql)} {whereSql}";
+
+            return hadRowVersion;
         }
 
         public static long InsertOnly<T>(this IDbCommand dbCmd, T obj, string[] onlyFields, bool selectIdentity)

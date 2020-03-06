@@ -59,6 +59,8 @@ namespace ServiceStack.OrmLite
 
         internal static async Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T obj, CancellationToken token, Action<IDbCommand> commandFilter)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
@@ -82,6 +84,8 @@ namespace ServiceStack.OrmLite
 
         internal static async Task<int> UpdateAllAsync<T>(this IDbCommand dbCmd, IEnumerable<T> objs, Action<IDbCommand> commandFilter, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             IDbTransaction dbTrans = null;
 
             int count = 0;
@@ -133,6 +137,8 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, object anonType, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             var dialectProvider = dbCmd.GetDialectProvider();
 
             var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(
@@ -145,6 +151,8 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> DeleteNonDefaultsAsync<T>(this IDbCommand dbCmd, T filter, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             var dialectProvider = dbCmd.GetDialectProvider();
             var hadRowVersion = dialectProvider.PrepareParameterizedDeleteStatement<T>(
                 dbCmd, filter.AllFieldsMap<T>().NonDefaultsOnly());
@@ -172,6 +180,8 @@ namespace ServiceStack.OrmLite
 
         private static async Task<int> DeleteAllAsync<T>(IDbCommand dbCmd, IEnumerable<T> objs, Func<object, Dictionary<string, object>> fieldValuesFn = null, CancellationToken token=default(CancellationToken))
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             IDbTransaction dbTrans = null;
 
             int count = 0;
@@ -203,12 +213,16 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> DeleteByIdAsync<T>(this IDbCommand dbCmd, object id, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             var sql = dbCmd.DeleteByIdSql<T>(id);
             return dbCmd.ExecuteSqlAsync(sql, token);
         }
 
         internal static async Task DeleteByIdAsync<T>(this IDbCommand dbCmd, object id, ulong rowVersion, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             var sql = dbCmd.DeleteByIdSql<T>(id, rowVersion);
 
             var rowsAffected = await dbCmd.ExecuteSqlAsync(sql, token);
@@ -240,6 +254,8 @@ namespace ServiceStack.OrmLite
 
         internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             if (anonType != null) dbCmd.SetParameters<T>(anonType, excludeDefaults: false, sql: ref sql);
             return dbCmd.ExecuteSqlAsync(dbCmd.GetDialectProvider().ToDeleteStatement(typeof(T), sql), token);
         }
@@ -252,6 +268,8 @@ namespace ServiceStack.OrmLite
 
         internal static async Task<long> InsertAsync<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter, bool selectIdentity, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
@@ -264,6 +282,8 @@ namespace ServiceStack.OrmLite
 
         internal static async Task<long> InsertAsync<T>(this IDbCommand dbCmd, Dictionary<string,object> obj, Action<IDbCommand> commandFilter, bool selectIdentity, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
@@ -276,7 +296,7 @@ namespace ServiceStack.OrmLite
         private static async Task<long> InsertInternalAsync<T>(IOrmLiteDialectProvider dialectProvider,
             IDbCommand dbCmd, object obj, Action<IDbCommand> commandFilter, bool selectIdentity, CancellationToken token)
         {
-            Debug.Assert(typeof(T) != typeof(object), "T == object");
+            OrmLiteUtils.AssertNotAnonType<T>();
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
@@ -335,6 +355,8 @@ namespace ServiceStack.OrmLite
 
         internal static async Task InsertAllAsync<T>(this IDbCommand dbCmd, IEnumerable<T> objs, Action<IDbCommand> commandFilter, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             IDbTransaction dbTrans = null;
 
             if (dbCmd.Transaction == null)
@@ -367,6 +389,8 @@ namespace ServiceStack.OrmLite
 
         internal static async Task<bool> SaveAsync<T>(this IDbCommand dbCmd, T obj, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             var modelDef = typeof(T).GetModelDefinition();
             var id = modelDef.GetPrimaryKey(obj);
             var existingRow = id != null ? await dbCmd.SingleByIdAsync<T>(id, token) : default(T);
@@ -400,6 +424,8 @@ namespace ServiceStack.OrmLite
 
         internal static async Task<int> SaveAllAsync<T>(this IDbCommand dbCmd, IEnumerable<T> objs, CancellationToken token)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             var saveRows = objs.ToList();
 
             var firstRow = saveRows.FirstOrDefault();

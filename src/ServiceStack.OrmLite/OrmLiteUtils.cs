@@ -989,9 +989,18 @@ namespace ServiceStack.OrmLite
             return OrmLiteConfig.DialectProvider.GetNonDefaultValueInsertFields<T>(obj);
         }
         
+        public static void AssertNotAnonType<T>()
+        {
+            if (typeof(T) == typeof(object))
+                throw new ArgumentException("T generic argument should be a Table but was typeof(object)");
+            
+            if (typeof(T) == typeof(Dictionary<string,object>))
+                throw new ArgumentException("T generic argument should be a Table but was typeof(Dictionary<string,object>)");
+        }
+
         public static List<string> GetNonDefaultValueInsertFields<T>(this IOrmLiteDialectProvider dialectProvider, object obj)
         {
-            Debug.Assert(typeof(T) != typeof(object), "T == object");
+            AssertNotAnonType<T>();
             
             var insertFields = new List<string>();
             var modelDef = typeof(T).GetModelDefinition();
