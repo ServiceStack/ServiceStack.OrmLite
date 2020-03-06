@@ -417,6 +417,18 @@ namespace ServiceStack.OrmLite
 
         internal static int Update<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter = null)
         {
+            return dbCmd.UpdateInternal<T>(obj, commandFilter);
+        }
+
+        internal static int Update<T>(this IDbCommand dbCmd, Dictionary<string,object> obj, Action<IDbCommand> commandFilter = null)
+        {
+            return dbCmd.UpdateInternal<T>(obj, commandFilter);
+        }
+
+        internal static int UpdateInternal<T>(this IDbCommand dbCmd, object obj, Action<IDbCommand> commandFilter = null)
+        {
+            OrmLiteUtils.AssertNotAnonType<T>();
+            
             OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
@@ -426,6 +438,11 @@ namespace ServiceStack.OrmLite
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
+            return dbCmd.UpdateAndVerify<T>(commandFilter, hadRowVersion);
+        }
+
+        internal static int UpdateAndVerify<T>(this IDbCommand dbCmd, Action<IDbCommand> commandFilter, bool hadRowVersion)
+        {
             commandFilter?.Invoke(dbCmd);
             var rowsUpdated = dbCmd.ExecNonQuery();
 
@@ -443,6 +460,7 @@ namespace ServiceStack.OrmLite
         internal static int UpdateAll<T>(this IDbCommand dbCmd, IEnumerable<T> objs, Action<IDbCommand> commandFilter = null)
         {
             OrmLiteUtils.AssertNotAnonType<T>();
+
             IDbTransaction dbTrans = null;
 
             int count = 0;
