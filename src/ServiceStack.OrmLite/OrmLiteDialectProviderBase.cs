@@ -980,11 +980,7 @@ namespace ServiceStack.OrmLite
 
         protected virtual object GetValue<T>(FieldDefinition fieldDef, object obj)
         {
-            var value = obj is T
-               ? fieldDef.GetValue(obj)
-               : GetAnonValue(fieldDef, obj);
-
-            return GetFieldValue(fieldDef, value);
+            return GetFieldValue(fieldDef, fieldDef.GetValue(obj));
         }
 
         public object GetFieldValue(FieldDefinition fieldDef, object value)
@@ -1032,9 +1028,7 @@ namespace ServiceStack.OrmLite
 
         protected virtual object GetQuotedValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
         {
-            var value = obj is T
-                ? fieldDef.GetValue(obj)
-                : GetAnonValue(fieldDef, obj);
+            var value = fieldDef.GetValue(obj);
 
             if (value == null)
                 return DBNull.Value;
@@ -1046,25 +1040,6 @@ namespace ServiceStack.OrmLite
                 return DBNull.Value;
 
             return unquotedVal;
-        }
-
-        static readonly ConcurrentDictionary<string, GetMemberDelegate> anonValueFnMap =
-            new ConcurrentDictionary<string, GetMemberDelegate>();
-
-        protected virtual object GetAnonValue(FieldDefinition fieldDef, object obj)
-        {
-            if (obj is IDictionary d)
-                return d[fieldDef.Name];
-            
-            var anonType = obj.GetType();
-            var key = anonType.Name + "." + fieldDef.Name;
-
-            var factoryFn = (Func<string, GetMemberDelegate>)(_ =>
-                anonType.GetProperty(fieldDef.Name).CreateGetter());
-
-            var getterFn = anonValueFnMap.GetOrAdd(key, factoryFn);
-
-            return getterFn(obj);
         }
 
         public virtual void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields = null)
