@@ -934,7 +934,7 @@ namespace ServiceStack.OrmLite
                     dbCmd.Insert(obj, commandFilter:null);
                 }
 
-                modelDef.RowVersion?.SetValue(obj, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
+                modelDef.RowVersion?.SetValue(obj, dbCmd.GetRowVersion(modelDef, id));
 
                 return true;
             }
@@ -943,7 +943,7 @@ namespace ServiceStack.OrmLite
             if (rowsUpdated == 0 && Env.StrictMode)
                 throw new OptimisticConcurrencyException("No rows were inserted or updated");
 
-            modelDef.RowVersion?.SetValue(obj, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
+            modelDef.RowVersion?.SetValue(obj, dbCmd.GetRowVersion(modelDef, id));
 
             return false;
         }
@@ -1000,7 +1000,7 @@ namespace ServiceStack.OrmLite
                         rowsAdded++;
                     }
 
-                    modelDef.RowVersion?.SetValue(row, dbCmd.GetRowVersion(modelDef, id, modelDef.RowVersion.ColumnType));
+                    modelDef.RowVersion?.SetValue(row, dbCmd.GetRowVersion(modelDef, id));
                 }
 
                 dbTrans?.Commit();
@@ -1121,12 +1121,12 @@ namespace ServiceStack.OrmLite
             dbCmd.ExecuteNonQuery();
         }
 
-        internal static object GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id, Type asType)
+        internal static object GetRowVersion(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
         {
             var sql = RowVersionSql(dbCmd, modelDef, id);
             var to = dbCmd.GetDialectProvider().FromDbRowVersion(modelDef.RowVersion.FieldType, dbCmd.Scalar<object>(sql));
 
-            if (to is ulong u && asType == typeof(byte[]))
+            if (to is ulong u && modelDef.RowVersion.ColumnType == typeof(byte[]))
                 return BitConverter.GetBytes(u);
 
             return to;

@@ -424,6 +424,16 @@ namespace ServiceStack.OrmLite
             dbConn.Exec(dbCmd => dbCmd.SaveReferences(instance, refs.ToArray()));
         }
 
+        public static object GetRowVersion<T>(this IDbConnection dbConn, object id)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetRowVersion(typeof(T).GetModelDefinition(), id));
+        }
+
+        public static object GetRowVersion(this IDbConnection dbConn, Type modelType, object id)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetRowVersion(modelType.GetModelDefinition(), id));
+        }
+
         // Procedures
         public static void ExecuteProcedure<T>(this IDbConnection dbConn, T obj)
         {

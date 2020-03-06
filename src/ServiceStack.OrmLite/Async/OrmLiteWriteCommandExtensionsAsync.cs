@@ -606,7 +606,12 @@ namespace ServiceStack.OrmLite
         {
             var sql = dbCmd.RowVersionSql(modelDef, id);
             var rowVersion = await dbCmd.ScalarAsync<object>(sql, token);
-            return dbCmd.GetDialectProvider().FromDbRowVersion(modelDef.RowVersion.FieldType, rowVersion);
+            var to = dbCmd.GetDialectProvider().FromDbRowVersion(modelDef.RowVersion.FieldType, rowVersion);
+
+            if (to is ulong u && modelDef.RowVersion.ColumnType == typeof(byte[]))
+                return BitConverter.GetBytes(u);
+            
+            return to;
         }
     }
 }
