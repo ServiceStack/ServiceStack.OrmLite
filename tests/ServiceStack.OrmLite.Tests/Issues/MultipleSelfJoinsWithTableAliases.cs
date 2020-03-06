@@ -209,7 +209,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public void Can_use_CustomSql_with_TableAlias_and_GroupBy()
         {
             var customFmt = "";
-            if (Dialect == Dialect.SqlServer || Dialect == Dialect.SqlServer2012)
+            if ((Dialect & Dialect.AnySqlServer) == Dialect)
                 customFmt = "CONCAT(LEFT({0}, 1),LEFT({1},1))";
             else if (Dialect == Dialect.Sqlite)
                 customFmt = "substr({0}, 1, 1) || substr({1}, 1, 1)";
@@ -228,10 +228,16 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.TableAlias("buyer"))
                     // .GroupBy<Sale, ContactIssue>((s,c) => new object[] { s.Id, "BuyerFirstName", "BuyerLastName" })
                     // .GroupBy<Sale, ContactIssue>((s,c) => new  { s.Id, BuyerFirstName = "BuyerFirstName", BuyerLastName = "BuyerLastName" })
-                    .GroupBy<Sale, ContactIssue>((s,c) => new  { s.Id, BuyerFirstName = Sql.TableAlias(c.FirstName, "buyer"), BuyerLastName = Sql.TableAlias(c.LastName, "buyer") })
+                    .GroupBy<Sale, ContactIssue>((s,c) => new {
+                        s.Id,
+                        BuyerFirstName = Sql.TableAlias(c.FirstName, "buyer"),
+                        BuyerLastName = Sql.TableAlias(c.LastName, "buyer"),
+                        SellerFirstName = Sql.TableAlias(c.FirstName, "seller"),
+                        SellerLastName = Sql.TableAlias(c.LastName, "seller"),
+                    })
                     .Select<Sale, ContactIssue>((s, c) => new
                     {
-                        s,
+                        s.Id,
                         BuyerFirstName = Sql.TableAlias(c.FirstName, "buyer"),
                         BuyerLastName = Sql.TableAlias(c.LastName, "buyer"),
                         BuyerInitials = Sql.Custom(customFmt.Fmt("buyer.FirstName", "buyer.LastName")),

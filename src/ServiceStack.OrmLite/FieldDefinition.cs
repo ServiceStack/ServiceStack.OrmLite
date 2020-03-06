@@ -71,8 +71,15 @@ namespace ServiceStack.OrmLite
 
         public object GetValue(object instance)
         {
-            if (instance is IDictionary d)
-                return d[Name];
+            var type = instance.GetType(); 
+            if (PropertyInfo.DeclaringType?.IsAssignableFrom(type) != true)
+            {
+                if (instance is IDictionary d)
+                    return d[Name];
+
+                var accessor = TypeProperties.Get(type).GetAccessor(Name);
+                return accessor?.PublicGetter(instance);
+            }
             
             return this.GetValueFn?.Invoke(instance);
         }
