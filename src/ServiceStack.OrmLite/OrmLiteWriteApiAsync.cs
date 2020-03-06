@@ -403,12 +403,12 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.SaveReferencesAsync(token, instance, refs.ToArray()));
         }
 
-        public static Task GetRowVersionAsync<T>(this IDbConnection dbConn, object id, CancellationToken token = default)
+        public static Task<object> GetRowVersionAsync<T>(this IDbConnection dbConn, object id, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.GetRowVersionAsync(typeof(T).GetModelDefinition(), id, token));
         }
 
-        public static Task GetRowVersionAsync(this IDbConnection dbConn, Type modelType, object id, CancellationToken token = default)
+        public static Task<object>  GetRowVersionAsync(this IDbConnection dbConn, Type modelType, object id, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.GetRowVersionAsync(modelType.GetModelDefinition(), id, token));
         }
