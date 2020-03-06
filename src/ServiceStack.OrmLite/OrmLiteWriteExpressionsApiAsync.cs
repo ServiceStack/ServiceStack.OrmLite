@@ -223,22 +223,6 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Updates the entity using the primary key as the filter
-        /// </summary>
-        public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, object entity, CancellationToken token=default)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync<T>(entity, where:null, commandFilter:null, token));
-        }
-
-        /// <summary>
-        /// Updates the entity using the primary key as the filter
-        /// </summary>
-        public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, Dictionary<string,object> entity, CancellationToken token=default)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync<T>(entity, where:null, commandFilter:null, token));
-        }
-
-        /// <summary>
         /// Updates all matching fields populated on anonymousType that matches where condition (if any). E.g:
         /// 
         ///   db.Update&lt;Person&gt;(new { FirstName = "JJ" }, p => p.LastName == "Hendrix");

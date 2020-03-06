@@ -287,6 +287,10 @@ namespace ServiceStack.OrmLite.Tests
             var actual = db.SingleById<ModelWithRowVersionBase>(rowId);
             Assert.That(actual.Text, Is.EqualTo("Three"));
             Assert.That(actual.RowVersion, Is.Not.EqualTo(row.RowVersion));
+
+            row.Text = "Four";
+            Assert.Throws<OptimisticConcurrencyException>(() =>
+                db.Update<ModelWithRowVersionBase>(row.ToObjectDictionary()));
         }
 
         [Test]
@@ -301,6 +305,10 @@ namespace ServiceStack.OrmLite.Tests
             var actual = await db.SingleByIdAsync<ModelWithRowVersionBase>(rowId);
             Assert.That(actual.Text, Is.EqualTo("Three"));
             Assert.That(actual.RowVersion, Is.Not.EqualTo(row.RowVersion));
+
+            row.Text = "Four";
+            Assert.ThrowsAsync<OptimisticConcurrencyException>(async () =>
+                await db.UpdateAsync<ModelWithRowVersionBase>(row.ToObjectDictionary()));
         }
 
         [Test]
@@ -315,6 +323,10 @@ namespace ServiceStack.OrmLite.Tests
             var actual = db.SingleById<ModelWithRowVersionBase>(rowId);
             Assert.That(actual.Text, Is.EqualTo("Three"));
             Assert.That(actual.RowVersion, Is.Not.EqualTo(row.RowVersion));
+
+            row.Text = "Four";
+            Assert.Throws<OptimisticConcurrencyException>(() =>
+                db.UpdateOnly<ModelWithRowVersionBase>(row.ToObjectDictionary()));
         }
 
         [Test]
@@ -329,6 +341,10 @@ namespace ServiceStack.OrmLite.Tests
             var actual = await db.SingleByIdAsync<ModelWithRowVersionBase>(rowId);
             Assert.That(actual.Text, Is.EqualTo("Three"));
             Assert.That(actual.RowVersion, Is.Not.EqualTo(row.RowVersion));
+
+            row.Text = "Four";
+            Assert.ThrowsAsync<OptimisticConcurrencyException>(async () =>
+                await db.UpdateOnlyAsync<ModelWithRowVersionBase>(row.ToObjectDictionary()));
         }
 
         [Test]

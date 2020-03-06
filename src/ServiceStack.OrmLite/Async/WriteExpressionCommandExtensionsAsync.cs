@@ -121,8 +121,9 @@ namespace ServiceStack.OrmLite
         {
             OrmLiteUtils.AssertNotAnonType<T>();
 
-            var whereExpr = updateFields.GetUpdateOnlyWhereExpression<T>(out var exprArgs);
-            return dbCmd.UpdateOnlyAsync<T>(updateFields, whereExpr, exprArgs, commandFilter, token);
+            var whereExpr = dbCmd.GetDialectProvider().GetUpdateOnlyWhereExpression<T>(updateFields, out var exprArgs);
+            dbCmd.PrepareUpdateOnly<T>(updateFields, whereExpr, exprArgs);
+            return dbCmd.UpdateAndVerifyAsync<T>(commandFilter, updateFields.ContainsKey(ModelDefinition.RowVersionName), token);
         }
 
         public static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd,

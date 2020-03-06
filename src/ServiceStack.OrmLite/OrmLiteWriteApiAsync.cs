@@ -152,6 +152,15 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Updates 1 POCO. All fields are updated except for the PrimaryKey which is used as the identity selector. E.g:
+        /// <para>db.Update(new Dictionary&lt;string,object&gt; { ["Id"] = 1, ["FirstName"] = "Jimi", ["Age"] = 27 })</para>
+        /// </summary>
+        public static Task<int> UpdateAsync<T>(this IDbConnection dbConn, Dictionary<string,object> obj, Action<IDbCommand> commandFilter = null, CancellationToken token = default)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateAsync<T>(obj, token, commandFilter));
+        }
+
+        /// <summary>
         /// Updates 1 or more POCOs in a transaction. E.g:
         /// <para>db.Update(new Person { Id = 1, FirstName = "Tupac", LastName = "Shakur", Age = 25 },</para>
         /// <para>new Person { Id = 2, FirstName = "Biggie", LastName = "Smalls", Age = 24 })</para>

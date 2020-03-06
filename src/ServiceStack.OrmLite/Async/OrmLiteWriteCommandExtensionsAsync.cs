@@ -57,7 +57,17 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
-        internal static async Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T obj, CancellationToken token, Action<IDbCommand> commandFilter)
+        internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, T obj, CancellationToken token, Action<IDbCommand> commandFilter = null)
+        {
+            return dbCmd.UpdateInternalAsync<T>(obj, token, commandFilter);
+        }
+
+        internal static Task<int> UpdateAsync<T>(this IDbCommand dbCmd, Dictionary<string,object> obj, CancellationToken token, Action<IDbCommand> commandFilter = null)
+        {
+            return dbCmd.UpdateInternalAsync<T>(obj, token, commandFilter);
+        }
+
+        internal static async Task<int> UpdateInternalAsync<T>(this IDbCommand dbCmd, object obj, CancellationToken token, Action<IDbCommand> commandFilter=null)
         {
             OrmLiteUtils.AssertNotAnonType<T>();
             
@@ -69,11 +79,18 @@ namespace ServiceStack.OrmLite
                 return 0;
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
-            commandFilter?.Invoke(dbCmd);
 
-            var rowsUpdated = await dialectProvider.ExecuteNonQueryAsync(dbCmd, token);
+            return await dbCmd.UpdateAndVerifyAsync<T>(commandFilter, hadRowVersion, token);
+        }
+
+        internal static async Task<int> UpdateAndVerifyAsync<T>(this IDbCommand dbCmd, Action<IDbCommand> commandFilter, bool hadRowVersion, CancellationToken token)
+        {
+            commandFilter?.Invoke(dbCmd);
+            var rowsUpdated = await dbCmd.ExecNonQueryAsync(token);
+
             if (hadRowVersion && rowsUpdated == 0)
                 throw new OptimisticConcurrencyException();
+
             return rowsUpdated;
         }
 

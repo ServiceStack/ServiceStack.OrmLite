@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Text;
+using ServiceStack.Data;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -173,7 +174,8 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecNonQuery();
         }
 
-        internal static string GetUpdateOnlyWhereExpression<T>(this Dictionary<string, object> updateFields, out object[] args)
+        internal static string GetUpdateOnlyWhereExpression<T>(this IOrmLiteDialectProvider dialectProvider, 
+            Dictionary<string, object> updateFields, out object[] args)
         {
             var modelDef = typeof(T).GetModelDefinition();
             var pkField = modelDef.PrimaryKey;
@@ -198,22 +200,23 @@ namespace ServiceStack.OrmLite
                             $"UpdateOnly<{typeof(T).Name}> requires a '{pkField.Name}' Primary Key Value");
             }
 
-            if (modelDef.RowVersion == null || !updateFields.TryGetValue(modelDef.RowVersion.Name, out var rowVersion))
+            if (modelDef.RowVersion == null || !updateFields.TryGetValue(ModelDefinition.RowVersionName, out var rowVersion))
             {
                 args = new[] { idValue };
                 return "(" + pkField.FieldName + " = {0})";
             }
 
             args = new[] { idValue, rowVersion };
-            return "(" + pkField.FieldName + " = {0} AND " + modelDef.RowVersion.Name + " = {1})";
+            return "(" + dialectProvider.GetQuotedColumnName(pkField.FieldName) + " = {0} AND " + dialectProvider.GetRowVersionColumn(modelDef.RowVersion) + " = {1})";
         }
 
         public static int UpdateOnly<T>(this IDbCommand dbCmd,
             Dictionary<string, object> updateFields,
             Action<IDbCommand> commandFilter = null)
         {
-            var whereExpr = updateFields.GetUpdateOnlyWhereExpression<T>(out var exprArgs);
-            return dbCmd.UpdateOnly<T>(updateFields, whereExpr, exprArgs, commandFilter);
+            var whereExpr = dbCmd.GetDialectProvider().GetUpdateOnlyWhereExpression<T>(updateFields, out var exprArgs);
+            dbCmd.PrepareUpdateOnly<T>(updateFields, whereExpr, exprArgs);
+            return dbCmd.UpdateAndVerify<T>(commandFilter, updateFields.ContainsKey(ModelDefinition.RowVersionName));
         }
 
         public static int UpdateOnly<T>(this IDbCommand dbCmd,
@@ -221,6 +224,14 @@ namespace ServiceStack.OrmLite
             string whereExpression,
             object[] whereParams,
             Action<IDbCommand> commandFilter = null)
+        {
+            dbCmd.PrepareUpdateOnly<T>(updateFields, whereExpression, whereParams);
+            commandFilter?.Invoke(dbCmd);
+
+            return dbCmd.ExecNonQuery();
+        }
+
+        internal static void PrepareUpdateOnly<T>(this IDbCommand dbCmd, Dictionary<string, object> updateFields, string whereExpression, object[] whereParams)
         {
             if (updateFields == null)
                 throw new ArgumentNullException(nameof(updateFields));
@@ -230,9 +241,6 @@ namespace ServiceStack.OrmLite
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(whereExpression, whereParams);
             q.PrepareUpdateStatement(dbCmd, updateFields);
-            commandFilter?.Invoke(dbCmd);
-
-            return dbCmd.ExecNonQuery();
         }
 
         public static int UpdateNonDefaults<T>(this IDbCommand dbCmd, T item, Expression<Func<T, bool>> where)
