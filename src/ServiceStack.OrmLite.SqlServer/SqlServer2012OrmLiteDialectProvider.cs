@@ -162,7 +162,7 @@ namespace ServiceStack.OrmLite.SqlServer
             {
                 foreach (var fieldDef in modelDef.FieldDefinitions)
                 {
-                    if (fieldDef.CustomSelect != null)
+                    if (fieldDef.CustomSelect != null || fieldDef.IsComputed)
                         continue;
 
                     var columnDefinition = GetColumnDefinition(fieldDef);

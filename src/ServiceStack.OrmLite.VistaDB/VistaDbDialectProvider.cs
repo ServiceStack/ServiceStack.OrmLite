@@ -126,6 +126,9 @@ namespace ServiceStack.OrmLite.VistaDB
 
             foreach (var fieldDef in modelDefinition.FieldDefinitions)
             {
+                if (fieldDef.CustomSelect != null || fieldDef.IsComputed)
+                    continue;
+
                 if (columns.Length != 0)
                     columns.Append(", \n  ");
 

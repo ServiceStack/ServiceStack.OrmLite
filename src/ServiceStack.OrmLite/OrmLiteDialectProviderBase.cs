@@ -1261,7 +1261,7 @@ namespace ServiceStack.OrmLite
             var modelDef = tableType.GetModelDefinition();
             foreach (var fieldDef in CreateTableFieldsStrategy(modelDef))
             {
-                if (fieldDef.CustomSelect != null)
+                if (fieldDef.CustomSelect != null || fieldDef.IsComputed)
                     continue;
 
                 var columnDefinition = GetColumnDefinition(fieldDef);

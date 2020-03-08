@@ -149,7 +149,8 @@ namespace ServiceStack.OrmLite
                         }
                     }
 
-                    ExecuteSql(dbCmd, dialectProvider.ToCreateTableStatement(modelType));
+                    var createTableSql = dialectProvider.ToCreateTableStatement(modelType);
+                    ExecuteSql(dbCmd, createTableSql);
 
                     var postCreateTableSql = dialectProvider.ToPostCreateTableStatement(modelDef);
                     if (postCreateTableSql != null)

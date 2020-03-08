@@ -72,7 +72,7 @@ namespace ServiceStack.OrmLite.Firebird
             var modelDef = GetModel(tableType);
             foreach (var fieldDef in CreateTableFieldsStrategy(modelDef))
             {
-                if (fieldDef.CustomSelect != null)
+                if (fieldDef.CustomSelect != null || fieldDef.IsComputed)
                     continue;
 
                 if (fieldDef.IsPrimaryKey)
