@@ -190,7 +190,7 @@ namespace ServiceStack.OrmLite.Firebird
         }
 		
         protected override bool ShouldSkipInsert(FieldDefinition fieldDef) => 
-            fieldDef.ShouldSkipInsert() || fieldDef.IsComputed;
+            fieldDef.ShouldSkipInsert() || (fieldDef.IsComputed && !fieldDef.IsPersisted);
 
         protected virtual bool ShouldReturnOnInsert(ModelDefinition modelDef, FieldDefinition fieldDef) =>
             fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && HasInsertReturnValues(modelDef)) || fieldDef.AutoId;
@@ -268,7 +268,7 @@ namespace ServiceStack.OrmLite.Firebird
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed || fieldDef.IgnoreOnUpdate)
+                if ((fieldDef.IsComputed && !fieldDef.IsPersisted) || fieldDef.IgnoreOnUpdate)
                     continue;
 
                 if ((fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField)

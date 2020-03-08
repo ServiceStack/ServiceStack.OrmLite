@@ -444,7 +444,7 @@ namespace ServiceStack.OrmLite.MySql
             var modelDef = GetModel(tableType);
             foreach (var fieldDef in CreateTableFieldsStrategy(modelDef))
             {
-                if (fieldDef.CustomSelect != null || fieldDef.IsComputed)
+                if (fieldDef.CustomSelect != null || (fieldDef.IsComputed && !fieldDef.IsPersisted))
                     continue;
 
                 if (sbColumns.Length != 0) sbColumns.Append(", \n  ");

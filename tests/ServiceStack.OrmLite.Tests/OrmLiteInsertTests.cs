@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
@@ -9,6 +10,7 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
+
     [TestFixtureOrmLite]
     public class OrmLiteInsertTests : OrmLiteProvidersTestBase
     {
@@ -356,14 +358,7 @@ namespace ServiceStack.OrmLite.Tests
                     MinCustomerBuy = 10
                 };
 
-                var fieldDef = typeof(Market).GetModelMetadata()
-                    .GetFieldDefinition<Market>(x => x.AvailableTotal);
-
-                fieldDef.IsComputed = false;
-
                 db.Insert(market);
-
-                fieldDef.IsComputed = true;
             }
         }
 
@@ -513,7 +508,7 @@ namespace ServiceStack.OrmLite.Tests
         public int Available { get; set; }
         [Required]
         public int AvailableSalesEvent { get; set; }
-        [Compute]
+        [Compute, Persisted]
         [Required]
         public int AvailableTotal { get; set; }
         [Required]

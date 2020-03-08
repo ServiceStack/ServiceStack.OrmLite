@@ -301,7 +301,8 @@ namespace ServiceStack.OrmLite.Oracle
             var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
             foreach (var fieldDef in fieldDefs)
             {
-                if (fieldDef.IsComputed || fieldDef.IsRowVersion) continue;
+                if ((fieldDef.IsComputed && !fieldDef.IsPersisted) || fieldDef.IsRowVersion) 
+                    continue;
 
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
@@ -384,7 +385,7 @@ namespace ServiceStack.OrmLite.Oracle
             var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
             foreach (var fieldDef in fieldDefs)
             {
-                if (fieldDef.IsComputed)
+                if ((fieldDef.IsComputed && !fieldDef.IsPersisted))
                     continue;
 
                 if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence))
@@ -446,7 +447,8 @@ namespace ServiceStack.OrmLite.Oracle
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
+                if ((fieldDef.IsComputed && !fieldDef.IsPersisted)) 
+                    continue;
 
                 var updateFieldsEmptyOrNull = updateFields == null || updateFields.Count == 0;
                 if ((fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField)
@@ -492,7 +494,7 @@ namespace ServiceStack.OrmLite.Oracle
             var modelDef = GetModel(tableType);
             foreach (var fieldDef in CreateTableFieldsStrategy(modelDef))
             {
-                if (fieldDef.CustomSelect != null || fieldDef.IsComputed)
+                if (fieldDef.CustomSelect != null || (fieldDef.IsComputed && !fieldDef.IsPersisted))
                     continue;
 
                 if (fieldDef.IsPrimaryKey)
@@ -706,7 +708,9 @@ namespace ServiceStack.OrmLite.Oracle
 
                     foreach (var fieldDef in fromModelDef.FieldDefinitions)
                     {
-                        if (fieldDef.IsComputed) continue;
+                        if (fieldDef.IsComputed) 
+                            continue;
+                        
                         if (fieldDef.ForeignKey != null
                             && GetModel(fieldDef.ForeignKey.ReferenceType).ModelName == modelDef.ModelName)
                         {
@@ -722,7 +726,9 @@ namespace ServiceStack.OrmLite.Oracle
                     var modelDef = GetModel(tableType);
                     foreach (var fieldDef in modelDef.FieldDefinitions)
                     {
-                        if (fieldDef.IsComputed) continue;
+                        if (fieldDef.IsComputed) 
+                            continue;
+                        
                         if (fieldDef.IsPrimaryKey)
                         {
                             if (filter.Length > 0) filter.Append(" AND ");
