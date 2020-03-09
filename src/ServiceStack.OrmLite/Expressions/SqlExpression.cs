@@ -578,9 +578,17 @@ namespace ServiceStack.OrmLite
                 if (whereExpression[whereExpression.Length - 1] != ')')
                     throw new NotSupportedException("Invalid whereExpression Expression with Ensure Conditions");
 
-                // insert before parens
-                whereExpression = whereExpression.Substring(0, whereExpression.Length - 1) 
-                                + addExpression + ")";
+                // insert before normal WHERE parens: {EnsureConditions} AND (1+1)
+                if (whereExpression.EndsWith(TrueLiteral, StringComparison.Ordinal)) // insert before ^1+1)
+                {
+                    whereExpression = whereExpression.Substring(0, whereExpression.Length - (TrueLiteral.Length - 1))
+                                    + sqlExpression + ")";
+                }
+                else // insert before ^)
+                {
+                    whereExpression = whereExpression.Substring(0, whereExpression.Length - 1) 
+                                    + addExpression + ")";
+                }
             }
             return this;
         }
@@ -598,7 +606,7 @@ namespace ServiceStack.OrmLite
             var newExpr = WhereExpressionToString(Visit(predicate));
             return Ensure(newExpr);
         }
-        
+
         private bool hasEnsureConditions = false;
         /// <summary>
         /// Add a WHERE Condition to always be applied, irrespective of other WHERE conditions 
@@ -609,7 +617,7 @@ namespace ServiceStack.OrmLite
             if (string.IsNullOrEmpty(whereExpression))
             {
                 whereExpression = "WHERE " + condition 
-                    + " AND (1=1)"; //allow subsequent WHERE conditions to be inserted before parens
+                    + " AND " + TrueLiteral; //allow subsequent WHERE conditions to be inserted before parens
             }
             else
             {
