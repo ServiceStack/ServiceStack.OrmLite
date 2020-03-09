@@ -179,5 +179,36 @@ namespace ServiceStack.OrmLite.Tests
                 assertEnsure(q);
             }
         }
+
+        [Test]
+        public void Can_pre_multi_Ensure_and_tables()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitRockstars(db);
+                db.DropAndCreateTable<RockstarAlbum>();
+                db.InsertAll(AutoQueryTests.SeedAlbums);
+
+                void assertEnsure(SqlExpression<Rockstar> q)
+                {
+                    var rows = db.Select(q);
+                    Assert.That(rows.Count, Is.EqualTo(1));
+                    Assert.That(rows[0].Id, Is.EqualTo(3));
+                }
+
+                var q = db
+                    .From<Rockstar>()
+                    .Join<RockstarAlbum>((r,a) => r.Id == a.RockstarId);
+
+                q.Ensure<Rockstar,RockstarAlbum>((r,a) => a.Name == "Nevermind" && r.Id == a.RockstarId);
+
+                q.Where(x => x.Age == 27)
+                    .Or(x => x.LivingStatus == LivingStatus.Dead);
+
+                q.Ensure(x => x.Id == 3);
+
+                assertEnsure(q);
+            }
+        }
     }
 }

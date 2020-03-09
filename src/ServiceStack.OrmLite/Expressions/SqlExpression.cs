@@ -634,7 +634,7 @@ namespace ServiceStack.OrmLite
                     if (!whereExpression.StartsWith("WHERE ", StringComparison.OrdinalIgnoreCase))
                         throw new NotSupportedException("Invalid whereExpression Expression with Ensure Conditions");
 
-                    whereExpression = "WHERE " + condition + " " + whereExpression.Substring("WHERE ".Length);
+                    whereExpression = "WHERE " + condition + " AND " + whereExpression.Substring("WHERE ".Length);
                 }
             }
 
