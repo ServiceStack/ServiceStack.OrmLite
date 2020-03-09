@@ -89,8 +89,8 @@ namespace ServiceStack.OrmLite.Tests
 
         public static RockstarAlbum[] SeedAlbums = new[] {
             new RockstarAlbum { Id = 10, RockstarId = 1, Name = "Electric Ladyland" },
-            new RockstarAlbum { Id = 11, RockstarId = 4, Name = "Nevermind" },
-            new RockstarAlbum { Id = 12, RockstarId = 6, Name = "Thriller" },
+            new RockstarAlbum { Id = 11, RockstarId = 3, Name = "Nevermind" },
+            new RockstarAlbum { Id = 12, RockstarId = 7, Name = "Thriller" },
         };
 
         private static readonly Department2[] SeedDepartments = new[]

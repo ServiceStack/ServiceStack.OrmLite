@@ -107,6 +107,7 @@ namespace ServiceStack.OrmLite
             to.Rows = Rows;
             to.tableDefs = tableDefs;
             to.UseSelectPropertiesAsAliases = UseSelectPropertiesAsAliases;
+            to.hasEnsureConditions = hasEnsureConditions;
             return to;
         }
 
@@ -564,11 +565,72 @@ namespace ServiceStack.OrmLite
 
         protected SqlExpression<T> AppendToWhere(string condition, string sqlExpression)
         {
-            whereExpression = string.IsNullOrEmpty(whereExpression)
-                ? (WhereStatementWithoutWhereString ? "" : "WHERE ")
-                : whereExpression + " " + condition + " ";
+            var addExpression = string.IsNullOrEmpty(whereExpression)
+                ? (WhereStatementWithoutWhereString ? "" : "WHERE ") + sqlExpression
+                : " " + condition + " " + sqlExpression;
 
-            whereExpression += sqlExpression;
+            if (!hasEnsureConditions)
+            {
+                whereExpression += addExpression;
+            }
+            else
+            {
+                if (whereExpression[whereExpression.Length - 1] != ')')
+                    throw new NotSupportedException("Invalid whereExpression Expression with Ensure Conditions");
+
+                // insert before parens
+                whereExpression = whereExpression.Substring(0, whereExpression.Length - 1) 
+                                + addExpression + ")";
+            }
+            return this;
+        }
+
+        public virtual SqlExpression<T> Ensure(Expression<Func<T, bool>> predicate) => AppendToEnsure(predicate);
+        public virtual SqlExpression<T> Ensure<Target>(Expression<Func<Target, bool>> predicate) => AppendToEnsure(predicate);
+        public virtual SqlExpression<T> Ensure<Source, Target>(Expression<Func<Source, Target, bool>> predicate) => AppendToEnsure(predicate);
+        public virtual SqlExpression<T> Ensure<T1, T2, T3>(Expression<Func<T1, T2, T3, bool>> predicate) => AppendToEnsure(predicate);
+        
+        protected SqlExpression<T> AppendToEnsure(Expression predicate)
+        {
+            if (predicate == null)
+                return this;
+
+            var newExpr = WhereExpressionToString(Visit(predicate));
+            return Ensure(newExpr);
+        }
+        
+        private bool hasEnsureConditions = false;
+        /// <summary>
+        /// Add a WHERE Condition to always be applied, irrespective of other WHERE conditions 
+        /// </summary>
+        public SqlExpression<T> Ensure(string sqlFilter, params object[] filterParams)
+        {
+            var condition = FormatFilter(sqlFilter, filterParams);
+            if (string.IsNullOrEmpty(whereExpression))
+            {
+                whereExpression = "WHERE " + condition 
+                    + " AND (1=1)"; //allow subsequent WHERE conditions to be inserted before parens
+            }
+            else
+            {
+                if (!hasEnsureConditions)
+                {
+                    var existingExpr = whereExpression.StartsWith("WHERE ", StringComparison.OrdinalIgnoreCase)
+                        ? whereExpression.Substring("WHERE ".Length)
+                        : whereExpression;
+
+                    whereExpression = "WHERE " + condition + " AND (" + existingExpr + ")";
+                }
+                else
+                {
+                    if (!whereExpression.StartsWith("WHERE ", StringComparison.OrdinalIgnoreCase))
+                        throw new NotSupportedException("Invalid whereExpression Expression with Ensure Conditions");
+
+                    whereExpression = "WHERE " + condition + " " + whereExpression.Substring("WHERE ".Length);
+                }
+            }
+
+            hasEnsureConditions = true;
             return this;
         }
 
