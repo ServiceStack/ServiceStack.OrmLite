@@ -156,9 +156,24 @@ namespace ServiceStack.OrmLite.Tests
         public const int V10_2 = 102;
         public const int V10_3 = 103;
         public const int V10_4 = 104;
-        public static readonly int[] Versions = TestConfig.EnvironmentVariableInto("MYSQL_VERSION", new[]{ V5_5, V10_1, V10_2, V10_3, V10_4 });
-        public static int[] MySqlConnectorVersions = Versions.Where(x => x == V10_4).ToArray();
-        public static readonly string DefaultConnection = TestConfig.DialectConnections[Tuple.Create(Dialect.MySql, V10_4)];
+        public static readonly int[] Versions;
+        public static int[] MySqlConnectorVersions;
+        public static readonly string DefaultConnection;
+
+        static MySqlDb()
+        {
+            try
+            {
+                Versions = TestConfig.EnvironmentVariableInto("MYSQL_VERSION", new[] { V5_5, V10_1, V10_2, V10_3, V10_4 });
+                MySqlConnectorVersions = Versions.Where(x => x == V10_4).ToArray();
+                DefaultConnection = TestConfig.DialectConnections[Tuple.Create(Dialect.MySql, V10_4)];
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
 
         public static string VersionString(int version) => "MySQL " + (version == V5_5
             ? "v5_5"
@@ -262,36 +277,50 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         private static Dictionary<Tuple<Dialect, int>, string> dialectConnections;
-        public static Dictionary<Tuple<Dialect,int>, string> DialectConnections => dialectConnections ?? (dialectConnections = new Dictionary<Tuple<Dialect,int>, string> 
+        public static Dictionary<Tuple<Dialect,int>, string> DialectConnections => dialectConnections ?? (dialectConnections = LoadDialectConnections());
+
+        private static Dictionary<Tuple<Dialect, int>, string> LoadDialectConnections()
         {
-            [Tuple.Create(Dialect.Sqlite, SqliteDb.Memory)] = EnvironmentVariable(new[]{ "SQLITE_MEMORY_CONNECTION", "SQLITE_CONNECTION" }, ":memory:"),
-            [Tuple.Create(Dialect.Sqlite, SqliteDb.File)] = EnvironmentVariable(new[]{ "SQLITE_FILE_CONNECTION", "SQLITE_CONNECTION" }, "~/App_Data/db.sqlite".MapAbsolutePath()),
+            try 
+            { 
+                return new Dictionary<Tuple<Dialect,int>, string> 
+                {
+                    [Tuple.Create(Dialect.Sqlite, SqliteDb.Memory)] = EnvironmentVariable(new[]{ "SQLITE_MEMORY_CONNECTION", "SQLITE_CONNECTION" }, ":memory:"),
+                    [Tuple.Create(Dialect.Sqlite, SqliteDb.File)] = EnvironmentVariable(new[]{ "SQLITE_FILE_CONNECTION", "SQLITE_CONNECTION" }, "~/App_Data/db.sqlite".MapAbsolutePath()),
 
-            [Tuple.Create(Dialect.SqlServer, SqlServerDb.V2012)] = EnvironmentVariable(new[]{ "MSSQL2012_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
-            [Tuple.Create(Dialect.SqlServer2017, SqlServerDb.V2017)] = EnvironmentVariable(new[]{ "MSSQL2017_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
-            [Tuple.Create(Dialect.SqlServer2019, SqlServerDb.V2019)] = EnvironmentVariable(new[]{ "MSSQL2019_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
+                    [Tuple.Create(Dialect.SqlServer, SqlServerDb.V2012)] = EnvironmentVariable(new[]{ "MSSQL2012_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
+                    [Tuple.Create(Dialect.SqlServer2017, SqlServerDb.V2017)] = EnvironmentVariable(new[]{ "MSSQL2017_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
+                    [Tuple.Create(Dialect.SqlServer2019, SqlServerDb.V2019)] = EnvironmentVariable(new[]{ "MSSQL2019_CONNECTION", "MSSQL_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
 
-            [Tuple.Create(Dialect.PostgreSql9, PostgreSqlDb.V9)]  = EnvironmentVariable(new[]{ "PGSQL9_CONNECTION",  "PGSQL_CONNECTION" }, "Server=localhost;Port=48301;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
-            [Tuple.Create(Dialect.PostgreSql10, PostgreSqlDb.V10)] = EnvironmentVariable(new[]{ "PGSQL10_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48302;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
-            [Tuple.Create(Dialect.PostgreSql11, PostgreSqlDb.V11)] = EnvironmentVariable(new[]{ "PGSQL11_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48303;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
-            
-            [Tuple.Create(Dialect.MySql, MySqlDb.V5_5)]  = EnvironmentVariable(new[]{ "MYSQL55_CONNECTION",  "MYSQL_CONNECTION" }, "Server=localhost;Port=48201;Database=test;UID=root;Password=test;SslMode=none;Convert Zero Datetime=True;"),
-            [Tuple.Create(Dialect.MySql, MySqlDb.V10_1)] = EnvironmentVariable(new[]{ "MYSQL101_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none"),
-            [Tuple.Create(Dialect.MySql, MySqlDb.V10_2)] = EnvironmentVariable(new[]{ "MYSQL102_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48203;Database=test;UID=root;Password=test;SslMode=none"),
-            [Tuple.Create(Dialect.MySql, MySqlDb.V10_3)] = EnvironmentVariable(new[]{ "MYSQL103_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48204;Database=test;UID=root;Password=test;SslMode=none"),
-            [Tuple.Create(Dialect.MySql, MySqlDb.V10_4)] = EnvironmentVariable(new[]{ "MYSQL104_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none"),
+                    [Tuple.Create(Dialect.PostgreSql9, PostgreSqlDb.V9)]  = EnvironmentVariable(new[]{ "PGSQL9_CONNECTION",  "PGSQL_CONNECTION" }, "Server=localhost;Port=48301;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
+                    [Tuple.Create(Dialect.PostgreSql10, PostgreSqlDb.V10)] = EnvironmentVariable(new[]{ "PGSQL10_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48302;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
+                    [Tuple.Create(Dialect.PostgreSql11, PostgreSqlDb.V11)] = EnvironmentVariable(new[]{ "PGSQL11_CONNECTION", "PGSQL_CONNECTION" }, "Server=localhost;Port=48303;User Id=test;Password=test;Database=test;Pooling=true;MinPoolSize=0;MaxPoolSize=200"),
+                
+                    [Tuple.Create(Dialect.MySql, MySqlDb.V5_5)]  = EnvironmentVariable(new[]{ "MYSQL55_CONNECTION",  "MYSQL_CONNECTION" }, "Server=localhost;Port=48201;Database=test;UID=root;Password=test;SslMode=none;Convert Zero Datetime=True;"),
+                    [Tuple.Create(Dialect.MySql, MySqlDb.V10_1)] = EnvironmentVariable(new[]{ "MYSQL101_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48202;Database=test;UID=root;Password=test;SslMode=none"),
+                    [Tuple.Create(Dialect.MySql, MySqlDb.V10_2)] = EnvironmentVariable(new[]{ "MYSQL102_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48203;Database=test;UID=root;Password=test;SslMode=none"),
+                    [Tuple.Create(Dialect.MySql, MySqlDb.V10_3)] = EnvironmentVariable(new[]{ "MYSQL103_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48204;Database=test;UID=root;Password=test;SslMode=none"),
+                    [Tuple.Create(Dialect.MySql, MySqlDb.V10_4)] = EnvironmentVariable(new[]{ "MYSQL104_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none"),
 
-            [Tuple.Create(Dialect.MySqlConnector, MySqlDb.V10_4)] = EnvironmentVariable(new[]{ "MYSQL104_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none"),
-            
-            [Tuple.Create(Dialect.Oracle, OracleDb.V11)] = EnvironmentVariable(new[]{ "ORACLE11_CONNECTION", "ORACLE_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
-            
-            [Tuple.Create(Dialect.Firebird, FirebirdDb.V3)] = EnvironmentVariable(new[]{ "FIREBIRD3_CONNECTION", "FIREBIRD_CONNECTION" }, @"User=SYSDBA;Password=masterkey;Database=/firebird/data/test.gdb;DataSource=localhost;Port=48101;Dialect=3;charset=ISO8859_1;MinPoolSize=0;MaxPoolSize=100;"),
+                    [Tuple.Create(Dialect.MySqlConnector, MySqlDb.V10_4)] = EnvironmentVariable(new[]{ "MYSQL104_CONNECTION", "MYSQL_CONNECTION" }, "Server=localhost;Port=48205;Database=test;UID=root;Password=test;SslMode=none"),
+                
+                    [Tuple.Create(Dialect.Oracle, OracleDb.V11)] = EnvironmentVariable(new[]{ "ORACLE11_CONNECTION", "ORACLE_CONNECTION" }, "Data Source=tcp:localhost,48501\\SQLExpress;Initial Catalog=master;User Id=sa;Password=Test!tesT;Connect Timeout=120;MultipleActiveResultSets=True;"),
+                
+                    [Tuple.Create(Dialect.Firebird, FirebirdDb.V3)] = EnvironmentVariable(new[]{ "FIREBIRD3_CONNECTION", "FIREBIRD_CONNECTION" }, @"User=SYSDBA;Password=masterkey;Database=/firebird/data/test.gdb;DataSource=localhost;Port=48101;Dialect=3;charset=ISO8859_1;MinPoolSize=0;MaxPoolSize=100;"),
 
-            [Tuple.Create(Dialect.Firebird, FirebirdDb.V4)] = EnvironmentVariable(new[]{ "FIREBIRD4_CONNECTION", "FIREBIRD_CONNECTION" }, @"User=SYSDBA;Password=masterkey;Database=c:\ormlite-tests\firebird\test.fdb;DataSource=localhost;Dialect=3;charset=utf8;MinPoolSize=0;MaxPoolSize=100;"),
-            
-            [Tuple.Create(Dialect.VistaDb, VistaDb.V5)] = EnvironmentVariable(new[]{ "VISTADB5_CONNECTION", "VISTADB_CONNECTION" }, @"Data Source='|DataDirectory|\Database.vdb5'"),
-        });
-        
+                    [Tuple.Create(Dialect.Firebird, FirebirdDb.V4)] = EnvironmentVariable(new[]{ "FIREBIRD4_CONNECTION", "FIREBIRD_CONNECTION" }, @"User=SYSDBA;Password=masterkey;Database=c:\ormlite-tests\firebird\test.fdb;DataSource=localhost;Dialect=3;charset=utf8;MinPoolSize=0;MaxPoolSize=100;"),
+                
+                    [Tuple.Create(Dialect.VistaDb, VistaDb.V5)] = EnvironmentVariable(new[]{ "VISTADB5_CONNECTION", "VISTADB_CONNECTION" }, @"Data Source='|DataDirectory|\Database.vdb5'"),
+                };
+            }
+            catch (Exception e)
+            {
+                //Best place to Catch Exceptions is in NUnit.Framework.Internal.Builders.DefaultSideBuilder Line 115
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
         public static Dictionary<Dialect, int[]> DialectVersions = new Dictionary<Dialect, int[]> 
         {
             [Dialect.Sqlite] = SqliteDb.Versions,

@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
 #else
             MySqlConnectorDialectProvider.Instance;
 #endif
-        public static string ConnectionString = "Server=localhost;Port=48201;Database=test;UID=root;Password=test";
+        public static string ConnectionString = "Server=localhost;Database=test;UID=root;Password=test";
     }
 
     public class OrmLiteTestBase
