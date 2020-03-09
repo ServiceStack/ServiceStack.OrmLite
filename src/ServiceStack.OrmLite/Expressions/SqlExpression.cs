@@ -597,6 +597,8 @@ namespace ServiceStack.OrmLite
         public virtual SqlExpression<T> Ensure<Target>(Expression<Func<Target, bool>> predicate) => AppendToEnsure(predicate);
         public virtual SqlExpression<T> Ensure<Source, Target>(Expression<Func<Source, Target, bool>> predicate) => AppendToEnsure(predicate);
         public virtual SqlExpression<T> Ensure<T1, T2, T3>(Expression<Func<T1, T2, T3, bool>> predicate) => AppendToEnsure(predicate);
+        public virtual SqlExpression<T> Ensure<T1, T2, T3, T4>(Expression<Func<T1, T2, T3, T4, bool>> predicate) => AppendToEnsure(predicate);
+        public virtual SqlExpression<T> Ensure<T1, T2, T3, T4, T5>(Expression<Func<T1, T2, T3, T4, T5, bool>> predicate) => AppendToEnsure(predicate);
         
         protected SqlExpression<T> AppendToEnsure(Expression predicate)
         {
