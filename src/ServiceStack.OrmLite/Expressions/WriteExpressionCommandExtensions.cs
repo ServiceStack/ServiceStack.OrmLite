@@ -383,6 +383,14 @@ namespace ServiceStack.OrmLite
             var sql = where.ToDeleteRowStatement();
             return dbCmd.ExecuteSql(sql, where.Params);
         }
+
+        public static int DeleteWhere<T>(this IDbCommand dbCmd, string whereFilter, object[] whereParams)
+        {
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Where(whereFilter, whereParams);
+            var sql = q.ToDeleteRowStatement();
+            return dbCmd.ExecuteSql(sql, q.Params);
+        }
     }
 }
 

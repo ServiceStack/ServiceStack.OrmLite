@@ -217,6 +217,14 @@ namespace ServiceStack.OrmLite
             var sql = q.ToDeleteRowStatement();
             return dbCmd.ExecuteSqlAsync(sql, q.Params, token);
         }
+
+        internal static Task<int> DeleteWhereAsync<T>(this IDbCommand dbCmd, string whereFilter, object[] whereParams, CancellationToken token)
+        {
+            var q = dbCmd.GetDialectProvider().SqlExpression<T>();
+            q.Where(whereFilter, whereParams);
+            var sql = q.ToDeleteRowStatement();
+            return dbCmd.ExecuteSqlAsync(sql, q.Params, token);
+        }
     }
 }
 

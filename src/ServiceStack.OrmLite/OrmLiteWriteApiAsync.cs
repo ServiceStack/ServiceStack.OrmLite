@@ -310,11 +310,19 @@ namespace ServiceStack.OrmLite
             return dbConn.Exec(dbCmd => dbCmd.DeleteAllAsync(tableType, token));
         }
 
+        /// <summary>
+        /// Delete rows using sqlfilter, e.g:
+        /// <para>db.DeleteAsync&lt;Person&gt;("FirstName = @FirstName AND Age = @Age", new { FirstName = "Jimi", Age = 27 })</para>
+        /// </summary>
         public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, string sqlFilter, object anonType, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteAsync<T>(sqlFilter, anonType, token));
         }
 
+        /// <summary>
+        /// Delete rows using sqlfilter and Runtime Type, e.g:
+        /// <para>db.DeleteAsync(typeof(Person), "FirstName = @FirstName AND Age = @Age", new { FirstName = "Jimi", Age = 27 })</para>
+        /// </summary>
         public static Task<int> DeleteAsync(this IDbConnection dbConn, Type tableType, string sqlFilter, object anonType, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteAsync(tableType, sqlFilter, anonType, token));

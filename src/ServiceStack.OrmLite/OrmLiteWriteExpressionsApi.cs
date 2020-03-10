@@ -264,5 +264,16 @@ namespace ServiceStack.OrmLite
         {
             return dbConn.Exec(dbCmd => dbCmd.Delete(where));
         }
+
+        /// <summary>
+        /// Delete the rows that matches the where filter, e.g:
+        /// 
+        ///   db.DeleteWhere&lt;Person&gt;("Age = {0}", new object[] { 27 });
+        ///   DELETE FROM "Person" WHERE ("Age" = 27)
+        /// </summary>
+        public static int DeleteWhere<T>(this IDbConnection dbConn, string whereFilter, object[] whereParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.DeleteWhere<T>(whereFilter, whereParams));
+        }
     }
 }

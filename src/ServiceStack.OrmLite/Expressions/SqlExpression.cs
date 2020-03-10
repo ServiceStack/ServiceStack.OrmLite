@@ -1347,11 +1347,14 @@ namespace ServiceStack.OrmLite
             foreach (var entry in updateFields)
             {
                 var fieldDef = ModelDef.GetFieldDefinition(entry.Key);
-                if (fieldDef.ShouldSkipUpdate()) continue;
-                if (fieldDef.IsRowVersion) continue;
+                if (fieldDef.ShouldSkipUpdate()) 
+                    continue;
+                if (fieldDef.IsRowVersion) 
+                    continue;
 
                 if (UpdateFields.Count > 0
-                    && !UpdateFields.Contains(fieldDef.Name)) continue; // added
+                    && !UpdateFields.Contains(fieldDef.Name)) // added 
+                    continue;
 
                 var value = entry.Value;
                 if (value == null && !fieldDef.IsNullable)
