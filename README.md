@@ -1925,6 +1925,20 @@ OrmLiteConfig.BeforeExecFilter = dbCmd => Console.WriteLine(dbCmd.GetDebugString
 //OrmLiteConfig.AfterExecFilter = dbCmd => Console.WriteLine(dbCmd.GetDebugString());
 ```
 
+#### Output Generated SQL
+
+You can use `OrmLiteUtils.PrintSql()` for the common debugging task of viewing the generated SQL OrmLite executes:
+
+```csharp
+OrmLiteUtils.PrintSql();
+```
+
+To later disable logging use: 
+
+```csharp
+OrmLiteUtils.UnPrintSql();
+```
+
 ### Exec, Result and String Filters
 
 OrmLite's core Exec filters makes it possible to inject your own behavior, tracing, profiling, etc.

@@ -132,6 +132,13 @@ namespace ServiceStack.OrmLite
                    || propertyInfo.HasAttributeNamed(typeof(PrimaryKeyAttribute).Name)
                    || isAutoId;
 
+                var isAutoIncrement = isPrimaryKey && propertyInfo.HasAttributeCached<AutoIncrementAttribute>();
+                
+                if (isAutoIncrement && propertyInfo.PropertyType == typeof(Guid))
+                    throw new NotSupportedException($"[AutoIncrement] is only valid for integer properties for {modelType.Name}.{propertyInfo.Name} Guid property use [AutoId] instead");
+                
+                if (isAutoId && propertyInfo.PropertyType == typeof(int) || propertyInfo.PropertyType == typeof(long))
+                    throw new NotSupportedException($"[AutoId] is only valid for Guid properties for {modelType.Name}.{propertyInfo.Name} integer property use [AutoIncrement] instead");
                 
                 var aliasAttr = propertyInfo.FirstAttribute<AliasAttribute>();
 
@@ -158,9 +165,7 @@ namespace ServiceStack.OrmLite
                     PropertyInfo = propertyInfo,
                     IsNullable = isNullable,
                     IsPrimaryKey = isPrimaryKey,
-                    AutoIncrement =
-                        isPrimaryKey &&
-                        propertyInfo.HasAttributeCached<AutoIncrementAttribute>(),
+                    AutoIncrement = isPrimaryKey && isAutoIncrement,
                     AutoId = isAutoId,
                     IsIndexed = !isPrimaryKey && isIndex,
                     IsUniqueIndex = isUnique,
