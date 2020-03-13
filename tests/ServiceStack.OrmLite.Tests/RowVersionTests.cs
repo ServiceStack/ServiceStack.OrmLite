@@ -49,6 +49,19 @@ namespace ServiceStack.OrmLite.Tests
         public long Version { get; set; }
     }
 
+    [Schema("dbo")]
+    public class ModelWithSchemaAndRowVersionForInnerJoin
+    {
+        [AutoIncrement]
+        public long Id { get; set; }
+
+        public string Text { get; set; }
+
+        public long ModelWithRowVersionId { get; set; }
+
+        public ulong RowVersion { get; set; }
+    }
+
     public class ModelWithOptimisticChildren
     {
         [AutoIncrement]
@@ -598,6 +611,30 @@ namespace ServiceStack.OrmLite.Tests
 
             var count = db.Count<ModelWithRowVersion>(m => m.Id == rowId);
             Assert.That(count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task Can_read_from_inner_join_with_schema()
+        {
+            db.DropAndCreateTable<ModelWithSchemaAndRowVersionForInnerJoin>();
+            var rowVersionModel = new ModelWithRowVersion()
+            {
+                Text = "test"
+            };
+            var modelId = await db.InsertAsync(rowVersionModel, selectIdentity: true).ConfigureAwait(false);
+            var innerJoinTable = new ModelWithSchemaAndRowVersionForInnerJoin()
+            {
+                ModelWithRowVersionId = modelId,
+                Text = "inner join table"
+            };
+            var joinId = await db.InsertAsync(innerJoinTable, selectIdentity: true).ConfigureAwait(false);
+
+            var query = db
+                .From<ModelWithRowVersion, ModelWithSchemaAndRowVersionForInnerJoin>((x, y) => x.Id == y.ModelWithRowVersionId)
+                .Where<ModelWithSchemaAndRowVersionForInnerJoin>(model => model.Id == joinId);
+
+            var result = await db.SingleAsync(query).ConfigureAwait(false);
+            Assert.NotNull(result);
         }
 
         private void TouchRow(long rowId)
