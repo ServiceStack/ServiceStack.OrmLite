@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite.Tests
         public long Version { get; set; }
     }
 
-    [Schema("dbo")]
+    [Schema("Schema")]
     public class ModelWithSchemaAndRowVersionForInnerJoin
     {
         [AutoIncrement]
@@ -617,13 +617,11 @@ namespace ServiceStack.OrmLite.Tests
         public async Task Can_read_from_inner_join_with_schema()
         {
             db.DropAndCreateTable<ModelWithSchemaAndRowVersionForInnerJoin>();
-            var rowVersionModel = new ModelWithRowVersion()
-            {
+            var rowVersionModel = new ModelWithRowVersion {
                 Text = "test"
             };
             var modelId = await db.InsertAsync(rowVersionModel, selectIdentity: true).ConfigureAwait(false);
-            var innerJoinTable = new ModelWithSchemaAndRowVersionForInnerJoin()
-            {
+            var innerJoinTable = new ModelWithSchemaAndRowVersionForInnerJoin {
                 ModelWithRowVersionId = modelId,
                 Text = "inner join table"
             };
