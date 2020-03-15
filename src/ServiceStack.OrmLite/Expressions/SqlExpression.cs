@@ -1308,8 +1308,10 @@ namespace ServiceStack.OrmLite
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.ShouldSkipUpdate()) continue;
-                if (fieldDef.IsRowVersion) continue;
+                if (fieldDef.ShouldSkipUpdate()) 
+                    continue;
+                if (fieldDef.IsRowVersion) 
+                    continue;
                 if (UpdateFields.Count > 0
                     && !UpdateFields.Contains(fieldDef.Name)) continue; // added
 
@@ -1346,7 +1348,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var entry in updateFields)
             {
-                var fieldDef = ModelDef.GetFieldDefinition(entry.Key);
+                var fieldDef = ModelDef.AssertFieldDefinition(entry.Key);
                 if (fieldDef.ShouldSkipUpdate()) 
                     continue;
                 if (fieldDef.IsRowVersion) 

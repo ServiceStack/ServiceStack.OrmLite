@@ -706,7 +706,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var entry in args)
             {
-                var fieldDef = modelDef.GetFieldDefinition(entry.Key);
+                var fieldDef = modelDef.AssertFieldDefinition(entry.Key);
                 if (fieldDef.ShouldSkipInsert())
                     continue;
 
@@ -1101,7 +1101,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var entry in args)
             {
-                var fieldDef = modelDef.GetFieldDefinition(entry.Key);
+                var fieldDef = modelDef.AssertFieldDefinition(entry.Key);
                 if (fieldDef.ShouldSkipUpdate() || fieldDef.IsPrimaryKey || fieldDef.AutoIncrement)
                     continue;
 
@@ -1137,7 +1137,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var entry in args)
             {
-                var fieldDef = modelDef.GetFieldDefinition(entry.Key);
+                var fieldDef = modelDef.AssertFieldDefinition(entry.Key);
                 if (fieldDef.ShouldSkipUpdate() || fieldDef.AutoIncrement || fieldDef.IsPrimaryKey ||
                     fieldDef.IsRowVersion || fieldDef.Name == OrmLiteConfig.IdField)
                     continue;
@@ -1213,7 +1213,7 @@ namespace ServiceStack.OrmLite
         public string GetDefaultValue(Type tableType, string fieldName)
         {
             var modelDef = tableType.GetModelDefinition();
-            var fieldDef = modelDef.GetFieldDefinition(fieldName);
+            var fieldDef = modelDef.AssertFieldDefinition(fieldName);
             return GetDefaultValue(fieldDef);
         }
 

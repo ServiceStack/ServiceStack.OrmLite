@@ -459,7 +459,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
             foreach (var entry in args)
             {
-                var fieldDef = modelDef.GetFieldDefinition(entry.Key);
+                var fieldDef = modelDef.AssertFieldDefinition(entry.Key);
 
                 if (ShouldReturnOnInsert(modelDef, fieldDef))
                 {
