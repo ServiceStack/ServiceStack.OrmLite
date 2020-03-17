@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite
         T Fields { get; }
     }
 
-    public class DictionaryRow : IDynamicRow<Dictionary<string,object>>
+    public struct DictionaryRow : IDynamicRow<Dictionary<string,object>>
     {
         public Type Type { get; }
         public Dictionary<string, object> Fields { get; }
@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite
         }
     }
 
-    public class ObjectRow : IDynamicRow<object>
+    public struct ObjectRow : IDynamicRow<object>
     {
         public Type Type { get; }
         public object Fields { get; }
