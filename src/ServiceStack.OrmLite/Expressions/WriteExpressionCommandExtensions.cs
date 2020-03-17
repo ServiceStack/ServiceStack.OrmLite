@@ -164,7 +164,7 @@ namespace ServiceStack.OrmLite
             if (updateFields == null)
                 throw new ArgumentNullException(nameof(updateFields));
 
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateFields.FromObjectDictionary<T>());
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateFields.ToFilterType<T>());
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(where);
@@ -236,7 +236,7 @@ namespace ServiceStack.OrmLite
             if (updateFields == null)
                 throw new ArgumentNullException(nameof(updateFields));
 
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateFields.FromObjectDictionary<T>());
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateFields.ToFilterType<T>());
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(whereExpression, whereParams);
@@ -268,7 +268,7 @@ namespace ServiceStack.OrmLite
         {
             OrmLiteUtils.AssertNotAnonType<T>();
             
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateOnly);
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, updateOnly.ToFilterType<T>());
 
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             var whereSql = q.Where(where).WhereExpression;

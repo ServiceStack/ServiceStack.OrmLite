@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite
         {
             OrmLiteUtils.AssertNotAnonType<T>();
             
-            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
+            OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj.ToFilterType<T>());
 
             var dialectProvider = dbCmd.GetDialectProvider();
             var hadRowVersion = dialectProvider.PrepareParameterizedUpdateStatement<T>(dbCmd);
@@ -301,7 +301,7 @@ namespace ServiceStack.OrmLite
         {
             OrmLiteUtils.AssertNotAnonType<T>();
             
-            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
+            OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj.ToFilterType<T>());
 
             var dialectProvider = dbCmd.GetDialectProvider();
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
