@@ -199,6 +199,22 @@ namespace ServiceStack.OrmLite
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync<Into, From>(expression, include, token));
         }
+
+        /// <summary>
+        /// Project results with references from a number of joined tables into a different model
+        /// </summary>
+        public static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, IEnumerable<string> include, CancellationToken token = default)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync<Into, From>(expression, include, token));
+        }
+
+        /// <summary>
+        /// Project results with references from a number of joined tables into a different model
+        /// </summary>
+        public static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, Expression<Func<Into, object>> include)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync<Into, From>(expression, include.GetFieldNames()));
+        }
         
         /// <summary>
         /// Return ADO.NET reader.GetSchemaTable() in a DataTable
