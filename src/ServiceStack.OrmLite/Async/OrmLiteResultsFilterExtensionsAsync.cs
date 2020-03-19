@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite
     {
         internal static ILog Log = LogManager.GetLogger(typeof(OrmLiteResultsFilterExtensionsAsync));
 
-        public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token = default(CancellationToken))
+        public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token = default)
         {
             if (anonType != null)
                 dbCmd.SetParameters(anonType.ToObjectDictionary(), (bool)false, sql:ref sql);
@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
-        public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict, CancellationToken token = default(CancellationToken))
+        public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, string sql, Dictionary<string, object> dict, CancellationToken token = default)
         {
             if (dict != null)
                 dbCmd.SetParameters(dict, (bool)false, sql:ref sql);
@@ -52,7 +52,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
-        public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, CancellationToken token = default(CancellationToken))
+        public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, CancellationToken token = default)
         {
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();

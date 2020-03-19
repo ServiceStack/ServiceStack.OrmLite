@@ -363,7 +363,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ConvertToListAsync<TOutputModel>(sql, token);
         }
 
-        internal static async Task<T> LoadSingleByIdAsync<T>(this IDbCommand dbCmd, object value, string[] include = null, CancellationToken token = default(CancellationToken))
+        internal static async Task<T> LoadSingleByIdAsync<T>(this IDbCommand dbCmd, object value, string[] include = null, CancellationToken token = default)
         {
             var row = await dbCmd.SingleByIdAsync<T>(value, token);
             if (row == null)
@@ -374,7 +374,7 @@ namespace ServiceStack.OrmLite
             return row;
         }
 
-        public static async Task LoadReferencesAsync<T>(this IDbCommand dbCmd, T instance, string[] include = null, CancellationToken token = default(CancellationToken))
+        public static async Task LoadReferencesAsync<T>(this IDbCommand dbCmd, T instance, string[] include = null, CancellationToken token = default)
         {
             var loadRef = new LoadReferencesAsync<T>(dbCmd, instance);
             var fieldDefs = loadRef.FieldDefs;
@@ -405,7 +405,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static async Task<List<Into>> LoadListWithReferences<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expr = null, IEnumerable<string> include = null, CancellationToken token = default(CancellationToken))
+        internal static async Task<List<Into>> LoadListWithReferences<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expr = null, IEnumerable<string> include = null, CancellationToken token = default)
         {
             var loadList = new LoadListAsync<Into, From>(dbCmd, expr);
 

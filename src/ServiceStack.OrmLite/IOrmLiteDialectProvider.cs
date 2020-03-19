@@ -211,14 +211,14 @@ namespace ServiceStack.OrmLite
                                          string indexName = null, bool unique = false);
 
         //Async
-        Task OpenAsync(IDbConnection db, CancellationToken token = default(CancellationToken));
-        Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken));
-        Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken));
-        Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken));
-        Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default(CancellationToken));
-        Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken));
-        Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default(CancellationToken));
-        Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken));
+        Task OpenAsync(IDbConnection db, CancellationToken token = default);
+        Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default);
+        Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default);
+        Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default);
+        Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default);
+        Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default);
+        Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default);
+        Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default);
 
         Task<long> InsertAndGetLastInsertIdAsync<T>(IDbCommand dbCmd, CancellationToken token);
     

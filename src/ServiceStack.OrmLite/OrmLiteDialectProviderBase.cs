@@ -1663,34 +1663,34 @@ namespace ServiceStack.OrmLite
         //Async API's, should be overrided by Dialect Providers to use .ConfigureAwait(false)
         //Default impl below uses TaskAwaiter shim in async.cs
 
-        public virtual Task OpenAsync(IDbConnection db, CancellationToken token = default(CancellationToken))
+        public virtual Task OpenAsync(IDbConnection db, CancellationToken token = default)
         {
             db.Open();
             return TaskResult.Finished;
         }
 
-        public virtual Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        public virtual Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default)
         {
             return cmd.ExecuteReader().InTask();
         }
 
-        public virtual Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        public virtual Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default)
         {
             return cmd.ExecuteNonQuery().InTask();
         }
 
-        public virtual Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        public virtual Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default)
         {
             return cmd.ExecuteScalar().InTask();
         }
 
-        public virtual Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default(CancellationToken))
+        public virtual Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default)
         {
             return reader.Read().InTask();
         }
 
 #if ASYNC
-        public virtual async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
+        public virtual async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default)
         {
             try
             {
@@ -1708,7 +1708,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public virtual async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default(CancellationToken))
+        public virtual async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default)
         {
             try
             {
@@ -1724,7 +1724,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public virtual async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
+        public virtual async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default)
         {
             try
             {

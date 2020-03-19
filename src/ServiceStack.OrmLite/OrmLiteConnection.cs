@@ -90,7 +90,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public async Task OpenAsync(CancellationToken token = default(CancellationToken))
+        public async Task OpenAsync(CancellationToken token = default)
         {
             if (DbConnection.State == ConnectionState.Broken)
                 DbConnection.Close();

@@ -10,8 +10,6 @@ namespace ServiceStack.OrmLite
 
     public interface IDynamicRow<T> : IDynamicRow
     {
-        Type Type { get; }
-        
         T Fields { get; }
     }
 

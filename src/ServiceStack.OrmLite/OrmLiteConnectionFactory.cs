@@ -98,7 +98,7 @@ namespace ServiceStack.OrmLite
             return connection;
         }
 
-        public virtual async Task<IDbConnection> OpenDbConnectionAsync(CancellationToken token = default(CancellationToken))
+        public virtual async Task<IDbConnection> OpenDbConnectionAsync(CancellationToken token = default)
         {
             var connection = CreateDbConnection();
             if (connection is OrmLiteConnection ormliteConn)
@@ -111,7 +111,7 @@ namespace ServiceStack.OrmLite
             return connection;
         }
 
-        public virtual async Task<IDbConnection> OpenDbConnectionAsync(string namedConnection, CancellationToken token = default(CancellationToken))
+        public virtual async Task<IDbConnection> OpenDbConnectionAsync(string namedConnection, CancellationToken token = default)
         {
             var connection = CreateDbConnection(namedConnection);
             if (connection is OrmLiteConnection ormliteConn)
@@ -139,7 +139,7 @@ namespace ServiceStack.OrmLite
             return connection;
         }
 
-        public virtual async Task<IDbConnection> OpenDbConnectionStringAsync(string connectionString, CancellationToken token = default(CancellationToken))
+        public virtual async Task<IDbConnection> OpenDbConnectionStringAsync(string connectionString, CancellationToken token = default)
         {
             if (connectionString == null)
                 throw new ArgumentNullException(nameof(connectionString));
@@ -169,7 +169,7 @@ namespace ServiceStack.OrmLite
             return dbFactory.OpenDbConnection();
         }
 
-        public virtual async Task<IDbConnection> OpenDbConnectionStringAsync(string connectionString, string providerName, CancellationToken token = default(CancellationToken))
+        public virtual async Task<IDbConnection> OpenDbConnectionStringAsync(string connectionString, string providerName, CancellationToken token = default)
         {
             if (connectionString == null)
                 throw new ArgumentNullException(nameof(connectionString));
@@ -230,7 +230,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Alias for OpenDbConnectionAsync
         /// </summary>
-        public static Task<IDbConnection> OpenAsync(this IDbConnectionFactory connectionFactory, CancellationToken token = default(CancellationToken))
+        public static Task<IDbConnection> OpenAsync(this IDbConnectionFactory connectionFactory, CancellationToken token = default)
         {
             return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionAsync(token);
         }
@@ -238,7 +238,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Alias for OpenDbConnectionAsync
         /// </summary>
-        public static Task<IDbConnection> OpenAsync(this IDbConnectionFactory connectionFactory, string namedConnection, CancellationToken token = default(CancellationToken))
+        public static Task<IDbConnection> OpenAsync(this IDbConnectionFactory connectionFactory, string namedConnection, CancellationToken token = default)
         {
             return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionAsync(namedConnection, token);
         }
@@ -259,7 +259,7 @@ namespace ServiceStack.OrmLite
             return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnection(namedConnection);
         }
 
-        public static Task<IDbConnection> OpenDbConnectionAsync(this IDbConnectionFactory connectionFactory, string namedConnection, CancellationToken token = default(CancellationToken))
+        public static Task<IDbConnection> OpenDbConnectionAsync(this IDbConnectionFactory connectionFactory, string namedConnection, CancellationToken token = default)
         {
             return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionAsync(namedConnection, token);
         }
@@ -277,12 +277,12 @@ namespace ServiceStack.OrmLite
             return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionString(connectionString, providerName);
         }
 
-        public static Task<IDbConnection> OpenDbConnectionStringAsync(this IDbConnectionFactory connectionFactory, string connectionString, CancellationToken token = default(CancellationToken))
+        public static Task<IDbConnection> OpenDbConnectionStringAsync(this IDbConnectionFactory connectionFactory, string connectionString, CancellationToken token = default)
         {
             return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionStringAsync(connectionString, token);
         }
 
-        public static Task<IDbConnection> OpenDbConnectionStringAsync(this IDbConnectionFactory connectionFactory, string connectionString, string providerName, CancellationToken token = default(CancellationToken))
+        public static Task<IDbConnection> OpenDbConnectionStringAsync(this IDbConnectionFactory connectionFactory, string connectionString, string providerName, CancellationToken token = default)
         {
             return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionStringAsync(connectionString, providerName, token);
         }

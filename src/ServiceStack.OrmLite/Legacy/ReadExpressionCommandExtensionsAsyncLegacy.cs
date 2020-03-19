@@ -45,7 +45,7 @@ namespace ServiceStack.OrmLite.Legacy
         }
 
         [Obsolete("Use db.LoadSelectAsync(db.From<T>())")]
-        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, string[] include = null, CancellationToken token = default(CancellationToken))
+        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, string[] include = null, CancellationToken token = default)
         {
             var expr = dbCmd.GetDialectProvider().SqlExpression<T>();
             expr = expression(expr);
