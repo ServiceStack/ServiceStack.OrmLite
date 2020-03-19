@@ -161,34 +161,14 @@ namespace ServiceStack.OrmLite.Tests.Async
             Assert.That(dbCustomer.Orders, Is.Null);
             Assert.That(dbCustomer.PrimaryAddress, Is.Not.Null);
 
-
             // Invalid field name
-            try
-            {
-                dbCustomers = await db.LoadSelectAsync<Customer>(q => q.Id == customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
-                Assert.Fail();
-            }
-            catch (System.ArgumentException)
-            {
-            }
-            catch (System.Exception)
-            {
-                Assert.Fail();
-            }
+            dbCustomers = await db.LoadSelectAsync<Customer>(q => q.Id == customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
+            Assert.That(dbCustomers.All(x => x.Orders == null));
+            Assert.That(dbCustomers.All(x => x.PrimaryAddress == null));
 
-
-            try
-            {
-                dbCustomer = await db.LoadSingleByIdAsync<Customer>(customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
-                Assert.Fail();
-            }
-            catch (System.ArgumentException)
-            {
-            }
-            catch (System.Exception)
-            {
-                Assert.Fail();
-            }
+            dbCustomer = await db.LoadSingleByIdAsync<Customer>(customer.Id, include: new[] { "InvalidOption1", "InvalidOption2" });
+            Assert.That(dbCustomer.Orders, Is.Null);
+            Assert.That(dbCustomer.PrimaryAddress, Is.Null);
         }
 
         [Test]

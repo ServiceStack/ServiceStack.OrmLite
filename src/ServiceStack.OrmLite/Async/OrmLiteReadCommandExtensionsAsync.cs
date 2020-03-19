@@ -379,19 +379,15 @@ namespace ServiceStack.OrmLite
             var loadRef = new LoadReferencesAsync<T>(dbCmd, instance);
             var fieldDefs = loadRef.FieldDefs;
 
-            if (!include.IsEmpty())
-            {
-                // Check that any include values aren't reference fields of the specified type
-                var fields = fieldDefs.Select(q => q.FieldName);
-                var invalid = include.Except<string>(fields).ToList();
-                if (invalid.Count > 0)
-                    throw new ArgumentException($"Fields '{invalid.Join("', '")}' are not Reference Properties of Type '{typeof(T).Name}'");
-
-                fieldDefs = fieldDefs.Where(fd => include.Contains(fd.FieldName)).ToList();
-            }
+            var includeSet = include != null
+                ? new HashSet<string>(include, StringComparer.OrdinalIgnoreCase)
+                : null;
 
             foreach (var fieldDef in fieldDefs)
             {
+                if (includeSet != null && !includeSet.Contains(fieldDef.Name))
+                    continue;
+
                 dbCmd.Parameters.Clear();
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
