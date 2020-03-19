@@ -160,16 +160,34 @@ namespace ServiceStack.OrmLite
         /// Returns results with references from using a LINQ Expression. E.g:
         /// <para>db.LoadSelectAsync&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
         /// </summary>
-        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, string[] include = null, CancellationToken token = default(CancellationToken))
+        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, string[] include = null, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync(predicate, include, token));
+        }
+
+        /// <summary>
+        /// Returns results with references from using a LINQ Expression. E.g:
+        /// <para>db.LoadSelectAsync&lt;Person&gt;(x =&gt; x.Age &gt; 40, include: x => new { x.PrimaryAddress })</para>
+        /// </summary>
+        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> include)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync(predicate, include.GetFieldNames()));
         }
 
         /// <summary>
         /// Returns results with references from using an SqlExpression lambda. E.g:
         /// <para>db.LoadSelectAsync(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, string[] include = null, CancellationToken token = default(CancellationToken))
+        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, string[] include = null, CancellationToken token = default)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync(expression, include, token));
+        }
+
+        /// <summary>
+        /// Returns results with references from using an SqlExpression lambda. E.g:
+        /// <para>db.LoadSelectAsync(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40), include:q.OnlyFields)</para>
+        /// </summary>
+        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, IEnumerable<string> include, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync(expression, include, token));
         }
@@ -177,7 +195,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Project results with references from a number of joined tables into a different model
         /// </summary>
-        public static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, string[] include = null, CancellationToken token = default(CancellationToken))
+        public static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, string[] include = null, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync<Into, From>(expression, include, token));
         }

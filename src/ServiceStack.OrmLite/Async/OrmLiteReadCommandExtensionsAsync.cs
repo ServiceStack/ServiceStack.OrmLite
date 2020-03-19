@@ -405,24 +405,21 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        internal static async Task<List<Into>> LoadListWithReferences<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expr = null, string[] include = null, CancellationToken token = default(CancellationToken))
+        internal static async Task<List<Into>> LoadListWithReferences<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expr = null, IEnumerable<string> include = null, CancellationToken token = default(CancellationToken))
         {
             var loadList = new LoadListAsync<Into, From>(dbCmd, expr);
 
             var fieldDefs = loadList.FieldDefs;
-            if (include?.Length > 0)
-            {
-                // Check that any include values aren't reference fields of the specified From type
-                var fields = fieldDefs.Select(q => q.FieldName);
-                var invalid = include.Except(fields).ToList();
-                if (invalid.Count > 0)
-                    throw new ArgumentException($"Fields '{invalid.Join("', '")}' are not Reference Properties of Type '{typeof(From).Name}'");
 
-                fieldDefs = loadList.FieldDefs.Where(fd => include.Contains(fd.FieldName)).ToList();
-            }
-
+            var includeSet = include != null 
+                ? new HashSet<string>(include, StringComparer.OrdinalIgnoreCase)
+                : null;
+            
             foreach (var fieldDef in fieldDefs)
             {
+                if (includeSet != null && !includeSet.Contains(fieldDef.Name))
+                    continue;
+
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {

@@ -174,17 +174,17 @@ namespace ServiceStack.OrmLite
             return dbCmd.ScalarAsync<long>(dbCmd.GetDialectProvider().ToRowCountStatement(sql), token);
         }
 
-        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null, string[] include = null, CancellationToken token = default(CancellationToken))
+        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null, IEnumerable<string> include = null, CancellationToken token = default)
         {
             return dbCmd.LoadListWithReferences<T, T>(expression, include, token);
         }
 
-        internal static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression, string[] include = null, CancellationToken token = default(CancellationToken))
+        internal static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression, IEnumerable<string> include = null, CancellationToken token = default)
         {
             return dbCmd.LoadListWithReferences<Into, From>(expression, include, token);
         }
 
-        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, string[] include = null, CancellationToken token = default(CancellationToken))
+        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, IEnumerable<string> include = null, CancellationToken token = default)
         {
             var expr = dbCmd.GetDialectProvider().SqlExpression<T>().Where(predicate);
             return dbCmd.LoadListWithReferences<T, T>(expr, include, token);
