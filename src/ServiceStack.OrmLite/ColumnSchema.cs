@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -36,7 +37,17 @@ namespace ServiceStack.OrmLite
         {
             var sql = StringBuilderCache.Allocate();
             
-            sql.Append($"{ColumnName.PadRight(18, ' ')} {DataTypeName}");
+            sql.Append($"{ColumnName.PadRight(20, ' ')} {DataTypeName}");
+            AppendDefinition(sql);
+
+            return StringBuilderCache.ReturnAndFree(sql);
+        }
+
+        public string ColumnDefinition => 
+            StringBuilderCache.ReturnAndFree(AppendDefinition(StringBuilderCache.Allocate()));
+
+        private StringBuilder AppendDefinition(StringBuilder sql)
+        {
             if (NumericPrecision > 0)
             {
                 sql.Append("(");
@@ -46,6 +57,7 @@ namespace ServiceStack.OrmLite
                     sql.Append(",");
                     sql.Append(NumericScale);
                 }
+
                 sql.Append(")");
             }
             else if (ColumnSize > 0)
@@ -77,8 +89,8 @@ namespace ServiceStack.OrmLite
             {
                 sql.AppendFormat(" DEFAULT ({0})", DefaultValue);
             }
-            
-            return StringBuilderCache.ReturnAndFree(sql);
+
+            return sql;
         }
     }
 
