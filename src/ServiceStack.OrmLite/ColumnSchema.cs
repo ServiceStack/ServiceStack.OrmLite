@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite
         {
             var sql = StringBuilderCache.Allocate();
             
-            sql.Append($"{ColumnName.PadRight(20, ' ')} {DataTypeName}");
+            sql.Append(ColumnName.PadRight(20, ' ')).Append(' ');
             AppendDefinition(sql);
 
             return StringBuilderCache.ReturnAndFree(sql);
@@ -48,6 +48,7 @@ namespace ServiceStack.OrmLite
 
         private StringBuilder AppendDefinition(StringBuilder sql)
         {
+            sql.Append(DataTypeName);
             if (NumericPrecision > 0)
             {
                 sql.Append("(");
