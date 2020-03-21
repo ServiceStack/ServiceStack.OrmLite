@@ -79,11 +79,11 @@ namespace ServiceStack.OrmLite
             else
             {
                 sql.Append(AllowDBNull ? " NULL" : " NOT NULL");
-            }
 
-            if (IsUnique)
-            {
-                sql.Append(" UNIQUE");
+                if (IsUnique)
+                {
+                    sql.Append(" UNIQUE");
+                }
             }
 
             if (DefaultValue != null)
