@@ -136,6 +136,11 @@ namespace ServiceStack.OrmLite
 
         void SetParameter(FieldDefinition fieldDef, IDbDataParameter p);
 
+        void EnableIdentityInsert<T>(IDbCommand cmd);
+        Task EnableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default);
+        void DisableIdentityInsert<T>(IDbCommand cmd);
+        Task DisableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default);
+
         Dictionary<string, FieldDefinition> GetFieldDefinitionMap(ModelDefinition modelDef);
 
         object GetFieldValue(FieldDefinition fieldDef, object value);

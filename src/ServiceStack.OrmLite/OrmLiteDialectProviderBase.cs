@@ -923,6 +923,12 @@ namespace ServiceStack.OrmLite
             InitDbParam(p, fieldDef.ColumnType);
         }
 
+        public virtual void EnableIdentityInsert<T>(IDbCommand cmd) {}
+        public virtual Task EnableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default) => TypeConstants.EmptyTask;
+
+        public virtual void DisableIdentityInsert<T>(IDbCommand cmd) {}
+        public virtual Task DisableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default) => TypeConstants.EmptyTask;
+
         public virtual void SetParameterValues<T>(IDbCommand dbCmd, object obj)
         {
             var modelDef = GetModel(typeof(T));
