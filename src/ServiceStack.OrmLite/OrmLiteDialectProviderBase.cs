@@ -654,7 +654,8 @@ namespace ServiceStack.OrmLite
             return null;
         }
 
-        public virtual void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
+        public virtual void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null, 
+            Func<FieldDefinition,bool> shouldInclude=null)
         {
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
@@ -665,7 +666,7 @@ namespace ServiceStack.OrmLite
             var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
             foreach (var fieldDef in fieldDefs)
             {
-                if (fieldDef.ShouldSkipInsert())
+                if (fieldDef.ShouldSkipInsert() && shouldInclude?.Invoke(fieldDef) != true)
                     continue;
 
                 if (sbColumnNames.Length > 0)

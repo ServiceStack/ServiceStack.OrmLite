@@ -118,6 +118,60 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(dbB.Name, Is.EqualTo(guidB[nameof(GuidAutoId.Name)]));
             }
         }
+        
+        [Test]
+        public void Does_populate_and_return_existing_guid_on_insert_ObjectDictionary()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<GuidAutoId>();
+                var aGuid = Guid.NewGuid();
+                var bGuid = Guid.NewGuid();
+
+                var guidA = new GuidAutoId { Id = aGuid, Name = "A" }.ToObjectDictionary();
+                var guidB = new GuidAutoId { Id = bGuid, Name = "B" }.ToObjectDictionary();
+
+                db.Insert<GuidAutoId>(guidA);
+                db.Insert<GuidAutoId>(guidB, selectIdentity:true);
+                
+                Assert.That(guidA[nameof(GuidAutoId.Id)], Is.EqualTo(aGuid));
+                Assert.That(guidB[nameof(GuidAutoId.Id)], Is.EqualTo(bGuid));
+                Assert.That(guidA[nameof(GuidAutoId.Id)], Is.Not.EqualTo(guidB));
+
+                var dbA = db.SingleById<GuidAutoId>(guidA[nameof(GuidAutoId.Id)]);
+                Assert.That(dbA.Name, Is.EqualTo(guidA[nameof(GuidAutoId.Name)]));
+
+                var dbB = db.SingleById<GuidAutoId>(guidB[nameof(GuidAutoId.Id)]);
+                Assert.That(dbB.Name, Is.EqualTo(guidB[nameof(GuidAutoId.Name)]));
+            }
+        }
+        
+        [Test]
+        public async Task Does_populate_and_return_existing_guid_on_insert_ObjectDictionary_Async()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<GuidAutoId>();
+                var aGuid = Guid.NewGuid();
+                var bGuid = Guid.NewGuid();
+
+                var guidA = new GuidAutoId { Id = aGuid, Name = "A" }.ToObjectDictionary();
+                var guidB = new GuidAutoId { Id = bGuid, Name = "B" }.ToObjectDictionary();
+
+                await db.InsertAsync<GuidAutoId>(guidA);
+                await db.InsertAsync<GuidAutoId>(guidB, selectIdentity:true);
+                
+                Assert.That(guidA[nameof(GuidAutoId.Id)], Is.EqualTo(aGuid));
+                Assert.That(guidB[nameof(GuidAutoId.Id)], Is.EqualTo(bGuid));
+                Assert.That(guidA[nameof(GuidAutoId.Id)], Is.Not.EqualTo(guidB));
+
+                var dbA = await db.SingleByIdAsync<GuidAutoId>(guidA[nameof(GuidAutoId.Id)]);
+                Assert.That(dbA.Name, Is.EqualTo(guidA[nameof(GuidAutoId.Name)]));
+
+                var dbB = await db.SingleByIdAsync<GuidAutoId>(guidB[nameof(GuidAutoId.Id)]);
+                Assert.That(dbB.Name, Is.EqualTo(guidB[nameof(GuidAutoId.Name)]));
+            }
+        }
 
         [Test]
         public void Does_populate_and_return_new_guid_on_save()

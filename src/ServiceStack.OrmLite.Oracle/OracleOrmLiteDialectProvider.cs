@@ -289,7 +289,8 @@ namespace ServiceStack.OrmLite.Oracle
             return StringBuilderCache.ReturnAndFree(sql);
         }
 
-        public override void PrepareParameterizedInsertStatement<T>(IDbCommand dbCommand, ICollection<string> insertFields = null)
+        public override void PrepareParameterizedInsertStatement<T>(IDbCommand dbCommand, ICollection<string> insertFields = null, 
+            Func<FieldDefinition,bool> shouldInclude=null)
         {
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
@@ -301,7 +302,8 @@ namespace ServiceStack.OrmLite.Oracle
             var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
             foreach (var fieldDef in fieldDefs)
             {
-                if ((fieldDef.IsComputed && !fieldDef.IsPersisted) || fieldDef.IsRowVersion) 
+                if (((fieldDef.IsComputed && !fieldDef.IsPersisted) || fieldDef.IsRowVersion)
+                    && shouldInclude?.Invoke(fieldDef) != true) 
                     continue;
 
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");

@@ -283,7 +283,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
         public override bool HasInsertReturnValues(ModelDefinition modelDef) =>
             modelDef.FieldDefinitions.Any(x => x.ReturnOnInsert || (x.AutoId && x.FieldType == typeof(Guid)));
 
-        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
+        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null, 
+            Func<FieldDefinition,bool> shouldInclude=null)
         {
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
@@ -301,7 +302,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
                     sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (ShouldSkipInsert(fieldDef) && !fieldDef.AutoId)
+                if ((ShouldSkipInsert(fieldDef) && !fieldDef.AutoId)
+                    && shouldInclude?.Invoke(fieldDef) != true)
                     continue;
 
                 if (sbColumnNames.Length > 0)

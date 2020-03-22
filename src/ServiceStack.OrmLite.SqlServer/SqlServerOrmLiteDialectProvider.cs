@@ -382,7 +382,32 @@ namespace ServiceStack.OrmLite.SqlServer
 
         protected virtual bool SupportsSequences(FieldDefinition fieldDef) => false;
 
-        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
+        public override void EnableIdentityInsert<T>(IDbCommand cmd)
+        {
+            var tableName = cmd.GetDialectProvider().GetQuotedTableName(ModelDefinition<T>.Definition);
+            cmd.ExecNonQuery($"SET IDENTITY_INSERT {tableName} ON");
+        }
+
+        public override Task EnableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default)
+        {
+            var tableName = cmd.GetDialectProvider().GetQuotedTableName(ModelDefinition<T>.Definition);
+            return cmd.ExecNonQueryAsync($"SET IDENTITY_INSERT {tableName} ON", null, token);
+        }
+
+        public override void DisableIdentityInsert<T>(IDbCommand cmd)
+        {
+            var tableName = cmd.GetDialectProvider().GetQuotedTableName(ModelDefinition<T>.Definition);
+            cmd.ExecNonQuery($"SET IDENTITY_INSERT {tableName} OFF");
+        }
+
+        public override Task DisableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default)
+        {
+            var tableName = cmd.GetDialectProvider().GetQuotedTableName(ModelDefinition<T>.Definition);
+            return cmd.ExecNonQueryAsync($"SET IDENTITY_INSERT {tableName} OFF", null, token);
+        }
+
+        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null, 
+            Func<FieldDefinition,bool> shouldInclude=null)
         {
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
@@ -401,7 +426,8 @@ namespace ServiceStack.OrmLite.SqlServer
                     sbReturningColumns.Append("INSERTED." + GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (ShouldSkipInsert(fieldDef) && !fieldDef.AutoId)
+                if ((ShouldSkipInsert(fieldDef) && !fieldDef.AutoId)
+                    && shouldInclude?.Invoke(fieldDef) != true)
                     continue;
 
                 if (sbColumnNames.Length > 0)

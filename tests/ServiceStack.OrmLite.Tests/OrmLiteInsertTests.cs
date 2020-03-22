@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Tests.Expression;
 using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
@@ -469,6 +470,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var row = ModelWithFieldsOfDifferentTypes.Create(0);
                 var obj = row.ToObjectDictionary();
+                obj.Remove(nameof(row.Id));
 
                 row.Id = (int) db.Insert<ModelWithFieldsOfDifferentTypes>(obj, selectIdentity:true);
                 Assert.That(row.Id, Is.Not.EqualTo(0));
@@ -488,9 +490,50 @@ namespace ServiceStack.OrmLite.Tests
 
                 var row = ModelWithFieldsOfDifferentTypes.Create(0);
                 var obj = row.ToObjectDictionary();
+                obj.Remove(nameof(row.Id));
 
                 row.Id = (int) await db.InsertAsync<ModelWithFieldsOfDifferentTypes>(obj, selectIdentity:true);
                 Assert.That(row.Id, Is.Not.EqualTo(0));
+
+                var fromDb = await db.SingleByIdAsync<ModelWithFieldsOfDifferentTypes>(row.Id);
+
+                ModelWithFieldsOfDifferentTypes.AssertIsEqual(fromDb, row);
+            }
+        }
+
+        [Test]
+        public void Can_Insert_ObjectDictionary_and_override_PrimaryKey()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
+
+                var row = ModelWithFieldsOfDifferentTypes.Create(0);
+                row.Id = 100;
+                var obj = row.ToObjectDictionary();
+
+                var retId = (int) db.Insert<ModelWithFieldsOfDifferentTypes>(obj, selectIdentity:true);
+                Assert.That(retId, Is.EqualTo(row.Id));
+
+                var fromDb = db.SingleById<ModelWithFieldsOfDifferentTypes>(row.Id);
+
+                ModelWithFieldsOfDifferentTypes.AssertIsEqual(fromDb, row);
+            }
+        }
+
+        [Test]
+        public async Task Can_Insert_ObjectDictionary_and_override_PrimaryKey_Async()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<ModelWithFieldsOfDifferentTypes>();
+
+                var row = ModelWithFieldsOfDifferentTypes.Create(0);
+                row.Id = 100;
+                var obj = row.ToObjectDictionary();
+
+                var retId = (int) await db.InsertAsync<ModelWithFieldsOfDifferentTypes>(obj, selectIdentity:true);
+                Assert.That(retId, Is.EqualTo(row.Id));
 
                 var fromDb = await db.SingleByIdAsync<ModelWithFieldsOfDifferentTypes>(row.Id);
 

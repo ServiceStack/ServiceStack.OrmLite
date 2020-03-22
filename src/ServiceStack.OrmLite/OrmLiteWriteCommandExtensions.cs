@@ -730,10 +730,29 @@ namespace ServiceStack.OrmLite
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj.ToFilterType<T>());
 
             var dialectProvider = dbCmd.GetDialectProvider();
-            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, 
-                insertFields: dialectProvider.GetNonDefaultValueInsertFields<T>(obj));
-            
-            return InsertInternal<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity);
+            var pkField = ModelDefinition<T>.Definition.PrimaryKey;
+            object id = null;
+            var enableIdentityInsert = pkField?.AutoIncrement == true && obj.TryGetValue(pkField.Name, out id);
+
+            try
+            {
+                if (enableIdentityInsert)
+                    dialectProvider.EnableIdentityInsert<T>(dbCmd);
+                
+                dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, 
+                    insertFields: dialectProvider.GetNonDefaultValueInsertFields<T>(obj),
+                    shouldInclude: f => obj.ContainsKey(f.Name));
+
+                var ret = InsertInternal<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity);
+                if (enableIdentityInsert)
+                    return Convert.ToInt64(id);
+                return ret;
+            }
+            finally
+            {
+                if (enableIdentityInsert)
+                    dialectProvider.DisableIdentityInsert<T>(dbCmd);
+            }
         }
         
         internal static void RemovePrimaryKeyWithDefaultValue<T>(this Dictionary<string, object> obj)
@@ -758,11 +777,8 @@ namespace ServiceStack.OrmLite
 
             if (dialectProvider.HasInsertReturnValues(ModelDefinition<T>.Definition))
             {
-                using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-                using (reader)
-                {
-                    return reader.PopulateReturnValues<T>(dialectProvider, obj);
-                }
+                using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+                return reader.PopulateReturnValues<T>(dialectProvider, obj);
             }
 
             if (selectIdentity)
