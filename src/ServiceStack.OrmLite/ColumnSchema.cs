@@ -48,7 +48,7 @@ namespace ServiceStack.OrmLite
 
         private StringBuilder AppendDefinition(StringBuilder sql)
         {
-            sql.Append(DataTypeName);
+            sql.Append(DataTypeName.ToUpper());
             if (DataType.IsRealNumberType() && NumericPrecision > 0)
             {
                 sql.Append("(");
