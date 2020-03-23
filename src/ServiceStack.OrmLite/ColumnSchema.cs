@@ -49,7 +49,7 @@ namespace ServiceStack.OrmLite
         private StringBuilder AppendDefinition(StringBuilder sql)
         {
             sql.Append(DataTypeName);
-            if (NumericPrecision > 0)
+            if (DataType.IsRealNumberType() && NumericPrecision > 0)
             {
                 sql.Append("(");
                 sql.Append(NumericPrecision);
@@ -61,7 +61,7 @@ namespace ServiceStack.OrmLite
 
                 sql.Append(")");
             }
-            else if (ColumnSize > 0)
+            else if (!DataType.IsNumericType() && ColumnSize > 0)
             {
                 sql.Append("(");
                 sql.Append(ColumnSize);
