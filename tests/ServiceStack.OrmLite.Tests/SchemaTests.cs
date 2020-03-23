@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Tests.Issues;
 using ServiceStack.OrmLite.Tests.Shared;
 using ServiceStack.Text;
 
@@ -166,6 +167,42 @@ namespace ServiceStack.OrmLite.Tests
                 
                 columnSchemas.Each(x => x.PrintDump());
             }
+        }
+
+        [Test]
+        public void GetTableNames_does_not_return_tables_in_different_schema()
+        {
+            if (Dialect == Dialect.Sqlite || (Dialect & Dialect.AnyMySql) == Dialect)
+                return;
+
+            using var db = OpenDbConnection();
+            db.CreateTableIfNotExists<ModelWithSchema>();
+
+            var name = db.GetDialectProvider().GetTableName(nameof(ModelWithSchema)).StripDbQuotes().ToLower();
+            
+            var tableNames = db.GetTableNames().Map(x => x.ToLower());
+            Assert.That(tableNames.Contains(name), Is.False);
+            
+            var tableNamesWithCounts = db.GetTableNamesWithRowCounts().Map(x => x.Key.ToLower());
+            Assert.That(tableNamesWithCounts.Contains(name), Is.False);
+        }
+
+        [Test]
+        public void GetTableNames_does_return_tables_in_schema()
+        {
+            if (Dialect == Dialect.Sqlite || (Dialect & Dialect.AnyMySql) == Dialect)
+                return;
+            
+            using var db = OpenDbConnection();
+            db.CreateTableIfNotExists<ModelWithSchema>();
+            
+            var name = db.GetDialectProvider().GetTableName(nameof(ModelWithSchema)).StripDbQuotes().ToLower();
+
+            var tableNames = db.GetTableNames("Schema").Map(x => x.ToLower());
+            Assert.That(tableNames.Contains(name));
+            
+            var tableNamesWithCounts = db.GetTableNamesWithRowCounts(schema:"Schema").Map(x => x.Key.ToLower());
+            Assert.That(tableNamesWithCounts.Contains(name));
         }
     }
 }

@@ -106,18 +106,16 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override IDbDataParameter CreateParam() => new SqlParameter();
 
+        private const string DefaultSchema = "dbo";
         public override string ToTableNamesStatement(string schema)
         {
             var sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE'";
-
-            return schema != null 
-                ? sql + " AND TABLE_SCHEMA = {0}".SqlFmt(this, schema) 
-                : sql;
+            return sql + " AND TABLE_SCHEMA = {0}".SqlFmt(this, schema ?? DefaultSchema);
         }
 
         public override string ToTableNamesWithRowCountsStatement(bool live, string schema)
         {
-            var schemaSql = schema != null ? " AND s.Name = {0}".SqlFmt(this, schema) : "";
+            var schemaSql = " AND s.Name = {0}".SqlFmt(this, schema ?? DefaultSchema);
             
             var sql = @"SELECT t.NAME, p.rows FROM sys.tables t INNER JOIN sys.schemas s ON t.schema_id = s.schema_id 
                                INNER JOIN sys.indexes i ON t.OBJECT_ID = i.object_id 
