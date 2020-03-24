@@ -216,7 +216,8 @@ namespace ServiceStack.OrmLite
         public static Task<ColumnSchema[]> GetTableColumnsAsync(this IDbCommand dbCmd, Type table, CancellationToken token) => 
             dbCmd.GetTableColumnsAsync($"SELECT * FROM {dbCmd.GetDialectProvider().GetQuotedTableName(table.GetModelDefinition())}", token);
 
-        public static async Task<ColumnSchema[]> GetTableColumnsAsync(this IDbCommand dbCmd, string sql, CancellationToken token) => (await dbCmd.GetSchemaTableAsync(sql, token)).ToColumnSchemas();
+        public static async Task<ColumnSchema[]> GetTableColumnsAsync(this IDbCommand dbCmd, string sql, CancellationToken token) => 
+            (await dbCmd.GetSchemaTableAsync(sql, token)).ToColumnSchemas(dbCmd);
     }
 }
 #endif

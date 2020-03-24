@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
@@ -203,6 +204,20 @@ namespace ServiceStack.OrmLite.Tests
             
             var tableNamesWithCounts = db.GetTableNamesWithRowCounts(schema:"Schema").Map(x => x.Key.ToLower());
             Assert.That(tableNamesWithCounts.Contains(name));
+        }
+
+        [Test]
+        public void Can_get_definition_of_ModelWithSchema()
+        {
+            using var db = OpenDbConnection();
+            db.CreateTableIfNotExists<ModelWithSchema>();
+            
+            var tableColumns = db.GetTableColumns<ModelWithSchema>();
+            Assert.That(tableColumns.Length, Is.EqualTo(typeof(ModelWithSchema).GetProperties().Length));
+            
+            Assert.That(tableColumns.First(x => x.ColumnName.EqualsIgnoreCase(nameof(ModelWithSchema.Id))).IsKey);
+            
+            // tableColumns.Map(x => x.ToString()).PrintDump();
         }
     }
 }

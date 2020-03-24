@@ -232,7 +232,7 @@ namespace ServiceStack.OrmLite
 
         internal static DataTable GetSchemaTable(this IDbCommand dbCmd, string sql)
         {
-            using (var reader = dbCmd.ExecReader(sql))
+            using (var reader = dbCmd.ExecReader(sql, CommandBehavior.KeyInfo)) //KeyInfo required for npgsql
             {
                 return reader.GetSchemaTable();
             }
@@ -241,9 +241,10 @@ namespace ServiceStack.OrmLite
         public static ColumnSchema[] GetTableColumns(this IDbCommand dbCmd, Type table) => 
             dbCmd.GetTableColumns($"SELECT * FROM {dbCmd.GetDialectProvider().GetQuotedTableName(table.GetModelDefinition())}");
 
-        public static ColumnSchema[] GetTableColumns(this IDbCommand dbCmd, string sql) => dbCmd.GetSchemaTable(sql).ToColumnSchemas();
+        public static ColumnSchema[] GetTableColumns(this IDbCommand dbCmd, string sql) => 
+            dbCmd.GetSchemaTable(sql).ToColumnSchemas(dbCmd);
 
-        internal static ColumnSchema[] ToColumnSchemas(this DataTable dt)
+        internal static ColumnSchema[] ToColumnSchemas(this DataTable dt, IDbCommand dbCmd)
         {
             var ret = new List<ColumnSchema>();
             foreach (DataRow row in dt.Rows)
@@ -255,6 +256,12 @@ namespace ServiceStack.OrmLite
                 }
 
                 var to = obj.FromObjectDictionary<ColumnSchema>();
+                //MySQL doesn't populate DataTypeName, so reverse populate it from Type Converter ColumnDefinition
+                if (to.DataTypeName == null && to.DataType != null)
+                    to.DataTypeName = dbCmd.GetDialectProvider().GetConverter(to.DataType)?.ColumnDefinition.LeftPart('(');
+                if (to.DataTypeName == null)
+                    continue;
+                
                 ret.Add(to);
             }
 
