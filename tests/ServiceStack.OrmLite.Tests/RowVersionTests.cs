@@ -616,6 +616,9 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public async Task Can_read_from_inner_join_with_schema()
         {
+            if ((Dialect & Dialect.AnyMySql) == Dialect) //ERROR table name too long
+                return;
+        
             db.DropAndCreateTable<ModelWithSchemaAndRowVersionForInnerJoin>();
             var rowVersionModel = new ModelWithRowVersion {
                 Text = "test"
