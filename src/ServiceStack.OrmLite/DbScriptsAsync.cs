@@ -124,6 +124,26 @@ namespace ServiceStack.OrmLite
             exec(db => db.ScalarAsync<object>(sql, args), scope, options);
 
 
+        public Task<object> dbCount(ScriptScopeContext scope, string sql) => 
+            exec(db => db.RowCountAsync(sql), scope, null);
+
+        public Task<object> dbCount(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
+            exec(db => db.RowCountAsync(sql, args), scope, null);
+
+        public Task<object> dbCount(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+            exec(db => db.RowCountAsync(sql, args), scope, options);
+
+
+        public async Task<object> dbExists(ScriptScopeContext scope, string sql) => 
+            await dbScalar(scope, sql) != null;
+
+        public async Task<object> dbExists(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
+            await dbScalar(scope, sql, args) != null;
+
+        public async Task<object> dbExists(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+            await dbScalar(scope, sql, args, options) != null;
+
+
         public Task<object> dbExec(ScriptScopeContext scope, string sql) => 
             exec(db => db.ExecuteSqlAsync(sql), scope, null);
 

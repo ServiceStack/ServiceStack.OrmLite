@@ -121,6 +121,26 @@ namespace ServiceStack.OrmLite
             exec(db => db.Scalar<object>(sql, args), scope, options);
 
 
+        public long dbCount(ScriptScopeContext scope, string sql) => 
+            exec(db => db.RowCount(sql), scope, null);
+
+        public long dbCount(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
+            exec(db => db.RowCount(sql, args), scope, null);
+
+        public long dbCount(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+            exec(db => db.RowCount(sql, args), scope, options);
+
+
+        public bool dbExists(ScriptScopeContext scope, string sql) => 
+            dbScalar(scope, sql) != null;
+
+        public bool dbExists(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
+            dbScalar(scope, sql, args) != null;
+
+        public bool dbExists(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+            dbScalar(scope, sql, args, options) != null;
+
+
         public int dbExec(ScriptScopeContext scope, string sql) => 
             exec(db => db.ExecuteSql(sql), scope, null);
 
