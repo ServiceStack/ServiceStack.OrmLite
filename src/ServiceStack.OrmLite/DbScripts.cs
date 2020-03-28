@@ -198,9 +198,10 @@ namespace ServiceStack.OrmLite
         private string padCondition(string text) => string.IsNullOrEmpty(text) ? "" : " " + text;
     }
     
-    public partial class DbScriptsAsync 
+    public partial class DbScriptsAsync
     {
-        private static DbScripts Sync = new DbScripts();
+        private DbScripts sync;
+        private DbScripts Sync => sync ??= new DbScripts { Context = Context, Pages = Pages };
         
         public object dbSelectSync(ScriptScopeContext scope, string sql) => Sync.dbSelect(scope, sql);
 
