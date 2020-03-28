@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite
         private IDbConnectionFactory dbFactory;
         public IDbConnectionFactory DbFactory
         {
-            get => dbFactory ?? (dbFactory = Context.Container.Resolve<IDbConnectionFactory>());
+            get => dbFactory ??= Context.Container.Resolve<IDbConnectionFactory>();
             set => dbFactory = value;
         }
 
@@ -196,5 +196,92 @@ namespace ServiceStack.OrmLite
         public bool isUnsafeSqlFragment(string sql) => OrmLiteUtils.isUnsafeSql(sql, OrmLiteUtils.VerifyFragmentRegEx);
 
         private string padCondition(string text) => string.IsNullOrEmpty(text) ? "" : " " + text;
+    }
+    
+    public partial class DbScriptsAsync 
+    {
+        private static DbScripts Sync = new DbScripts();
+        
+        public object dbSelectSync(ScriptScopeContext scope, string sql) => Sync.dbSelect(scope, sql);
+
+        public object dbSelectSync(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
+            Sync.dbSelect(scope, sql, args);
+
+        public object dbSelectSync(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+            Sync.dbSelect(scope, sql, args, options);
+
+
+        public object dbSingleSync(ScriptScopeContext scope, string sql) => 
+            Sync.dbSingle(scope, sql);
+
+        public object dbSingleSync(ScriptScopeContext scope, string sql, Dictionary<string, object> args) =>
+            Sync.dbSingle(scope, sql, args);
+
+        public object dbSingleSync(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) =>
+            Sync.dbSingle(scope, sql, args, options);
+
+
+        public object dbScalarSync(ScriptScopeContext scope, string sql) => 
+            Sync.dbScalar(scope, sql);
+
+        public object dbScalarSync(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
+            Sync.dbScalar(scope, sql, args);
+
+        public object dbScalarSync(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+            Sync.dbScalar(scope, sql, args, options);
+
+
+        public long dbCountSync(ScriptScopeContext scope, string sql) => 
+            Sync.dbCount(scope, sql);
+
+        public long dbCountSync(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
+            Sync.dbCount(scope, sql, args);
+
+        public long dbCountSync(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+            Sync.dbCount(scope, sql, args, options);
+
+
+        public bool dbExistsSync(ScriptScopeContext scope, string sql) => 
+            Sync.dbExists(scope, sql);
+
+        public bool dbExistsSync(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
+            Sync.dbExists(scope, sql, args);
+
+        public bool dbExistsSync(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+            Sync.dbExists(scope, sql, args, options);
+
+
+        public int dbExecSync(ScriptScopeContext scope, string sql) => 
+            Sync.dbExec(scope, sql);
+
+        public int dbExecSync(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
+            Sync.dbExec(scope, sql, args);
+
+        public int dbExecSync(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
+            Sync.dbExec(scope, sql, args, options);
+
+        public List<string> dbTableNamesSync(ScriptScopeContext scope) => dbTableNamesSync(scope, null, null);
+        public List<string> dbTableNamesSync(ScriptScopeContext scope, Dictionary<string, object> args) => dbTableNamesSync(scope, args, null);
+        public List<string> dbTableNamesSync(ScriptScopeContext scope, Dictionary<string, object> args, object options) => 
+            Sync.dbTableNames(scope, args, options);
+
+        public List<KeyValuePair<string, long>> dbTableNamesWithRowCountsSync(ScriptScopeContext scope) => 
+            dbTableNamesWithRowCountsSync(scope, null, null);
+        public List<KeyValuePair<string, long>> dbTableNamesWithRowCountsSync(ScriptScopeContext scope, Dictionary<string, object> args) => 
+            dbTableNamesWithRowCountsSync(scope, args, null);
+        public List<KeyValuePair<string, long>> dbTableNamesWithRowCountsSync(ScriptScopeContext scope, Dictionary<string, object> args, object options) => 
+            Sync.dbTableNamesWithRowCounts(scope, args, options);
+
+        public string[] dbColumnNamesSync(ScriptScopeContext scope, string tableName) => dbColumnNamesSync(scope, tableName, null);
+        public string[] dbColumnNamesSync(ScriptScopeContext scope, string tableName, object options) => 
+            dbColumnsSync(scope, tableName, options).Select(x => x.ColumnName).ToArray();
+
+        public ColumnSchema[] dbColumnsSync(ScriptScopeContext scope, string tableName) => dbColumnsSync(scope, tableName, null);
+        public ColumnSchema[] dbColumnsSync(ScriptScopeContext scope, string tableName, object options) => 
+            Sync.dbColumns(scope, tableName, options);
+
+        public ColumnSchema[] dbDescSync(ScriptScopeContext scope, string sql) => dbDescSync(scope, sql, null);
+        public ColumnSchema[] dbDescSync(ScriptScopeContext scope, string sql, object options) =>
+            Sync.dbDesc(scope, sql, options);
     }
 }

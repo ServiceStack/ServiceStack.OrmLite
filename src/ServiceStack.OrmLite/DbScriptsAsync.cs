@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite
     [Obsolete("Use DbScriptsAsync")]
     public class TemplateDbFiltersAsync : DbScriptsAsync {}
     
-    public class DbScriptsAsync : ScriptMethods
+    public partial class DbScriptsAsync : ScriptMethods
     {
         private const string DbInfo = "__dbinfo"; // Keywords.DbInfo
         private const string DbConnection = "__dbconnection"; // useDbConnection global
@@ -20,7 +20,7 @@ namespace ServiceStack.OrmLite
         private IDbConnectionFactory dbFactory;
         public IDbConnectionFactory DbFactory
         {
-            get => dbFactory ?? (dbFactory = Context.Container.Resolve<IDbConnectionFactory>());
+            get => dbFactory ??= Context.Container.Resolve<IDbConnectionFactory>();
             set => dbFactory = value;
         }
 
