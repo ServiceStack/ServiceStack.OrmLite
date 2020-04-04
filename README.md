@@ -15,7 +15,7 @@ OrmLite was designed with a focus on the core objectives:
   * Create/Drop DB Table schemas using nothing but POCO class definitions (IOTW a true code-first ORM)
   * Simplicity - typed, wrist friendly API for common data access patterns.
   * High performance - with support for indexes, text blobs, etc.
-    * Amongst the [fastest Micro ORMs](http://mono.servicestack.net/benchmarks/) for .NET.
+    * Amongst the [fastest Micro ORMs](https://servicestackv3.github.io/Mono/src/Mono/benchmarks/default.htm) for .NET.
   * Expressive power and flexibility - with access to IDbCommand and raw SQL
   * Cross platform - supports multiple dbs (currently: Sql Server, Sqlite, MySql, PostgreSQL, Firebird) running on both .NET and Mono platforms.
 
@@ -2571,7 +2571,7 @@ foreach (var newRobot in newRobots)
 Using the [SQLite Manager](https://addons.mozilla.org/en-US/firefox/addon/sqlite-manager/?src=search) Firefox extension
 we can peek at one of the created shards to see 100 Robots in each shard. This is the dump of `robots-shard0.sqlite`:
 
-![Data dump of Robot Shard #1](http://mono.servicestack.net/files/robots-shard0.png)
+![Data dump of Robot Shard #1](https://raw.githubusercontent.com/ServiceStack/docs/master/docs/images/ormlite/robots-shard0.sqlite.jpg)
 
 As expected each shard has every 10th robot inside.
 
@@ -2766,11 +2766,11 @@ using (IDbConnection db = Config.OpenDbConnection())
 
 Running this against a SQL Server database will yield the results below:
 
-[![SQL Server Management Studio results](http://mono.servicestack.net/files/ormlite-example.png)](http://www.servicestack.net/files/ormlite-example.png)
+[![SQL Server Management Studio results](https://raw.githubusercontent.com/ServiceStack/docs/master/docs/images/ormlite/ormlite-example.png)](https://raw.githubusercontent.com/ServiceStack/docs/master/docs/images/ormlite/ormlite-example.png)
 
-Notice the POCO types are stored in the [very fast](http://mono.servicestack.net/mythz_blog/?p=176) 
-and [Versatile](http://mono.servicestack.net/mythz_blog/?p=314) 
-[JSV Format](https://github.com/ServiceStack/ServiceStack.Text/wiki/JSV-Format) which although hard to do - 
+Notice the POCO types are stored in the [very fast](https://github.com/ServiceStackV3/mythz_blog/blob/master/pages/176.md) 
+and [Versatile](https://github.com/ServiceStackV3/mythz_blog/blob/master/pages/314.md) 
+[JSV Format](https://docs.servicestack.net/jsv-format) which although hard to do - 
 is actually more compact, human and parser-friendly than JSON :)
 
 ### Ignoring DTO Properties
