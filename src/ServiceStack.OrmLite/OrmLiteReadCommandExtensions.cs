@@ -230,11 +230,15 @@ namespace ServiceStack.OrmLite
                 : null;
 
             var sqlCopy = sql; //C# doesn't allow changing ref params in lambda's
+            Dictionary<string, PropertyAccessor> anonTypeProps = null;
 
             var paramIndex = 0;
             anonType.ToObjectDictionary().ForEachParam(modelDef, excludeDefaults, (propName, columnName, value) =>
             {
-                var propType = value?.GetType() ?? typeof(object);
+                var propType = value?.GetType() ?? ((anonTypeProps ??= TypeProperties.Get(anonType.GetType()).PropertyMap)
+                   .TryGetValue(propName, out var pType)
+                        ? pType.PropertyInfo.PropertyType
+                        : typeof(object));
                 var inValues = GetMultiValues(value);
                 if (inValues != null)
                 {
