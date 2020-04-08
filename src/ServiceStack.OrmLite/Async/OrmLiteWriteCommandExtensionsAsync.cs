@@ -310,7 +310,7 @@ namespace ServiceStack.OrmLite
             try
             {
                 if (enableIdentityInsert)
-                    dialectProvider.EnableIdentityInsert<T>(dbCmd);
+                    await dialectProvider.EnableIdentityInsertAsync<T>(dbCmd, token);
                 
                 dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
                     insertFields: dialectProvider.GetNonDefaultValueInsertFields<T>(obj),
@@ -324,7 +324,7 @@ namespace ServiceStack.OrmLite
             finally
             {
                 if (enableIdentityInsert)
-                    dialectProvider.DisableIdentityInsert<T>(dbCmd);
+                    await dialectProvider.DisableIdentityInsertAsync<T>(dbCmd, token);
             }
         }
 
