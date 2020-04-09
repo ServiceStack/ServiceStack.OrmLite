@@ -580,6 +580,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             { "hstore", NpgsqlDbType.Hstore },
             { "text[]", NpgsqlDbType.Array | NpgsqlDbType.Text },
             { "short[]", NpgsqlDbType.Array | NpgsqlDbType.Smallint },
+            { "int[]", NpgsqlDbType.Array | NpgsqlDbType.Integer },
             { "integer[]", NpgsqlDbType.Array | NpgsqlDbType.Integer },
             { "bigint[]", NpgsqlDbType.Array | NpgsqlDbType.Bigint },
             { "real[]", NpgsqlDbType.Array | NpgsqlDbType.Real },
@@ -587,6 +588,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
             { "numeric[]", NpgsqlDbType.Array | NpgsqlDbType.Numeric },
             { "timestamp[]", NpgsqlDbType.Array | NpgsqlDbType.Timestamp },
             { "timestamp with time zone[]", NpgsqlDbType.Array | NpgsqlDbType.TimestampTz },
+            { "bool[]", NpgsqlDbType.Array | NpgsqlDbType.Boolean },
+            { "boolean[]", NpgsqlDbType.Array | NpgsqlDbType.Boolean },
         };
         
         public override void SetParameter(FieldDefinition fieldDef, IDbDataParameter p)
