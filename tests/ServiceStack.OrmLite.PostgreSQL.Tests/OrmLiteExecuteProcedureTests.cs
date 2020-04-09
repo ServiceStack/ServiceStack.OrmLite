@@ -42,16 +42,26 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
         private const string Drop = "DROP FUNCTION f_service_stack(text[], integer[]);";
 
         [Alias("f_service_stack")]
-        public class ServiceStackFunction
+        public class ServiceStackFunctionWithAlias
         {
             [CustomField("text[]")]
+            [Alias("v_string_values")]
             public string[] StringValues { get; set; }
             [CustomField("integer[]")]
+            [Alias("v_integer_values")]
             public int[] IntegerValues { get; set; }
         }
 
+        [Alias("f_service_stack")]
+        public class ServiceStackFunctionNoAlias
+        {
+            [CustomField("text[]")]
+            public string[] v_string_values { get; set; }
+            [CustomField("int[]")]
+            public int[] v_integer_values { get; set; }
+        }
+
         [Test]
-        [Ignore("This test fails both on .NET and .NET Core")]
         public void Can_execute_stored_procedure_with_array_arguments()
         {
             using (var db = OpenDbConnection())
@@ -59,11 +69,21 @@ namespace ServiceStack.OrmLite.PostgreSQL.Tests
                 db.ExecuteSql(Create);
                 db.GetLastSql().Print();
 
-                db.ExecuteProcedure(new ServiceStackFunction
+                // Execute using [Alias()] attribute
+                db.ExecuteProcedure(new ServiceStackFunctionWithAlias
                 {
                     StringValues = new[] { "ServiceStack", "Thoughtfully Architected" },
                     IntegerValues = new[] { 1, 2, 3 }
                 });
+                db.GetLastSql().Print();
+
+                // Execute without using [Alias()] attribute
+                db.ExecuteProcedure(new ServiceStackFunctionNoAlias
+                {
+                    v_string_values = new[] { "ServiceStack", "Thoughtfully Architected" },
+                    v_integer_values = new[] { 1, 2, 3 }
+                });
+                db.GetLastSql().Print();
 
                 db.ExecuteSql(Drop);
             }
