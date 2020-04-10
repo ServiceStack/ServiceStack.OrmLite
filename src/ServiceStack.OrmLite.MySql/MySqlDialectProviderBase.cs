@@ -356,7 +356,8 @@ namespace ServiceStack.OrmLite.MySql
 
         public override string GetQuotedValue(object value, Type fieldType)
         {
-            if (value == null) return "NULL";
+            if (value == null) 
+	            return "NULL";
 
             if (fieldType == typeof(byte[]))
                 return "0x" + BitConverter.ToString((byte[])value).Replace("-", "");

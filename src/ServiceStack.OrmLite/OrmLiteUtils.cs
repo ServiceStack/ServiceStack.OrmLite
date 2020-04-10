@@ -544,7 +544,10 @@ namespace ServiceStack.OrmLite
 
         public static string SqlJoin<T>(this List<T> values, IOrmLiteDialectProvider dialect = null)
         {
-            dialect = dialect ?? OrmLiteConfig.DialectProvider;
+            if (values == null)
+                return string.Empty;
+
+            dialect ??= OrmLiteConfig.DialectProvider;
 
             var sb = StringBuilderCache.Allocate();
             foreach (var value in values)
@@ -558,12 +561,16 @@ namespace ServiceStack.OrmLite
 
         public static string SqlJoin(IEnumerable values, IOrmLiteDialectProvider dialect = null)
         {
-            dialect = (dialect ?? OrmLiteConfig.DialectProvider);
+            if (values == null)
+                return string.Empty;
+            
+            dialect ??= OrmLiteConfig.DialectProvider;
 
             var sb = StringBuilderCache.Allocate();
             foreach (var value in values)
             {
-                if (sb.Length > 0) sb.Append(",");
+                if (sb.Length > 0) 
+                    sb.Append(",");
                 sb.Append(dialect.GetQuotedValue(value, value.GetType()));
             }
 

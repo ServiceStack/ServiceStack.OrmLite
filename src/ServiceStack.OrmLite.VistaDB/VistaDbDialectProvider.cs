@@ -266,7 +266,7 @@ namespace ServiceStack.OrmLite.VistaDB
                 sql.Append(sqlFilter);
             }
 
-            return string.Format("SELECT EXISTS({0});", StringBuilderCache.ReturnAndFree(sql));
+            return $"SELECT EXISTS({StringBuilderCache.ReturnAndFree(sql)});";
         }
 
         public override string GetQuotedValue(object value, Type fieldType)
@@ -275,7 +275,7 @@ namespace ServiceStack.OrmLite.VistaDB
                 return "NULL";
 
             if (fieldType == typeof(Guid))
-                return string.Format("CAST('{0}' AS UNIQUEIDENTIFIER)", (Guid)value);
+                return $"CAST('{(Guid) value}' AS UNIQUEIDENTIFIER)";
 
             return base.GetQuotedValue(value, fieldType);
         }
