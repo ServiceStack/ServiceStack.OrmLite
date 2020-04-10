@@ -18,7 +18,8 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(dialect.SqlSpread(new string[0]), Is.EqualTo(""));
             Assert.That(dialect.SqlSpread(1, 2, 3), Is.EqualTo("1,2,3"));
             Assert.That(dialect.SqlSpread("A", "B", "C"), Is.EqualTo("'A','B','C'"));
-            Assert.That(dialect.SqlSpread("A'B", "C\"D"), Is.EqualTo("'A''B','C\"D'"));
+            Assert.That(dialect.SqlSpread("A'B", "C\"D"), 
+                Is.EqualTo("'A''B','C\"D'").Or.EqualTo("'A\\'B','C\"D'")); //MySql
         }
     }
 }
