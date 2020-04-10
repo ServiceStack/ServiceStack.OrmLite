@@ -121,5 +121,9 @@ namespace ServiceStack.OrmLite
             converter.InitDbParam(dbParam, columnType);
             dbParam.Value = converter.ToDbValue(columnType, value);
         }
+
+        public static string SqlSpread<T>(this IOrmLiteDialectProvider dialect, params T[] values) =>
+            OrmLiteUtils.SqlJoin(values, dialect);
+
     }
 }
