@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -573,8 +575,58 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
             return "; " + SelectIdentitySql;
         }
+        
+        public Dictionary<Type,NpgsqlDbType> TypesMap { get; } = new Dictionary<Type, NpgsqlDbType>
+        {
+            [typeof(bool)] = NpgsqlDbType.Boolean,
+            [typeof(short)] = NpgsqlDbType.Smallint,
+            [typeof(int)] = NpgsqlDbType.Integer,
+            [typeof(long)] = NpgsqlDbType.Bigint,
+            [typeof(float)] = NpgsqlDbType.Real,
+            [typeof(double)] = NpgsqlDbType.Double,
+            [typeof(decimal)] = NpgsqlDbType.Numeric,
+            [typeof(string)] = NpgsqlDbType.Text,
+            [typeof(char[])] = NpgsqlDbType.Varchar,
+            [typeof(char)] = NpgsqlDbType.Char,
+            [typeof(NpgsqlPoint)] = NpgsqlDbType.Point,
+            [typeof(NpgsqlLSeg)] = NpgsqlDbType.LSeg,
+            [typeof(NpgsqlPath)] = NpgsqlDbType.Path,
+            [typeof(NpgsqlPolygon)] = NpgsqlDbType.Polygon,
+            [typeof(NpgsqlLine)] = NpgsqlDbType.Line,
+            [typeof(NpgsqlCircle)] = NpgsqlDbType.Circle,
+            [typeof(NpgsqlBox)] = NpgsqlDbType.Box,
+            [typeof(BitArray)] = NpgsqlDbType.Varbit,
+            [typeof(IDictionary<string, string>)] = NpgsqlDbType.Hstore,
+            [typeof(Guid)] = NpgsqlDbType.Uuid,
+            [typeof(NpgsqlInet)] = NpgsqlDbType.Cidr,
+            [typeof(ValueTuple<IPAddress,int>)] = NpgsqlDbType.Inet,
+            [typeof(IPAddress)] = NpgsqlDbType.Inet,
+            [typeof(PhysicalAddress)] = NpgsqlDbType.MacAddr,
+            [typeof(NpgsqlTsQuery)] = NpgsqlDbType.TsQuery,
+            [typeof(NpgsqlTsVector)] = NpgsqlDbType.TsVector,
+            [typeof(NpgsqlDate)] = NpgsqlDbType.Date,
+            [typeof(DateTime)] = NpgsqlDbType.Timestamp,
+            [typeof(DateTimeOffset)] = NpgsqlDbType.TimestampTz,
+            [typeof(TimeSpan)] = NpgsqlDbType.Time,
+            [typeof(NpgsqlTimeSpan)] = NpgsqlDbType.Time,
+            [typeof(byte[])] = NpgsqlDbType.Bytea,
+            [typeof(uint)] = NpgsqlDbType.Oid,
+            [typeof(uint[])] = NpgsqlDbType.Oidvector,
+        };
 
-        public static Dictionary<string, NpgsqlDbType> NativeTypes = new Dictionary<string, NpgsqlDbType> {
+        public NpgsqlDbType GetDbType<T>() => GetDbType(typeof(T));
+        public NpgsqlDbType GetDbType(Type type)
+        {
+            if (PostgreSqlDialect.Instance.TypesMap.TryGetValue(type, out var paramType))
+                return paramType;
+            var genericEnum = type.GetTypeWithGenericTypeDefinitionOf(typeof(IEnumerable<>));
+            if (genericEnum != null)
+                return GetDbType(genericEnum.GenericTypeArguments[0]) | NpgsqlDbType.Array;
+            
+            throw new NotSupportedException($"Type '{type.Name}' not found in 'TypesMap'");
+        }
+        
+        public Dictionary<string, NpgsqlDbType> NativeTypes = new Dictionary<string, NpgsqlDbType> {
             { "json", NpgsqlDbType.Json },
             { "jsonb", NpgsqlDbType.Jsonb },
             { "hstore", NpgsqlDbType.Hstore },
