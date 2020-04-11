@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             "ARRAY[" + PostgreSqlDialect.Provider.SqlSpread(items) + "]";
 
         public static string Array<T>(T[] items, bool nullIfEmpty) => 
-            nullIfEmpty && items == null || items.Length == 0
+            nullIfEmpty && (items == null || items.Length == 0)
             ? "null"
             : "ARRAY[" + PostgreSqlDialect.Provider.SqlSpread(items) + "]";
     }
