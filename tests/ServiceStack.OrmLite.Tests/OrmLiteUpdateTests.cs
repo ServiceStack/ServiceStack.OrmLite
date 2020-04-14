@@ -812,6 +812,148 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(row.FirstName, Is.EqualTo("Updated"));
             }
         }
+
+        [Test]
+        public void Can_update_DefaultValue()
+        {
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<DefaultValue>();
+            AssertDefaultValueFieldTypeDefaultValues();
+
+            var orig = new DefaultValue {
+                Id = 1,
+                Bool = true,
+                NBool = false,
+                Int = 2,
+                NInt = 0,
+                String = "A",
+            };
+            db.Insert(orig);
+            var row = db.SingleById<DefaultValue>(1);
+            AssertDefaultValues(row, orig);
+
+            db.UpdateOnly<DefaultValue>(new Dictionary<string, object> {
+                [nameof(DefaultValue.Id)] = 1,
+                [nameof(DefaultValue.Bool)] = false,
+                [nameof(DefaultValue.NBool)] = null,
+                [nameof(DefaultValue.Int)] = 0,
+                [nameof(DefaultValue.NInt)] = null,
+                [nameof(DefaultValue.String)] = null,
+            });
+            
+            row = db.SingleById<DefaultValue>(1);
+            AssertDefaultValues(row, new DefaultValue {
+                Id = 1,
+                Bool = false,
+                NBool = null,
+                Int = 0,
+                NInt = null,
+                String = null,
+            });
+
+            db.UpdateOnly<DefaultValue>(new Dictionary<string, object> {
+                [nameof(DefaultValue.Id)] = 1,
+                [nameof(DefaultValue.Bool)] = true,
+                [nameof(DefaultValue.NBool)] = false,
+                [nameof(DefaultValue.Int)] = 1,
+                [nameof(DefaultValue.NInt)] = 0,
+                [nameof(DefaultValue.String)] = "",
+            });
+            
+            row = db.SingleById<DefaultValue>(1);
+            AssertDefaultValues(row, new DefaultValue {
+                Id = 1,
+                Bool = true,
+                NBool = false,
+                Int = 1,
+                NInt = 0,
+                String = "",
+            });
+        }
+
+        [Test]
+        public async Task Can_update_DefaultValue_Async()
+        {
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<DefaultValue>();
+            AssertDefaultValueFieldTypeDefaultValues();
+
+            var orig = new DefaultValue {
+                Id = 1,
+                Bool = true,
+                NBool = false,
+                Int = 2,
+                NInt = 0,
+                String = "A",
+            };
+            await db.InsertAsync(orig);
+            var row = await db.SingleByIdAsync<DefaultValue>(1);
+            AssertDefaultValues(row, orig);
+
+            db.UpdateOnly<DefaultValue>(new Dictionary<string, object> {
+                [nameof(DefaultValue.Id)] = 1,
+                [nameof(DefaultValue.Bool)] = false,
+                [nameof(DefaultValue.NBool)] = null,
+                [nameof(DefaultValue.Int)] = 0,
+                [nameof(DefaultValue.NInt)] = null,
+                [nameof(DefaultValue.String)] = null,
+            });
+            
+            row = await db.SingleByIdAsync<DefaultValue>(1);
+            AssertDefaultValues(row, new DefaultValue {
+                Id = 1,
+                Bool = false,
+                NBool = null,
+                Int = 0,
+                NInt = null,
+                String = null,
+            });
+
+            await db.UpdateOnlyAsync<DefaultValue>(new Dictionary<string, object> {
+                [nameof(DefaultValue.Id)] = 1,
+                [nameof(DefaultValue.Bool)] = true,
+                [nameof(DefaultValue.NBool)] = false,
+                [nameof(DefaultValue.Int)] = 1,
+                [nameof(DefaultValue.NInt)] = 0,
+                [nameof(DefaultValue.String)] = "",
+            });
+            
+            row = db.SingleById<DefaultValue>(1);
+            AssertDefaultValues(row, new DefaultValue {
+                Id = 1,
+                Bool = true,
+                NBool = false,
+                Int = 1,
+                NInt = 0,
+                String = "",
+            });
+        }
+
+        private static void AssertDefaultValueFieldTypeDefaultValues()
+        {
+            var modelDef = typeof(DefaultValue).GetModelMetadata();
+            Assert.That(modelDef.GetFieldDefinition(nameof(DefaultValue.Int)).FieldTypeDefaultValue,
+                Is.EqualTo(default(int)));
+            Assert.That(modelDef.GetFieldDefinition(nameof(DefaultValue.NInt)).FieldTypeDefaultValue,
+                Is.EqualTo(default(int?)));
+            Assert.That(modelDef.GetFieldDefinition(nameof(DefaultValue.Bool)).FieldTypeDefaultValue,
+                Is.EqualTo(default(bool)));
+            Assert.That(modelDef.GetFieldDefinition(nameof(DefaultValue.NBool)).FieldTypeDefaultValue,
+                Is.EqualTo(default(bool?)));
+            Assert.That(modelDef.GetFieldDefinition(nameof(DefaultValue.String)).FieldTypeDefaultValue,
+                Is.EqualTo(default(string)));
+        }
+
+        private void AssertDefaultValues(DefaultValue row, DefaultValue orig)
+        {
+            Assert.That(row.Id, Is.EqualTo(orig.Id));
+            Assert.That(row.Bool, Is.EqualTo(orig.Bool));
+            Assert.That(row.NBool, Is.EqualTo(orig.NBool));
+            Assert.That(row.Int, Is.EqualTo(orig.Int));
+            Assert.That(row.NInt, Is.EqualTo(orig.NInt));
+            Assert.That(row.String, Is.EqualTo(orig.String));
+        }
+        
     }
 
     [CompositeIndex("FirstName", "LastName")]
@@ -830,4 +972,15 @@ namespace ServiceStack.OrmLite.Tests
         public int Id { get; set; }
         public bool? IsShutdownGraceful { get; set; }
     }
+    
+    public class DefaultValue
+    {
+        public int Id { get; set; }
+        public int Int { get; set; }
+        public int? NInt { get; set; }
+        public bool Bool { get; set; }
+        public bool? NBool { get; set; }
+        public string String { get; set; }
+    }
+
 }
