@@ -116,6 +116,8 @@ namespace ServiceStack.OrmLite
         public string ComputeExpression { get; set; }
 
         public string CustomSelect { get; set; }
+        public string CustomInsert { get; set; }
+        public string CustomUpdate { get; set; }
 
         public bool RequiresAlias => Alias != null || CustomSelect != null;
 

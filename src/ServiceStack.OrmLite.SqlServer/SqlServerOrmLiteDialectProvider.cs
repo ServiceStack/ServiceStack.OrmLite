@@ -443,7 +443,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     }
                     else
                     {
-                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName),fieldDef.CustomInsert));
                         AddParameter(cmd, fieldDef);
                     }
                 }
@@ -505,7 +505,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(this.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
+                    sbColumnValues.Append(this.GetInsertParam(dbCmd, value, fieldDef));
                 }
                 catch (Exception ex)
                 {

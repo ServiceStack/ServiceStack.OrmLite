@@ -6,6 +6,14 @@ namespace ServiceStack.OrmLite
 {
     public static class OrmLiteDialectProviderExtensions
     {
+        public static string GetParam(this IOrmLiteDialectProvider dialect, string name, string format)
+        {
+            var ret = dialect.ParamString + (dialect.ParamNameFilter?.Invoke(name) ?? name);
+            return format == null
+                ? ret
+                : string.Format(format, ret);
+        }
+
         public static string GetParam(this IOrmLiteDialectProvider dialect, string name)
         {
             return dialect.ParamString + (dialect.ParamNameFilter?.Invoke(name) ?? name);

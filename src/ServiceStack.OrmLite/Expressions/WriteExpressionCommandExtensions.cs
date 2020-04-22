@@ -327,7 +327,7 @@ namespace ServiceStack.OrmLite
                 sql
                     .Append(dialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(dialectProvider.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
+                    .Append(dialectProvider.GetUpdateParam(dbCmd, value, fieldDef));
             }
 
             dbCmd.CommandText = $"UPDATE {dialectProvider.GetQuotedTableName(modelDef)} " +

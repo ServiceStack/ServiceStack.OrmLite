@@ -312,7 +312,7 @@ namespace ServiceStack.OrmLite.Oracle
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName),fieldDef.CustomInsert));
 
                     AddParameter(dbCommand, fieldDef);
                 }
@@ -419,9 +419,9 @@ namespace ServiceStack.OrmLite.Oracle
 
                 try
                 {
-                    sbColumnNames.Append(string.Format("{0}", GetQuotedColumnName(fieldDef.FieldName)));
+                    sbColumnNames.Append($"{GetQuotedColumnName(fieldDef.FieldName)}");
                     if (!string.IsNullOrEmpty(fieldDef.Sequence) && dbCommand == null)
-                        sbColumnValues.Append(string.Format(":{0}", fieldDef.Name));
+                        sbColumnValues.Append($":{fieldDef.Name}");
                     else
                         sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
                 }
@@ -476,7 +476,7 @@ namespace ServiceStack.OrmLite.Oracle
                 sql
                     .Append(GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(this.AddUpdateParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
+                    .Append(this.GetUpdateParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef));
             }
 
             var strFilter = StringBuilderCacheAlt.ReturnAndFree(sqlFilter);

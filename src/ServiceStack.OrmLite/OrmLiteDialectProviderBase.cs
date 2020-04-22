@@ -677,7 +677,7 @@ namespace ServiceStack.OrmLite
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName),fieldDef.CustomInsert));
 
                     var p = AddParameter(cmd, fieldDef);
 
@@ -721,7 +721,7 @@ namespace ServiceStack.OrmLite
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(this.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
+                    sbColumnValues.Append(this.GetInsertParam(dbCmd, value, fieldDef));
                 }
                 catch (Exception ex)
                 {
@@ -812,7 +812,7 @@ namespace ServiceStack.OrmLite
                     sql
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName), fieldDef.CustomUpdate));
 
                     AddParameter(cmd, fieldDef);
                 }
@@ -1085,7 +1085,7 @@ namespace ServiceStack.OrmLite
                     sql
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddUpdateParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
+                        .Append(this.GetUpdateParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef));
                 }
                 catch (Exception ex)
                 {
@@ -1122,7 +1122,7 @@ namespace ServiceStack.OrmLite
                     sql
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
+                        .Append(this.GetUpdateParam(dbCmd, value, fieldDef));
                 }
                 catch (Exception ex)
                 {
@@ -1165,14 +1165,14 @@ namespace ServiceStack.OrmLite
                             .Append("=")
                             .Append(quotedFieldName)
                             .Append("+")
-                            .Append(this.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
+                            .Append(this.GetUpdateParam(dbCmd, value, fieldDef));
                     }
                     else
                     {
                         sql
                             .Append(quotedFieldName)
                             .Append("=")
-                            .Append(this.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
+                            .Append(this.GetUpdateParam(dbCmd, value, fieldDef));
                     }
                 }
                 catch (Exception ex)

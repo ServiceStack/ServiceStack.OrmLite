@@ -317,7 +317,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
 
-                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName),fieldDef.CustomInsert));
                     AddParameter(cmd, fieldDef);
                 }
                 catch (Exception ex)

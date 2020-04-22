@@ -191,6 +191,8 @@ namespace ServiceStack.OrmLite
                     IsPersisted = persistedAttr != null,
                     ComputeExpression = computeAttr != null ? computeAttr.Expression : string.Empty,
                     CustomSelect = customSelectAttr?.Sql,
+                    CustomInsert = propertyInfo.FirstAttribute<CustomInsertAttribute>()?.Sql,
+                    CustomUpdate = propertyInfo.FirstAttribute<CustomUpdateAttribute>()?.Sql,
                     Scale = decimalAttribute?.Scale,
                     BelongToModelName = belongToAttribute?.BelongToTableType.GetModelDefinition().ModelName,
                     CustomFieldDefinition = customFieldAttr?.Sql,

@@ -240,7 +240,7 @@ namespace ServiceStack.OrmLite.Firebird
                     }
                     else
                     {
-                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName),fieldDef.CustomInsert));
                         AddParameter(cmd, fieldDef);
                     }
                 }
@@ -297,7 +297,7 @@ namespace ServiceStack.OrmLite.Firebird
                 sql
                     .Append(GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(this.AddUpdateParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
+                    .Append(this.GetUpdateParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef));
             }
 
             var strFilter = StringBuilderCacheAlt.ReturnAndFree(sqlFilter);
