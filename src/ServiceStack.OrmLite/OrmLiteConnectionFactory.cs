@@ -230,6 +230,10 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Alias for OpenDbConnectionAsync
         /// </summary>
+        public static Task<IDbConnection> OpenDbConnectionAsync(this IDbConnectionFactory connectionFactory, CancellationToken token = default)
+        {
+            return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionAsync(token);
+        }
         public static Task<IDbConnection> OpenAsync(this IDbConnectionFactory connectionFactory, CancellationToken token = default)
         {
             return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionAsync(token);
