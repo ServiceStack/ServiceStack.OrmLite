@@ -15,7 +15,7 @@
         <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
         <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
         <PackageReference Include="ServiceStack" Version="$(Version)" />
-        <PackageReference Include="System.Data.SQLite.Core" Version="1.0.112" />
+        <PackageReference Include="System.Data.SQLite.Core" Version="1.0.112.2" />
 
         <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
         <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj" />

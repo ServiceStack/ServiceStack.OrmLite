@@ -17,7 +17,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
     <PackageReference Include="ServiceStack.Common" Version="$(Version)" />
-    <PackageReference Include="Microsoft.Data.SQLite" Version="3.1.0" />
+    <PackageReference Include="Microsoft.Data.SQLite" Version="3.1.3" />
   </ItemGroup>
 
   <ItemGroup>

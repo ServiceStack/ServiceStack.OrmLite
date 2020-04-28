@@ -16,7 +16,7 @@
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.Core.csproj" />
     <PackageReference Include="ServiceStack.Common.Core" Version="$(Version)" />
-    <PackageReference Include="Microsoft.Data.SqlClient" Version="1.1.0" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="1.1.2" />
   </ItemGroup>
 
   <ItemGroup>
