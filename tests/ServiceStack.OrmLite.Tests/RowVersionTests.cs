@@ -223,6 +223,18 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public async Task Can_Save_new_row_and_retrieve_rowversion_Async()
+        {
+            var row = new ModelWithRowVersion { Text = "First" };
+
+            bool wasInserted = await db.SaveAsync(row);
+
+            Assert.That(wasInserted, Is.True);
+            var actualRow = await db.SingleByIdAsync<ModelWithRowVersion>(row.Id);
+            Assert.That(row.RowVersion, Is.EqualTo(actualRow.RowVersion));
+        }
+
+        [Test]
         public void Can_SaveAll_new_rows_and_retrieve_rowversion()
         {
             var rows = new[]
