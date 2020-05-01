@@ -1146,7 +1146,7 @@ namespace ServiceStack.OrmLite
             if (to is ulong u && modelDef.RowVersion.ColumnType == typeof(byte[]))
                 return BitConverter.GetBytes(u);
 
-            return to;
+            return to ?? modelDef.RowVersion.ColumnType.GetDefaultValue();
         }
 
         internal static string RowVersionSql(this IDbCommand dbCmd, ModelDefinition modelDef, object id)
