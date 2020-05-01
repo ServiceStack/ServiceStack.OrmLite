@@ -262,6 +262,24 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public async Task Can_Save_ModelWithAutoGuidAndRowVersion_Async()
+        {
+            db.DropAndCreateTable<ModelWithAutoGuidAndRowVersion>();
+            var row = new ModelWithAutoGuidAndRowVersion { Name = "A" };
+            
+            Assert.That(await db.SaveAsync(row));
+
+            var dbRow = await db.SingleByIdAsync<ModelWithAutoGuidAndRowVersion>(row.Id);
+            Assert.That(dbRow.Name, Is.EqualTo(row.Name));
+
+            dbRow.Name = "B";
+            await db.SaveAsync(dbRow);
+
+            dbRow = await db.SingleByIdAsync<ModelWithAutoGuidAndRowVersion>(row.Id);
+            Assert.That(dbRow.Name, Is.EqualTo("B"));
+        }
+
+        [Test]
         public void Can_SaveAll_new_rows_and_retrieve_rowversion()
         {
             var rows = new[]
