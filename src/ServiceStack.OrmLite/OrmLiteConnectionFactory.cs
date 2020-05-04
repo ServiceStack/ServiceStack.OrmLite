@@ -196,7 +196,7 @@ namespace ServiceStack.OrmLite
         }
 
         private static Dictionary<string, IOrmLiteDialectProvider> dialectProviders;
-        public static Dictionary<string, IOrmLiteDialectProvider> DialectProviders => dialectProviders ?? (dialectProviders = new Dictionary<string, IOrmLiteDialectProvider>());
+        public static Dictionary<string, IOrmLiteDialectProvider> DialectProviders => dialectProviders ??= new Dictionary<string, IOrmLiteDialectProvider>();
 
         public virtual void RegisterDialectProvider(string providerName, IOrmLiteDialectProvider dialectProvider)
         {
@@ -204,7 +204,7 @@ namespace ServiceStack.OrmLite
         }
 
         private static Dictionary<string, OrmLiteConnectionFactory> namedConnections;
-        public static Dictionary<string, OrmLiteConnectionFactory> NamedConnections => namedConnections ?? (namedConnections = new Dictionary<string, OrmLiteConnectionFactory>());
+        public static Dictionary<string, OrmLiteConnectionFactory> NamedConnections => namedConnections ??= new Dictionary<string, OrmLiteConnectionFactory>();
 
         public virtual void RegisterConnection(string namedConnection, string connectionString, IOrmLiteDialectProvider dialectProvider)
         {
@@ -289,6 +289,32 @@ namespace ServiceStack.OrmLite
         public static Task<IDbConnection> OpenDbConnectionStringAsync(this IDbConnectionFactory connectionFactory, string connectionString, string providerName, CancellationToken token = default)
         {
             return ((OrmLiteConnectionFactory)connectionFactory).OpenDbConnectionStringAsync(connectionString, providerName, token);
+        }
+
+
+        public static IOrmLiteDialectProvider GetDialectProvider(this IDbConnectionFactory connectionFactory, ConnectionInfo dbInfo)
+        {
+            return dbInfo != null
+                ? GetDialectProvider(connectionFactory, providerName:dbInfo.ProviderName, namedConnection:dbInfo.NamedConnection)
+                : ((OrmLiteConnectionFactory) connectionFactory).DialectProvider;
+        }
+        
+        public static IOrmLiteDialectProvider GetDialectProvider(this IDbConnectionFactory connectionFactory,
+            string providerName = null, string namedConnection = null)
+        {
+            var dbFactory = (OrmLiteConnectionFactory) connectionFactory;
+
+            if (!string.IsNullOrEmpty(providerName))
+                return OrmLiteConnectionFactory.DialectProviders.TryGetValue(providerName, out var provider)
+                    ? provider
+                    : throw new NotSupportedException($"Dialect provider is not registered '{provider}'");
+            
+            if (!string.IsNullOrEmpty(namedConnection))
+                return OrmLiteConnectionFactory.NamedConnections.TryGetValue(namedConnection, out var namedFactory)
+                    ? namedFactory.DialectProvider
+                    : throw new NotSupportedException($"Named connection is not registered '{namedConnection}'");
+            
+            return dbFactory.DialectProvider;
         }
 
         public static IDbConnection ToDbConnection(this IDbConnection db)

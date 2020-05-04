@@ -40,6 +40,21 @@ namespace ServiceStack.OrmLite
             return DbFactory.OpenDbConnection();
         }
 
+        T dialect<T>(ScriptScopeContext scope, Func<IOrmLiteDialectProvider, T> fn)
+        {
+            if (scope.PageResult != null)
+            {
+                if (scope.PageResult.Args.TryGetValue(DbInfo, out var oDbInfo) && oDbInfo is ConnectionInfo dbInfo)
+                    return fn(DbFactory.GetDialectProvider(dbInfo));
+
+                if (scope.PageResult.Args.TryGetValue(DbConnection, out var oDbConn) && oDbConn is Dictionary<string, object> useDb)
+                    return fn(DbFactory.GetDialectProvider(
+                        providerName:useDb.GetValueOrDefault("providerName")?.ToString(),
+                        namedConnection:useDb.GetValueOrDefault("namedConnection")?.ToString()));
+            }
+            return fn(OrmLiteConfig.DialectProvider);
+        }
+
         public IgnoreResult useDb(ScriptScopeContext scope, Dictionary<string, object> dbConnOptions)
         {
             if (dbConnOptions == null)
@@ -80,10 +95,8 @@ namespace ServiceStack.OrmLite
         {
             try
             {
-                using (var db = OpenDbConnection(scope, options as Dictionary<string, object>))
-                {
-                    return fn(db);
-                }
+                using var db = OpenDbConnection(scope, options as Dictionary<string, object>);
+                return fn(db);
             }
             catch (Exception ex)
             {
@@ -173,24 +186,31 @@ namespace ServiceStack.OrmLite
 
         public ColumnSchema[] dbColumns(ScriptScopeContext scope, string tableName) => dbColumns(scope, tableName, null);
         public ColumnSchema[] dbColumns(ScriptScopeContext scope, string tableName, object options) => 
-            exec(db => db.GetTableColumns($"SELECT * FROM {sqlQuote(tableName)}"), scope, options);
+            exec(db => db.GetTableColumns($"SELECT * FROM {sqlQuote(scope,tableName)}"), scope, options);
 
         public ColumnSchema[] dbDesc(ScriptScopeContext scope, string sql) => dbDesc(scope, sql, null);
         public ColumnSchema[] dbDesc(ScriptScopeContext scope, string sql, object options) => exec(db => db.GetTableColumns(sql), scope, options);
 
-        public string sqlQuote(string name) => OrmLiteConfig.DialectProvider.GetQuotedName(name);
-        public string sqlConcat(IEnumerable<object> values) => OrmLiteConfig.DialectProvider.SqlConcat(values);
-        public string sqlCurrency(string fieldOrValue) => OrmLiteConfig.DialectProvider.SqlCurrency(fieldOrValue);
-        public string sqlCurrency(string fieldOrValue, string symbol) => OrmLiteConfig.DialectProvider.SqlCurrency(fieldOrValue, symbol);
 
-        public string sqlBool(bool value) => OrmLiteConfig.DialectProvider.SqlBool(value);
-        public string sqlTrue() => OrmLiteConfig.DialectProvider.SqlBool(true);
-        public string sqlFalse() => OrmLiteConfig.DialectProvider.SqlBool(false);
-        public string sqlLimit(int? offset, int? limit) => padCondition(OrmLiteConfig.DialectProvider.SqlLimit(offset, limit));
-        public string sqlLimit(int? limit) => padCondition(OrmLiteConfig.DialectProvider.SqlLimit(null, limit));
-        public string sqlSkip(int? offset) => padCondition(OrmLiteConfig.DialectProvider.SqlLimit(offset, null));
-        public string sqlTake(int? limit) => padCondition(OrmLiteConfig.DialectProvider.SqlLimit(null, limit));
-        public string ormliteVar(string name) => OrmLiteConfig.DialectProvider.Variables.TryGetValue(name, out var value) ? value : null;
+        public string sqlQuote(ScriptScopeContext scope, string name) => dialect(scope, d => d.GetQuotedName(name));
+        public string sqlConcat(ScriptScopeContext scope, IEnumerable<object> values) => dialect(scope, d => d.SqlConcat(values));
+        public string sqlCurrency(ScriptScopeContext scope, string fieldOrValue) => dialect(scope, d => d.SqlCurrency(fieldOrValue));
+        public string sqlCurrency(ScriptScopeContext scope, string fieldOrValue, string symbol) => 
+            dialect(scope, d => d.SqlCurrency(fieldOrValue, symbol));
+
+        public string sqlBool(ScriptScopeContext scope, bool value) => dialect(scope, d => d.SqlBool(value));
+        public string sqlTrue(ScriptScopeContext scope) => dialect(scope, d => d.SqlBool(true));
+        public string sqlFalse(ScriptScopeContext scope) => dialect(scope, d => d.SqlBool(false));
+        public string sqlLimit(ScriptScopeContext scope, int? offset, int? limit) => 
+            dialect(scope, d => padCondition(d.SqlLimit(offset, limit)));
+        public string sqlLimit(ScriptScopeContext scope, int? limit) => 
+            dialect(scope, d => padCondition(d.SqlLimit(null, limit)));
+        public string sqlSkip(ScriptScopeContext scope, int? offset) => 
+            dialect(scope, d => padCondition(d.SqlLimit(offset, null)));
+        public string sqlTake(ScriptScopeContext scope, int? limit) => 
+            dialect(scope, d => padCondition(d.SqlLimit(null, limit)));
+        public string ormliteVar(ScriptScopeContext scope, string name) => 
+            dialect(scope, d => d.Variables.TryGetValue(name, out var value) ? value : null);
 
         public string sqlVerifyFragment(string sql) => sql.SqlVerifyFragment();
         public bool isUnsafeSql(string sql) => OrmLiteUtils.isUnsafeSql(sql, OrmLiteUtils.VerifySqlRegEx);
