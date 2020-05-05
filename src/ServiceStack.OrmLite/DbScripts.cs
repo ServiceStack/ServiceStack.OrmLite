@@ -209,6 +209,8 @@ namespace ServiceStack.OrmLite
             dialect(scope, d => padCondition(d.SqlLimit(offset, null)));
         public string sqlTake(ScriptScopeContext scope, int? limit) => 
             dialect(scope, d => padCondition(d.SqlLimit(null, limit)));
+        public string sqlOrderByFields(ScriptScopeContext scope, string orderBy) => 
+            dialect(scope, d => OrmLiteUtils.OrderByFields(d, orderBy));
         public string ormliteVar(ScriptScopeContext scope, string name) => 
             dialect(scope, d => d.Variables.TryGetValue(name, out var value) ? value : null);
 

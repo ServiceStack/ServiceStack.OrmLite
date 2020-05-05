@@ -737,58 +737,42 @@ namespace ServiceStack.OrmLite
                 // e.g. CustomerId (C#) vs customer_id (DB)
                 var dbFieldNameWithNoUnderscores = dbFieldName.Replace("_", "");
                 if (string.Compare(fieldName, dbFieldNameWithNoUnderscores, StringComparison.OrdinalIgnoreCase) == 0)
-                {
                     return i;
-                }
 
                 // Next guess: Maybe the DB field has special characters?
                 // e.g. Quantity (C#) vs quantity% (DB)
                 var dbFieldNameSanitized = AllowedPropertyCharsRegex.Replace(dbFieldName, string.Empty);
                 if (string.Compare(fieldName, dbFieldNameSanitized, StringComparison.OrdinalIgnoreCase) == 0)
-                {
                     return i;
-                }
 
                 // Next guess: Maybe the DB field has special characters *and* has underscores?
                 // e.g. Quantity (C#) vs quantity_% (DB)
                 if (string.Compare(fieldName, dbFieldNameSanitized.Replace("_", string.Empty), StringComparison.OrdinalIgnoreCase) == 0)
-                {
                     return i;
-                }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field?
                 // e.g. CustomerId (C#) vs t130CustomerId (DB)
                 if (dbFieldName.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
-                {
                     return i;
-                }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has underscores?
                 // e.g. CustomerId (C#) vs t130_CustomerId (DB)
                 if (dbFieldNameWithNoUnderscores.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
-                {
                     return i;
-                }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has special characters?
                 // e.g. CustomerId (C#) vs t130#CustomerId (DB)
                 if (dbFieldNameSanitized.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
-                {
                     return i;
-                }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has underscores *and* has special characters?
                 // e.g. CustomerId (C#) vs t130#Customer_I#d (DB)
                 if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
-                {
                     return i;
-                }
 
                 // Cater for Naming Strategies like PostgreSQL that has lower_underscore names
                 if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName.Replace("_", ""), StringComparison.OrdinalIgnoreCase))
-                {
                     return i;
-                }
             }
 
             return NotFound;
@@ -1137,5 +1121,34 @@ namespace ServiceStack.OrmLite
             : "'" + text + "'";
 
         public static string UnquotedColumnName(string columnExpr) => columnExpr.LastRightPart('.').StripDbQuotes();
+
+        public static string OrderByFields(IOrmLiteDialectProvider dialect, string orderBy)
+        {
+            if (string.IsNullOrEmpty(orderBy))
+                return string.Empty;
+            
+            var sb = StringBuilderCache.Allocate();
+
+            var fields = orderBy.Split(',');
+            const string Asc = "";
+            const string Desc = " DESC";
+
+            var orderBySuffix = Asc;
+            foreach (var fieldName in fields)
+            {
+                if (sb.Length > 0)
+                    sb.Append(", ");
+                
+                var reverse = fieldName.StartsWith("-");
+                var useSuffix = reverse
+                    ? orderBySuffix == Asc ? Desc : Asc
+                    : orderBySuffix;
+                var useName = reverse ? fieldName.Substring(1) : fieldName;
+                var quotedName = dialect.GetQuotedColumnName(useName);
+
+                sb.Append(quotedName + useSuffix);
+            }
+            return StringBuilderCache.ReturnAndFree(sb);
+        }
     }
 }

@@ -17,6 +17,16 @@ namespace ServiceStack.OrmLite.Tests
                 .TrimEnd(); 
         }
 
+        public static string NormalizeQuotes(this string sql)
+        {
+            return sql.ToLower()
+                .Replace("\"", "'")
+                .Replace("`", "'")
+                .Replace("[", "'")
+                .Replace("]", "'")
+                .TrimEnd(); 
+        }
+
         public static string PreNormalizeSql(this string sql, IDbConnection db)
         {
             var paramString = db.GetDialectProvider().ParamString;
