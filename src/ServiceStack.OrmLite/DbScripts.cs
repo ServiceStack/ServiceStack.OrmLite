@@ -198,6 +198,8 @@ namespace ServiceStack.OrmLite
         public string sqlCurrency(ScriptScopeContext scope, string fieldOrValue, string symbol) => 
             dialect(scope, d => d.SqlCurrency(fieldOrValue, symbol));
 
+        public string sqlCast(ScriptScopeContext scope, object fieldOrValue, string castAs) => 
+            dialect(scope, d => d.SqlCast(fieldOrValue, castAs));
         public string sqlBool(ScriptScopeContext scope, bool value) => dialect(scope, d => d.SqlBool(value));
         public string sqlTrue(ScriptScopeContext scope) => dialect(scope, d => d.SqlBool(true));
         public string sqlFalse(ScriptScopeContext scope) => dialect(scope, d => d.SqlBool(false));
