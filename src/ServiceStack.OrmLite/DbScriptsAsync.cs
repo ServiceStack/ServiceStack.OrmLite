@@ -85,7 +85,7 @@ namespace ServiceStack.OrmLite
 
                 if (options.TryGetValue("namedConnection", out var namedConnection))
                 {
-                    return await DbFactory.OpenDbConnectionStringAsync((string) namedConnection);
+                    return await DbFactory.OpenDbConnectionAsync((string) namedConnection);
                 }
             }
 
