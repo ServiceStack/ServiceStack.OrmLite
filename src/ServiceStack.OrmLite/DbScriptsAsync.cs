@@ -165,6 +165,7 @@ namespace ServiceStack.OrmLite
         public Task<object> dbExec(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
             exec(db => db.ExecuteSqlAsync(sql, args), scope, options);
 
+        public List<string> dbNamedConnections() => OrmLiteConnectionFactory.NamedConnections.Keys.ToList();
         public Task<object> dbTableNames(ScriptScopeContext scope) => dbTableNames(scope, null, null);
         public Task<object> dbTableNames(ScriptScopeContext scope, Dictionary<string, object> args) => dbTableNames(scope, args, null);
         public Task<object> dbTableNames(ScriptScopeContext scope, Dictionary<string, object> args, object options) => 

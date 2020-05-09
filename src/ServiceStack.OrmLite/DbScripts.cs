@@ -9,11 +9,12 @@ namespace ServiceStack.OrmLite
 {
     [Obsolete("Use DbScripts")]
     public class TemplateDbFilters : DbScripts {}
-    
+
+    [Obsolete("Use DbScriptsAsync")]
     public class DbScripts : ScriptMethods
     {
         private const string DbInfo = "__dbinfo"; // Keywords.DbInfo
-        private const string DbConnection = "__dbconnection"; // useDbConnection global
+        private const string DbConnection = "__dbconnection"; // useDb global
         
         private IDbConnectionFactory dbFactory;
         public IDbConnectionFactory DbFactory
@@ -163,6 +164,7 @@ namespace ServiceStack.OrmLite
         public int dbExec(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
             exec(db => db.ExecuteSql(sql, args), scope, options);
 
+        public List<string> dbNamedConnections() => OrmLiteConnectionFactory.NamedConnections.Keys.ToList();
         public List<string> dbTableNames(ScriptScopeContext scope) => dbTableNames(scope, null, null);
         public List<string> dbTableNames(ScriptScopeContext scope, Dictionary<string, object> args) => dbTableNames(scope, args, null);
         public List<string> dbTableNames(ScriptScopeContext scope, Dictionary<string, object> args, object options) => 

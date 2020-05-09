@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
-using ServiceStack;
 using ServiceStack.Data;
-using ServiceStack.Templates;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -62,7 +60,7 @@ namespace ServiceStack.OrmLite
         public Action<OrmLiteConnection> OnDispose { get; set; }
 
         private OrmLiteConnection ormLiteConnection;
-        private OrmLiteConnection OrmLiteConnection => ormLiteConnection ?? (ormLiteConnection = new OrmLiteConnection(this));
+        private OrmLiteConnection OrmLiteConnection => ormLiteConnection ??= new OrmLiteConnection(this);
 
         public virtual IDbConnection CreateDbConnection()
         {
