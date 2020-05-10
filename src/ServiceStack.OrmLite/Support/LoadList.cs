@@ -258,17 +258,17 @@ namespace ServiceStack.OrmLite.Support
                 ? modelDef.GetRefFieldDef(refModelDef, refType)
                 : modelDef.GetRefFieldDefIfExists(refModelDef);
 
-            if (refField != null)
-            {
-                var sqlRef = GetRefFieldSql(refModelDef, refField);
-                var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token);
-                SetRefFieldChildResults(fieldDef, refField, childResults);
-            }
-            else if (refSelf != null)
+            if (refSelf != null)
             {
                 var sqlRef = GetRefSelfSql(modelDef, refSelf, refModelDef);
                 var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token);
                 SetRefSelfChildResults(fieldDef, refModelDef, refSelf, childResults);
+            }
+            else if (refField != null)
+            {
+                var sqlRef = GetRefFieldSql(refModelDef, refField);
+                var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token);
+                SetRefFieldChildResults(fieldDef, refField, childResults);
             }
         }
     }
