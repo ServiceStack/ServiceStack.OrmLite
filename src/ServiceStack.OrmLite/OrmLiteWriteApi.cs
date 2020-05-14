@@ -186,9 +186,9 @@ namespace ServiceStack.OrmLite
         /// <para>db.Delete&lt;Person&gt;(new { FirstName = "Jimi", Age = 27 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
-        public static int Delete<T>(this IDbConnection dbConn, object anonFilter)
+        public static int Delete<T>(this IDbConnection dbConn, object anonFilter, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Delete<T>(anonFilter));
+            return dbConn.Exec(dbCmd => dbCmd.Delete<T>(anonFilter, commandFilter));
         }
 
         /// <summary>
@@ -196,9 +196,9 @@ namespace ServiceStack.OrmLite
         /// <para>db.Delete(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
-        public static int Delete<T>(this IDbConnection dbConn, T allFieldsFilter)
+        public static int Delete<T>(this IDbConnection dbConn, T allFieldsFilter, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Delete(allFieldsFilter));
+            return dbConn.Exec(dbCmd => dbCmd.Delete(allFieldsFilter, commandFilter));
         }
 
         /// <summary>
@@ -236,9 +236,9 @@ namespace ServiceStack.OrmLite
         /// <para>db.DeleteById&lt;Person&gt;(1)</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
-        public static int DeleteById<T>(this IDbConnection dbConn, object id)
+        public static int DeleteById<T>(this IDbConnection dbConn, object id, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteById<T>(id));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteById<T>(id, commandFilter));
         }
 
         /// <summary>
@@ -247,9 +247,9 @@ namespace ServiceStack.OrmLite
         /// row does not exist or has a different row version.
         /// E.g: <para>db.DeleteById&lt;Person&gt;(1)</para>
         /// </summary>
-        public static void DeleteById<T>(this IDbConnection dbConn, object id, ulong rowVersion)
+        public static void DeleteById<T>(this IDbConnection dbConn, object id, ulong rowVersion, Action<IDbCommand> commandFilter = null)
         {
-            dbConn.Exec(dbCmd => dbCmd.DeleteById<T>(id, rowVersion));
+            dbConn.Exec(dbCmd => dbCmd.DeleteById<T>(id, rowVersion, commandFilter));
         }
 
         /// <summary>

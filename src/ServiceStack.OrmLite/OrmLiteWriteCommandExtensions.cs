@@ -256,11 +256,13 @@ namespace ServiceStack.OrmLite
             return dbCmd.CommandText;
         }
 
-        internal static int ExecuteSql(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams = null)
+        internal static int ExecuteSql(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams = null, Action<IDbCommand> commandFilter = null)
         {
             dbCmd.CommandText = sql;
 
             dbCmd.SetParameters(sqlParams);
+
+            commandFilter?.Invoke(dbCmd);
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
@@ -273,12 +275,14 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteNonQuery();
         }
 
-        internal static int ExecuteSql(this IDbCommand dbCmd, string sql, object anonType)
+        internal static int ExecuteSql(this IDbCommand dbCmd, string sql, object anonType, Action<IDbCommand> commandFilter = null)
         {
             if (anonType != null)
                 dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false, sql:ref sql);
 
             dbCmd.CommandText = sql;
+
+            commandFilter?.Invoke(dbCmd);
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
@@ -483,12 +487,12 @@ namespace ServiceStack.OrmLite
             return rowsUpdated;
         }
 
-        internal static int Delete<T>(this IDbCommand dbCmd, T anonType)
+        internal static int Delete<T>(this IDbCommand dbCmd, T anonType, Action<IDbCommand> commandFilter = null)
         {
-            return dbCmd.Delete<T>((object)anonType);
+            return dbCmd.Delete<T>((object)anonType, commandFilter);
         }
 
-        internal static int Delete<T>(this IDbCommand dbCmd, object anonType)
+        internal static int Delete<T>(this IDbCommand dbCmd, object anonType, Action<IDbCommand> commandFilter = null)
         {
             var dialectProvider = dbCmd.GetDialectProvider();
 
@@ -496,6 +500,8 @@ namespace ServiceStack.OrmLite
                 dbCmd, anonType.AllFieldsMap<T>());
 
             dialectProvider.SetParameterValues<T>(dbCmd, anonType);
+
+            commandFilter?.Invoke(dbCmd);
 
             return AssertRowsUpdated(dbCmd, hadRowVersion);
         }
@@ -526,7 +532,7 @@ namespace ServiceStack.OrmLite
             return DeleteAll(dbCmd, filters, o => o.AllFieldsMap<T>().NonDefaultsOnly());
         }
 
-        private static int DeleteAll<T>(IDbCommand dbCmd, IEnumerable<T> objs, Func<object,Dictionary<string,object>> fieldValuesFn=null)
+        private static int DeleteAll<T>(IDbCommand dbCmd, IEnumerable<T> objs, Func<object,Dictionary<string,object>> fieldValuesFn=null, Action<IDbCommand> commandFilter = null)
         {
             IDbTransaction dbTrans = null;
 
@@ -548,6 +554,9 @@ namespace ServiceStack.OrmLite
 
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
+                    commandFilter?.Invoke(dbCmd);
+                    commandFilter = null;
+
                     count += dbCmd.ExecNonQuery();
                 }
 
@@ -561,11 +570,11 @@ namespace ServiceStack.OrmLite
             return count;
         }
 
-        internal static int DeleteById<T>(this IDbCommand dbCmd, object id)
+        internal static int DeleteById<T>(this IDbCommand dbCmd, object id, Action<IDbCommand> commandFilter = null)
         {
             var sql = DeleteByIdSql<T>(dbCmd, id);
 
-            return dbCmd.ExecuteSql(sql);
+            return dbCmd.ExecuteSql(sql, commandFilter: commandFilter);
         }
 
         internal static string DeleteByIdSql<T>(this IDbCommand dbCmd, object id)
@@ -584,11 +593,11 @@ namespace ServiceStack.OrmLite
             return sql;
         }
 
-        internal static void DeleteById<T>(this IDbCommand dbCmd, object id, ulong rowVersion)
+        internal static void DeleteById<T>(this IDbCommand dbCmd, object id, ulong rowVersion, Action<IDbCommand> commandFilter = null)
         {
             var sql = DeleteByIdSql<T>(dbCmd, id, rowVersion);
 
-            var rowsAffected = dbCmd.ExecuteSql(sql);
+            var rowsAffected = dbCmd.ExecuteSql(sql, commandFilter: commandFilter);
             if (rowsAffected == 0)
                 throw new OptimisticConcurrencyException("The row was modified or deleted since the last read");
         }
