@@ -79,42 +79,38 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_create_field_with_custom_sql()
         {
             OrmLiteConfig.BeforeExecFilter = cmd => cmd.GetDebugString().Print();
-            
-            using (var db = OpenDbConnection())
+
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<PocoTable>();
+
+            var createTableSql = db.GetLastSql().NormalizeSql();
+
+            createTableSql.Print();
+
+            if (Dialect != Dialect.Firebird)
             {
-                db.DropAndCreateTable<PocoTable>();
-
-                var createTableSql = db.GetLastSql().NormalizeSql();
-
-                createTableSql.Print();
-
-                if (Dialect != Dialect.Firebird)
-                {
-                    Assert.That(createTableSql, Does.Contain("charcolumn char(20) null"));
-                    Assert.That(createTableSql, Does.Contain("decimalcolumn decimal(18,4) null"));
-                }
-                else
-                {
-                    Assert.That(createTableSql, Does.Contain("charcolumn char(20)"));
-                    Assert.That(createTableSql, Does.Contain("decimalcolumn decimal(18,4)"));
-                }
+                Assert.That(createTableSql, Does.Contain("charcolumn char(20) null"));
+                Assert.That(createTableSql, Does.Contain("decimalcolumn decimal(18,4) null"));
+            }
+            else
+            {
+                Assert.That(createTableSql, Does.Contain("charcolumn char(20)"));
+                Assert.That(createTableSql, Does.Contain("decimalcolumn decimal(18,4)"));
             }
         }
 
         [Test]
         public void Does_execute_CustomSql_before_table_created()
         {
-            using (var db = OpenDbConnection())
+            using var db = OpenDbConnection();
+            try
             {
-                try
-                {
-                    db.CreateTable<ModelWithPreCreateSql>();
-                    Assert.Fail("Should throw");
-                }
-                catch (Exception)
-                {
-                    Assert.That(!db.TableExists("ModelWithPreCreateSql".SqlColumn(DialectProvider)));
-                }
+                db.CreateTable<ModelWithPreCreateSql>();
+                Assert.Fail("Should throw");
+            }
+            catch (Exception)
+            {
+                Assert.That(!db.TableExists("ModelWithPreCreateSql".SqlColumn(DialectProvider)));
             }
         }
 
@@ -122,14 +118,12 @@ namespace ServiceStack.OrmLite.Tests
         [IgnoreDialect(Dialect.AnyOracle | Dialect.AnyPostgreSql, "multiple SQL statements need to be wrapped in an anonymous block")]
         public void Does_execute_CustomSql_after_table_created()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<ModelWithSeedDataSql>();
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<ModelWithSeedDataSql>();
 
-                var seedDataNames = db.Select<ModelWithSeedDataSql>().ConvertAll(x => x.Name);
+            var seedDataNames = db.Select<ModelWithSeedDataSql>().ConvertAll(x => x.Name);
 
-                Assert.That(seedDataNames, Is.EquivalentTo(new[] {"Foo", "Bar"}));
-            }
+            Assert.That(seedDataNames, Is.EquivalentTo(new[] {"Foo", "Bar"}));
         }
 
         [Test]
@@ -141,49 +135,43 @@ namespace ServiceStack.OrmLite.Tests
                     "INSERT INTO {0} (Name) VALUES ('Foo');".Fmt("DynamicAttributeSeedData".SqlTable(DialectProvider)) +
                     "INSERT INTO {0} (Name) VALUES ('Bar');".Fmt("DynamicAttributeSeedData".SqlTable(DialectProvider))));
 
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<DynamicAttributeSeedData>();
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<DynamicAttributeSeedData>();
 
-                var seedDataNames = db.Select<DynamicAttributeSeedData>().ConvertAll(x => x.Name);
+            var seedDataNames = db.Select<DynamicAttributeSeedData>().ConvertAll(x => x.Name);
 
-                Assert.That(seedDataNames, Is.EquivalentTo(new[] {"Foo", "Bar"}));
-            }
+            Assert.That(seedDataNames, Is.EquivalentTo(new[] {"Foo", "Bar"}));
         }
 
         [Test]
         public void Does_execute_CustomSql_before_table_dropped()
         {
-            using (var db = OpenDbConnection())
+            using var db = OpenDbConnection();
+            db.CreateTable<ModelWithPreDropSql>();
+            try
             {
-                db.CreateTable<ModelWithPreDropSql>();
-                try
-                {
-                    db.DropTable<ModelWithPreDropSql>();
-                    Assert.Fail("Should throw");
-                }
-                catch (Exception)
-                {
-                    Assert.That(db.TableExists("ModelWithPreDropSql".SqlTableRaw(DialectProvider)));
-                }
+                db.DropTable<ModelWithPreDropSql>();
+                Assert.Fail("Should throw");
+            }
+            catch (Exception)
+            {
+                Assert.That(db.TableExists("ModelWithPreDropSql".SqlTableRaw(DialectProvider)));
             }
         }
 
         [Test]
         public void Does_execute_CustomSql_after_table_dropped()
         {
-            using (var db = OpenDbConnection())
+            using var db = OpenDbConnection();
+            db.CreateTable<ModelWithPostDropSql>();
+            try
             {
-                db.CreateTable<ModelWithPostDropSql>();
-                try
-                {
-                    db.DropTable<ModelWithPostDropSql>();
-                    Assert.Fail("Should throw");
-                }
-                catch (Exception)
-                {
-                    Assert.That(!db.TableExists("ModelWithPostDropSql"));
-                }
+                db.DropTable<ModelWithPostDropSql>();
+                Assert.Fail("Should throw");
+            }
+            catch (Exception)
+            {
+                Assert.That(!db.TableExists("ModelWithPostDropSql"));
             }
         }
 
@@ -200,69 +188,62 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_select_custom_field_expressions()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<CustomSelectTest>();
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<CustomSelectTest>();
 
-                db.Insert(new CustomSelectTest {Id = 1, Width = 10, Height = 5});
+            db.Insert(new CustomSelectTest {Id = 1, Width = 10, Height = 5});
 
-                var row = db.SingleById<CustomSelectTest>(1);
+            var row = db.SingleById<CustomSelectTest>(1);
 
-                Assert.That(row.Area, Is.EqualTo(10 * 5));
-            }
+            Assert.That(row.Area, Is.EqualTo(10 * 5));
         }
 
         [Test]
         public void Can_Count_Distinct()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<LetterFrequency>();
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<LetterFrequency>();
 
-                var rows = "A,B,B,C,C,C,D,D,E".Split(',').Map(x => new LetterFrequency {Letter = x});
+            var rows = "A,B,B,C,C,C,D,D,E".Split(',').Map(x => new LetterFrequency {Letter = x});
 
-                db.InsertAll(rows);
+            db.InsertAll(rows);
 
-                var count = db.Count(db.From<LetterFrequency>().Select(x => x.Letter));
-                Assert.That(count, Is.EqualTo(rows.Count));
+            var count = db.Count(db.From<LetterFrequency>().Select(x => x.Letter));
+            Assert.That(count, Is.EqualTo(rows.Count));
 
-                count = db.Scalar<long>(db.From<LetterFrequency>().Select(x => Sql.Count(x.Letter)));
-                Assert.That(count, Is.EqualTo(rows.Count));
+            count = db.Scalar<long>(db.From<LetterFrequency>().Select(x => Sql.Count(x.Letter)));
+            Assert.That(count, Is.EqualTo(rows.Count));
 
-                var distinctCount = db.Scalar<long>(db.From<LetterFrequency>().Select(x => Sql.CountDistinct(x.Letter)));
-                Assert.That(distinctCount, Is.EqualTo(rows.Map(x => x.Letter).Distinct().Count()));
+            var distinctCount = db.Scalar<long>(db.From<LetterFrequency>().Select(x => Sql.CountDistinct(x.Letter)));
+            Assert.That(distinctCount, Is.EqualTo(rows.Map(x => x.Letter).Distinct().Count()));
 
-                distinctCount = db.Scalar<long>(db.From<LetterFrequency>().Select("COUNT(DISTINCT Letter)"));
-                Assert.That(distinctCount, Is.EqualTo(rows.Map(x => x.Letter).Distinct().Count()));
-            }
+            distinctCount = db.Scalar<long>(db.From<LetterFrequency>().Select("COUNT(DISTINCT Letter)"));
+            Assert.That(distinctCount, Is.EqualTo(rows.Map(x => x.Letter).Distinct().Count()));
         }
         
         [Test]
         public void Does_select_aliases_on_constant_expressions()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<LetterFrequency>();
-                db.Insert(new LetterFrequency { Letter = "A" });
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<LetterFrequency>();
+            db.Insert(new LetterFrequency { Letter = "A" });
 
-                var q = db.From<LetterFrequency>()
-                    .Select(x => new
-                    {
-                        param = 1,
-                        descr = x.Letter,
-                        str = "hi",
-                        date = DateTime.UtcNow
-                    });
+            var q = db.From<LetterFrequency>()
+                .Select(x => new
+                {
+                    param = 1,
+                    descr = x.Letter,
+                    str = "hi",
+                    date = DateTime.UtcNow
+                });
 
-                var results = db.Select<Dictionary<string,object>>(q)[0];
+            var results = db.Select<Dictionary<string,object>>(q)[0];
                 
-                Assert.That(results["param"], Is.EqualTo(1));
-                Assert.That(results["descr"], Is.EqualTo("A"));
-                Assert.That(results["str"], Is.EqualTo("hi"));
-                Assert.That(results["date"], Is.Not.Empty);
-            }
+            Assert.That(results["param"], Is.EqualTo(1));
+            Assert.That(results["descr"], Is.EqualTo("A"));
+            Assert.That(results["str"], Is.EqualTo("hi"));
+            Assert.That(results["date"], Is.Not.Empty);
         }
-
 
     }
 }

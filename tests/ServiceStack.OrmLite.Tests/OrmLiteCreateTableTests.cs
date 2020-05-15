@@ -22,13 +22,13 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropTable<ModelWithIdOnly>();
 
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw(DialectProvider)),
+                    db.TableExists(nameof(ModelWithIdOnly).SqlTableRaw(DialectProvider)),
                     Is.False);
 
                 db.CreateTable<ModelWithIdOnly>(true);
 
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw(DialectProvider)),
+                    db.TableExists(nameof(ModelWithIdOnly).SqlTableRaw(DialectProvider)),
                     Is.True);
             }
         }
