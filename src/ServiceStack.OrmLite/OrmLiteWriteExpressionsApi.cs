@@ -248,9 +248,9 @@ namespace ServiceStack.OrmLite
         ///   db.Delete&lt;Person&gt;(p => p.Age == 27);
         ///   DELETE FROM "Person" WHERE ("Age" = 27)
         /// </summary>
-        public static int Delete<T>(this IDbConnection dbConn, Expression<Func<T, bool>> where)
+        public static int Delete<T>(this IDbConnection dbConn, Expression<Func<T, bool>> where, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Delete(where));
+            return dbConn.Exec(dbCmd => dbCmd.Delete(where, commandFilter));
         }
 
         /// <summary>
@@ -260,7 +260,7 @@ namespace ServiceStack.OrmLite
         ///   db.Delete&lt;Person&gt;(q.Where(p => p.Age == 27));
         ///   DELETE FROM "Person" WHERE ("Age" = 27)
         /// </summary>
-        public static int Delete<T>(this IDbConnection dbConn, SqlExpression<T> where)
+        public static int Delete<T>(this IDbConnection dbConn, SqlExpression<T> where, Action<IDbCommand> commandFilter = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.Delete(where));
         }

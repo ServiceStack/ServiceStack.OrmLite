@@ -371,17 +371,17 @@ namespace ServiceStack.OrmLite
             return dbCmd;
         }
 
-        public static int Delete<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> where)
+        public static int Delete<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> where, Action<IDbCommand> commandFilter = null)
         {
             var ev = dbCmd.GetDialectProvider().SqlExpression<T>();
             ev.Where(where);
-            return dbCmd.Delete(ev);
+            return dbCmd.Delete(ev, commandFilter);
         }
 
-        public static int Delete<T>(this IDbCommand dbCmd, SqlExpression<T> where)
+        public static int Delete<T>(this IDbCommand dbCmd, SqlExpression<T> where, Action<IDbCommand> commandFilter = null)
         {
             var sql = where.ToDeleteRowStatement();
-            return dbCmd.ExecuteSql(sql, where.Params);
+            return dbCmd.ExecuteSql(sql, where.Params, commandFilter);
         }
 
         public static int DeleteWhere<T>(this IDbCommand dbCmd, string whereFilter, object[] whereParams)
