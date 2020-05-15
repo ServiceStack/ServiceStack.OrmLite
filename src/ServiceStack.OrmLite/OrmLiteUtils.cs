@@ -987,6 +987,9 @@ namespace ServiceStack.OrmLite
             
             if (typeof(T) == typeof(Dictionary<string,object>))
                 throw new ArgumentException("T generic argument should be a Table but was typeof(Dictionary<string,object>)");
+            
+            if (typeof(ISqlExpression).IsAssignableFrom(typeof(T)))
+                throw new ArgumentException("T generic argument should be a Table but was an ISqlExpression");
         }
 
         public static List<string> GetNonDefaultValueInsertFields<T>(this IOrmLiteDialectProvider dialectProvider, object obj)

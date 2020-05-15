@@ -19,14 +19,24 @@ namespace ServiceStack.OrmLite
     {
         internal static ILog Log = LogManager.GetLogger(typeof(OrmLiteWriteCommandExtensionsAsync));
 
-        internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
+        internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token) =>
+            dbCmd.SetParameters(sqlParams).ExecuteSqlAsync(sql, (Action<IDbCommand>) null, token);
+        
+        internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, 
+            Action<IDbCommand> commandFilter, CancellationToken token)
         {
-            return dbCmd.SetParameters(sqlParams).ExecuteSqlAsync(sql, token);
+            return dbCmd.SetParameters(sqlParams).ExecuteSqlAsync(sql, commandFilter, token);
         }
 
-        internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
+        internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, CancellationToken token) =>
+            dbCmd.ExecuteSqlAsync(sql,(Action<IDbCommand>)null, token);
+
+        internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, 
+            Action<IDbCommand> commandFilter, CancellationToken token)
         {
             dbCmd.CommandText = sql;
+
+            commandFilter?.Invoke(dbCmd);
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
@@ -39,12 +49,18 @@ namespace ServiceStack.OrmLite
             return dbCmd.GetDialectProvider().ExecuteNonQueryAsync(dbCmd, token);
         }
 
-        internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)
+        internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token) =>
+            dbCmd.ExecuteSqlAsync(sql, anonType, null, token);
+
+        internal static Task<int> ExecuteSqlAsync(this IDbCommand dbCmd, string sql, object anonType, 
+            Action<IDbCommand> commandFilter, CancellationToken token)
         {
             if (anonType != null)
                 dbCmd.SetParameters(anonType.ToObjectDictionary(), excludeDefaults: false, sql:ref sql);
 
             dbCmd.CommandText = sql;
+
+            commandFilter?.Invoke(dbCmd);
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
@@ -122,7 +138,8 @@ namespace ServiceStack.OrmLite
                     OrmLiteConfig.UpdateFilter?.Invoke(dbCmd, obj);
     
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
-                    commandFilter?.Invoke(dbCmd);
+
+                    commandFilter?.Invoke(dbCmd); //filters can augment SQL & only should be invoked once
                     commandFilter = null;
     
                     var rowsUpdated = await dbCmd.ExecNonQueryAsync(token);
@@ -192,10 +209,11 @@ namespace ServiceStack.OrmLite
             if (filters.Length == 0)
                 return TaskResult.Zero;
 
-            return DeleteAllAsync(dbCmd, filters, o => o.AllFieldsMap<T>().NonDefaultsOnly(), token);
+            return DeleteAllAsync(dbCmd, filters, o => o.AllFieldsMap<T>().NonDefaultsOnly(), token:token);
         }
 
-        private static async Task<int> DeleteAllAsync<T>(IDbCommand dbCmd, IEnumerable<T> objs, Func<object, Dictionary<string, object>> fieldValuesFn = null, CancellationToken token=default(CancellationToken))
+        private static async Task<int> DeleteAllAsync<T>(IDbCommand dbCmd, IEnumerable<T> objs, Func<object, Dictionary<string, object>> fieldValuesFn = null, 
+            Action<IDbCommand> commandFilter=null, CancellationToken token=default)
         {
             OrmLiteUtils.AssertNotAnonType<T>();
             
@@ -218,6 +236,9 @@ namespace ServiceStack.OrmLite
                     dialectProvider.PrepareParameterizedDeleteStatement<T>(dbCmd, fieldValues);
 
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
+                    
+                    commandFilter?.Invoke(dbCmd); //filters can augment SQL & only should be invoked once
+                    commandFilter = null;
 
                     var rowsAffected = await dbCmd.ExecNonQueryAsync(token);
                     count += rowsAffected;
@@ -228,26 +249,29 @@ namespace ServiceStack.OrmLite
             return count;
         }
 
-        internal static Task<int> DeleteByIdAsync<T>(this IDbCommand dbCmd, object id, CancellationToken token)
+        internal static Task<int> DeleteByIdAsync<T>(this IDbCommand dbCmd, object id, 
+            Action<IDbCommand> commandFilter, CancellationToken token)
         {
             OrmLiteUtils.AssertNotAnonType<T>();
             
             var sql = dbCmd.DeleteByIdSql<T>(id);
-            return dbCmd.ExecuteSqlAsync(sql, token);
+            return dbCmd.ExecuteSqlAsync(sql, commandFilter, token);
         }
 
-        internal static async Task DeleteByIdAsync<T>(this IDbCommand dbCmd, object id, ulong rowVersion, CancellationToken token)
+        internal static async Task DeleteByIdAsync<T>(this IDbCommand dbCmd, object id, ulong rowVersion, 
+            Action<IDbCommand> commandFilter, CancellationToken token)
         {
             OrmLiteUtils.AssertNotAnonType<T>();
             
             var sql = dbCmd.DeleteByIdSql<T>(id, rowVersion);
 
-            var rowsAffected = await dbCmd.ExecuteSqlAsync(sql, token);
+            var rowsAffected = await dbCmd.ExecuteSqlAsync(sql, commandFilter, token);
             if (rowsAffected == 0)
                 throw new OptimisticConcurrencyException("The row was modified or deleted since the last read");
         }
 
-        internal static Task<int> DeleteByIdsAsync<T>(this IDbCommand dbCmd, IEnumerable idValues, CancellationToken token)
+        internal static Task<int> DeleteByIdsAsync<T>(this IDbCommand dbCmd, IEnumerable idValues, 
+            Action<IDbCommand> commandFilter, CancellationToken token)
         {
             var sqlIn = dbCmd.SetIdsInSqlParams(idValues);
             if (string.IsNullOrEmpty(sqlIn))
@@ -255,7 +279,7 @@ namespace ServiceStack.OrmLite
 
             var sql = OrmLiteWriteCommandExtensions.GetDeleteByIdsSql<T>(sqlIn, dbCmd.GetDialectProvider());
 
-            return dbCmd.ExecuteSqlAsync(sql, token);
+            return dbCmd.ExecuteSqlAsync(sql, commandFilter, token);
         }
 
         internal static Task<int> DeleteAllAsync<T>(this IDbCommand dbCmd, CancellationToken token)
@@ -405,8 +429,6 @@ namespace ServiceStack.OrmLite
 
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
 
-            commandFilter?.Invoke(dbCmd);
-
             using (dbTrans)
             {
                 foreach (var obj in objs)
@@ -414,6 +436,9 @@ namespace ServiceStack.OrmLite
                     OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
+
+                    commandFilter?.Invoke(dbCmd); //filters can augment SQL & only should be invoked once
+                    commandFilter = null;
 
                     await dbCmd.ExecNonQueryAsync(token);
                 }

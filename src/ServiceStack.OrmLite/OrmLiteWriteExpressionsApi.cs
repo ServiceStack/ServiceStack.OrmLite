@@ -262,7 +262,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static int Delete<T>(this IDbConnection dbConn, SqlExpression<T> where, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Delete(where));
+            return dbConn.Exec(dbCmd => dbCmd.Delete(where, commandFilter));
         }
 
         /// <summary>

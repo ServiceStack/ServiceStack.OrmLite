@@ -279,9 +279,10 @@ namespace ServiceStack.OrmLite
         ///   db.DeleteAsync&lt;Person&gt;(p => p.Age == 27);
         ///   DELETE FROM "Person" WHERE ("Age" = 27)
         /// </summary>
-        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> where, CancellationToken token = default)
+        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> where, 
+            Action<IDbCommand> commandFilter = null, CancellationToken token = default)
         {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteAsync(where, token));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteAsync(where, commandFilter, token));
         }
 
         /// <summary>
@@ -291,9 +292,10 @@ namespace ServiceStack.OrmLite
         ///   db.DeleteAsync&lt;Person&gt;(q.Where(p => p.Age == 27));
         ///   DELETE FROM "Person" WHERE ("Age" = 27)
         /// </summary>
-        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, SqlExpression<T> where, CancellationToken token = default)
+        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, SqlExpression<T> where
+            , Action<IDbCommand> commandFilter = null, CancellationToken token = default)
         {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteAsync(where, token));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteAsync(where, commandFilter, token));
         }
     
         /// <summary>
@@ -302,9 +304,10 @@ namespace ServiceStack.OrmLite
         ///   db.DeleteWhereAsync&lt;Person&gt;("Age = {0}", new object[] { 27 });
         ///   DELETE FROM "Person" WHERE ("Age" = 27)
         /// </summary>
-        public static Task<int> DeleteWhereAsync<T>(this IDbConnection dbConn, string whereFilter, object[] whereParams, CancellationToken token = default)
+        public static Task<int> DeleteWhereAsync<T>(this IDbConnection dbConn, string whereFilter, object[] whereParams
+            , Action<IDbCommand> commandFilter = null, CancellationToken token = default)
         {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteWhereAsync<T>(whereFilter, whereParams, token));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteWhereAsync<T>(whereFilter, whereParams, commandFilter, token));
         }
     }
 }

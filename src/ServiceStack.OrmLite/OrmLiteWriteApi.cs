@@ -280,7 +280,7 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Delete 1 row by the PrimaryKey where the rowVersion matches the optimistic concurrency field. 
-        /// Will throw <exception cref="OptimisticConcurrencyException">RowModefiedExeption</exception> if the 
+        /// Will throw <exception cref="OptimisticConcurrencyException">RowModifiedException</exception> if the 
         /// row does not exist or has a different row version.
         /// E.g: <para>db.DeleteById&lt;Person&gt;(1)</para>
         /// </summary>

@@ -205,25 +205,28 @@ namespace ServiceStack.OrmLite
             return dbCmd.InitInsertOnly(insertFields).ExecNonQueryAsync(token);
         }
 
-        internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> where, CancellationToken token)
+        internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> where, 
+            Action<IDbCommand> commandFilter, CancellationToken token)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(where);
-            return dbCmd.DeleteAsync(q, token);
+            return dbCmd.DeleteAsync(q, commandFilter, token);
         }
 
-        internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, SqlExpression<T> q, CancellationToken token)
+        internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, SqlExpression<T> q, 
+            Action<IDbCommand> commandFilter, CancellationToken token)
         {
             var sql = q.ToDeleteRowStatement();
-            return dbCmd.ExecuteSqlAsync(sql, q.Params, token);
+            return dbCmd.ExecuteSqlAsync(sql, q.Params, commandFilter, token);
         }
 
-        internal static Task<int> DeleteWhereAsync<T>(this IDbCommand dbCmd, string whereFilter, object[] whereParams, CancellationToken token)
+        internal static Task<int> DeleteWhereAsync<T>(this IDbCommand dbCmd, string whereFilter, object[] whereParams, 
+            Action<IDbCommand> commandFilter, CancellationToken token)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(whereFilter, whereParams);
             var sql = q.ToDeleteRowStatement();
-            return dbCmd.ExecuteSqlAsync(sql, q.Params, token);
+            return dbCmd.ExecuteSqlAsync(sql, q.Params, commandFilter, token);
         }
     }
 }

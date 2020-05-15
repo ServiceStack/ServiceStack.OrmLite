@@ -486,8 +486,9 @@ namespace ServiceStack.OrmLite
 
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                    commandFilter?.Invoke(dbCmd);
+                    commandFilter?.Invoke(dbCmd); //filters can augment SQL & only should be invoked once
                     commandFilter = null;
+                    
                     var rowsUpdated = dbCmd.ExecNonQuery();
                     if (hadRowVersion && rowsUpdated == 0) 
                         throw new OptimisticConcurrencyException();
@@ -559,7 +560,8 @@ namespace ServiceStack.OrmLite
             return DeleteAll(dbCmd, filters, o => o.AllFieldsMap<T>().NonDefaultsOnly());
         }
 
-        private static int DeleteAll<T>(IDbCommand dbCmd, IEnumerable<T> objs, Func<object,Dictionary<string,object>> fieldValuesFn=null, Action<IDbCommand> commandFilter = null)
+        private static int DeleteAll<T>(IDbCommand dbCmd, IEnumerable<T> objs, 
+            Func<object,Dictionary<string,object>> fieldValuesFn, Action<IDbCommand> commandFilter = null)
         {
             OrmLiteUtils.AssertNotAnonType<T>();
             
@@ -583,7 +585,7 @@ namespace ServiceStack.OrmLite
 
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                    commandFilter?.Invoke(dbCmd);
+                    commandFilter?.Invoke(dbCmd); //filters can augment SQL & only should be invoked once
                     commandFilter = null;
 
                     count += dbCmd.ExecNonQuery();
@@ -864,12 +866,13 @@ namespace ServiceStack.OrmLite
 
                 dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd);
 
-                commandFilter?.Invoke(dbCmd);
-
                 foreach (var obj in objs)
                 {
                     OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
+
+                    commandFilter?.Invoke(dbCmd); //filters can augment SQL & only should be invoked once
+                    commandFilter = null;
 
                     try
                     {

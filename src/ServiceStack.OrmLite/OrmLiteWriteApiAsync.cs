@@ -196,7 +196,8 @@ namespace ServiceStack.OrmLite
         /// <para>db.DeleteAsync&lt;Person&gt;(new { FirstName = "Jimi", Age = 27 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
-        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, object anonFilter, CancellationToken token = default)
+        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, object anonFilter, 
+            Action<IDbCommand> commandFilter = null, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteAsync<T>(anonFilter, token));
         }
@@ -206,7 +207,8 @@ namespace ServiceStack.OrmLite
         /// <para>db.DeleteAsync&lt;Person&gt;(new Dictionary&lt;string,object&gt; { ["FirstName"] = "Jimi", ["Age"] = 27 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
-        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, Dictionary<string, object> filters, CancellationToken token = default)
+        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, Dictionary<string, object> filters, 
+            Action<IDbCommand> commandFilter = null, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteAsync<T>(filters, token));
         }
@@ -216,7 +218,8 @@ namespace ServiceStack.OrmLite
         /// <para>db.DeleteAsync(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
-        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, T allFieldsFilter, CancellationToken token = default)
+        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, T allFieldsFilter, 
+            Action<IDbCommand> commandFilter = null, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteAsync(allFieldsFilter, token));
         }
@@ -225,11 +228,13 @@ namespace ServiceStack.OrmLite
         /// Delete 1 or more rows in a transaction using all fields in the commandFilter. E.g:
         /// <para>db.DeleteAsync(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 })</para>
         /// </summary>
-        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, CancellationToken token = default, params T[] allFieldsFilters)
+        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, 
+            Action<IDbCommand> commandFilter = null, CancellationToken token = default, params T[] allFieldsFilters)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteAsync(token, allFieldsFilters));
         }
-        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, params T[] allFieldsFilters)
+        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, 
+            Action<IDbCommand> commandFilter = null, params T[] allFieldsFilters)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteAsync(default, allFieldsFilters));
         }
@@ -256,7 +261,7 @@ namespace ServiceStack.OrmLite
         }
         public static Task<int> DeleteNonDefaultsAsync<T>(this IDbConnection dbConn, params T[] nonDefaultsFilters)
         {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteNonDefaultsAsync(default(CancellationToken), nonDefaultsFilters));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteNonDefaultsAsync(default, nonDefaultsFilters));
         }
 
         /// <summary>
@@ -264,20 +269,22 @@ namespace ServiceStack.OrmLite
         /// <para>db.DeleteByIdAsync&lt;Person&gt;(1)</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
-        public static Task<int> DeleteByIdAsync<T>(this IDbConnection dbConn, object id, CancellationToken token = default)
+        public static Task<int> DeleteByIdAsync<T>(this IDbConnection dbConn, object id, 
+            Action<IDbCommand> commandFilter = null, CancellationToken token = default)
         {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteByIdAsync<T>(id, token));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteByIdAsync<T>(id, commandFilter, token));
         }
 
         /// <summary>
         /// Delete 1 row by the PrimaryKey where the rowVersion matches the optimistic concurrency field. 
-        /// Will throw <exception cref="OptimisticConcurrencyException">RowModefiedExeption</exception> if the 
+        /// Will throw <exception cref="OptimisticConcurrencyException">RowModifiedException</exception> if the 
         /// row does not exist or has a different row version.
         /// E.g: <para>db.DeleteByIdAsync&lt;Person&gt;(1)</para>
         /// </summary>
-        public static Task DeleteByIdAsync<T>(this IDbConnection dbConn, object id, ulong rowVersion, CancellationToken token = default)
+        public static Task DeleteByIdAsync<T>(this IDbConnection dbConn, object id, ulong rowVersion, 
+            Action<IDbCommand> commandFilter = null, CancellationToken token = default)
         {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteByIdAsync<T>(id, rowVersion, token));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteByIdAsync<T>(id, rowVersion, commandFilter, token));
         }
 
         /// <summary>
@@ -285,9 +292,10 @@ namespace ServiceStack.OrmLite
         /// <para>db.DeleteByIdsAsync&lt;Person&gt;(new[] { 1, 2, 3 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
-        public static Task<int> DeleteByIdsAsync<T>(this IDbConnection dbConn, IEnumerable idValues, CancellationToken token = default)
+        public static Task<int> DeleteByIdsAsync<T>(this IDbConnection dbConn, IEnumerable idValues, 
+            Action<IDbCommand> commandFilter = null, CancellationToken token = default)
         {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteByIdsAsync<T>(idValues, token));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteByIdsAsync<T>(idValues, commandFilter, token));
         }
 
         /// <summary>
