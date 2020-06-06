@@ -25,62 +25,60 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_insert_update_and_select_AllTypes()
         {
-            using (var db = OpenDbConnection())
+            using var db = OpenDbConnection();
+            if (Dialect == Dialect.Firebird) //Exceeds row limit
+                DialectProvider.GetStringConverter().MaxColumnDefinition = "VARCHAR(4000)";
+
+            db.DropAndCreateTable<AllTypes>();
+            db.GetLastSql().Print();
+
+            var rows = 3.Times(i => AllTypes.Create(i));
+
+            db.InsertAll(rows);
+
+            var lastRow = rows.Last();
+
+            var dbRow = db.SingleById<AllTypes>(lastRow.Id);
+
+            Assert.That(dbRow, Is.EqualTo(lastRow));
+
+            Assert.That(db.Single<AllTypes>(x => x.NullableId == lastRow.NullableId), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.Byte == lastRow.Byte), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.Short == lastRow.Short), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.Int == lastRow.Int), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.Long == lastRow.Long), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.UShort == lastRow.UShort), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.UInt == lastRow.UInt), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.ULong == lastRow.ULong), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.Decimal == lastRow.Decimal), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.String == lastRow.String), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.DateTime == lastRow.DateTime), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.TimeSpan == lastRow.TimeSpan), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.DateTimeOffset == lastRow.DateTimeOffset), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.Guid == lastRow.Guid), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.Char == lastRow.Char), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.NullableDateTime == lastRow.NullableDateTime), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.NullableTimeSpan == lastRow.NullableTimeSpan), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.CustomText == lastRow.CustomText), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.MaxText == lastRow.MaxText), Is.EqualTo(lastRow));
+            Assert.That(db.Single<AllTypes>(x => x.CustomDecimal == lastRow.CustomDecimal), Is.EqualTo(lastRow));
+
+            Assert.That(db.Single(db.From<AllTypes>().Where(x => x.Bool == lastRow.Bool).OrderByDescending(x => x.Id)), Is.EqualTo(lastRow));
+
+            var updatedRows = 3.Times(i =>
             {
-                if (Dialect == Dialect.Firebird) //Exceeds row limit
-                    DialectProvider.GetStringConverter().MaxColumnDefinition = "VARCHAR(4000)";
+                var updated = AllTypes.Create(i + 3);
+                updated.Id = i + 1;
+                db.Update(updated);
+                return updated;
+            });
 
-                db.DropAndCreateTable<AllTypes>();
-                db.GetLastSql().Print();
+            var lastUpdatedRow = updatedRows.Last();
+            var dbUpdatedRow = db.SingleById<AllTypes>(lastUpdatedRow.Id);
+            Assert.That(dbUpdatedRow, Is.EqualTo(lastUpdatedRow));
 
-                var rows = 3.Times(i => AllTypes.Create(i));
-
-                db.InsertAll(rows);
-
-                var lastRow = rows.Last();
-
-                var dbRow = db.SingleById<AllTypes>(lastRow.Id);
-
-                Assert.That(dbRow, Is.EqualTo(lastRow));
-
-                Assert.That(db.Single<AllTypes>(x => x.NullableId == lastRow.NullableId), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.Byte == lastRow.Byte), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.Short == lastRow.Short), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.Int == lastRow.Int), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.Long == lastRow.Long), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.UShort == lastRow.UShort), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.UInt == lastRow.UInt), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.ULong == lastRow.ULong), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.Decimal == lastRow.Decimal), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.String == lastRow.String), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.DateTime == lastRow.DateTime), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.TimeSpan == lastRow.TimeSpan), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.DateTimeOffset == lastRow.DateTimeOffset), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.Guid == lastRow.Guid), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.Char == lastRow.Char), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.NullableDateTime == lastRow.NullableDateTime), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.NullableTimeSpan == lastRow.NullableTimeSpan), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.CustomText == lastRow.CustomText), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.MaxText == lastRow.MaxText), Is.EqualTo(lastRow));
-                Assert.That(db.Single<AllTypes>(x => x.CustomDecimal == lastRow.CustomDecimal), Is.EqualTo(lastRow));
-
-                Assert.That(db.Single(db.From<AllTypes>().Where(x => x.Bool == lastRow.Bool).OrderByDescending(x => x.Id)), Is.EqualTo(lastRow));
-
-                var updatedRows = 3.Times(i =>
-                {
-                    var updated = AllTypes.Create(i + 3);
-                    updated.Id = i + 1;
-                    db.Update(updated);
-                    return updated;
-                });
-
-                var lastUpdatedRow = updatedRows.Last();
-                var dbUpdatedRow = db.SingleById<AllTypes>(lastUpdatedRow.Id);
-                Assert.That(dbUpdatedRow, Is.EqualTo(lastUpdatedRow));
-
-                if (Dialect == Dialect.Firebird)
-                    DialectProvider.GetStringConverter().MaxColumnDefinition = null;
-            }
+            if (Dialect == Dialect.Firebird)
+                DialectProvider.GetStringConverter().MaxColumnDefinition = null;
         }
     }
 

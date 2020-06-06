@@ -21,23 +21,21 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Does_IgnoreOnInsert()
         {
-            using (var db = OpenDbConnection())
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<CustomSelectModel>();
+                
+            var row = new CustomSelectModel
             {
-                db.DropAndCreateTable<CustomSelectModel>();
+                DeviceId = Guid.NewGuid(),
+                GroupId = Guid.NewGuid(),
+                SiteId = Guid.NewGuid(),
+            };
                 
-                var row = new CustomSelectModel
-                {
-                    DeviceId = Guid.NewGuid(),
-                    GroupId = Guid.NewGuid(),
-                    SiteId = Guid.NewGuid(),
-                };
-                
-                db.Insert(row);
+            db.Insert(row);
 
-                db.Update(row);
+            db.Update(row);
 
-                db.Save(row);
-            }
+            db.Save(row);
         }
     }
 }

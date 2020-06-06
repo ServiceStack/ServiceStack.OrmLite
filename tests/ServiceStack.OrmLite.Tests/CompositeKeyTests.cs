@@ -15,27 +15,23 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_select_single_from_empty_composite_key_table()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<CompositeKey>();
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<CompositeKey>();
 
-                var result = db.Single<CompositeKey>(ck => ck.SubId1 == SubId1Value && ck.SubId2 == SubId2Value);
-                Assert.That(result, Is.Null);
-            }
+            var result = db.Single<CompositeKey>(ck => ck.SubId1 == SubId1Value && ck.SubId2 == SubId2Value);
+            Assert.That(result, Is.Null);
         }
 
         [Test]
         public void Can_select_single_from_composite_key_table_with_one_matching_row()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<CompositeKey>();
-                InsertData(db, 1);
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<CompositeKey>();
+            InsertData(db, 1);
 
-                var result = db.Single<CompositeKey>(ck => ck.SubId1 == SubId1Value && ck.SubId2 == SubId2Value);
-                Assert.That(result.SubId1, Is.EqualTo(SubId1Value));
-                Assert.That(result.SubId2, Is.EqualTo(SubId2Value));
-            }
+            var result = db.Single<CompositeKey>(ck => ck.SubId1 == SubId1Value && ck.SubId2 == SubId2Value);
+            Assert.That(result.SubId1, Is.EqualTo(SubId1Value));
+            Assert.That(result.SubId2, Is.EqualTo(SubId2Value));
         }
 
         private void InsertData(IDbConnection db, int count)
@@ -50,15 +46,13 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_select_single_from_composite_key_table_with_several_matching_rows()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<CompositeKey>();
-                InsertData(db, 4);
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<CompositeKey>();
+            InsertData(db, 4);
 
-                var result = db.Single<CompositeKey>(ck => ck.SubId1 == SubId1Value && ck.SubId2 == SubId2Value);
-                Assert.That(result.SubId1, Is.EqualTo(SubId1Value));
-                Assert.That(result.SubId2, Is.EqualTo(SubId2Value));
-            }
+            var result = db.Single<CompositeKey>(ck => ck.SubId1 == SubId1Value && ck.SubId2 == SubId2Value);
+            Assert.That(result.SubId1, Is.EqualTo(SubId1Value));
+            Assert.That(result.SubId2, Is.EqualTo(SubId2Value));
         }
 
         public class CompositeKey

@@ -13,7 +13,7 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void API_SqlServer_Examples()
         {
-            var db = OpenDbConnection();
+            using var db = OpenDbConnection();
             db.DropAndCreateTable<Person>();
             db.DropAndCreateTable<PersonWithAutoId>();
 
@@ -360,7 +360,6 @@ namespace ServiceStack.OrmLite.Tests
 
             db.SaveAll(new[]{ new Person { Id = 14, FirstName = "Amy", LastName = "Winehouse", Age = 27 },
                               new Person { Id = 15, FirstName = "Amy", LastName = "Winehouse", Age = 27 } });
-            db.Dispose();
         }
     }
 }

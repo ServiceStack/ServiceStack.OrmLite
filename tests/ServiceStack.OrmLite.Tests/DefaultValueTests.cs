@@ -18,17 +18,15 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_create_table_with_DefaultValues()
         {
-            using (var db = OpenDbConnection())
-            {
-                var row = CreateAndInitialize(db);
+            using var db = OpenDbConnection();
+            var row = CreateAndInitialize(db);
 
-                var expectedDate = !Dialect.HasFlag(Dialect.Firebird)
-                    ? DateTime.UtcNow.Date
-                    : DateTime.Now.Date; 
+            var expectedDate = !Dialect.HasFlag(Dialect.Firebird)
+                ? DateTime.UtcNow.Date
+                : DateTime.Now.Date; 
 
-                Assert.That(row.CreatedDateUtc, Is.GreaterThan(expectedDate));
-                Assert.That(row.NCreatedDateUtc, Is.GreaterThan(expectedDate));
-            }
+            Assert.That(row.CreatedDateUtc, Is.GreaterThan(expectedDate));
+            Assert.That(row.NCreatedDateUtc, Is.GreaterThan(expectedDate));
         }
 
         private DefaultValues CreateAndInitialize(IDbConnection db, int count = 1)
@@ -61,42 +59,38 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_use_ToUpdateStatement_to_generate_inline_SQL()
         {
-            using (var db = OpenDbConnection())
-            {
-                CreateAndInitialize(db);
+            using var db = OpenDbConnection();
+            CreateAndInitialize(db);
 
-                var row = db.SingleById<DefaultValues>(1);
-                row.DefaultIntNoDefault = 42;
+            var row = db.SingleById<DefaultValues>(1);
+            row.DefaultIntNoDefault = 42;
 
-                var sql = db.ToUpdateStatement(row);
-                sql.Print();
-                db.ExecuteSql(sql);
+            var sql = db.ToUpdateStatement(row);
+            sql.Print();
+            db.ExecuteSql(sql);
 
-                row = db.SingleById<DefaultValues>(1);
+            row = db.SingleById<DefaultValues>(1);
 
-                Assert.That(row.DefaultInt, Is.EqualTo(1));
-                Assert.That(row.DefaultIntNoDefault, Is.EqualTo(42));
-                Assert.That(row.NDefaultInt, Is.EqualTo(1));
-                Assert.That(row.DefaultDouble, Is.EqualTo(1.1).Within(.1d));
-                Assert.That(row.NDefaultDouble, Is.EqualTo(1.1).Within(.1d));
-                Assert.That(row.DefaultString, Is.EqualTo("String"));
-            }
+            Assert.That(row.DefaultInt, Is.EqualTo(1));
+            Assert.That(row.DefaultIntNoDefault, Is.EqualTo(42));
+            Assert.That(row.NDefaultInt, Is.EqualTo(1));
+            Assert.That(row.DefaultDouble, Is.EqualTo(1.1).Within(.1d));
+            Assert.That(row.NDefaultDouble, Is.EqualTo(1.1).Within(.1d));
+            Assert.That(row.DefaultString, Is.EqualTo("String"));
         }
 
         [Test]
         public void Can_filter_update_method1_to_insert_date()
         {
-            using (var db = OpenDbConnection())
-            {
-                CreateAndInitialize(db, 2);
+            using var db = OpenDbConnection();
+            CreateAndInitialize(db, 2);
 
-                ResetUpdateDate(db);
-                db.Update(cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider),
-                    new DefaultValues { Id = 1, DefaultInt = 45, CreatedDateUtc = DateTime.Now }, 
-                    new DefaultValues { Id = 2, DefaultInt = 72, CreatedDateUtc = DateTime.Now });
-                VerifyUpdateDate(db);
-                VerifyUpdateDate(db, id: 2);
-            }
+            ResetUpdateDate(db);
+            db.Update(cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider),
+                new DefaultValues { Id = 1, DefaultInt = 45, CreatedDateUtc = DateTime.Now }, 
+                new DefaultValues { Id = 2, DefaultInt = 72, CreatedDateUtc = DateTime.Now });
+            VerifyUpdateDate(db);
+            VerifyUpdateDate(db, id: 2);
         }
 
         private static void ResetUpdateDate(IDbConnection db)
@@ -117,105 +111,91 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_filter_update_method2_to_insert_date()
         {
-            using (var db = OpenDbConnection())
-            {
-                CreateAndInitialize(db);
+            using var db = OpenDbConnection();
+            CreateAndInitialize(db);
 
-                ResetUpdateDate(db);
-                db.Update(new DefaultValues { Id = 1, DefaultInt = 2342, CreatedDateUtc = DateTime.Now }, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDate(db);
-            }
+            ResetUpdateDate(db);
+            db.Update(new DefaultValues { Id = 1, DefaultInt = 2342, CreatedDateUtc = DateTime.Now }, p => p.Id == 1,
+                cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+            VerifyUpdateDate(db);
         }
 
         [Test]
         public void Can_filter_update_method3_to_insert_date()
         {
-            using (var db = OpenDbConnection())
-            {
-                CreateAndInitialize(db);
+            using var db = OpenDbConnection();
+            CreateAndInitialize(db);
 
-                ResetUpdateDate(db);
-                var row = db.SingleById<DefaultValues>(1);
-                row.DefaultInt = 3245;
-                row.DefaultDouble = 978.423;
-                db.Update(row, cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDate(db);
-            }
+            ResetUpdateDate(db);
+            var row = db.SingleById<DefaultValues>(1);
+            row.DefaultInt = 3245;
+            row.DefaultDouble = 978.423;
+            db.Update(row, cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+            VerifyUpdateDate(db);
         }
 
         [Test]
         public void Can_filter_update_method4_to_insert_date()
         {
-            using (var db = OpenDbConnection())
-            {
-                CreateAndInitialize(db);
+            using var db = OpenDbConnection();
+            CreateAndInitialize(db);
 
-                ResetUpdateDate(db);
-                db.Update<DefaultValues>(new { DefaultInt = 765 }, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDate(db);
-            }
+            ResetUpdateDate(db);
+            db.Update<DefaultValues>(new { DefaultInt = 765 }, p => p.Id == 1,
+                cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+            VerifyUpdateDate(db);
         }
 
         [Test]
         public void Can_filter_updateAll_to_insert_date()
         {
-            using (var db = OpenDbConnection())
-            {
-                CreateAndInitialize(db, 2);
+            using var db = OpenDbConnection();
+            CreateAndInitialize(db, 2);
 
-                ResetUpdateDate(db);
-                db.UpdateAll(new [] { new DefaultValues { Id = 1, DefaultInt = 45, CreatedDateUtc = DateTime.Now },
-                                      new DefaultValues { Id = 2, DefaultInt = 72, CreatedDateUtc = DateTime.Now } },
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDate(db);
-                VerifyUpdateDate(db, id: 2);
-            }
+            ResetUpdateDate(db);
+            db.UpdateAll(new [] { new DefaultValues { Id = 1, DefaultInt = 45, CreatedDateUtc = DateTime.Now },
+                    new DefaultValues { Id = 2, DefaultInt = 72, CreatedDateUtc = DateTime.Now } },
+                cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+            VerifyUpdateDate(db);
+            VerifyUpdateDate(db, id: 2);
         }
 
         [Test]
         public void Can_filter_updateOnly_method1_to_insert_date()
         {
-            using (var db = OpenDbConnection())
-            {
-                CreateAndInitialize(db);
+            using var db = OpenDbConnection();
+            CreateAndInitialize(db);
 
-                ResetUpdateDate(db);
-                db.UpdateOnly(() => new DefaultValues {DefaultInt = 345}, p => p.Id == 1,
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDate(db);
-            }
+            ResetUpdateDate(db);
+            db.UpdateOnly(() => new DefaultValues {DefaultInt = 345}, p => p.Id == 1,
+                cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+            VerifyUpdateDate(db);
         }
 
         [Test]
         public void Can_filter_updateOnly_method2_to_insert_date()
         {
-            using (var db = OpenDbConnection())
-            {
-                CreateAndInitialize(db);
+            using var db = OpenDbConnection();
+            CreateAndInitialize(db);
 
-                ResetUpdateDate(db);
-                db.UpdateOnly(() => new DefaultValues { DefaultInt = 345 }, db.From<DefaultValues>().Where(p => p.Id == 1),
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDate(db);
-            }
+            ResetUpdateDate(db);
+            db.UpdateOnly(() => new DefaultValues { DefaultInt = 345 }, db.From<DefaultValues>().Where(p => p.Id == 1),
+                cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+            VerifyUpdateDate(db);
         }
 
         [Test]
         public void Can_filter_updateOnly_method3_to_insert_date()
         {
-            using (var db = OpenDbConnection())
-            {
-                CreateAndInitialize(db);
+            using var db = OpenDbConnection();
+            CreateAndInitialize(db);
 
-                ResetUpdateDate(db);
-                var row = db.SingleById<DefaultValues>(1);
-                row.DefaultDouble = 978.423;
-                db.UpdateOnly(row, db.From<DefaultValues>().Update(p => p.DefaultDouble),
-                    cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
-                VerifyUpdateDate(db);
-            }
+            ResetUpdateDate(db);
+            var row = db.SingleById<DefaultValues>(1);
+            row.DefaultDouble = 978.423;
+            db.UpdateOnly(row, db.From<DefaultValues>().Update(p => p.DefaultDouble),
+                cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
+            VerifyUpdateDate(db);
         }
 
         [Test]

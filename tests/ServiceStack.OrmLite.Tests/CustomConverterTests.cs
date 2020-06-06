@@ -22,34 +22,32 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_override_SqlServer_Time_Converter()
         {
-            using (var db = OpenDbConnection())
-            {
-                var hold = DialectProvider.GetConverter<TimeSpan>();
-                DialectProvider.RegisterConverter<TimeSpan>(
-                    new SqlServerTimeConverter());
+            using var db = OpenDbConnection();
+            var hold = DialectProvider.GetConverter<TimeSpan>();
+            DialectProvider.RegisterConverter<TimeSpan>(
+                new SqlServerTimeConverter());
 
-                db.DropAndCreateTable<PocoWithTime>();
+            db.DropAndCreateTable<PocoWithTime>();
 
-                var sql = db.GetLastSql();
-                Assert.That(sql, Does.Contain("\"TimeSpan\" TIME NOT NULL"));
-                sql.Print();
+            var sql = db.GetLastSql();
+            Assert.That(sql, Does.Contain("\"TimeSpan\" TIME NOT NULL"));
+            sql.Print();
 
-                //SQL Server can't do < 1 day and only 3ms precision
-                var oneTime = new TimeSpan(0, 1, 1, 1, 3); 
+            //SQL Server can't do < 1 day and only 3ms precision
+            var oneTime = new TimeSpan(0, 1, 1, 1, 3); 
 
-                db.Insert(new PocoWithTime { TimeSpan = oneTime });
+            db.Insert(new PocoWithTime { TimeSpan = oneTime });
 
-                Assert.That(db.Single<PocoWithTime>(x => x.TimeSpan == oneTime).TimeSpan, 
-                    Is.EqualTo(oneTime).Within(TimeSpan.FromSeconds(1)));
+            Assert.That(db.Single<PocoWithTime>(x => x.TimeSpan == oneTime).TimeSpan, 
+                Is.EqualTo(oneTime).Within(TimeSpan.FromSeconds(1)));
 
-                sql = db.GetLastSql();
-                sql.Print();
+            sql = db.GetLastSql();
+            sql.Print();
 
-                Assert.That(sql, Does.Contain("\"TimeSpan\" = '01:01:01.0030000'").
-                                 Or.Contain("\"TimeSpan\" = CAST(@0 AS TIME))"));
+            Assert.That(sql, Does.Contain("\"TimeSpan\" = '01:01:01.0030000'").
+                Or.Contain("\"TimeSpan\" = CAST(@0 AS TIME))"));
 
-                DialectProvider.RegisterConverter<TimeSpan>(hold);
-            }
+            DialectProvider.RegisterConverter<TimeSpan>(hold);
         }
     }
 }
