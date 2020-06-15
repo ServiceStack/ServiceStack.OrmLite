@@ -1,7 +1,7 @@
 <Project>
 
   <PropertyGroup>
-    <Version>5.9.0</Version>
+    <Version>5.9.1</Version>
     <AssemblyVersion>5.0.0.0</AssemblyVersion>
     <LangVersion>latest</LangVersion>
   	<Authors>ServiceStack</Authors>
