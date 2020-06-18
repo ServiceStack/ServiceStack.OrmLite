@@ -314,7 +314,6 @@ namespace ServiceStack.OrmLite
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
-
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
                 insertFields: dialectProvider.GetNonDefaultValueInsertFields<T>(obj));
 

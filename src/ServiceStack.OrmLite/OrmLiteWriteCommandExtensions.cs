@@ -782,6 +782,8 @@ namespace ServiceStack.OrmLite
 
         private static long InsertInternal<T>(IOrmLiteDialectProvider dialectProvider, IDbCommand dbCmd, object obj, Action<IDbCommand> commandFilter, bool selectIdentity)
         {
+            OrmLiteUtils.AssertNotAnonType<T>();
+
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
             commandFilter?.Invoke(dbCmd); //dbCmd.OnConflictInsert() needs to be applied before last insert id

@@ -54,10 +54,10 @@ namespace ServiceStack.OrmLite
 
         public static Task<int> ExecNonQueryAsync(this IDbCommand dbCmd, CancellationToken token = default)
         {
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
+
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.ExecuteSql(dbCmd).InTask();
-
-            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
 
             if (Log.IsDebugEnabled)
                 Log.DebugCommand(dbCmd);
@@ -213,13 +213,18 @@ namespace ServiceStack.OrmLite
 
         public static Task<long> ExecLongScalarAsync(this IDbCommand dbCmd)
         {
-            return dbCmd.ExecLongScalarAsync(null, default(CancellationToken));
+            return dbCmd.ExecLongScalarAsync(null, default);
         }
 
         public static Task<long> ExecLongScalarAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
             if (sql != null)
                 dbCmd.CommandText = sql;
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
+
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetLongScalar(dbCmd).InTask();
