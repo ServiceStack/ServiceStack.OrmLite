@@ -9,7 +9,15 @@
       Add OrmLite Converters for SQL Servers SqlGeography and SqlGeometry Types
     </PackageDescription>
     <PackageTags>SQLServer;OrmLite;RDBMS;SQL;POCO;Code-First;ORM;Schema-less;Blobs</PackageTags>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="1.0.0" PrivateAssets="All" />
+  </ItemGroup>
+
 
   <ItemGroup>
     <ProjectReference Include="..\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
