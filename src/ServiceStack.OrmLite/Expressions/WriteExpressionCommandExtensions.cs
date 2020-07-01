@@ -169,9 +169,7 @@ namespace ServiceStack.OrmLite
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Where(where);
             q.PrepareUpdateStatement(dbCmd, updateFields);
-            commandFilter?.Invoke(dbCmd);
-
-            return dbCmd.ExecNonQuery();
+            return dbCmd.UpdateAndVerify<T>(commandFilter, updateFields.ContainsKey(ModelDefinition.RowVersionName));
         }
 
         internal static string GetUpdateOnlyWhereExpression<T>(this IOrmLiteDialectProvider dialectProvider, 
@@ -226,9 +224,7 @@ namespace ServiceStack.OrmLite
             Action<IDbCommand> commandFilter = null)
         {
             dbCmd.PrepareUpdateOnly<T>(updateFields, whereExpression, whereParams);
-            commandFilter?.Invoke(dbCmd);
-
-            return dbCmd.ExecNonQuery();
+            return dbCmd.UpdateAndVerify<T>(commandFilter, updateFields.ContainsKey(ModelDefinition.RowVersionName));
         }
 
         internal static void PrepareUpdateOnly<T>(this IDbCommand dbCmd, Dictionary<string, object> updateFields, string whereExpression, object[] whereParams)
