@@ -18,12 +18,12 @@ namespace ServiceStack.OrmLite.SqlServerTests.Expressions
 
         public override IDbConnection OpenDbConnection(string connString = null, IOrmLiteDialectProvider dialectProvider = null)
         {
-            dialectProvider = dialectProvider ?? OrmLiteConfig.DialectProvider;
+            dialectProvider ??= OrmLiteConfig.DialectProvider;
 
             if (db != null && db.State != ConnectionState.Open)
                 db = null;
 
-            return db ?? (db = base.OpenDbConnection(connString, dialectProvider));
+            return db ??= base.OpenDbConnection(connString, dialectProvider);
         }
 
         [TearDown]

@@ -2587,13 +2587,13 @@ namespace ServiceStack.OrmLite
         private string quotedTrue;
         protected object GetQuotedTrueValue()
         {
-            return new PartialSqlString(quotedTrue ?? (quotedTrue = DialectProvider.GetQuotedValue(true, typeof(bool))));
+            return new PartialSqlString(quotedTrue ??= DialectProvider.GetQuotedValue(true, typeof(bool)));
         }
 
         private string quotedFalse;
         protected object GetQuotedFalseValue()
         {
-            return new PartialSqlString(quotedFalse ?? (quotedFalse =DialectProvider.GetQuotedValue(false, typeof(bool))));
+            return new PartialSqlString(quotedFalse ??= DialectProvider.GetQuotedValue(false, typeof(bool)));
         }
 
         private void BuildSelectExpression(string fields, bool distinct)

@@ -450,7 +450,7 @@ namespace ServiceStack.OrmLite.Dapper
 
             // Queue the preparation to be fired off when adding parameters to the DbCommand
             MAKECALLBACK:
-            (outputCallbacks ?? (outputCallbacks = new List<Action>())).Add(() =>
+            (outputCallbacks ??= new List<Action>()).Add(() =>
             {
                 // Finally, prep the parameter and attach the callback to it
                 var targetMemberType = lastMemberAccess?.Type;
