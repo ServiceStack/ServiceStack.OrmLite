@@ -615,6 +615,8 @@ namespace ServiceStack.OrmLite
             if (predicate == null)
                 return this;
 
+            Reset();
+
             var newExpr = WhereExpressionToString(Visit(predicate));
             return Ensure(newExpr);
         }
