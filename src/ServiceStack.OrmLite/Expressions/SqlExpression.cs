@@ -769,20 +769,11 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> OrderBy()
-        {
-            return OrderBy(string.Empty);
-        }
+        public virtual SqlExpression<T> OrderBy() => OrderBy(string.Empty);
 
-        public virtual SqlExpression<T> OrderBy(string orderBy)
-        {
-            return UnsafeOrderBy(orderBy.SqlVerifyFragment());
-        }
+        public virtual SqlExpression<T> OrderBy(string orderBy) => UnsafeOrderBy(orderBy.SqlVerifyFragment());
 
-        public virtual SqlExpression<T> OrderBy(long columnIndex)
-        {
-            return UnsafeOrderBy(columnIndex.ToString());
-        }
+        public virtual SqlExpression<T> OrderBy(long columnIndex) => UnsafeOrderBy(columnIndex.ToString());
 
         public virtual SqlExpression<T> UnsafeOrderBy(string orderBy)
         {
@@ -795,10 +786,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> OrderByRandom()
-        {
-            return OrderBy(DialectProvider.SqlRandom);
-        }
+        public virtual SqlExpression<T> OrderByRandom() => OrderBy(DialectProvider.SqlRandom);
 
         public ModelDefinition GetModelDefinition(FieldDefinition fieldDef)
         {
@@ -845,15 +833,9 @@ namespace ServiceStack.OrmLite
             public const string Desc = " DESC";
         }
 
-        public virtual SqlExpression<T> OrderByFields(params FieldDefinition[] fields)
-        {
-            return OrderByFields(OrderBySuffix.Asc, fields);
-        }
+        public virtual SqlExpression<T> OrderByFields(params FieldDefinition[] fields) => OrderByFields(OrderBySuffix.Asc, fields);
 
-        public virtual SqlExpression<T> OrderByFieldsDescending(params FieldDefinition[] fields)
-        {
-            return OrderByFields(OrderBySuffix.Desc, fields);
-        }
+        public virtual SqlExpression<T> OrderByFieldsDescending(params FieldDefinition[] fields) => OrderByFields(OrderBySuffix.Desc, fields);
 
         private SqlExpression<T> OrderByFields(string orderBySuffix, string[] fieldNames)
         {
@@ -879,7 +861,7 @@ namespace ServiceStack.OrmLite
                 var field = FirstMatchingField(useName);
                 var qualifiedName = field != null
                     ? GetQuotedColumnName(field.Item1, field.Item2.Name)
-                    : string.Equals("Random", useName)
+                    : string.Equals("Random", useName, StringComparison.OrdinalIgnoreCase)
                         ? DialectProvider.SqlRandom
                         : throw new ArgumentException("Could not find field " + useName);
 
@@ -893,20 +875,11 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> OrderByFields(params string[] fieldNames)
-        {
-            return OrderByFields("", fieldNames);
-        }
+        public virtual SqlExpression<T> OrderByFields(params string[] fieldNames) => OrderByFields("", fieldNames);
 
-        public virtual SqlExpression<T> OrderByFieldsDescending(params string[] fieldNames)
-        {
-            return OrderByFields(" DESC", fieldNames);
-        }
+        public virtual SqlExpression<T> OrderByFieldsDescending(params string[] fieldNames) => OrderByFields(" DESC", fieldNames);
 
-        public virtual SqlExpression<T> OrderBy(Expression<Func<T, object>> keySelector)
-        {
-            return OrderByInternal(keySelector);
-        }
+        public virtual SqlExpression<T> OrderBy(Expression<Func<T, object>> keySelector) => OrderByInternal(keySelector);
 
         public virtual SqlExpression<T> OrderBy<Table>(Expression<Func<Table, object>> fields) => OrderByInternal(fields);
         public virtual SqlExpression<T> OrderBy<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields) => OrderByInternal(fields);
@@ -948,11 +921,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> ThenBy(Expression<Func<T, object>> keySelector)
-        {
-            return ThenByInternal(keySelector);
-        }
-
+        public virtual SqlExpression<T> ThenBy(Expression<Func<T, object>> keySelector) => ThenByInternal(keySelector);
         public virtual SqlExpression<T> ThenBy<Table>(Expression<Func<Table, object>> fields) => ThenByInternal(fields);
         public virtual SqlExpression<T> ThenBy<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields) => ThenByInternal(fields);
         public virtual SqlExpression<T> ThenBy<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields) => ThenByInternal(fields);
@@ -1000,15 +969,9 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> OrderByDescending(string orderBy)
-        {
-            return UnsafeOrderByDescending(orderBy.SqlVerifyFragment());
-        }
+        public virtual SqlExpression<T> OrderByDescending(string orderBy) => UnsafeOrderByDescending(orderBy.SqlVerifyFragment());
 
-        public virtual SqlExpression<T> OrderByDescending(long columnIndex)
-        {
-            return UnsafeOrderByDescending(columnIndex.ToString());
-        }
+        public virtual SqlExpression<T> OrderByDescending(long columnIndex) => UnsafeOrderByDescending(columnIndex.ToString());
 
         private SqlExpression<T> UnsafeOrderByDescending(string orderBy)
         {
@@ -1026,11 +989,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> ThenByDescending(Expression<Func<T, object>> keySelector)
-        {
-            return ThenByDescendingInternal(keySelector);
-        }
-
+        public virtual SqlExpression<T> ThenByDescending(Expression<Func<T, object>> keySelector) => ThenByDescendingInternal(keySelector);
         public virtual SqlExpression<T> ThenByDescending<Table>(Expression<Func<Table, object>> fields) => ThenByDescendingInternal(fields);
         public virtual SqlExpression<T> ThenByDescending<Table1, Table2>(Expression<Func<Table1, Table2, object>> fields) => ThenByDescendingInternal(fields);
         public virtual SqlExpression<T> ThenByDescending<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, object>> fields) => ThenByDescendingInternal(fields);
