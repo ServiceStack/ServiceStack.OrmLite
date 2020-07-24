@@ -37,7 +37,6 @@ namespace ServiceStack.OrmLite.Tests.Issues
         {
             var factory = new OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider);
             using var db = await factory.OpenAsync();
-            OrmLiteUtils.PrintSql();
 
             db.ExecuteSql(@"
 CREATE TABLE IF NOT EXISTS `users` (

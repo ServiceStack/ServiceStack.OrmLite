@@ -282,9 +282,9 @@ namespace ServiceStack.OrmLite
     public static class ModelDefinition<T>
     {
         private static ModelDefinition definition;
-        public static ModelDefinition Definition => definition ?? (definition = typeof(T).GetModelDefinition());
+        public static ModelDefinition Definition => definition ??= typeof(T).GetModelDefinition();
 
         private static string primaryKeyName;
-        public static string PrimaryKeyName => primaryKeyName ?? (primaryKeyName = Definition.PrimaryKey.FieldName);
+        public static string PrimaryKeyName => primaryKeyName ??= Definition.PrimaryKey.FieldName;
     }
 }

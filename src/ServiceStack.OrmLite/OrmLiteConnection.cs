@@ -27,7 +27,7 @@ namespace ServiceStack.OrmLite
             this.DialectProvider = factory.DialectProvider;
         }
 
-        public IDbConnection DbConnection => dbConnection ?? (dbConnection = ConnectionString.ToDbConnection(Factory.DialectProvider));
+        public IDbConnection DbConnection => dbConnection ??= ConnectionString.ToDbConnection(Factory.DialectProvider);
 
         public void Dispose()
         {

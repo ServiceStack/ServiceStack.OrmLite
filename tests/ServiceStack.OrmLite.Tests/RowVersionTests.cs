@@ -50,6 +50,17 @@ namespace ServiceStack.OrmLite.Tests
         public long Version { get; set; }
     }
 
+    [Alias("ModelAlias")]
+    public class ModelWithAlias
+    {
+        [Alias("ModelId")]
+        [AutoIncrement]
+        public int Id { get; set; }
+        
+        [Alias("IntAlias")]
+        public int IntField { get; set; }
+    }
+
     [Schema("Schema")]
     public class ModelWithSchemaAndRowVersionForInnerJoin
     {

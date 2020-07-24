@@ -196,5 +196,22 @@ namespace ServiceStack.OrmLite.Tests
 
             assertEnsure(q);
         }
+        
+        [Test]
+        public void Ensure_does_use_aliases()
+        {
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<ModelWithAlias>();
+
+            db.Insert(new ModelWithAlias {
+                IntField = 1,
+            });
+
+            var q = db.From<ModelWithAlias>()
+                .Ensure(x => x.IntField > 0);
+
+            var results = db.Select(q);
+            Assert.That(results.Count, Is.EqualTo(1));
+        }
     }
 }
