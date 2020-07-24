@@ -648,6 +648,8 @@ namespace ServiceStack.OrmLite.SqlServer
                 ? $"CAST({fieldOrValue} AS VARCHAR(MAX))"
                 : $"CAST({fieldOrValue} AS {castAs})";
 
+        public override string SqlRandom => "NEWID()";
+        
         protected SqlConnection Unwrap(IDbConnection db) => (SqlConnection)db.ToDbConnection();
 
         protected SqlCommand Unwrap(IDbCommand cmd) => (SqlCommand)cmd.ToDbCommand();

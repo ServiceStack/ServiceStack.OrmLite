@@ -795,7 +795,7 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> OrderByRandom()
         {
-            return OrderBy("RAND()");
+            return OrderBy(DialectProvider.SqlRandom);
         }
 
         public ModelDefinition GetModelDefinition(FieldDefinition fieldDef)
@@ -875,9 +875,11 @@ namespace ServiceStack.OrmLite
                 var useName = reverse ? fieldName.Substring(1) : fieldName;
 
                 var field = FirstMatchingField(useName);
-                if (field == null)
-                    throw new ArgumentException("Could not find field " + useName);
-                var qualifiedName = GetQuotedColumnName(field.Item1, field.Item2.Name);
+                var qualifiedName = field != null
+                    ? GetQuotedColumnName(field.Item1, field.Item2.Name)
+                    : string.Equals("Random", useName)
+                        ? DialectProvider.SqlRandom
+                        : throw new ArgumentException("Could not find field " + useName);
 
                 if (sbOrderBy.Length > 0)
                     sbOrderBy.Append(", ");

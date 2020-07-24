@@ -1129,6 +1129,8 @@ namespace ServiceStack.OrmLite.Oracle
         }
 
         public override string SqlConcat(IEnumerable<object> args) => string.Join(" || ", args);
+
+        public override string SqlRandom => "dbms_random.value";
         
         protected OracleConnection Unwrap(IDbConnection db)
         {

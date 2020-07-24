@@ -243,6 +243,8 @@ namespace ServiceStack.OrmLite.Sqlite
         public override string SqlCurrency(string fieldOrValue, string currencySymbol) => SqlConcat(new []{ "'" + currencySymbol + "'", "printf(\"%.2f\", " + fieldOrValue + ")" });
 
         public override string SqlBool(bool value) => value ? "1" : "0";
+
+        public override string SqlRandom => "random()";
     }
 
     public static class SqliteExtensions

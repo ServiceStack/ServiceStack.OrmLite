@@ -1668,7 +1668,9 @@ namespace ServiceStack.OrmLite
         
         public virtual string SqlCast(object fieldOrValue, string castAs) => $"CAST({fieldOrValue} AS {castAs})";
 
-        //Async API's, should be overrided by Dialect Providers to use .ConfigureAwait(false)
+        public virtual string SqlRandom => "RAND()";
+
+        //Async API's, should be overriden by Dialect Providers to use .ConfigureAwait(false)
         //Default impl below uses TaskAwaiter shim in async.cs
 
         public virtual Task OpenAsync(IDbConnection db, CancellationToken token = default)

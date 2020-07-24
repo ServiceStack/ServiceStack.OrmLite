@@ -706,6 +706,8 @@ namespace ServiceStack.OrmLite.PostgreSQL
         public override string SqlCast(object fieldOrValue, string castAs) => 
             $"({fieldOrValue})::{castAs}";
 
+        public override string SqlRandom => "RANDOM()";
+
         protected NpgsqlConnection Unwrap(IDbConnection db)
         {
             return (NpgsqlConnection)db.ToDbConnection();

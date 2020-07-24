@@ -22,11 +22,6 @@ namespace ServiceStack.OrmLite.SqlServer
                 : $"substring({quotedColumn}, {startIndex}, LEN({quotedColumn}) - {startIndex} + 1)";
         }
 
-        public override SqlExpression<T> OrderByRandom()
-        {
-            return base.OrderBy("NEWID()");
-        }
-
         protected override PartialSqlString ToLengthPartialString(object arg)
         {
             return new PartialSqlString($"LEN({arg})");
