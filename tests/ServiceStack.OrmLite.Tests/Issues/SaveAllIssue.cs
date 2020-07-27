@@ -15,20 +15,18 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_use_SaveAll_to_save_one_column_table()
         {
-            using (var db = OpenDbConnection())
+            using var db = OpenDbConnection();
+            db.CreateTableIfNotExists<UserRole>();
+
+            db.SaveAll(new[]
             {
-                db.CreateTableIfNotExists<UserRole>();
+                new UserRole { Name = "Admin" },
+                new UserRole { Name = "Reader" },
+                new UserRole { Name = "Writer" },
+            });
 
-                db.SaveAll(new[]
-                {
-                    new UserRole { Name = "Admin" },
-                    new UserRole { Name = "Reader" },
-                    new UserRole { Name = "Writer" },
-                });
-
-                var rows = db.Select<UserRole>();
-                Assert.That(rows.Map(x => x.Name), Is.EquivalentTo(new[]{ "Admin", "Reader", "Writer"}));
-            }
+            var rows = db.Select<UserRole>();
+            Assert.That(rows.Map(x => x.Name), Is.EquivalentTo(new[]{ "Admin", "Reader", "Writer"}));
         }
     }
 }
