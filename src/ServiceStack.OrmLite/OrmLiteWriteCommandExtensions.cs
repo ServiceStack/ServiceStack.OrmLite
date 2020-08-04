@@ -1006,6 +1006,7 @@ namespace ServiceStack.OrmLite
 
             try
             {
+                var dialect = dbCmd.Dialect();
                 foreach (var row in saveRows)
                 {
                     var id = modelDef.GetPrimaryKey(row);
@@ -1017,9 +1018,8 @@ namespace ServiceStack.OrmLite
                     {
                         if (modelDef.HasAutoIncrementId)
                         {
-                            var dialectProvider = dbCmd.GetDialectProvider();
                             var newId = dbCmd.Insert(row, commandFilter: null, selectIdentity: true);
-                            var safeId = dialectProvider.FromDbValue(newId, modelDef.PrimaryKey.FieldType);
+                            var safeId = dialect.FromDbValue(newId, modelDef.PrimaryKey.FieldType);
                             modelDef.PrimaryKey.SetValue(row, safeId);
                             id = newId;
                         }
