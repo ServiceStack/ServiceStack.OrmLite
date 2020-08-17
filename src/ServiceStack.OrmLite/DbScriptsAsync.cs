@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using ServiceStack.Data;
 using ServiceStack.Script;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -25,7 +26,7 @@ namespace ServiceStack.OrmLite
 
         public async Task<IDbConnection> OpenDbConnectionAsync(ScriptScopeContext scope, Dictionary<string, object> options)
         {
-            var dbConn = await OpenDbConnectionFromOptionsAsync(options);
+            var dbConn = await OpenDbConnectionFromOptionsAsync(options).ConfigAwait();
             if (dbConn != null)
                 return dbConn;
 
@@ -79,13 +80,13 @@ namespace ServiceStack.OrmLite
                 if (options.TryGetValue("connectionString", out var connectionString))
                 {
                     return options.TryGetValue("providerName", out var providerName)
-                        ? await DbFactory.OpenDbConnectionStringAsync((string) connectionString, (string) providerName)
-                        : await DbFactory.OpenDbConnectionStringAsync((string) connectionString);
+                        ? await DbFactory.OpenDbConnectionStringAsync((string) connectionString, (string) providerName).ConfigAwait()
+                        : await DbFactory.OpenDbConnectionStringAsync((string) connectionString).ConfigAwait();
                 }
 
                 if (options.TryGetValue("namedConnection", out var namedConnection))
                 {
-                    return await DbFactory.OpenDbConnectionAsync((string) namedConnection);
+                    return await DbFactory.OpenDbConnectionAsync((string) namedConnection).ConfigAwait();
                 }
             }
 
@@ -96,8 +97,8 @@ namespace ServiceStack.OrmLite
         {
             try
             {
-                using var db = await OpenDbConnectionAsync(scope, options as Dictionary<string, object>);
-                var result = await fn(db);
+                using var db = await OpenDbConnectionAsync(scope, options as Dictionary<string, object>).ConfigAwait();
+                var result = await fn(db).ConfigAwait();
                 return result;
             }
             catch (Exception ex)
@@ -147,13 +148,13 @@ namespace ServiceStack.OrmLite
 
 
         public async Task<object> dbExists(ScriptScopeContext scope, string sql) => 
-            await dbScalar(scope, sql) != null;
+            await dbScalar(scope, sql).ConfigAwait() != null;
 
         public async Task<object> dbExists(ScriptScopeContext scope, string sql, Dictionary<string, object> args) => 
-            await dbScalar(scope, sql, args) != null;
+            await dbScalar(scope, sql, args).ConfigAwait() != null;
 
         public async Task<object> dbExists(ScriptScopeContext scope, string sql, Dictionary<string, object> args, object options) => 
-            await dbScalar(scope, sql, args, options) != null;
+            await dbScalar(scope, sql, args, options).ConfigAwait() != null;
 
 
         public Task<object> dbExec(ScriptScopeContext scope, string sql) => 
@@ -185,7 +186,8 @@ namespace ServiceStack.OrmLite
 
         public Task<object> dbColumnNames(ScriptScopeContext scope, string tableName) => dbColumnNames(scope, tableName, null);
         public Task<object> dbColumnNames(ScriptScopeContext scope, string tableName, object options) => 
-            exec(async db => (await db.GetTableColumnsAsync($"SELECT * FROM {sqlQuote(scope,tableName)}")).Select(x => x.ColumnName).ToArray(), scope, options);
+            exec(async db => (await db.GetTableColumnsAsync($"SELECT * FROM {sqlQuote(scope,tableName)}").ConfigAwait())
+                .Select(x => x.ColumnName).ToArray(), scope, options);
 
         public Task<object> dbColumns(ScriptScopeContext scope, string tableName) => dbColumns(scope, tableName, null);
         public Task<object> dbColumns(ScriptScopeContext scope, string tableName, object options) => 

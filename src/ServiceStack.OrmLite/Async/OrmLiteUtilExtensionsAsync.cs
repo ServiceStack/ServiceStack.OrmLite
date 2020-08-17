@@ -10,6 +10,7 @@ using System.Dynamic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -40,7 +41,7 @@ namespace ServiceStack.OrmLite
                 var indexCache = reader.GetIndexFieldsCache(ModelDefinition<T>.Definition, dialectProvider);
                 row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                 return row;
-            }, token);
+            }, token).ConfigAwait();
         }
 
         public static async Task<List<T>> ConvertToListAsync<T>(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, HashSet<string> onlyFields, CancellationToken token)
@@ -53,7 +54,7 @@ namespace ServiceStack.OrmLite
                     {
                         var row = reader.ConvertToListObjects();
                         return (T) (object) row;
-                    }, token);
+                    }, token).ConfigAwait();
                 }
             }
             if (typeof(T) == typeof(Dictionary<string, object>))
@@ -64,7 +65,7 @@ namespace ServiceStack.OrmLite
                     {
                         var row = reader.ConvertToDictionaryObjects();
                         return (T) (object) row;
-                    }, token);
+                    }, token).ConfigAwait();
                 }
             }
             if (typeof(T) == typeof(object))
@@ -75,7 +76,7 @@ namespace ServiceStack.OrmLite
                     {
                         var row = reader.ConvertToExpandoObject();
                         return (T) (object) row;
-                    }, token);
+                    }, token).ConfigAwait();
                 }
             }
             if (typeof(T).IsValueTuple())
@@ -87,7 +88,7 @@ namespace ServiceStack.OrmLite
                     {
                         var row = reader.ConvertToValueTuple<T>(values, dialectProvider);
                         return row;
-                    }, token);
+                    }, token).ConfigAwait();
                 }
             }
             if (typeof(T).IsTuple())
@@ -106,7 +107,7 @@ namespace ServiceStack.OrmLite
                         var tupleArgs = reader.ToMultiTuple(dialectProvider, modelIndexCaches, genericArgs, values);
                         var tuple = activator(tupleArgs.ToArray());
                         return (T) tuple;
-                    }, token);
+                    }, token).ConfigAwait();
                 }
             }
             else
@@ -121,7 +122,7 @@ namespace ServiceStack.OrmLite
                         var row = CreateInstance<T>();
                         row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                         return row;
-                    }, token);
+                    }, token).ConfigAwait();
                 }
             }
         }
@@ -138,7 +139,7 @@ namespace ServiceStack.OrmLite
                 var row = type.CreateInstance();
                 row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                 return row;
-            }, token);
+            }, token).ConfigAwait();
         }
 
         public static async Task<IList> ConvertToListAsync(this IDataReader reader, IOrmLiteDialectProvider dialectProvider, Type type, CancellationToken token)
@@ -154,7 +155,7 @@ namespace ServiceStack.OrmLite
                     var row = type.CreateInstance();
                     row.PopulateWithSqlReader(dialectProvider, reader, indexCache, values);
                     return row;
-                }, token);
+                }, token).ConfigAwait();
 
                 var to = (IList)typeof(List<>).GetCachedGenericType(type).CreateInstance();
                 ret.Each(o => to.Add(o));

@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Data;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -97,7 +98,7 @@ namespace ServiceStack.OrmLite
 
             if (DbConnection.State == ConnectionState.Closed)
             {
-                await DialectProvider.OpenAsync(DbConnection, token);
+                await DialectProvider.OpenAsync(DbConnection, token).ConfigAwait();
                 //so the internal connection is wrapped for example by miniprofiler
                 if (Factory.ConnectionFilter != null)
                     dbConnection = Factory.ConnectionFilter(dbConnection);

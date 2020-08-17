@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Data;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -345,14 +346,14 @@ namespace ServiceStack.OrmLite
         public static async Task<bool> SaveAsync<T>(this IDbConnection dbConn, T obj, bool references = false, CancellationToken token = default)
         {
             if (!references)
-                return await dbConn.Exec(dbCmd => dbCmd.SaveAsync(obj, token));
+                return await dbConn.Exec(dbCmd => dbCmd.SaveAsync(obj, token)).ConfigAwait();
 
             return await dbConn.Exec(async dbCmd =>
             {
-                var ret = await dbCmd.SaveAsync(obj, token);
-                await dbCmd.SaveAllReferencesAsync(obj, token);
+                var ret = await dbCmd.SaveAsync(obj, token).ConfigAwait();
+                await dbCmd.SaveAllReferencesAsync(obj, token).ConfigAwait();
                 return ret;
-            });
+            }).ConfigAwait();
         }
 
         /// <summary>

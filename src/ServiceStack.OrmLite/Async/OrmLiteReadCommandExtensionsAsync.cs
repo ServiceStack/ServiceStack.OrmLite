@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Logging;
 using ServiceStack.OrmLite.Support;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -215,7 +216,7 @@ namespace ServiceStack.OrmLite
 
         public static async Task<long> LongScalarAsync(this IDbCommand dbCmd, CancellationToken token)
         {
-            var ret = await dbCmd.GetDialectProvider().ExecuteScalarAsync(dbCmd, token);
+            var ret = await dbCmd.GetDialectProvider().ExecuteScalarAsync(dbCmd, token).ConfigAwait();
             return OrmLiteReadCommandExtensions.ToLong(ret);
         }
 
@@ -232,7 +233,7 @@ namespace ServiceStack.OrmLite
             {
                 var value = dialectProvider.FromDbValue(reader, 0, typeof(T));
                 return value == DBNull.Value ? default(T) : value;
-            }, token);
+            }, token).ConfigAwait();
                 
             var columnValues = new List<T>();
             ret.Each(o => columnValues.Add((T)o));
@@ -252,7 +253,7 @@ namespace ServiceStack.OrmLite
             {
                 var value = dialectProvider.FromDbValue(reader, 0, typeof(T));
                 return value == DBNull.Value ? default(T) : value;
-            }, token);
+            }, token).ConfigAwait();
                 
             var columnValues = new HashSet<T>();
             ret.Each(o => columnValues.Add((T)o));
@@ -332,7 +333,7 @@ namespace ServiceStack.OrmLite
 
             sql = dbCmd.GetFilterSql<T>();
 
-            var ret = await dbCmd.ScalarAsync(sql, token);
+            var ret = await dbCmd.ScalarAsync(sql, token).ConfigAwait();
             return ret != null;
         }
 
@@ -340,7 +341,7 @@ namespace ServiceStack.OrmLite
         {
             if (anonType != null) dbCmd.SetParameters(anonType.ToObjectDictionary(), (bool)false, sql:ref sql);
 
-            var ret = await dbCmd.ScalarAsync(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql), token);
+            var ret = await dbCmd.ScalarAsync(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql), token).ConfigAwait();
             return ret != null;
         }
 
@@ -365,11 +366,11 @@ namespace ServiceStack.OrmLite
 
         internal static async Task<T> LoadSingleByIdAsync<T>(this IDbCommand dbCmd, object value, string[] include = null, CancellationToken token = default)
         {
-            var row = await dbCmd.SingleByIdAsync<T>(value, token);
+            var row = await dbCmd.SingleByIdAsync<T>(value, token).ConfigAwait();
             if (row == null)
                 return default(T);
 
-            await dbCmd.LoadReferencesAsync(row, include, token);
+            await dbCmd.LoadReferencesAsync(row, include, token).ConfigAwait();
 
             return row;
         }
@@ -392,11 +393,11 @@ namespace ServiceStack.OrmLite
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
-                    await loadRef.SetRefFieldList(fieldDef, listInterface.GetGenericArguments()[0], token);
+                    await loadRef.SetRefFieldList(fieldDef, listInterface.GetGenericArguments()[0], token).ConfigAwait();
                 }
                 else
                 {
-                    await loadRef.SetRefField(fieldDef, fieldDef.FieldType, token);
+                    await loadRef.SetRefField(fieldDef, fieldDef.FieldType, token).ConfigAwait();
                 }
             }
         }
@@ -419,11 +420,11 @@ namespace ServiceStack.OrmLite
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
-                    await loadList.SetRefFieldListAsync(fieldDef, listInterface.GetGenericArguments()[0], token);
+                    await loadList.SetRefFieldListAsync(fieldDef, listInterface.GetGenericArguments()[0], token).ConfigAwait();
                 }
                 else
                 {
-                    await loadList.SetRefFieldAsync(fieldDef, fieldDef.FieldType, token);
+                    await loadList.SetRefFieldAsync(fieldDef, fieldDef.FieldType, token).ConfigAwait();
                 }
             }
 

@@ -101,11 +101,11 @@ namespace ServiceStack.OrmLite
             var connection = CreateDbConnection();
             if (connection is OrmLiteConnection ormliteConn)
             {
-                await ormliteConn.OpenAsync(token);
+                await ormliteConn.OpenAsync(token).ConfigAwait();
                 return connection;
             }
 
-            await DialectProvider.OpenAsync(connection, token);
+            await DialectProvider.OpenAsync(connection, token).ConfigAwait();
             return connection;
         }
 
@@ -114,11 +114,11 @@ namespace ServiceStack.OrmLite
             var connection = CreateDbConnection(namedConnection);
             if (connection is OrmLiteConnection ormliteConn)
             {
-                await ormliteConn.OpenAsync(token);
+                await ormliteConn.OpenAsync(token).ConfigAwait();
                 return connection;
             }
 
-            await DialectProvider.OpenAsync(connection, token);
+            await DialectProvider.OpenAsync(connection, token).ConfigAwait();
             return connection;
         }
 
@@ -147,7 +147,7 @@ namespace ServiceStack.OrmLite
                 ConnectionString = connectionString
             };
 
-            await connection.OpenAsync(token);
+            await connection.OpenAsync(token).ConfigAwait();
 
             return connection;
         }
@@ -179,7 +179,7 @@ namespace ServiceStack.OrmLite
 
             var dbFactory = new OrmLiteConnectionFactory(connectionString, dialectProvider, setGlobalDialectProvider:false);
 
-            return await dbFactory.OpenDbConnectionAsync(token);
+            return await dbFactory.OpenDbConnectionAsync(token).ConfigAwait();
         }
 
         public virtual IDbConnection OpenDbConnection(string namedConnection)
@@ -370,14 +370,14 @@ namespace ServiceStack.OrmLite
                 if (connInfo.ConnectionString != null)
                 {
                     return connInfo.ProviderName != null 
-                        ? await dbFactoryExt.OpenDbConnectionStringAsync(connInfo.ConnectionString, connInfo.ProviderName) 
-                        : await dbFactoryExt.OpenDbConnectionStringAsync(connInfo.ConnectionString);
+                        ? await dbFactoryExt.OpenDbConnectionStringAsync(connInfo.ConnectionString, connInfo.ProviderName).ConfigAwait() 
+                        : await dbFactoryExt.OpenDbConnectionStringAsync(connInfo.ConnectionString).ConfigAwait();
                 }
 
                 if (connInfo.NamedConnection != null)
-                    return await dbFactoryExt.OpenDbConnectionAsync(connInfo.NamedConnection);
+                    return await dbFactoryExt.OpenDbConnectionAsync(connInfo.NamedConnection).ConfigAwait();
             }
-            return await dbFactory.OpenAsync();
+            return await dbFactory.OpenAsync().ConfigAwait();
         }
     }
 }

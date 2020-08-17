@@ -12,6 +12,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Data;
 using ServiceStack.Logging;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -96,13 +97,13 @@ namespace ServiceStack.OrmLite
 
             dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-            return await dbCmd.UpdateAndVerifyAsync<T>(commandFilter, hadRowVersion, token);
+            return await dbCmd.UpdateAndVerifyAsync<T>(commandFilter, hadRowVersion, token).ConfigAwait();
         }
 
         internal static async Task<int> UpdateAndVerifyAsync<T>(this IDbCommand dbCmd, Action<IDbCommand> commandFilter, bool hadRowVersion, CancellationToken token)
         {
             commandFilter?.Invoke(dbCmd);
-            var rowsUpdated = await dbCmd.ExecNonQueryAsync(token);
+            var rowsUpdated = await dbCmd.ExecNonQueryAsync(token).ConfigAwait();
 
             if (hadRowVersion && rowsUpdated == 0)
                 throw new OptimisticConcurrencyException();
@@ -142,7 +143,7 @@ namespace ServiceStack.OrmLite
                     commandFilter?.Invoke(dbCmd); //filters can augment SQL & only should be invoked once
                     commandFilter = null;
     
-                    var rowsUpdated = await dbCmd.ExecNonQueryAsync(token);
+                    var rowsUpdated = await dbCmd.ExecNonQueryAsync(token).ConfigAwait();
                         
                     if (hadRowVersion && rowsUpdated == 0)
                         throw new OptimisticConcurrencyException();
@@ -157,7 +158,7 @@ namespace ServiceStack.OrmLite
 
         private static async Task<int> AssertRowsUpdatedAsync(IDbCommand dbCmd, bool hadRowVersion, CancellationToken token)
         {
-            var rowsUpdated = await dbCmd.ExecNonQueryAsync(token);
+            var rowsUpdated = await dbCmd.ExecNonQueryAsync(token).ConfigAwait();
             if (hadRowVersion && rowsUpdated == 0)
                 throw new OptimisticConcurrencyException();
 
@@ -240,7 +241,7 @@ namespace ServiceStack.OrmLite
                     commandFilter?.Invoke(dbCmd); //filters can augment SQL & only should be invoked once
                     commandFilter = null;
 
-                    var rowsAffected = await dbCmd.ExecNonQueryAsync(token);
+                    var rowsAffected = await dbCmd.ExecNonQueryAsync(token).ConfigAwait();
                     count += rowsAffected;
                 }
                 dbTrans?.Commit();
@@ -265,7 +266,7 @@ namespace ServiceStack.OrmLite
             
             var sql = dbCmd.DeleteByIdSql<T>(id, rowVersion);
 
-            var rowsAffected = await dbCmd.ExecuteSqlAsync(sql, commandFilter, token);
+            var rowsAffected = await dbCmd.ExecuteSqlAsync(sql, commandFilter, token).ConfigAwait();
             if (rowsAffected == 0)
                 throw new OptimisticConcurrencyException("The row was modified or deleted since the last read");
         }
@@ -317,7 +318,7 @@ namespace ServiceStack.OrmLite
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
                 insertFields: dialectProvider.GetNonDefaultValueInsertFields<T>(obj));
 
-            return await InsertInternalAsync<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity, token);
+            return await InsertInternalAsync<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity, token).ConfigAwait();
         }
 
         internal static async Task<long> InsertAsync<T>(this IDbCommand dbCmd, Dictionary<string,object> obj, Action<IDbCommand> commandFilter, bool selectIdentity, CancellationToken token)
@@ -333,13 +334,13 @@ namespace ServiceStack.OrmLite
             try
             {
                 if (enableIdentityInsert)
-                    await dialectProvider.EnableIdentityInsertAsync<T>(dbCmd, token);
+                    await dialectProvider.EnableIdentityInsertAsync<T>(dbCmd, token).ConfigAwait();
                 
                 dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
                     insertFields: dialectProvider.GetNonDefaultValueInsertFields<T>(obj),
                     shouldInclude: f => obj.ContainsKey(f.Name));
 
-                var ret = await InsertInternalAsync<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity, token);
+                var ret = await InsertInternalAsync<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity, token).ConfigAwait();
                 if (enableIdentityInsert)
                     return Convert.ToInt64(id);
                 return ret;
@@ -347,7 +348,7 @@ namespace ServiceStack.OrmLite
             finally
             {
                 if (enableIdentityInsert)
-                    await dialectProvider.DisableIdentityInsertAsync<T>(dbCmd, token);
+                    await dialectProvider.DisableIdentityInsertAsync<T>(dbCmd, token).ConfigAwait();
             }
         }
 
@@ -362,7 +363,7 @@ namespace ServiceStack.OrmLite
 
             if (dialectProvider.HasInsertReturnValues(ModelDefinition<T>.Definition))
             {
-                using var reader = await dbCmd.ExecReaderAsync(dbCmd.CommandText, token);
+                using var reader = await dbCmd.ExecReaderAsync(dbCmd.CommandText, token).ConfigAwait();
                 return reader.PopulateReturnValues<T>(dialectProvider, obj);
             }
 
@@ -370,10 +371,10 @@ namespace ServiceStack.OrmLite
             {
                 dbCmd.CommandText += dialectProvider.GetLastInsertIdSqlSuffix<T>();
 
-                return await dbCmd.ExecLongScalarAsync();
+                return await dbCmd.ExecLongScalarAsync().ConfigAwait();
             }
 
-            return await dbCmd.ExecNonQueryAsync(token);
+            return await dbCmd.ExecNonQueryAsync(token).ConfigAwait();
         }
 
         internal static Task InsertAsync<T>(this IDbCommand dbCmd, Action<IDbCommand> commandFilter, CancellationToken token, T[] objs)
@@ -406,14 +407,14 @@ namespace ServiceStack.OrmLite
 
                     dialectProvider.SetParameterValues<T>(dbCmd, obj);
 
-                    await dbCmd.ExecNonQueryAsync(token);
+                    await dbCmd.ExecNonQueryAsync(token).ConfigAwait();
                 }
                 dbTrans?.Commit();
             }
         }
 
         internal static async Task<long> InsertIntoSelectAsync<T>(this IDbCommand dbCmd, ISqlExpression query, Action<IDbCommand> commandFilter, CancellationToken token) => 
-            OrmLiteReadCommandExtensions.ToLong(await dbCmd.InsertIntoSelectInternal<T>(query, commandFilter).ExecNonQueryAsync(token: token));
+            OrmLiteReadCommandExtensions.ToLong(await dbCmd.InsertIntoSelectInternal<T>(query, commandFilter).ExecNonQueryAsync(token: token).ConfigAwait());
 
         internal static async Task InsertAllAsync<T>(this IDbCommand dbCmd, IEnumerable<T> objs, Action<IDbCommand> commandFilter, CancellationToken token)
         {
@@ -439,7 +440,7 @@ namespace ServiceStack.OrmLite
                     commandFilter?.Invoke(dbCmd); //filters can augment SQL & only should be invoked once
                     commandFilter = null;
 
-                    await dbCmd.ExecNonQueryAsync(token);
+                    await dbCmd.ExecNonQueryAsync(token).ConfigAwait();
                 }
                 dbTrans?.Commit();
             }
@@ -456,31 +457,31 @@ namespace ServiceStack.OrmLite
             
             var modelDef = typeof(T).GetModelDefinition();
             var id = modelDef.GetPrimaryKey(obj);
-            var existingRow = id != null ? await dbCmd.SingleByIdAsync<T>(id, token) : default(T);
+            var existingRow = id != null ? await dbCmd.SingleByIdAsync<T>(id, token).ConfigAwait() : default(T);
 
             if (Equals(existingRow, default(T)))
             {
                 if (modelDef.HasAutoIncrementId)
                 {
 
-                    var newId = await dbCmd.InsertAsync(obj, commandFilter: null, selectIdentity: true, token:token);
+                    var newId = await dbCmd.InsertAsync(obj, commandFilter: null, selectIdentity: true, token:token).ConfigAwait();
                     var safeId = dbCmd.GetDialectProvider().FromDbValue(newId, modelDef.PrimaryKey.FieldType);
                     modelDef.PrimaryKey.SetValue(obj, safeId);
                     id = newId;
                 }
                 else
                 {
-                    await dbCmd.InsertAsync(obj, commandFilter:null, selectIdentity:false, token:token);
+                    await dbCmd.InsertAsync(obj, commandFilter:null, selectIdentity:false, token:token).ConfigAwait();
                 }
 
-                modelDef.RowVersion?.SetValue(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token));
+                modelDef.RowVersion?.SetValue(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token).ConfigAwait());
 
                 return true;
             }
 
             await dbCmd.UpdateAsync(obj, token, null);
 
-            modelDef.RowVersion?.SetValue(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token));
+            modelDef.RowVersion?.SetValue(obj, await dbCmd.GetRowVersionAsync(modelDef, id, token).ConfigAwait());
 
             return false;
         }
@@ -503,7 +504,7 @@ namespace ServiceStack.OrmLite
                 ? saveRows.Where(x => !defaultIdValue.Equals(modelDef.GetPrimaryKey(x))).ToSafeDictionary(x => modelDef.GetPrimaryKey(x))
                 : saveRows.Where(x => modelDef.GetPrimaryKey(x) != null).ToSafeDictionary(x => modelDef.GetPrimaryKey(x));
 
-            var existingRowsMap = (await dbCmd.SelectByIdsAsync<T>(idMap.Keys, token)).ToDictionary(x => modelDef.GetPrimaryKey(x));
+            var existingRowsMap = (await dbCmd.SelectByIdsAsync<T>(idMap.Keys, token).ConfigAwait()).ToDictionary(x => modelDef.GetPrimaryKey(x));
 
             var rowsAdded = 0;
 
@@ -521,26 +522,26 @@ namespace ServiceStack.OrmLite
                     var id = modelDef.GetPrimaryKey(row);
                     if (id != defaultIdValue && existingRowsMap.ContainsKey(id))
                     {
-                        await dbCmd.UpdateAsync(row, token, null);
+                        await dbCmd.UpdateAsync(row, token, null).ConfigAwait();
                     }
                     else
                     {
                         if (modelDef.HasAutoIncrementId)
                         {
-                            var newId = await dbCmd.InsertAsync(row, commandFilter:null, selectIdentity:true, token:token);
+                            var newId = await dbCmd.InsertAsync(row, commandFilter:null, selectIdentity:true, token:token).ConfigAwait();
                             var safeId = dialectProvider.FromDbValue(newId, modelDef.PrimaryKey.FieldType);
                             modelDef.PrimaryKey.SetValue(row, safeId);
                             id = newId;
                         }
                         else
                         {
-                            await dbCmd.InsertAsync(row, commandFilter:null, selectIdentity:false, token:token);
+                            await dbCmd.InsertAsync(row, commandFilter:null, selectIdentity:false, token:token).ConfigAwait();
                         }
 
                         rowsAdded++;
                     }
 
-                    modelDef.RowVersion?.SetValue(row, await dbCmd.GetRowVersionAsync(modelDef, id, token));
+                    modelDef.RowVersion?.SetValue(row, await dbCmd.GetRowVersionAsync(modelDef, id, token).ConfigAwait());
                 }
 
                 dbTrans?.Commit();
@@ -573,7 +574,7 @@ namespace ServiceStack.OrmLite
                             refField.SetValue(oRef, pkValue);
                         }
 
-                        await dbCmd.CreateTypedApi(refType).SaveAllAsync(results, token);
+                        await dbCmd.CreateTypedApi(refType).SaveAllAsync(results, token).ConfigAwait();
                     }
                 }
                 else
@@ -592,14 +593,14 @@ namespace ServiceStack.OrmLite
                     {
                         refField?.SetValue(result, pkValue);
 
-                        await dbCmd.CreateTypedApi(refType).SaveAsync(result, token);
+                        await dbCmd.CreateTypedApi(refType).SaveAsync(result, token).ConfigAwait();
 
                         //Save Self Table.RefTableId PK
                         if (refSelf != null)
                         {
                             var refPkValue = refModelDef.PrimaryKey.GetValue(result);
                             refSelf.SetValue(instance, refPkValue);
-                            await dbCmd.UpdateAsync(instance, token, null);
+                            await dbCmd.UpdateAsync(instance, token, null).ConfigAwait();
                         }
                     }
                 }
@@ -625,7 +626,7 @@ namespace ServiceStack.OrmLite
                 refField?.SetValue(oRef, pkValue);
             }
 
-            await dbCmd.SaveAllAsync(refs, token);
+            await dbCmd.SaveAllAsync(refs, token).ConfigAwait();
 
             foreach (var oRef in refs)
             {
@@ -634,7 +635,7 @@ namespace ServiceStack.OrmLite
                 {
                     var refPkValue = refModelDef.PrimaryKey.GetValue(oRef);
                     refSelf.SetValue(instance, refPkValue);
-                    await dbCmd.UpdateAsync(instance, token, null);
+                    await dbCmd.UpdateAsync(instance, token, null).ConfigAwait();
                 }
             }
         }
@@ -651,7 +652,7 @@ namespace ServiceStack.OrmLite
         internal static async Task<object> GetRowVersionAsync(this IDbCommand dbCmd, ModelDefinition modelDef, object id, CancellationToken token)
         {
             var sql = dbCmd.RowVersionSql(modelDef, id);
-            var rowVersion = await dbCmd.ScalarAsync<object>(sql, token);
+            var rowVersion = await dbCmd.ScalarAsync<object>(sql, token).ConfigAwait();
             var to = dbCmd.GetDialectProvider().FromDbRowVersion(modelDef.RowVersion.FieldType, rowVersion);
 
             if (to is ulong u && modelDef.RowVersion.ColumnType == typeof(byte[]))

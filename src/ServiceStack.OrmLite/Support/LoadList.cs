@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Support
 {
@@ -244,7 +245,7 @@ namespace ServiceStack.OrmLite.Support
 
             var sqlRef = GetRefListSql(refModelDef, refField);
 
-            var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token);
+            var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token).ConfigAwait();
 
             SetListChildResults(fieldDef, refType, childResults, refField);
         }
@@ -261,13 +262,13 @@ namespace ServiceStack.OrmLite.Support
             if (refSelf != null)
             {
                 var sqlRef = GetRefSelfSql(modelDef, refSelf, refModelDef);
-                var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token);
+                var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token).ConfigAwait();
                 SetRefSelfChildResults(fieldDef, refModelDef, refSelf, childResults);
             }
             else if (refField != null)
             {
                 var sqlRef = GetRefFieldSql(refModelDef, refField);
-                var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token);
+                var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token).ConfigAwait();
                 SetRefFieldChildResults(fieldDef, refField, childResults);
             }
         }
