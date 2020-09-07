@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Data;
 using System.Linq.Expressions;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace ServiceStack.OrmLite
 {
@@ -17,6 +19,15 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Checks whether a Table Exists. E.g:
+        /// <para>db.TableExistsAsync("Person")</para>
+        /// </summary>
+        public static Task<bool> TableExistsAsync(this IDbConnection dbConn, string tableName, string schema = null, CancellationToken token=default)
+        {
+            return dbConn.GetDialectProvider().DoesTableExistAsync(dbConn, tableName, schema, token);
+        }
+
+        /// <summary>
+        /// Checks whether a Table Exists. E.g:
         /// <para>db.TableExists&lt;Person&gt;()</para>
         /// </summary>
         public static bool TableExists<T>(this IDbConnection dbConn)
@@ -29,12 +40,34 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Checks whether a Table Exists. E.g:
+        /// <para>db.TableExistsAsync&lt;Person&gt;()</para>
+        /// </summary>
+        public static Task<bool> TableExistsAsync<T>(this IDbConnection dbConn, CancellationToken token=default)
+        {
+            var dialectProvider = dbConn.GetDialectProvider();
+            var modelDef = typeof(T).GetModelDefinition();
+            var schema = modelDef.Schema == null ? null : dialectProvider.NamingStrategy.GetSchemaName(modelDef.Schema);
+            var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef);
+            return dialectProvider.DoesTableExistAsync(dbConn, tableName, schema, token);
+        }
+
+        /// <summary>
         /// Checks whether a Table Column Exists. E.g:
         /// <para>db.ColumnExists("Age", "Person")</para>
         /// </summary>
         public static bool ColumnExists(this IDbConnection dbConn, string columnName, string tableName, string schema = null)
         {
             return dbConn.GetDialectProvider().DoesColumnExist(dbConn, columnName, tableName, schema);
+        }
+
+        /// <summary>
+        /// Checks whether a Table Column Exists. E.g:
+        /// <para>db.ColumnExistsAsync("Age", "Person")</para>
+        /// </summary>
+        public static Task<bool> ColumnExistsAsync(this IDbConnection dbConn, string columnName, string tableName, string schema = null, CancellationToken token=default)
+        {
+            return dbConn.GetDialectProvider().DoesColumnExistAsync(dbConn, columnName, tableName, schema, token);
         }
 
         /// <summary>
@@ -50,6 +83,21 @@ namespace ServiceStack.OrmLite
             var fieldDef = modelDef.GetFieldDefinition(field);
             var fieldName = dialectProvider.NamingStrategy.GetColumnName(fieldDef.FieldName);
             return dialectProvider.DoesColumnExist(dbConn, fieldName, tableName, schema);
+        }
+
+        /// <summary>
+        /// Checks whether a Table Column Exists. E.g:
+        /// <para>db.ColumnExistsAsync&lt;Person&gt;(x =&gt; x.Age)</para>
+        /// </summary>
+        public static Task<bool> ColumnExistsAsync<T>(this IDbConnection dbConn, Expression<Func<T, object>> field, CancellationToken token=default)
+        {
+            var dialectProvider = dbConn.GetDialectProvider();
+            var modelDef = typeof(T).GetModelDefinition();
+            var schema = modelDef.Schema == null ? null : dialectProvider.NamingStrategy.GetSchemaName(modelDef.Schema);
+            var tableName = dialectProvider.NamingStrategy.GetTableName(modelDef);
+            var fieldDef = modelDef.GetFieldDefinition(field);
+            var fieldName = dialectProvider.NamingStrategy.GetColumnName(fieldDef.FieldName);
+            return dialectProvider.DoesColumnExistAsync(dbConn, fieldName, tableName, schema, token);
         }
         
         /// <summary>

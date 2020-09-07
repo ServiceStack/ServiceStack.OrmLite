@@ -180,12 +180,18 @@ namespace ServiceStack.OrmLite
         string ToCreateSequenceStatement(Type tableType, string sequenceName);
 
         List<string> SequenceList(Type tableType);
+        Task<List<string>> SequenceListAsync(Type tableType, CancellationToken token=default);
         
         bool DoesSchemaExist(IDbCommand dbCmd, string schema);
+        Task<bool> DoesSchemaExistAsync(IDbCommand dbCmd, string schema, CancellationToken token=default);
         bool DoesTableExist(IDbConnection db, string tableName, string schema = null);
+        Task<bool> DoesTableExistAsync(IDbConnection db, string tableName, string schema = null, CancellationToken token=default);
         bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null);
+        Task<bool> DoesTableExistAsync(IDbCommand dbCmd, string tableName, string schema = null, CancellationToken token=default);
         bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null);
+        Task<bool> DoesColumnExistAsync(IDbConnection db, string columnName, string tableName, string schema = null, CancellationToken token=default);
         bool DoesSequenceExist(IDbCommand dbCmd, string sequenceName);
+        Task<bool> DoesSequenceExistAsync(IDbCommand dbCmd, string sequenceName, CancellationToken token=default);
 
         void DropColumn(IDbConnection db, Type modelType, string columnName);
 

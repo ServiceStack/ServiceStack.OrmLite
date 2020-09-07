@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Text;
 
@@ -17,8 +19,17 @@ namespace ServiceStack.OrmLite.SqlServer
             var sql = "SELECT CASE WHEN EXISTS (SELECT 1 FROM sys.sequences WHERE object_id=object_id({0})) THEN 1 ELSE 0 END"
                 .SqlFmt(this, sequenceName);
 
-            dbCmd.CommandText = sql;
-            var result = dbCmd.ExecLongScalar();
+            var result = dbCmd.ExecLongScalar(sql);
+
+            return result == 1;
+        }
+
+        public override async Task<bool> DoesSequenceExistAsync(IDbCommand dbCmd, string sequenceName, CancellationToken token = default)
+        {
+            var sql = "SELECT CASE WHEN EXISTS (SELECT 1 FROM sys.sequences WHERE object_id=object_id({0})) THEN 1 ELSE 0 END"
+                .SqlFmt(this, sequenceName);
+
+            var result = await dbCmd.ExecLongScalarAsync(sql, token);
 
             return result == 1;
         }

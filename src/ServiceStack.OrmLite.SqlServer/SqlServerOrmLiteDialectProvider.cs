@@ -131,6 +131,13 @@ namespace ServiceStack.OrmLite.SqlServer
             return result > 0; 
         }
 
+        public override async Task<bool> DoesSchemaExistAsync(IDbCommand dbCmd, string schemaName, CancellationToken token = default)
+        {
+            var sql = $"SELECT count(*) FROM sys.schemas WHERE name = '{schemaName.SqlParam()}'";
+            var result = await dbCmd.ExecLongScalarAsync(sql, token);
+            return result > 0; 
+        }
+
         public override string ToCreateSchemaStatement(string schemaName)
         {
             var sql = $"CREATE SCHEMA [{GetSchemaName(schemaName)}]";
@@ -152,6 +159,21 @@ namespace ServiceStack.OrmLite.SqlServer
             return result > 0;
         }
 
+        public override async Task<bool> DoesTableExistAsync(IDbCommand dbCmd, string tableName, string schema = null, CancellationToken token = default)
+        {
+            var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}"
+                .SqlFmt(this, tableName);
+
+            if (schema != null)
+                sql += " AND TABLE_SCHEMA = {0}".SqlFmt(this, schema);
+            else
+                sql += " AND TABLE_SCHEMA <> 'Security'";
+
+            var result = await dbCmd.ExecLongScalarAsync(sql, token);
+
+            return result > 0;
+        }
+
         public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName"
@@ -161,6 +183,20 @@ namespace ServiceStack.OrmLite.SqlServer
                 sql += " AND TABLE_SCHEMA = @schema";
 
             var result = db.SqlScalar<long>(sql, new { tableName, columnName, schema });
+
+            return result > 0;
+        }
+
+        public override async Task<bool> DoesColumnExistAsync(IDbConnection db, string columnName, string tableName, string schema = null,
+            CancellationToken token = default)
+        {
+            var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName"
+                .SqlFmt(this, tableName, columnName);
+
+            if (schema != null)
+                sql += " AND TABLE_SCHEMA = @schema";
+
+            var result = await db.SqlScalarAsync<long>(sql, new { tableName, columnName, schema }, token: token);
 
             return result > 0;
         }

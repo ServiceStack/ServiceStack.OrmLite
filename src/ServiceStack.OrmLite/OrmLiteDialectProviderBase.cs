@@ -1260,6 +1260,11 @@ namespace ServiceStack.OrmLite
 
         public abstract bool DoesSchemaExist(IDbCommand dbCmd, string schemaName);
 
+        public virtual Task<bool> DoesSchemaExistAsync(IDbCommand dbCmd, string schema, CancellationToken token = default)
+        {
+            return DoesSchemaExist(dbCmd, schema).InTask();
+        }
+
         public virtual string ToCreateTableStatement(Type tableType)
         {
             var sbColumns = StringBuilderCache.Allocate();
@@ -1406,9 +1411,19 @@ namespace ServiceStack.OrmLite
             return db.Exec(dbCmd => DoesTableExist(dbCmd, tableName, schema));
         }
 
+        public virtual async Task<bool> DoesTableExistAsync(IDbConnection db, string tableName, string schema = null, CancellationToken token = default)
+        {
+            return await db.Exec(async dbCmd => await DoesTableExistAsync(dbCmd, tableName, schema, token));
+        }
+
         public virtual bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             throw new NotImplementedException();
+        }
+
+        public virtual Task<bool> DoesTableExistAsync(IDbCommand dbCmd, string tableName, string schema = null, CancellationToken token = default)
+        {
+            return DoesTableExist(dbCmd, tableName, schema).InTask();
         }
 
         public virtual bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
@@ -1416,9 +1431,19 @@ namespace ServiceStack.OrmLite
             throw new NotImplementedException();
         }
 
+        public virtual Task<bool> DoesColumnExistAsync(IDbConnection db, string columnName, string tableName, string schema = null, CancellationToken token = default)
+        {
+            return DoesColumnExist(db, columnName, tableName, schema).InTask();
+        }
+
         public virtual bool DoesSequenceExist(IDbCommand dbCmd, string sequenceName)
         {
             throw new NotImplementedException();
+        }
+
+        public virtual Task<bool> DoesSequenceExistAsync(IDbCommand dbCmd, string sequenceName, CancellationToken token = default)
+        {
+            return DoesSequenceExist(dbCmd, sequenceName).InTask();
         }
 
         protected virtual string GetIndexName(bool isUnique, string modelName, string fieldName)
@@ -1461,10 +1486,9 @@ namespace ServiceStack.OrmLite
             return "";
         }
 
-        public virtual List<string> SequenceList(Type tableType)
-        {
-            return new List<string>();
-        }
+        public virtual List<string> SequenceList(Type tableType) => new List<string>();
+
+        public virtual Task<List<string>> SequenceListAsync(Type tableType, CancellationToken token = default) => new List<string>().InTask();
 
         // TODO : make abstract  ??
         public virtual string ToExistStatement(Type fromTableType,

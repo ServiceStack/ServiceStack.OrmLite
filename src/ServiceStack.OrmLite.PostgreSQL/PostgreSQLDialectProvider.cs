@@ -412,6 +412,20 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
+            var sql = DoesTableExistSql(dbCmd, tableName, schema);
+            var result = dbCmd.ExecLongScalar(sql);
+            return result > 0;
+        }
+
+        public override async Task<bool> DoesTableExistAsync(IDbCommand dbCmd, string tableName, string schema = null, CancellationToken token=default)
+        {
+            var sql = DoesTableExistSql(dbCmd, tableName, schema);
+            var result = await dbCmd.ExecLongScalarAsync(sql, token);
+            return result > 0;
+        }
+
+        private string DoesTableExistSql(IDbCommand dbCmd, string tableName, string schema)
+        {
             var sql = !Normalize || ReservedWords.Contains(tableName)
                 ? "SELECT COUNT(*) FROM pg_class WHERE relname = {0} AND relkind = 'r'".SqlFmt(tableName)
                 : "SELECT COUNT(*) FROM pg_class WHERE lower(relname) = {0} AND relkind = 'r'".SqlFmt(tableName.ToLower());
@@ -424,25 +438,32 @@ namespace ServiceStack.OrmLite.PostgreSQL
                     schema = builder.SearchPath;
                 if (schema == null)
                     schema = "public";
-                
+
                 // If a search path (schema) is specified, and there is only one, then assume the CREATE TABLE directive should apply to that schema.
                 if (!string.IsNullOrEmpty(schema) && !schema.Contains(","))
                 {
                     sql = !Normalize || ReservedWords.Contains(schema)
-                        ? "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE relname = {0} AND relkind = 'r' AND nspname = {1}".SqlFmt(tableName, schema)
-                        : "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE lower(relname) = {0} AND relkind = 'r' AND lower(nspname) = {1}".SqlFmt(tableName.ToLower(), schema.ToLower());
+                        ? "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE relname = {0} AND relkind = 'r' AND nspname = {1}"
+                            .SqlFmt(tableName, schema)
+                        : "SELECT COUNT(*) FROM pg_class JOIN pg_catalog.pg_namespace n ON n.oid = pg_class.relnamespace WHERE lower(relname) = {0} AND relkind = 'r' AND lower(nspname) = {1}"
+                            .SqlFmt(tableName.ToLower(), schema.ToLower());
                 }
             }
 
-            var result = dbCmd.ExecLongScalar(sql);
-
-            return result > 0;
+            return sql;
         }
-        
+
         public override bool DoesSchemaExist(IDbCommand dbCmd, string schemaName)
         {
             dbCmd.CommandText = $"SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = '{GetSchemaName(schemaName).SqlParam()}');";
             var query = dbCmd.ExecuteScalar();
+            return query as bool? ?? false;
+        }
+
+        public override async Task<bool> DoesSchemaExistAsync(IDbCommand dbCmd, string schemaName, CancellationToken token = default)
+        {
+            dbCmd.CommandText = $"SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = '{GetSchemaName(schemaName).SqlParam()}');";
+            var query = await dbCmd.ScalarAsync();
             return query as bool? ?? false;
         }
 
@@ -454,9 +475,25 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
         {
+            var sql = DoesColumnExistSql(columnName, tableName, ref schema);
+            var result = db.SqlScalar<long>(sql, new { tableName, columnName, schema });
+            return result > 0;
+        }
+
+        public override async Task<bool> DoesColumnExistAsync(IDbConnection db, string columnName, string tableName, string schema = null,
+            CancellationToken token = default)
+        {
+            var sql = DoesColumnExistSql(columnName, tableName, ref schema);
+            var result = await db.SqlScalarAsync<long>(sql, new { tableName, columnName, schema }, token);
+            return result > 0;
+        }
+
+        private string DoesColumnExistSql(string columnName, string tableName, ref string schema)
+        {
             var sql = !Normalize || ReservedWords.Contains(tableName)
                 ? "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName".SqlFmt(tableName)
-                : "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE lower(TABLE_NAME) = @tableName".SqlFmt(tableName.ToLower());
+                : "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE lower(TABLE_NAME) = @tableName".SqlFmt(
+                    tableName.ToLower());
 
             sql += !Normalize || ReservedWords.Contains(columnName)
                 ? " AND COLUMN_NAME = @columnName".SqlFmt(columnName)
@@ -472,9 +509,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
                     schema = schema.ToLower();
             }
 
-            var result = db.SqlScalar<long>(sql, new { tableName, columnName, schema });
-
-            return result > 0;
+            return sql;
         }
 
         public override string ToExecuteProcedureStatement(object objWithProperties)
