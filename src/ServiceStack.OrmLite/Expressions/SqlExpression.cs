@@ -168,6 +168,7 @@ namespace ServiceStack.OrmLite
             sb.Append(skipParameterizationForThisExpression ? "1" : "0");
             sb.Append(UseSelectPropertiesAsAliases ? "1" : "0");
             sb.Append(hasEnsureConditions ? "1" : "0");
+            sb.AppendLine();
 
             if (includeParams && Params.Count > 0)
             {
