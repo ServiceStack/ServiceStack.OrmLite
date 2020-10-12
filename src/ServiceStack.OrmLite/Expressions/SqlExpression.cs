@@ -125,8 +125,8 @@ namespace ServiceStack.OrmLite
         {
             var sb = StringBuilderCache.Allocate();
 
-            if (!string.IsNullOrEmpty(SelectExpression))
-                sb.AppendLine(SelectExpression);
+            if (!string.IsNullOrEmpty(selectExpression))
+                sb.AppendLine(selectExpression);
             if (!OnlyFields.IsEmpty())
                 sb.AppendLine(OnlyFields.Join(","));
 
