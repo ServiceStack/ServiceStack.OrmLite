@@ -7,10 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Linq.Expressions;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
-using ServiceStack.OrmLite.Converters;
-using ServiceStack.OrmLite.Dapper;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -19,9 +16,6 @@ namespace ServiceStack.OrmLite
     {
         public const string TrueLiteral = "(1=1)";
         public const string FalseLiteral = "(1=0)";
-
-        protected bool visitedExpressionIsTableColumn = false;
-        protected bool skipParameterizationForThisExpression = false;
 
         private Expression<Func<T, bool>> underlyingExpression;
         private List<string> orderByProperties = new List<string>();
@@ -37,20 +31,25 @@ namespace ServiceStack.OrmLite
         public List<string> InsertFields { get; set; }
 
         private string sep = string.Empty;
-        protected bool useFieldName = false;
-        protected bool selectDistinct = false;
-        protected bool CustomSelect { get; set; }
         protected ModelDefinition modelDef;
-        public bool PrefixFieldWithTableName { get; set; }
         public string TableAlias { get; set; }
-        public bool WhereStatementWithoutWhereString { get; set; }
         public IOrmLiteDialectProvider DialectProvider { get; set; }
         public List<IDbDataParameter> Params { get; set; }
         public Func<string,string> SqlFilter { get; set; }
         public static Action<SqlExpression<T>> SelectFilter { get; set; }
         public int? Rows { get; set; }
         public int? Offset { get; set; }
+        public bool PrefixFieldWithTableName { get; set; }
         public bool UseSelectPropertiesAsAliases { get; set; }
+        public bool WhereStatementWithoutWhereString { get; set; }
+
+        protected bool CustomSelect { get; set; }
+        protected bool useFieldName = false;
+        protected bool selectDistinct = false;
+        protected bool visitedExpressionIsTableColumn = false;
+        protected bool skipParameterizationForThisExpression = false;
+        private bool hasEnsureConditions = false;
+        private bool inSqlMethodCall = false;
 
         protected string Sep => sep;
 
@@ -81,36 +80,114 @@ namespace ServiceStack.OrmLite
 
         protected virtual SqlExpression<T> CopyTo(SqlExpression<T> to)
         {
-            to.visitedExpressionIsTableColumn = visitedExpressionIsTableColumn;
-            to.skipParameterizationForThisExpression = skipParameterizationForThisExpression;
-            to.underlyingExpression = underlyingExpression;
-            to.orderByProperties = orderByProperties;
+            to.modelDef = modelDef;
+            to.tableDefs = tableDefs;
+
             to.selectExpression = selectExpression;
+            to.OnlyFields = OnlyFields != null ? new HashSet<string>(OnlyFields, StringComparer.OrdinalIgnoreCase) : null;
+
+            to.UpdateFields = UpdateFields;
+            to.InsertFields = InsertFields;
+
+            to.TableAlias = TableAlias;
             to.fromExpression = fromExpression;
             to.whereExpression = whereExpression;
             to.groupBy = groupBy;
             to.havingExpression = havingExpression;
             to.orderBy = orderBy;
-            to.OnlyFields = OnlyFields != null ? new HashSet<string>(OnlyFields, StringComparer.OrdinalIgnoreCase) : null;
-            to.UpdateFields = UpdateFields;
-            to.InsertFields = InsertFields;
-            to.useFieldName = useFieldName;
-            to.selectDistinct = selectDistinct;
-            to.CustomSelect = CustomSelect;
-            to.modelDef = modelDef;
-            to.PrefixFieldWithTableName = PrefixFieldWithTableName;
-            to.TableAlias = TableAlias;
-            to.WhereStatementWithoutWhereString = WhereStatementWithoutWhereString;
-            to.Params = new List<IDbDataParameter>(Params);
-            to.SqlFilter = SqlFilter;
+            to.orderByProperties = orderByProperties;
+
             to.Offset = Offset;
             to.Rows = Rows;
-            to.tableDefs = tableDefs;
+
+            to.CustomSelect = CustomSelect;
+            to.PrefixFieldWithTableName = PrefixFieldWithTableName;
+            to.useFieldName = useFieldName;
+            to.selectDistinct = selectDistinct;
+            to.WhereStatementWithoutWhereString = WhereStatementWithoutWhereString;
+            to.visitedExpressionIsTableColumn = visitedExpressionIsTableColumn;
+            to.skipParameterizationForThisExpression = skipParameterizationForThisExpression;
             to.UseSelectPropertiesAsAliases = UseSelectPropertiesAsAliases;
             to.hasEnsureConditions = hasEnsureConditions;
+
+            to.Params = new List<IDbDataParameter>(Params);
+
+            to.underlyingExpression = underlyingExpression;
+            to.SqlFilter = SqlFilter;
+            
             return to;
         }
 
+        /// <summary>
+        /// Generate a unique SHA1 hash of expression with param values for caching 
+        /// </summary>
+        public string ComputeHash()
+        {
+            var sb = StringBuilderCache.Allocate();
+
+            if (!string.IsNullOrEmpty(SelectExpression))
+                sb.AppendLine(SelectExpression);
+            if (!OnlyFields.IsEmpty())
+                sb.AppendLine(OnlyFields.Join(","));
+
+            if (!UpdateFields.IsEmpty())
+                sb.AppendLine(UpdateFields.Join(","));
+            if (!InsertFields.IsEmpty())
+                sb.AppendLine(InsertFields.Join(","));
+
+            if (!string.IsNullOrEmpty(TableAlias))
+                sb.AppendLine(TableAlias);
+            if (!string.IsNullOrEmpty(fromExpression))
+                sb.AppendLine(fromExpression);
+
+            if (!string.IsNullOrEmpty(whereExpression))
+                sb.AppendLine(whereExpression);
+
+            if (!string.IsNullOrEmpty(groupBy))
+                sb.AppendLine(groupBy);
+
+            if (!string.IsNullOrEmpty(havingExpression))
+                sb.AppendLine(havingExpression);
+
+            if (!string.IsNullOrEmpty(orderBy))
+                sb.AppendLine(orderBy);
+            if (!orderByProperties.IsEmpty())
+                sb.AppendLine(orderByProperties.Join(","));
+
+            if (Offset != null || Rows != null)
+                sb.Append(Offset ?? 0).Append(',').Append(Rows ?? 0).AppendLine();
+
+            var flags = 0;
+            sb.Append("FLAGS=");
+            sb.Append(CustomSelect ? "1" : "0");
+            sb.Append(PrefixFieldWithTableName ? "1" : "0");
+            sb.Append(useFieldName ? "1" : "0");
+            sb.Append(selectDistinct ? "1" : "0");
+            sb.Append(WhereStatementWithoutWhereString ? "1" : "0");
+            sb.Append(visitedExpressionIsTableColumn ? "1" : "0");
+            sb.Append(skipParameterizationForThisExpression ? "1" : "0");
+            sb.Append(UseSelectPropertiesAsAliases ? "1" : "0");
+            sb.Append(hasEnsureConditions ? "1" : "0");
+
+            if (Params.Count > 0)
+            {
+                sb.AppendLine("PARAMS=");
+                for (var i = 0; i < Params.Count; i++)
+                {
+                    sb.AppendLine(Params[i].Value.ConvertTo<string>());
+                }
+                sb.AppendLine();
+            }
+
+            var uniqueExpr = StringBuilderCache.ReturnAndFree(sb);
+            // fastest up to 500 chars https://wintermute79.wordpress.com/2014/10/10/c-sha-1-benchmark/
+            using var sha1 = new System.Security.Cryptography.SHA1Managed();
+            var hash = sha1.ComputeHash(Encoding.ASCII.GetBytes(uniqueExpr));
+            var hexFormat = hash.ToHex();
+            
+            return hexFormat;
+        }
+        
         /// <summary>
         /// Clear select expression. All properties will be selected.
         /// </summary>
@@ -621,7 +698,6 @@ namespace ServiceStack.OrmLite
             return Ensure(newExpr);
         }
 
-        private bool hasEnsureConditions = false;
         /// <summary>
         /// Add a WHERE Condition to always be applied, irrespective of other WHERE conditions 
         /// </summary>
@@ -2312,7 +2388,6 @@ namespace ServiceStack.OrmLite
                    && IsJoinedTable(exp.Expression.Type);
         }
 
-        private bool inSqlMethodCall = false;
 
         protected virtual object VisitMethodCall(MethodCallExpression m)
         {
