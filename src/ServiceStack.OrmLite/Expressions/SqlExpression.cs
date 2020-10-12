@@ -121,7 +121,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Generate a unique SHA1 hash of expression with param values for caching 
         /// </summary>
-        public string ComputeHash()
+        public string ComputeHash(bool includeParams=true)
         {
             var sb = StringBuilderCache.Allocate();
 
@@ -169,7 +169,7 @@ namespace ServiceStack.OrmLite
             sb.Append(UseSelectPropertiesAsAliases ? "1" : "0");
             sb.Append(hasEnsureConditions ? "1" : "0");
 
-            if (Params.Count > 0)
+            if (includeParams && Params.Count > 0)
             {
                 sb.AppendLine("PARAMS=");
                 for (var i = 0; i < Params.Count; i++)
