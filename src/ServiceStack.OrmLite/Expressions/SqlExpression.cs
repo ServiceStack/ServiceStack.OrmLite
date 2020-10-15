@@ -83,11 +83,11 @@ namespace ServiceStack.OrmLite
             to.modelDef = modelDef;
             to.tableDefs = tableDefs;
 
-            to.selectExpression = selectExpression;
-            to.OnlyFields = OnlyFields != null ? new HashSet<string>(OnlyFields, StringComparer.OrdinalIgnoreCase) : null;
-
             to.UpdateFields = UpdateFields;
             to.InsertFields = InsertFields;
+
+            to.selectExpression = selectExpression;
+            to.OnlyFields = OnlyFields != null ? new HashSet<string>(OnlyFields, StringComparer.OrdinalIgnoreCase) : null;
 
             to.TableAlias = TableAlias;
             to.fromExpression = fromExpression;
@@ -123,17 +123,40 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public string ComputeHash(bool includeParams=true)
         {
+            var uniqueExpr = Dump(includeParams);
+            // fastest up to 500 chars https://wintermute79.wordpress.com/2014/10/10/c-sha-1-benchmark/
+            using var sha1 = new System.Security.Cryptography.SHA1Managed();
+            var hash = sha1.ComputeHash(Encoding.ASCII.GetBytes(uniqueExpr));
+            var hexFormat = hash.ToHex();
+            
+            return hexFormat;
+        }
+
+        /// <summary>
+        /// Dump internal state of this SqlExpression into a string
+        /// </summary>
+        /// <param name="includeParams"></param>
+        /// <returns></returns>
+        public string Dump(bool includeParams)
+        {
             var sb = StringBuilderCache.Allocate();
+
+            sb.Append('<').Append(ModelDef.Name);
+            foreach (var tableDef in tableDefs)
+            {
+                sb.Append(',').Append(tableDef);
+            }
+            sb.Append('>').AppendLine();
+            
+            if (!UpdateFields.IsEmpty())
+                sb.AppendLine(UpdateFields.Join(","));
+            if (!InsertFields.IsEmpty())
+                sb.AppendLine(InsertFields.Join(","));
 
             if (!string.IsNullOrEmpty(selectExpression))
                 sb.AppendLine(selectExpression);
             if (!OnlyFields.IsEmpty())
                 sb.AppendLine(OnlyFields.Join(","));
-
-            if (!UpdateFields.IsEmpty())
-                sb.AppendLine(UpdateFields.Join(","));
-            if (!InsertFields.IsEmpty())
-                sb.AppendLine(InsertFields.Join(","));
 
             if (!string.IsNullOrEmpty(TableAlias))
                 sb.AppendLine(TableAlias);
@@ -169,25 +192,23 @@ namespace ServiceStack.OrmLite
             sb.Append(hasEnsureConditions ? "1" : "0");
             sb.AppendLine();
 
-            if (includeParams && Params.Count > 0)
+            if (includeParams)
             {
-                sb.AppendLine("PARAMS:");
-                for (var i = 0; i < Params.Count; i++)
+                sb.Append("PARAMS:").Append(Params.Count).AppendLine();
+                if (Params.Count > 0)
                 {
-                    sb.Append(Params[i].ParameterName).Append('=');
-                    sb.AppendLine(Params[i].Value.ConvertTo<string>());
+                    foreach (var p in Params)
+                    {
+                        sb.Append(p.ParameterName).Append('=');
+                        sb.AppendLine(p.Value.ConvertTo<string>());
+                    }
                 }
             }
 
             var uniqueExpr = StringBuilderCache.ReturnAndFree(sb);
-            // fastest up to 500 chars https://wintermute79.wordpress.com/2014/10/10/c-sha-1-benchmark/
-            using var sha1 = new System.Security.Cryptography.SHA1Managed();
-            var hash = sha1.ComputeHash(Encoding.ASCII.GetBytes(uniqueExpr));
-            var hexFormat = hash.ToHex();
-            
-            return hexFormat;
+            return uniqueExpr;
         }
-        
+
         /// <summary>
         /// Clear select expression. All properties will be selected.
         /// </summary>
