@@ -157,8 +157,7 @@ namespace ServiceStack.OrmLite
             if (Offset != null || Rows != null)
                 sb.Append(Offset ?? 0).Append(',').Append(Rows ?? 0).AppendLine();
 
-            var flags = 0;
-            sb.Append("FLAGS=");
+            sb.Append("FLAGS:");
             sb.Append(CustomSelect ? "1" : "0");
             sb.Append(PrefixFieldWithTableName ? "1" : "0");
             sb.Append(useFieldName ? "1" : "0");
@@ -172,12 +171,12 @@ namespace ServiceStack.OrmLite
 
             if (includeParams && Params.Count > 0)
             {
-                sb.AppendLine("PARAMS=");
+                sb.AppendLine("PARAMS:");
                 for (var i = 0; i < Params.Count; i++)
                 {
+                    sb.Append(Params[i].ParameterName).Append('=');
                     sb.AppendLine(Params[i].Value.ConvertTo<string>());
                 }
-                sb.AppendLine();
             }
 
             var uniqueExpr = StringBuilderCache.ReturnAndFree(sb);
