@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite
         /// Returns results from using a LINQ Expression. E.g:
         /// <para>db.Select&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
         /// </summary>
-        public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, CancellationToken token = default(CancellationToken))
+        public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectAsync(predicate, token));
         }
@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite
         /// Returns results from using an SqlExpression lambda. E.g:
         /// <para>db.Select(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken))
+        public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectAsync(expression, token));
         }
@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Project results from a number of joined tables into a different model
         /// </summary>
-        public static Task<List<Into>> SelectAsync<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, CancellationToken token = default(CancellationToken))
+        public static Task<List<Into>> SelectAsync<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.SelectAsync<Into, From>(expression, token));
         }
@@ -43,38 +43,38 @@ namespace ServiceStack.OrmLite
         /// Returns results from using an SqlExpression lambda. E.g:
         /// <para>db.SelectAsync(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, ISqlExpression expression, CancellationToken token = default(CancellationToken)) => dbConn.Exec(dbCmd => dbCmd.SqlListAsync<T>(expression.SelectInto<T>(), expression.Params, token));
+        public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, ISqlExpression expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SqlListAsync<T>(expression.SelectInto<T>(), expression.Params, token));
 
-        public static Task<List<Tuple<T, T2>>> SelectMultiAsync<T, T2>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken)) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2>(expression, token));
+        public static Task<List<Tuple<T, T2>>> SelectMultiAsync<T, T2>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2>(expression, token));
 
-        public static Task<List<Tuple<T, T2, T3>>> SelectMultiAsync<T, T2, T3>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken)) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3>(expression, token));
+        public static Task<List<Tuple<T, T2, T3>>> SelectMultiAsync<T, T2, T3>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3>(expression, token));
 
-        public static Task<List<Tuple<T, T2, T3, T4>>> SelectMultiAsync<T, T2, T3, T4>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken)) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4>(expression, token));
+        public static Task<List<Tuple<T, T2, T3, T4>>> SelectMultiAsync<T, T2, T3, T4>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4>(expression, token));
 
-        public static Task<List<Tuple<T, T2, T3, T4, T5>>> SelectMultiAsync<T, T2, T3, T4, T5>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken)) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5>(expression, token));
+        public static Task<List<Tuple<T, T2, T3, T4, T5>>> SelectMultiAsync<T, T2, T3, T4, T5>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5>(expression, token));
 
-        public static Task<List<Tuple<T, T2, T3, T4, T5, T6>>> SelectMultiAsync<T, T2, T3, T4, T5, T6>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken)) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6>(expression, token));
+        public static Task<List<Tuple<T, T2, T3, T4, T5, T6>>> SelectMultiAsync<T, T2, T3, T4, T5, T6>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6>(expression, token));
 
-        public static Task<List<Tuple<T, T2, T3, T4, T5, T6, T7>>> SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken)) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(expression, token));
+        public static Task<List<Tuple<T, T2, T3, T4, T5, T6, T7>>> SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(expression, token));
 
 
-        public static Task<List<Tuple<T, T2>>> SelectMultiAsync<T, T2>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default(CancellationToken)) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2>(expression, tableSelects, token));
+        public static Task<List<Tuple<T, T2>>> SelectMultiAsync<T, T2>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2>(expression, tableSelects, token));
 
-        public static Task<List<Tuple<T, T2, T3>>> SelectMultiAsync<T, T2, T3>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default(CancellationToken)) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3>(expression, tableSelects, token));
+        public static Task<List<Tuple<T, T2, T3>>> SelectMultiAsync<T, T2, T3>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3>(expression, tableSelects, token));
 
-        public static Task<List<Tuple<T, T2, T3, T4>>> SelectMultiAsync<T, T2, T3, T4>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default(CancellationToken)) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4>(expression, tableSelects, token));
+        public static Task<List<Tuple<T, T2, T3, T4>>> SelectMultiAsync<T, T2, T3, T4>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4>(expression, tableSelects, token));
 
-        public static Task<List<Tuple<T, T2, T3, T4, T5>>> SelectMultiAsync<T, T2, T3, T4, T5>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default(CancellationToken)) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5>(expression, tableSelects, token));
+        public static Task<List<Tuple<T, T2, T3, T4, T5>>> SelectMultiAsync<T, T2, T3, T4, T5>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5>(expression, tableSelects, token));
 
-        public static Task<List<Tuple<T, T2, T3, T4, T5, T6>>> SelectMultiAsync<T, T2, T3, T4, T5, T6>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default(CancellationToken)) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6>(expression, tableSelects, token));
+        public static Task<List<Tuple<T, T2, T3, T4, T5, T6>>> SelectMultiAsync<T, T2, T3, T4, T5, T6>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6>(expression, tableSelects, token));
 
-        public static Task<List<Tuple<T, T2, T3, T4, T5, T6, T7>>> SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default(CancellationToken)) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(expression, tableSelects, token));
+        public static Task<List<Tuple<T, T2, T3, T4, T5, T6, T7>>> SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(expression, tableSelects, token));
 
         /// <summary>
         /// Returns a single result from using a LINQ Expression. E.g:
         /// <para>db.Single&lt;Person&gt;(x =&gt; x.Age == 42)</para>
         /// </summary>
-        public static Task<T> SingleAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, CancellationToken token = default(CancellationToken))
+        public static Task<T> SingleAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.SingleAsync(predicate, token));
         }
@@ -83,7 +83,7 @@ namespace ServiceStack.OrmLite
         /// Returns results from using an SqlExpression lambda. E.g:
         /// <para>db.SingleAsync&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
         /// </summary>
-        public static Task<T> SingleAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken))
+        public static Task<T> SingleAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.SingleAsync(expression, token));
         }
@@ -92,7 +92,7 @@ namespace ServiceStack.OrmLite
         /// Returns results from using an SqlExpression lambda. E.g:
         /// <para>db.SingleAsync(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static Task<T> SingleAsync<T>(this IDbConnection dbConn, ISqlExpression expression, CancellationToken token = default(CancellationToken))
+        public static Task<T> SingleAsync<T>(this IDbConnection dbConn, ISqlExpression expression, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.SingleAsync<T>(expression.SelectInto<T>(), expression.Params, token));
         }
@@ -101,7 +101,7 @@ namespace ServiceStack.OrmLite
         /// Returns a scalar result from using an SqlExpression lambda. E.g:
         /// <para>db.Scalar&lt;Person, int&gt;(x =&gt; Sql.Max(x.Age))</para>
         /// </summary>
-        public static Task<TKey> ScalarAsync<T, TKey>(this IDbConnection dbConn, Expression<Func<T, object>> field, CancellationToken token = default(CancellationToken))
+        public static Task<TKey> ScalarAsync<T, TKey>(this IDbConnection dbConn, Expression<Func<T, object>> field, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.ScalarAsync<T, TKey>(field, token));
         }
@@ -111,7 +111,7 @@ namespace ServiceStack.OrmLite
         /// <para>db.Scalar&lt;Person, int&gt;(x =&gt; Sql.Max(x.Age), , x =&gt; x.Age &lt; 50)</para>
         /// </summary>        
         public static Task<TKey> ScalarAsync<T, TKey>(this IDbConnection dbConn,
-            Expression<Func<T, object>> field, Expression<Func<T, bool>> predicate, CancellationToken token = default(CancellationToken))
+            Expression<Func<T, object>> field, Expression<Func<T, bool>> predicate, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.ScalarAsync<T, TKey>(field, predicate, token));
         }
@@ -120,7 +120,7 @@ namespace ServiceStack.OrmLite
         /// Returns the count of rows that match the LINQ expression, E.g:
         /// <para>db.Count&lt;Person&gt;(x =&gt; x.Age &lt; 50)</para>
         /// </summary>
-        public static Task<long> CountAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> expression, CancellationToken token = default(CancellationToken))
+        public static Task<long> CountAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> expression, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.CountAsync(expression, token));
         }
@@ -129,12 +129,12 @@ namespace ServiceStack.OrmLite
         /// Returns the count of rows that match the supplied SqlExpression, E.g:
         /// <para>db.Count(db.From&lt;Person&gt;().Where(x =&gt; x.Age &lt; 50))</para>
         /// </summary>
-        public static Task<long> CountAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken))
+        public static Task<long> CountAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.CountAsync(expression, token));
         }
 
-        public static Task<long> CountAsync<T>(this IDbConnection dbConn, CancellationToken token = default(CancellationToken))
+        public static Task<long> CountAsync<T>(this IDbConnection dbConn, CancellationToken token = default)
         {
             var expression = dbConn.GetDialectProvider().SqlExpression<T>();
             return dbConn.Exec(dbCmd => dbCmd.CountAsync(expression, token));
@@ -143,7 +143,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Return the number of rows returned by the supplied expression
         /// </summary>
-        public static Task<long> RowCountAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default(CancellationToken))
+        public static Task<long> RowCountAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.RowCountAsync(expression, token));
         }
@@ -151,7 +151,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Return the number of rows returned by the supplied sql
         /// </summary>
-        public static Task<long> RowCountAsync(this IDbConnection dbConn, string sql, object anonType = null, CancellationToken token = default(CancellationToken))
+        public static Task<long> RowCountAsync(this IDbConnection dbConn, string sql, object anonType = null, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.RowCountAsync(sql, anonType, token));
         }
@@ -160,16 +160,34 @@ namespace ServiceStack.OrmLite
         /// Returns results with references from using a LINQ Expression. E.g:
         /// <para>db.LoadSelectAsync&lt;Person&gt;(x =&gt; x.Age &gt; 40)</para>
         /// </summary>
-        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, string[] include = null, CancellationToken token = default(CancellationToken))
+        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, string[] include = null, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync(predicate, include, token));
+        }
+
+        /// <summary>
+        /// Returns results with references from using a LINQ Expression. E.g:
+        /// <para>db.LoadSelectAsync&lt;Person&gt;(x =&gt; x.Age &gt; 40, include: x => new { x.PrimaryAddress })</para>
+        /// </summary>
+        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, Expression<Func<T, bool>> predicate, Expression<Func<T, object>> include)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync(predicate, include.GetFieldNames()));
         }
 
         /// <summary>
         /// Returns results with references from using an SqlExpression lambda. E.g:
         /// <para>db.LoadSelectAsync(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, string[] include = null, CancellationToken token = default(CancellationToken))
+        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, string[] include = null, CancellationToken token = default)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync(expression, include, token));
+        }
+
+        /// <summary>
+        /// Returns results with references from using an SqlExpression lambda. E.g:
+        /// <para>db.LoadSelectAsync(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40), include:q.OnlyFields)</para>
+        /// </summary>
+        public static Task<List<T>> LoadSelectAsync<T>(this IDbConnection dbConn, SqlExpression<T> expression, IEnumerable<string> include, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync(expression, include, token));
         }
@@ -177,9 +195,25 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Project results with references from a number of joined tables into a different model
         /// </summary>
-        public static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, string[] include = null, CancellationToken token = default(CancellationToken))
+        public static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, string[] include = null, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync<Into, From>(expression, include, token));
+        }
+
+        /// <summary>
+        /// Project results with references from a number of joined tables into a different model
+        /// </summary>
+        public static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, IEnumerable<string> include, CancellationToken token = default)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync<Into, From>(expression, include, token));
+        }
+
+        /// <summary>
+        /// Project results with references from a number of joined tables into a different model
+        /// </summary>
+        public static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbConnection dbConn, SqlExpression<From> expression, Expression<Func<Into, object>> include)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.LoadSelectAsync<Into, From>(expression, include.GetFieldNames()));
         }
         
         /// <summary>

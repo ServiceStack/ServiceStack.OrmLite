@@ -141,7 +141,7 @@ namespace ServiceStack.OrmLite.Legacy
         /// <para>db.Exists&lt;Person&gt;(q =&gt; q.Where(x =&gt; x.Age &lt; 50))</para>
         /// </summary>
         [Obsolete("Use db.ExistsAsync(db.From<T>())")]
-        public static Task<bool> ExistsAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default(CancellationToken))
+        public static Task<bool> ExistsAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd =>
             {

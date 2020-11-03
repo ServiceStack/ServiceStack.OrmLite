@@ -22,13 +22,13 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropTable<ModelWithIdOnly>();
 
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw(DialectProvider)),
+                    db.TableExists(nameof(ModelWithIdOnly).SqlTableRaw(DialectProvider)),
                     Is.False);
 
                 db.CreateTable<ModelWithIdOnly>(true);
 
                 Assert.That(
-                    db.TableExists(typeof(ModelWithIdOnly).Name.SqlTableRaw(DialectProvider)),
+                    db.TableExists(nameof(ModelWithIdOnly).SqlTableRaw(DialectProvider)),
                     Is.True);
             }
         }
@@ -187,7 +187,7 @@ namespace ServiceStack.OrmLite.Tests
             var createTableSql = DialectProvider.ToCreateTableStatement(typeof(ModelWithIdAndName));
 
             Console.WriteLine("createTableSql: " + createTableSql);
-            if (Dialect != Dialect.AnyPostgreSql)
+            if ((Dialect & Dialect.AnyPostgreSql) != Dialect)
             {
                 Assert.That(createTableSql, Does.Contain("VARCHAR(255)").
                                             Or.Contain("VARCHAR2(255)"));

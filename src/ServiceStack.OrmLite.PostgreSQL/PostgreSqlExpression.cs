@@ -19,11 +19,6 @@ namespace ServiceStack.OrmLite.PostgreSQL
             }
             return memberName;
         }
-
-        public override SqlExpression<T> OrderByRandom()
-        {
-            return base.OrderBy("RANDOM()");
-        }
     }
 
 }

@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Support
 {
@@ -82,7 +83,7 @@ namespace ServiceStack.OrmLite.Support
             var sql = GetRefListSql(refType);
 
             var results = dbCmd.ConvertToList(refType, sql);
-            fieldDef.SetValueFn(instance, results);
+            fieldDef.SetValue(instance, results);
         }
 
         public void SetRefField(FieldDefinition fieldDef, Type refType)
@@ -101,13 +102,13 @@ namespace ServiceStack.OrmLite.Support
                     return;
 
                 var result = dbCmd.ConvertTo(refType, sql);
-                fieldDef.SetValueFn(instance, result);
+                fieldDef.SetValue(instance, result);
             }
             else if (refField != null)
             {
                 var sql = GetRefFieldSql(refType, refField);
                 var result = dbCmd.ConvertTo(refType, sql);
-                fieldDef.SetValueFn(instance, result);
+                fieldDef.SetValue(instance, result);
             }
         }
     }
@@ -122,8 +123,8 @@ namespace ServiceStack.OrmLite.Support
         {
             var sql = GetRefListSql(refType);
 
-            var results = await dbCmd.ConvertToListAsync(refType, sql, token);
-            fieldDef.SetValueFn(instance, results);
+            var results = await dbCmd.ConvertToListAsync(refType, sql, token).ConfigAwait();
+            fieldDef.SetValue(instance, results);
         }
 
         public async Task SetRefField(FieldDefinition fieldDef, Type refType, CancellationToken token)
@@ -138,8 +139,8 @@ namespace ServiceStack.OrmLite.Support
             if (refField != null)
             {
                 var sql = GetRefFieldSql(refType, refField);
-                var result = await dbCmd.ConvertToAsync(refType, sql, token);
-                fieldDef.SetValueFn(instance, result);
+                var result = await dbCmd.ConvertToAsync(refType, sql, token).ConfigAwait();
+                fieldDef.SetValue(instance, result);
             }
             else if (refSelf != null)
             {
@@ -147,8 +148,8 @@ namespace ServiceStack.OrmLite.Support
                 if (sql == null)
                     return;
 
-                var result = await dbCmd.ConvertToAsync(refType, sql, token);
-                fieldDef.SetValueFn(instance, result);
+                var result = await dbCmd.ConvertToAsync(refType, sql, token).ConfigAwait();
+                fieldDef.SetValue(instance, result);
             }
         }
     }

@@ -9,6 +9,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -156,7 +157,7 @@ namespace ServiceStack.OrmLite
 
         internal static async Task<long> GetCountAsync(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams, CancellationToken token)
         {
-            var ret = await dbCmd.ColumnAsync<long>(sql, sqlParams, token);
+            var ret = await dbCmd.ColumnAsync<long>(sql, sqlParams, token).ConfigAwait();
             return ret.Sum();
         }
 
@@ -174,17 +175,17 @@ namespace ServiceStack.OrmLite
             return dbCmd.ScalarAsync<long>(dbCmd.GetDialectProvider().ToRowCountStatement(sql), token);
         }
 
-        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null, string[] include = null, CancellationToken token = default(CancellationToken))
+        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression = null, IEnumerable<string> include = null, CancellationToken token = default)
         {
             return dbCmd.LoadListWithReferences<T, T>(expression, include, token);
         }
 
-        internal static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression, string[] include = null, CancellationToken token = default(CancellationToken))
+        internal static Task<List<Into>> LoadSelectAsync<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expression, IEnumerable<string> include = null, CancellationToken token = default)
         {
             return dbCmd.LoadListWithReferences<Into, From>(expression, include, token);
         }
 
-        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, string[] include = null, CancellationToken token = default(CancellationToken))
+        internal static Task<List<T>> LoadSelectAsync<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate, IEnumerable<string> include = null, CancellationToken token = default)
         {
             var expr = dbCmd.GetDialectProvider().SqlExpression<T>().Where(predicate);
             return dbCmd.LoadListWithReferences<T, T>(expr, include, token);
@@ -207,16 +208,15 @@ namespace ServiceStack.OrmLite
         
         internal static async Task<DataTable> GetSchemaTableAsync(this IDbCommand dbCmd, string sql, CancellationToken token)
         {
-            using (var reader = await dbCmd.ExecReaderAsync(sql, token))
-            {
-                return reader.GetSchemaTable();
-            }
+            using var reader = await dbCmd.ExecReaderAsync(sql, token).ConfigAwait();
+            return reader.GetSchemaTable();
         }
 
         public static Task<ColumnSchema[]> GetTableColumnsAsync(this IDbCommand dbCmd, Type table, CancellationToken token) => 
             dbCmd.GetTableColumnsAsync($"SELECT * FROM {dbCmd.GetDialectProvider().GetQuotedTableName(table.GetModelDefinition())}", token);
 
-        public static async Task<ColumnSchema[]> GetTableColumnsAsync(this IDbCommand dbCmd, string sql, CancellationToken token) => (await dbCmd.GetSchemaTableAsync(sql, token)).ToColumnSchemas();
+        public static async Task<ColumnSchema[]> GetTableColumnsAsync(this IDbCommand dbCmd, string sql, CancellationToken token) => 
+            (await dbCmd.GetSchemaTableAsync(sql, token).ConfigAwait()).ToColumnSchemas(dbCmd);
     }
 }
 #endif

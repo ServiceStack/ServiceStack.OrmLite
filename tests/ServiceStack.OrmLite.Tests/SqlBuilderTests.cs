@@ -8,7 +8,9 @@ using ServiceStack.DataAnnotations;
 namespace ServiceStack.OrmLite.Tests
 {
     [TestFixtureOrmLite]
-    public class SqlBuilderTests : OrmLiteProvidersTestBase
+    public class 
+        
+        SqlBuilderTests : OrmLiteProvidersTestBase
     {
         public SqlBuilderTests(DialectContext context) : base(context) {}
 

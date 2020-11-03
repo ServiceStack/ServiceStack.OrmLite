@@ -356,7 +356,8 @@ namespace ServiceStack.OrmLite.MySql
 
         public override string GetQuotedValue(object value, Type fieldType)
         {
-            if (value == null) return "NULL";
+            if (value == null) 
+	            return "NULL";
 
             if (fieldType == typeof(byte[]))
                 return "0x" + BitConverter.ToString((byte[])value).Replace("-", "");
@@ -416,24 +417,46 @@ namespace ServiceStack.OrmLite.MySql
         
         public override bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
-            var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0} AND TABLE_SCHEMA = {1}"
-                .SqlFmt(GetTableName(tableName, schema).StripDbQuotes(), dbCmd.Connection.Database);
+	        var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0} AND TABLE_SCHEMA = {1}"
+		        .SqlFmt(GetTableName(tableName, schema).StripDbQuotes(), dbCmd.Connection.Database);
 
-            var result = dbCmd.ExecLongScalar(sql);
+	        var result = dbCmd.ExecLongScalar(sql);
 
-            return result > 0;
+	        return result > 0;
+        }
+
+        public override async Task<bool> DoesTableExistAsync(IDbCommand dbCmd, string tableName, string schema = null, CancellationToken token=default)
+        {
+	        var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0} AND TABLE_SCHEMA = {1}"
+		        .SqlFmt(GetTableName(tableName, schema).StripDbQuotes(), dbCmd.Connection.Database);
+
+	        var result = await dbCmd.ExecLongScalarAsync(sql, token);
+
+	        return result > 0;
         }
 
         public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
         {
-            tableName = GetTableName(tableName, schema);
-            var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS"
-                      + " WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName AND TABLE_SCHEMA = @schema"
-                          .SqlFmt(GetTableName(tableName, schema).StripDbQuotes(), columnName);
+	        tableName = GetTableName(tableName, schema);
+	        var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS"
+	                  + " WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName AND TABLE_SCHEMA = @schema"
+		                  .SqlFmt(GetTableName(tableName, schema).StripDbQuotes(), columnName);
             
-            var result = db.SqlScalar<long>(sql, new { tableName, columnName, schema = db.Database });
+	        var result = db.SqlScalar<long>(sql, new { tableName, columnName, schema = db.Database });
 
-            return result > 0;
+	        return result > 0;
+        }
+
+        public override async Task<bool> DoesColumnExistAsync(IDbConnection db, string columnName, string tableName, string schema = null, CancellationToken token=default)
+        {
+	        tableName = GetTableName(tableName, schema);
+	        var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS"
+	                  + " WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName AND TABLE_SCHEMA = @schema"
+		                  .SqlFmt(GetTableName(tableName, schema).StripDbQuotes(), columnName);
+            
+	        var result = await db.SqlScalarAsync<long>(sql, new { tableName, columnName, schema = db.Database }, token);
+
+	        return result > 0;
         }
 
         public override string ToCreateTableStatement(Type tableType)
@@ -444,7 +467,7 @@ namespace ServiceStack.OrmLite.MySql
             var modelDef = GetModel(tableType);
             foreach (var fieldDef in CreateTableFieldsStrategy(modelDef))
             {
-                if (fieldDef.CustomSelect != null)
+                if (fieldDef.CustomSelect != null || (fieldDef.IsComputed && !fieldDef.IsPersisted))
                     continue;
 
                 if (sbColumns.Length != 0) sbColumns.Append(", \n  ");
@@ -547,32 +570,32 @@ namespace ServiceStack.OrmLite.MySql
         }
 
 #if ASYNC
-        public override Task OpenAsync(IDbConnection db, CancellationToken token = default(CancellationToken))
+        public override Task OpenAsync(IDbConnection db, CancellationToken token = default)
         {
             return Unwrap(db).OpenAsync(token);
         }
 
-        public override Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        public override Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default)
         {
             return Unwrap(cmd).ExecuteReaderAsync(token).Then(x => (IDataReader)x);
         }
 
-        public override Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        public override Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default)
         {
             return Unwrap(cmd).ExecuteNonQueryAsync(token);
         }
 
-        public override Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        public override Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default)
         {
             return Unwrap(cmd).ExecuteScalarAsync(token);
         }
 
-        public override Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default(CancellationToken))
+        public override Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default)
         {
             return Unwrap(reader).ReadAsync(token);
         }
 
-        public override async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
+        public override async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default)
         {
             try
             {
@@ -590,7 +613,7 @@ namespace ServiceStack.OrmLite.MySql
             }
         }
 
-        public override async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default(CancellationToken))
+        public override async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default)
         {
             try
             {
@@ -606,7 +629,7 @@ namespace ServiceStack.OrmLite.MySql
             }
         }
 
-        public override async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
+        public override async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default)
         {
             try
             {

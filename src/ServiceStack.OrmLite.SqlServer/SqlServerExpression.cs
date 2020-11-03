@@ -22,11 +22,6 @@ namespace ServiceStack.OrmLite.SqlServer
                 : $"substring({quotedColumn}, {startIndex}, LEN({quotedColumn}) - {startIndex} + 1)";
         }
 
-        public override SqlExpression<T> OrderByRandom()
-        {
-            return base.OrderBy("NEWID()");
-        }
-
         protected override PartialSqlString ToLengthPartialString(object arg)
         {
             return new PartialSqlString($"LEN({arg})");
@@ -93,11 +88,10 @@ namespace ServiceStack.OrmLite.SqlServer
                 if (setFields.Length > 0)
                     setFields.Append(", ");
 
-                var param = dialectProvider.AddUpdateParam(dbCmd, value, fieldDef);
                 setFields
                     .Append(dialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(param.ParameterName);
+                    .Append(dialectProvider.GetUpdateParam(dbCmd, value, fieldDef));
             }
 
             var strFields = StringBuilderCache.ReturnAndFree(setFields);

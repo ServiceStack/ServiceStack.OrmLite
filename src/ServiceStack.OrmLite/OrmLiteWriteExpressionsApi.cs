@@ -152,6 +152,28 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Updates all values from Object Dictionary, Requires Id which is used as a Primary Key Filter. E.g
+        /// 
+        ///   db.UpdateOnly&lt;Person&gt;(new Dictionary&lt;string,object&lt; { {"Id", 1}, {"FirstName", "JJ"} });
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("Id" = 1)
+        /// </summary>
+        public static int UpdateOnly<T>(this IDbConnection dbConn, Dictionary<string, object> updateFields, Action<IDbCommand> commandFilter = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly<T>(updateFields, commandFilter));
+        }
+
+        /// <summary>
+        /// Updates all values from Object Dictionary matching the where condition. E.g
+        /// 
+        ///   db.UpdateOnly&lt;Person&gt;(new Dictionary&lt;string,object&lt; { {"FirstName", "JJ"} }, "FirstName == {0}", new[] { "Jimi" });
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
+        /// </summary>
+        public static int UpdateOnly<T>(this IDbConnection dbConn, Dictionary<string, object> updateFields, string whereExpression, object[] whereParams, Action<IDbCommand> commandFilter = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly<T>(updateFields, whereExpression, whereParams, commandFilter));
+        }
+
+        /// <summary>
         /// Updates all non-default values set on item matching the where condition (if any). E.g
         /// 
         ///   db.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.FirstName == "Jimi");
@@ -171,14 +193,6 @@ namespace ServiceStack.OrmLite
         public static int Update<T>(this IDbConnection dbConn, T item, Expression<Func<T, bool>> where, Action<IDbCommand> commandFilter = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.Update(item, where, commandFilter));
-        }
-
-        /// <summary>
-        /// Updates the entity using the primary key as the filter
-        /// </summary>
-        public static int Update<T>(this IDbConnection dbConn, object entity)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.Update<T>(entity, where:null, commandFilter:null));
         }
 
         /// <summary>
@@ -234,9 +248,9 @@ namespace ServiceStack.OrmLite
         ///   db.Delete&lt;Person&gt;(p => p.Age == 27);
         ///   DELETE FROM "Person" WHERE ("Age" = 27)
         /// </summary>
-        public static int Delete<T>(this IDbConnection dbConn, Expression<Func<T, bool>> where)
+        public static int Delete<T>(this IDbConnection dbConn, Expression<Func<T, bool>> where, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Delete(where));
+            return dbConn.Exec(dbCmd => dbCmd.Delete(where, commandFilter));
         }
 
         /// <summary>
@@ -246,9 +260,20 @@ namespace ServiceStack.OrmLite
         ///   db.Delete&lt;Person&gt;(q.Where(p => p.Age == 27));
         ///   DELETE FROM "Person" WHERE ("Age" = 27)
         /// </summary>
-        public static int Delete<T>(this IDbConnection dbConn, SqlExpression<T> where)
+        public static int Delete<T>(this IDbConnection dbConn, SqlExpression<T> where, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Delete(where));
+            return dbConn.Exec(dbCmd => dbCmd.Delete(where, commandFilter));
+        }
+
+        /// <summary>
+        /// Delete the rows that matches the where filter, e.g:
+        /// 
+        ///   db.DeleteWhere&lt;Person&gt;("Age = {0}", new object[] { 27 });
+        ///   DELETE FROM "Person" WHERE ("Age" = 27)
+        /// </summary>
+        public static int DeleteWhere<T>(this IDbConnection dbConn, string whereFilter, object[] whereParams)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.DeleteWhere<T>(whereFilter, whereParams));
         }
     }
 }

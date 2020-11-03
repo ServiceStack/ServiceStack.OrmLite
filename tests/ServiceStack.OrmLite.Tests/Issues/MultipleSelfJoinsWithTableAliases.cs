@@ -205,6 +205,59 @@ namespace ServiceStack.OrmLite.Tests.Issues
             }
         }
 
+        [Test]
+        public void Can_use_CustomSql_with_TableAlias_and_GroupBy()
+        {
+            var customFmt = "";
+            if ((Dialect & Dialect.AnySqlServer) == Dialect)
+                customFmt = "CONCAT(LEFT({0}, 1),LEFT({1},1))";
+            else if (Dialect == Dialect.Sqlite)
+                customFmt = "substr({0}, 1, 1) || substr({1}, 1, 1)";
+
+            if (string.IsNullOrEmpty(customFmt))
+                return;
+            // OrmLiteUtils.PrintSql();
+
+            using (var db = OpenDbConnection())
+            {
+                var tenantId = Guid.NewGuid();
+                var sale = PopulateData(db, tenantId);
+
+                var q = db.From<Sale>()
+                    .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.TableAlias("seller"))
+                    .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.TableAlias("buyer"))
+                    // .GroupBy<Sale, ContactIssue>((s,c) => new object[] { s.Id, "BuyerFirstName", "BuyerLastName" })
+                    // .GroupBy<Sale, ContactIssue>((s,c) => new  { s.Id, BuyerFirstName = "BuyerFirstName", BuyerLastName = "BuyerLastName" })
+                    .GroupBy<Sale, ContactIssue>((s,c) => new {
+                        s.Id,
+                        BuyerFirstName = Sql.TableAlias(c.FirstName, "buyer"),
+                        BuyerLastName = Sql.TableAlias(c.LastName, "buyer"),
+                        SellerFirstName = Sql.TableAlias(c.FirstName, "seller"),
+                        SellerLastName = Sql.TableAlias(c.LastName, "seller"),
+                    })
+                    .Select<Sale, ContactIssue>((s, c) => new
+                    {
+                        s.Id,
+                        BuyerFirstName = Sql.TableAlias(c.FirstName, "buyer"),
+                        BuyerLastName = Sql.TableAlias(c.LastName, "buyer"),
+                        BuyerInitials = Sql.Custom(customFmt.Fmt("buyer.FirstName", "buyer.LastName")),
+                        SellerFirstName = Sql.TableAlias(c.FirstName, "seller"),
+                        SellerLastName = Sql.TableAlias(c.LastName, "seller"),
+                        SellerInitials = Sql.Custom(customFmt.Fmt("seller.FirstName", "seller.LastName")),
+                    });
+
+                var sales = db.Select<SaleView>(q);
+                var salesView = sales[0];
+
+                Assert.That(salesView.BuyerFirstName, Is.EqualTo("BuyerFirst"));
+                Assert.That(salesView.BuyerLastName, Is.EqualTo("LastBuyer"));
+                Assert.That(salesView.BuyerInitials, Is.EqualTo("BL"));
+                Assert.That(salesView.SellerFirstName, Is.EqualTo("SellerFirst"));
+                Assert.That(salesView.SellerLastName, Is.EqualTo("LastSeller"));
+                Assert.That(salesView.SellerInitials, Is.EqualTo("SL"));
+            }
+        }
+
         void AssertTupleResults(List<Tuple<Sale, ContactIssue, ContactIssue>> results)
         {
             var result = results[0];

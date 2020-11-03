@@ -55,8 +55,16 @@ namespace ServiceStack.OrmLite.Tests.Issues
         {
             using (var db = OpenDbConnection())
             {
-                db.DropTable<Parent>();
-                db.DropTable<Child>();
+                try
+                {
+                    db.DropTable<Parent>();
+                    db.DropTable<Child>();
+                }
+                catch (Exception e)
+                {
+                    db.DropTable<Child>();
+                    db.DropTable<Parent>();
+                }
 
                 db.CreateTable<Parent>();
                 db.CreateTable<Child>();

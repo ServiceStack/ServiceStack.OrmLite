@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
@@ -36,8 +37,19 @@ namespace ServiceStack.OrmLite
         {
             var sql = StringBuilderCache.Allocate();
             
-            sql.Append($"{ColumnName.PadRight(18, ' ')} {DataTypeName}");
-            if (NumericPrecision > 0)
+            sql.Append(ColumnName.PadRight(20, ' ')).Append(' ');
+            AppendDefinition(sql);
+
+            return StringBuilderCache.ReturnAndFree(sql);
+        }
+
+        public string ColumnDefinition => 
+            StringBuilderCache.ReturnAndFree(AppendDefinition(StringBuilderCache.Allocate()));
+
+        private StringBuilder AppendDefinition(StringBuilder sql)
+        {
+            sql.Append(DataTypeName.ToUpper());
+            if (DataType.IsRealNumberType() && NumericPrecision > 0)
             {
                 sql.Append("(");
                 sql.Append(NumericPrecision);
@@ -46,9 +58,10 @@ namespace ServiceStack.OrmLite
                     sql.Append(",");
                     sql.Append(NumericScale);
                 }
+
                 sql.Append(")");
             }
-            else if (ColumnSize > 0)
+            else if (!DataType.IsNumericType() && ColumnSize > 0)
             {
                 sql.Append("(");
                 sql.Append(ColumnSize);
@@ -66,19 +79,19 @@ namespace ServiceStack.OrmLite
             else
             {
                 sql.Append(AllowDBNull ? " NULL" : " NOT NULL");
-            }
 
-            if (IsUnique)
-            {
-                sql.Append(" UNIQUE");
+                if (IsUnique)
+                {
+                    sql.Append(" UNIQUE");
+                }
             }
 
             if (DefaultValue != null)
             {
                 sql.AppendFormat(" DEFAULT ({0})", DefaultValue);
             }
-            
-            return StringBuilderCache.ReturnAndFree(sql);
+
+            return sql;
         }
     }
 

@@ -44,19 +44,25 @@ namespace ServiceStack.OrmLite
             set => dialectProvider = value;
         }
 
-        public static IOrmLiteDialectProvider GetDialectProvider(this IDbCommand dbCmd)
-        {
-            return dbCmd is IHasDialectProvider hasDialectProvider 
+        public static IOrmLiteDialectProvider GetDialectProvider(this IDbCommand dbCmd) =>
+            dbCmd is IHasDialectProvider hasDialectProvider 
                 ? hasDialectProvider.DialectProvider
                 : DialectProvider;
-        }
 
-        public static IOrmLiteDialectProvider GetDialectProvider(this IDbConnection db)
-        {
-            return db is IHasDialectProvider hasDialectProvider
+        public static IOrmLiteDialectProvider Dialect(this IDbCommand dbCmd) =>
+            dbCmd is IHasDialectProvider hasDialectProvider 
                 ? hasDialectProvider.DialectProvider
                 : DialectProvider;
-        }
+
+        public static IOrmLiteDialectProvider GetDialectProvider(this IDbConnection db) =>
+            db is IHasDialectProvider hasDialectProvider
+                ? hasDialectProvider.DialectProvider
+                : DialectProvider;
+
+        public static IOrmLiteDialectProvider Dialect(this IDbConnection db) =>
+            db is IHasDialectProvider hasDialectProvider
+                ? hasDialectProvider.DialectProvider
+                : DialectProvider;
 
         public static IOrmLiteExecFilter GetExecFilter(this IOrmLiteDialectProvider dialectProvider) {
             return dialectProvider != null
@@ -135,7 +141,7 @@ namespace ServiceStack.OrmLite
 
         public static void ResetLogFactory(ILogFactory logFactory=null)
         {
-            logFactory = logFactory ?? LogManager.LogFactory;
+            logFactory ??= LogManager.LogFactory;
             LogManager.LogFactory = logFactory;
             OrmLiteResultsFilterExtensions.Log = logFactory.GetLogger(typeof(OrmLiteResultsFilterExtensions));
             OrmLiteWriteCommandExtensions.Log = logFactory.GetLogger(typeof(OrmLiteWriteCommandExtensions));

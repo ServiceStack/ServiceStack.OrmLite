@@ -13,6 +13,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics;
 using System.Dynamic;
 using System.Linq;
 using System.Linq.Expressions;
@@ -543,7 +544,10 @@ namespace ServiceStack.OrmLite
 
         public static string SqlJoin<T>(this List<T> values, IOrmLiteDialectProvider dialect = null)
         {
-            dialect = dialect ?? OrmLiteConfig.DialectProvider;
+            if (values == null)
+                return string.Empty;
+
+            dialect ??= OrmLiteConfig.DialectProvider;
 
             var sb = StringBuilderCache.Allocate();
             foreach (var value in values)
@@ -557,12 +561,16 @@ namespace ServiceStack.OrmLite
 
         public static string SqlJoin(IEnumerable values, IOrmLiteDialectProvider dialect = null)
         {
-            dialect = (dialect ?? OrmLiteConfig.DialectProvider);
+            if (values == null)
+                return string.Empty;
+            
+            dialect ??= OrmLiteConfig.DialectProvider;
 
             var sb = StringBuilderCache.Allocate();
             foreach (var value in values)
             {
-                if (sb.Length > 0) sb.Append(",");
+                if (sb.Length > 0) 
+                    sb.Append(",");
                 sb.Append(dialect.GetQuotedValue(value, value.GetType()));
             }
 
@@ -729,58 +737,42 @@ namespace ServiceStack.OrmLite
                 // e.g. CustomerId (C#) vs customer_id (DB)
                 var dbFieldNameWithNoUnderscores = dbFieldName.Replace("_", "");
                 if (string.Compare(fieldName, dbFieldNameWithNoUnderscores, StringComparison.OrdinalIgnoreCase) == 0)
-                {
                     return i;
-                }
 
                 // Next guess: Maybe the DB field has special characters?
                 // e.g. Quantity (C#) vs quantity% (DB)
                 var dbFieldNameSanitized = AllowedPropertyCharsRegex.Replace(dbFieldName, string.Empty);
                 if (string.Compare(fieldName, dbFieldNameSanitized, StringComparison.OrdinalIgnoreCase) == 0)
-                {
                     return i;
-                }
 
                 // Next guess: Maybe the DB field has special characters *and* has underscores?
                 // e.g. Quantity (C#) vs quantity_% (DB)
                 if (string.Compare(fieldName, dbFieldNameSanitized.Replace("_", string.Empty), StringComparison.OrdinalIgnoreCase) == 0)
-                {
                     return i;
-                }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field?
                 // e.g. CustomerId (C#) vs t130CustomerId (DB)
                 if (dbFieldName.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
-                {
                     return i;
-                }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has underscores?
                 // e.g. CustomerId (C#) vs t130_CustomerId (DB)
                 if (dbFieldNameWithNoUnderscores.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
-                {
                     return i;
-                }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has special characters?
                 // e.g. CustomerId (C#) vs t130#CustomerId (DB)
                 if (dbFieldNameSanitized.EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
-                {
                     return i;
-                }
 
                 // Next guess: Maybe the DB field has some prefix that we don't have in our C# field *and* has underscores *and* has special characters?
                 // e.g. CustomerId (C#) vs t130#Customer_I#d (DB)
                 if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName, StringComparison.OrdinalIgnoreCase))
-                {
                     return i;
-                }
 
                 // Cater for Naming Strategies like PostgreSQL that has lower_underscore names
                 if (dbFieldNameSanitized.Replace("_", "").EndsWith(fieldName.Replace("_", ""), StringComparison.OrdinalIgnoreCase))
-                {
                     return i;
-                }
             }
 
             return NotFound;
@@ -937,7 +929,7 @@ namespace ServiceStack.OrmLite
                 if (map.TryGetValue(pkValue, out refValues))
                 {
                     var castResults = untypedApi.Cast(refValues);
-                    fieldDef.SetValueFn(result, castResults);
+                    fieldDef.SetValue(result, castResults);
                 }
             }
         }
@@ -956,7 +948,7 @@ namespace ServiceStack.OrmLite
                 var fkValue = refSelf.GetValue(result);
                 if (fkValue != null && map.TryGetValue(fkValue, out var childResult))
                 {
-                    fieldDef.SetValueFn(result, childResult);
+                    fieldDef.SetValue(result, childResult);
                 }
             }
         }
@@ -977,7 +969,7 @@ namespace ServiceStack.OrmLite
                 var pkValue = modelDef.PrimaryKey.GetValue(result);
                 if (map.TryGetValue(pkValue, out var childResult))
                 {
-                    fieldDef.SetValueFn(result, childResult);
+                    fieldDef.SetValue(result, childResult);
                 }
             }
         }
@@ -985,11 +977,25 @@ namespace ServiceStack.OrmLite
         [Obsolete("Use dialectProvider.GetNonDefaultValueInsertFields()")]
         public static List<string> GetNonDefaultValueInsertFields<T>(T obj)
         {
-            return OrmLiteConfig.DialectProvider.GetNonDefaultValueInsertFields(obj);
+            return OrmLiteConfig.DialectProvider.GetNonDefaultValueInsertFields<T>(obj);
         }
         
-        public static List<string> GetNonDefaultValueInsertFields<T>(this IOrmLiteDialectProvider dialectProvider, T obj)
+        public static void AssertNotAnonType<T>()
         {
+            if (typeof(T) == typeof(object))
+                throw new ArgumentException("T generic argument should be a Table but was typeof(object)");
+            
+            if (typeof(T) == typeof(Dictionary<string,object>))
+                throw new ArgumentException("T generic argument should be a Table but was typeof(Dictionary<string,object>)");
+            
+            if (typeof(ISqlExpression).IsAssignableFrom(typeof(T)))
+                throw new ArgumentException("T generic argument should be a Table but was an ISqlExpression");
+        }
+
+        public static List<string> GetNonDefaultValueInsertFields<T>(this IOrmLiteDialectProvider dialectProvider, object obj)
+        {
+            AssertNotAnonType<T>();
+            
             var insertFields = new List<string>();
             var modelDef = typeof(T).GetModelDefinition();
             foreach (var fieldDef in modelDef.FieldDefinitionsArray)
@@ -1118,5 +1124,34 @@ namespace ServiceStack.OrmLite
             : "'" + text + "'";
 
         public static string UnquotedColumnName(string columnExpr) => columnExpr.LastRightPart('.').StripDbQuotes();
+
+        public static string OrderByFields(IOrmLiteDialectProvider dialect, string orderBy)
+        {
+            if (string.IsNullOrEmpty(orderBy))
+                return string.Empty;
+            
+            var sb = StringBuilderCache.Allocate();
+
+            var fields = orderBy.Split(',');
+            const string Asc = "";
+            const string Desc = " DESC";
+
+            var orderBySuffix = Asc;
+            foreach (var fieldName in fields)
+            {
+                if (sb.Length > 0)
+                    sb.Append(", ");
+                
+                var reverse = fieldName.StartsWith("-");
+                var useSuffix = reverse
+                    ? orderBySuffix == Asc ? Desc : Asc
+                    : orderBySuffix;
+                var useName = reverse ? fieldName.Substring(1) : fieldName;
+                var quotedName = dialect.GetQuotedColumnName(useName);
+
+                sb.Append(quotedName + useSuffix);
+            }
+            return StringBuilderCache.ReturnAndFree(sb);
+        }
     }
 }

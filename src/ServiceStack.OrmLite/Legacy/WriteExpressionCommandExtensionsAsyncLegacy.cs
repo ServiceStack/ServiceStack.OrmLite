@@ -36,7 +36,7 @@ namespace ServiceStack.OrmLite.Legacy
         [Obsolete("Use db.DeleteAsync(db.From<T>())")]
         internal static Task<int> DeleteAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> where, CancellationToken token)
         {
-            return dbCmd.DeleteAsync(where(dbCmd.GetDialectProvider().SqlExpression<T>()), token);
+            return dbCmd.DeleteAsync(where(dbCmd.GetDialectProvider().SqlExpression<T>()), null, token);
         }
 
         internal static Task<int> DeleteFmtAsync<T>(this IDbCommand dbCmd, string where, CancellationToken token)

@@ -36,7 +36,7 @@ namespace ServiceStack.OrmLite.FirebirdTests
 
         public IDbConnection OpenDbConnection(string connString = null)
         {
-            connString = connString ?? ConnectionString;
+            connString ??= ConnectionString;
             return connString.OpenDbConnection();
         }
     }

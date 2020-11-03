@@ -14,7 +14,7 @@ namespace ServiceStack.OrmLite.Tests.Async.Legacy
         [Test]
         public async Task API_Sqlite_Legacy_Examples_Async()
         {
-            var db = OpenDbConnection();
+            var db = await OpenDbConnectionAsync();
             db.DropAndCreateTable<Person>();
             db.DropAndCreateTable<PersonWithAutoId>();
 

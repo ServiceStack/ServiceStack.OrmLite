@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.Data;
 using ServiceStack.DataAnnotations;
@@ -46,6 +48,30 @@ namespace ServiceStack.OrmLite.Tests
         [RowVersion]
         [Alias("TheVersion")]
         public long Version { get; set; }
+    }
+
+    [Alias("ModelAlias")]
+    public class ModelWithAlias
+    {
+        [Alias("ModelId")]
+        [AutoIncrement]
+        public int Id { get; set; }
+        
+        [Alias("IntAlias")]
+        public int IntField { get; set; }
+    }
+
+    [Schema("Schema")]
+    public class ModelWithSchemaAndRowVersionForInnerJoin
+    {
+        [AutoIncrement]
+        public long Id { get; set; }
+
+        public string Text { get; set; }
+
+        public long ModelWithRowVersionId { get; set; }
+
+        public ulong RowVersion { get; set; }
     }
 
     public class ModelWithOptimisticChildren
@@ -209,6 +235,62 @@ namespace ServiceStack.OrmLite.Tests
         }
 
         [Test]
+        public async Task Can_Save_new_row_and_retrieve_rowversion_Async()
+        {
+            var row = new ModelWithRowVersion { Text = "First" };
+
+            bool wasInserted = await db.SaveAsync(row);
+
+            Assert.That(wasInserted, Is.True);
+            var actualRow = await db.SingleByIdAsync<ModelWithRowVersion>(row.Id);
+            Assert.That(row.RowVersion, Is.EqualTo(actualRow.RowVersion));
+        }
+        
+        public class ModelWithAutoGuidAndRowVersion
+        {
+            [AutoId]
+            public Guid Id { get; set; }
+            public string Name { get; set; }
+            public ulong RowVersion { get; set; }
+        }
+
+        [Test]
+        public void Can_Save_ModelWithAutoGuidAndRowVersion()
+        {
+            db.DropAndCreateTable<ModelWithAutoGuidAndRowVersion>();
+            var row = new ModelWithAutoGuidAndRowVersion { Name = "A" };
+            
+            Assert.That(db.Save(row));
+
+            var dbRow = db.SingleById<ModelWithAutoGuidAndRowVersion>(row.Id);
+            Assert.That(dbRow.Name, Is.EqualTo(row.Name));
+
+            dbRow.Name = "B";
+            db.Save(dbRow);
+
+            dbRow = db.SingleById<ModelWithAutoGuidAndRowVersion>(row.Id);
+            Assert.That(dbRow.Name, Is.EqualTo("B"));
+        }
+
+        [Test]
+        public async Task Can_Save_ModelWithAutoGuidAndRowVersion_Async()
+        {
+            db.DropAndCreateTable<ModelWithAutoGuidAndRowVersion>();
+            var row = new ModelWithAutoGuidAndRowVersion { Name = "A" };
+            
+            Assert.That(await db.SaveAsync(row));
+
+            var dbRow = await db.SingleByIdAsync<ModelWithAutoGuidAndRowVersion>(row.Id);
+            Assert.That(dbRow.Name, Is.EqualTo(row.Name));
+
+            dbRow.Name = "B";
+            await db.SaveAsync(dbRow);
+
+            dbRow = await db.SingleByIdAsync<ModelWithAutoGuidAndRowVersion>(row.Id);
+            Assert.That(dbRow.Name, Is.EqualTo("B"));
+        }
+
+        [Test]
         public void Can_SaveAll_new_rows_and_retrieve_rowversion()
         {
             var rows = new[]
@@ -272,6 +354,78 @@ namespace ServiceStack.OrmLite.Tests
             var actual = db.SingleById<ModelWithRowVersionBase>(rowId);
             Assert.That(actual.Text, Is.EqualTo("Three"));
             Assert.That(actual.RowVersion, Is.Not.EqualTo(row.RowVersion));
+        }
+
+        [Test]
+        public void Can_update_with_current_rowversion_base_ObjectDictionary()
+        {
+            var rowId = db.Insert(new ModelWithRowVersionBase { Text = "Two", MoreData = "Fred" }, selectIdentity: true);
+            var row = db.SingleById<ModelWithRowVersionBase>(rowId);
+
+            row.Text = "Three";
+            db.Update<ModelWithRowVersionBase>(row.ToObjectDictionary());
+
+            var actual = db.SingleById<ModelWithRowVersionBase>(rowId);
+            Assert.That(actual.Text, Is.EqualTo("Three"));
+            Assert.That(actual.RowVersion, Is.Not.EqualTo(row.RowVersion));
+
+            row.Text = "Four";
+            Assert.Throws<OptimisticConcurrencyException>(() =>
+                db.Update<ModelWithRowVersionBase>(row.ToObjectDictionary()));
+        }
+
+        [Test]
+        public async Task Can_update_with_current_rowversion_base_ObjectDictionary_Async()
+        {
+            var rowId = await db.InsertAsync(new ModelWithRowVersionBase { Text = "Two", MoreData = "Fred" }, selectIdentity: true);
+            var row = await db.SingleByIdAsync<ModelWithRowVersionBase>(rowId);
+
+            row.Text = "Three";
+            await db.UpdateAsync<ModelWithRowVersionBase>(row.ToObjectDictionary());
+
+            var actual = await db.SingleByIdAsync<ModelWithRowVersionBase>(rowId);
+            Assert.That(actual.Text, Is.EqualTo("Three"));
+            Assert.That(actual.RowVersion, Is.Not.EqualTo(row.RowVersion));
+
+            row.Text = "Four";
+            Assert.ThrowsAsync<OptimisticConcurrencyException>(async () =>
+                await db.UpdateAsync<ModelWithRowVersionBase>(row.ToObjectDictionary()));
+        }
+
+        [Test]
+        public void Can_update_with_current_rowversion_base_UpdateOnly_ObjectDictionary()
+        {
+            var rowId = db.Insert(new ModelWithRowVersionBase { Text = "Two", MoreData = "Fred" }, selectIdentity: true);
+            var row = db.SingleById<ModelWithRowVersionBase>(rowId);
+
+            row.Text = "Three";
+            db.UpdateOnly<ModelWithRowVersionBase>(row.ToObjectDictionary());
+
+            var actual = db.SingleById<ModelWithRowVersionBase>(rowId);
+            Assert.That(actual.Text, Is.EqualTo("Three"));
+            Assert.That(actual.RowVersion, Is.Not.EqualTo(row.RowVersion));
+
+            row.Text = "Four";
+            Assert.Throws<OptimisticConcurrencyException>(() =>
+                db.UpdateOnly<ModelWithRowVersionBase>(row.ToObjectDictionary()));
+        }
+
+        [Test]
+        public async Task Can_update_with_current_rowversion_base_UpdateOnly_ObjectDictionary_Async()
+        {
+            var rowId = await db.InsertAsync(new ModelWithRowVersionBase { Text = "Two", MoreData = "Fred" }, selectIdentity: true);
+            var row = await db.SingleByIdAsync<ModelWithRowVersionBase>(rowId);
+
+            row.Text = "Three";
+            await db.UpdateOnlyAsync<ModelWithRowVersionBase>(row.ToObjectDictionary());
+
+            var actual = await db.SingleByIdAsync<ModelWithRowVersionBase>(rowId);
+            Assert.That(actual.Text, Is.EqualTo("Three"));
+            Assert.That(actual.RowVersion, Is.Not.EqualTo(row.RowVersion));
+
+            row.Text = "Four";
+            Assert.ThrowsAsync<OptimisticConcurrencyException>(async () =>
+                await db.UpdateOnlyAsync<ModelWithRowVersionBase>(row.ToObjectDictionary()));
         }
 
         [Test]
@@ -525,6 +679,31 @@ namespace ServiceStack.OrmLite.Tests
 
             var count = db.Count<ModelWithRowVersion>(m => m.Id == rowId);
             Assert.That(count, Is.EqualTo(1));
+        }
+
+        [Test]
+        public async Task Can_read_from_inner_join_with_schema()
+        {
+            if ((Dialect & Dialect.AnyMySql) == Dialect) //ERROR table name too long
+                return;
+        
+            db.DropAndCreateTable<ModelWithSchemaAndRowVersionForInnerJoin>();
+            var rowVersionModel = new ModelWithRowVersion {
+                Text = "test"
+            };
+            var modelId = await db.InsertAsync(rowVersionModel, selectIdentity: true).ConfigureAwait(false);
+            var innerJoinTable = new ModelWithSchemaAndRowVersionForInnerJoin {
+                ModelWithRowVersionId = modelId,
+                Text = "inner join table"
+            };
+            var joinId = await db.InsertAsync(innerJoinTable, selectIdentity: true).ConfigureAwait(false);
+
+            var query = db
+                .From<ModelWithRowVersion, ModelWithSchemaAndRowVersionForInnerJoin>((x, y) => x.Id == y.ModelWithRowVersionId)
+                .Where<ModelWithSchemaAndRowVersionForInnerJoin>(model => model.Id == joinId);
+
+            var result = await db.SingleAsync(query).ConfigureAwait(false);
+            Assert.NotNull(result);
         }
 
         private void TouchRow(long rowId)

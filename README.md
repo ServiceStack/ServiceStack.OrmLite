@@ -15,7 +15,7 @@ OrmLite was designed with a focus on the core objectives:
   * Create/Drop DB Table schemas using nothing but POCO class definitions (IOTW a true code-first ORM)
   * Simplicity - typed, wrist friendly API for common data access patterns.
   * High performance - with support for indexes, text blobs, etc.
-    * Amongst the [fastest Micro ORMs](http://mono.servicestack.net/benchmarks/) for .NET.
+    * Amongst the [fastest Micro ORMs](https://servicestackv3.github.io/Mono/src/Mono/benchmarks/default.htm) for .NET.
   * Expressive power and flexibility - with access to IDbCommand and raw SQL
   * Cross platform - supports multiple dbs (currently: Sql Server, Sqlite, MySql, PostgreSQL, Firebird) running on both .NET and Mono platforms.
 
@@ -42,6 +42,7 @@ level public properties.
   - [ServiceStack.OrmLite.SqlServer.Data](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer.Data) (uses [Microsoft.Data.SqlClient](https://devblogs.microsoft.com/dotnet/introducing-the-new-microsoftdatasqlclient/))
   - [ServiceStack.OrmLite.Sqlite](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite)
   - [ServiceStack.OrmLite.Sqlite.Data](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Data) (uses [Microsoft.Data.SQLite](https://stackoverflow.com/a/52025556/85785))
+  - [ServiceStack.OrmLite.Sqlite.Windows](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Windows) (Windows / .NET Framework only)
   - [ServiceStack.OrmLite.PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
   - [ServiceStack.OrmLite.MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
   - [ServiceStack.OrmLite.MySqlConnector](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySqlConnector) (uses [MySqlConnector](https://github.com/mysql-net/MySqlConnector))
@@ -865,6 +866,51 @@ var track = db.SingleById<Track>(1);
 var tracks = db.SelectByIds<Track>(new[]{ 1,2,3 });
 ```
 
+### Ensure APIs
+
+The new `Ensure()` API on OrmLite's typed `SqlExpression<T>` can be used to ensure that a condition is always applied irrespective
+of other conditions, e.g:
+
+#### Typed API
+
+```csharp
+var q = db.From<Rockstar>();
+q.Ensure(x => x.Id == 1); //always applied
+
+//...
+q.Where(x => x.Age == 27);
+q.Or(x => x.LivingStatus == LivingStatus.Dead);
+
+var rows = db.Select(q);
+```
+
+#### Custom Parameterized SQL Expression
+
+Custom SQL Ensure parameterized expressions:
+
+```csharp
+ q.Ensure("Id = {0}", 1); 
+```
+
+#### Multiple Ensure expressions
+
+```csharp
+var q = db
+    .From<Rockstar>()
+    .Join<RockstarAlbum>((r,a) => r.Id == a.RockstarId);
+
+q.Ensure<Rockstar,RockstarAlbum>((r,a) => a.Name == "Nevermind" && r.Id == a.RockstarId);
+
+q.Where(x => x.Age == 27)
+ .Or(x => x.LivingStatus == LivingStatus.Dead);
+
+q.Ensure(x => x.Id == 3);
+
+var rows = db.Select(q);
+```
+
+These APIs are useful for mandatory filters like "Soft Deletes" and Multitenant records.
+
 ## Nested Typed Sub SqlExpressions
 
 The `Sql.In()` API supports nesting and combining of multiple Typed SQL Expressions together 
@@ -897,23 +943,39 @@ var names = new List<string>{ "foo", "bar", "qux" };
 var results = db.SqlList<Table>("SELECT * FROM Table WHERE Name IN (@names)", new { names });
 ```
 
-### Custom SQL using PostgreSQL Arrays
+### Spread Util
 
-If using PostgreSQL you can take advantage of its complex Array Types and utilize its [Array Functions and Operators](https://www.postgresql.org/docs/9.6/functions-array.html), e.g:
+The `SqlSpread()` API is useful to generate an escaped list of parameterized values for use in SQL `IN()` statements and SQL functions:
 
 ```csharp
-var ids = new[]{ 1, 2, 3};
-var q = Db.From<Table>()
-    .Where("ARRAY[{0}] && ref_ids", ids.Join(","))
-var results = db.Select(q);
+var dialect = db.Dialect();
+dialect.SqlSpread(1, 2, 3);         //= 1,2,3
+dialect.SqlSpread("A", "B", "C");   //= 'A','B','C'
+dialect.SqlSpread("A'B", "C\"D");   //= 'A''B','C\"D'
 ```
 
-When comparing a string collection you can use `SqlInValues` to create a quoted SQL IN list, e.g:
+### Custom SQL using PostgreSQL Arrays
+
+The `PgSql.Array()` provides a typed API for generating [PostgreSQL Array Expressions](https://www.postgresql.org/docs/current/arrays.html), e.g:
 
 ```csharp
-var q = Db.From<Table>()
-    .Where($"ARRAY[{new SqlInValues(cities).ToSqlInString()}] && cities");
-var results = db.Select(q);
+PgSql.Array(1,2,3)     //= ARRAY[1,2,3]
+var strings = new[]{ "A","B","C" };
+PgSql.Array(strings)   //= ARRAY['A','B','C']
+```
+
+Which you can safely use in Custom SQL Expressions that use PostgreSQL's native ARRAY support:
+
+```csharp
+q.And($"{PgSql.Array(anyTechnologyIds)} && technology_ids")
+q.And($"{PgSql.Array(labelSlugs)} && labels");
+```
+
+If you want and empty collection to return `null` instead of an empty `ARRAY[]` you can use the `nullIfEmpty` overload:
+
+```csharp
+PgSql.Array(new string[0], nullIfEmpty:true)      //= null
+PgSql.Array(new[]{"A","B","C"}, nullIfEmpty:true) //= ARRAY['A','B','C']
 ```
 
 ### Lazy Queries
@@ -971,7 +1033,7 @@ var q = db.From<Customer>()
 var dbCustomers = db.Select<Customer>(q);
 ```
 
-This query rougly maps to the following SQL:
+This query roughly maps to the following SQL:
 
 ```sql
 SELECT Customer.* 
@@ -1335,6 +1397,59 @@ Custom Key/Value Dictionary:
 
 ```csharp
 Dictionary<string,string> rows = db.Dictionary<string,string>(q);
+```
+
+### Dictionary APIs
+
+OrmLite's Dictionary APIs allow you to customize which parts of a Data Model should be modified by 
+converting it into then manipulating an Object Dictionary, e.g:
+
+#### Insert by Dictionary
+
+```csharp
+var row = new Person { FirstName = "John", LastName = "Smith" };
+Dictionary<string,object> obj = row.ToObjectDictionary();
+obj[nameof(Person.LastName)] = null;
+
+row.Id = (int) db.Insert<Person>(obj, selectIdentity:true);
+```
+
+#### Update by Dictionary
+
+```csharp
+Person row = db.SingleById<Person>(row.Id);
+var obj = row.ToObjectDictionary();
+obj[nameof(Person.LastName)] = "Smith";
+db.Update<Person>(obj);
+```
+
+#### UpdateOnly by Dictionary
+
+```csharp
+// By Primary Key Id
+var fields = new Dictionary<string, object> {
+    [nameof(Person.Id)] = 1,
+    [nameof(Person.FirstName)] = "John",
+    [nameof(Person.LastName)] = null,
+};
+
+db.UpdateOnly<Person>(fields);
+
+// By Custom Where Expression
+var fields = new Dictionary<string, object> {
+    [nameof(Person.FirstName)] = "John",
+    [nameof(Person.LastName)] = null,
+};
+
+db.UpdateOnly<Person>(fields, p => p.LastName == "Hendrix");
+```
+
+#### Delete by Dictionary
+
+```csharp
+db.Delete<Rockstar>(new Dictionary<string, object> {
+    ["Age"] = 27
+});
 ```
 
 ### BelongsTo Attribute
@@ -1924,6 +2039,20 @@ OrmLiteConfig.BeforeExecFilter = dbCmd => Console.WriteLine(dbCmd.GetDebugString
 //OrmLiteConfig.AfterExecFilter = dbCmd => Console.WriteLine(dbCmd.GetDebugString());
 ```
 
+#### Output Generated SQL
+
+You can use `OrmLiteUtils.PrintSql()` for the common debugging task of viewing the generated SQL OrmLite executes:
+
+```csharp
+OrmLiteUtils.PrintSql();
+```
+
+To later disable logging use: 
+
+```csharp
+OrmLiteUtils.UnPrintSql();
+```
+
 ### Exec, Result and String Filters
 
 OrmLite's core Exec filters makes it possible to inject your own behavior, tracing, profiling, etc.
@@ -2231,6 +2360,41 @@ CREATE TABLE "PocoTable"
 ```
 
 > OrmLite replaces any variable placeholders with the value in each RDBMS DialectProvider's `Variables` Dictionary.
+
+### Custom Insert and Update Expressions
+
+The `[CustomInsert]` and `[CustomUpdate]` attributes can be used to override what values rows are inserted during INSERT's and UPDATE's. 
+
+We can use this to insert a salted and hashed password using PostgreSQL native functions:
+
+```csharp
+public class CustomSqlUser
+{
+    [AutoIncrement]
+    public int Id { get; set; }
+
+    public string Email { get; set; }
+
+    [CustomInsert("crypt({0}, gen_salt('bf'))"),
+     CustomUpdate("crypt({0}, gen_salt('bf'))")]
+    public string Password { get; set; }
+}
+
+var user = new CustomSqlUser {
+    Email = "user@email.com", 
+    Password = "secret"
+};
+db.Insert(user);
+```
+
+We can then use `Sql.Custom()` to create a partially typed custom query to match on the hashed password, e.g:
+
+```csharp
+var quotedSecret = db.Dialect().GetQuotedValue("secret");
+var q = db.From<CustomSqlUser>()
+    .Where(x => x.Password == Sql.Custom($"crypt({quotedSecret}, password)"));
+var row = db.Single(q);
+```
 
 #### Pre / Post Custom SQL Hooks when Creating and Dropping tables 
 
@@ -2556,7 +2720,7 @@ foreach (var newRobot in newRobots)
 Using the [SQLite Manager](https://addons.mozilla.org/en-US/firefox/addon/sqlite-manager/?src=search) Firefox extension
 we can peek at one of the created shards to see 100 Robots in each shard. This is the dump of `robots-shard0.sqlite`:
 
-![Data dump of Robot Shard #1](http://mono.servicestack.net/files/robots-shard0.png)
+![Data dump of Robot Shard #1](https://raw.githubusercontent.com/ServiceStack/docs/master/docs/images/ormlite/robots-shard0.sqlite.jpg)
 
 As expected each shard has every 10th robot inside.
 
@@ -2751,11 +2915,11 @@ using (IDbConnection db = Config.OpenDbConnection())
 
 Running this against a SQL Server database will yield the results below:
 
-[![SQL Server Management Studio results](http://mono.servicestack.net/files/ormlite-example.png)](http://www.servicestack.net/files/ormlite-example.png)
+[![SQL Server Management Studio results](https://raw.githubusercontent.com/ServiceStack/docs/master/docs/images/ormlite/ormlite-example.png)](https://raw.githubusercontent.com/ServiceStack/docs/master/docs/images/ormlite/ormlite-example.png)
 
-Notice the POCO types are stored in the [very fast](http://mono.servicestack.net/mythz_blog/?p=176) 
-and [Versatile](http://mono.servicestack.net/mythz_blog/?p=314) 
-[JSV Format](https://github.com/ServiceStack/ServiceStack.Text/wiki/JSV-Format) which although hard to do - 
+Notice the POCO types are stored in the [very fast](https://github.com/ServiceStackV3/mythz_blog/blob/master/pages/176.md) 
+and [Versatile](https://github.com/ServiceStackV3/mythz_blog/blob/master/pages/314.md) 
+[JSV Format](https://docs.servicestack.net/jsv-format) which although hard to do - 
 is actually more compact, human and parser-friendly than JSON :)
 
 ### Ignoring DTO Properties
@@ -3138,6 +3302,22 @@ PostgreSqlDialect.Provider.RegisterConverter<List<double>>(new PostgreSqlDoubleA
 PostgreSqlDialect.Provider.RegisterConverter<List<decimal>>(new PostgreSqlDecimalArrayConverter());
 PostgreSqlDialect.Provider.RegisterConverter<List<DateTime>>(new PostgreSqlDateTimeTimeStampArrayConverter());
 PostgreSqlDialect.Provider.RegisterConverter<List<DateTimeOffset>>(new PostgreSqlDateTimeOffsetTimeStampTzArrayConverter());
+```
+
+### PostgreSQL Params
+
+The `PgSql.Param()` API provides a resolve the correct populated `NpgsqlParameter` and `NpgsqlDbType` from a C# Type
+which can be used to query custom PostgreSQL Data Types in APIs that accept `IDbDataParameter` parameters, e.g:
+
+```csharp
+public class FunctionResult
+{
+    public int[] Val { get; set; }
+}
+
+var p = PgSql.Param("paramValue", testVal);
+var sql = "SELECT * FROM my_func(@paramValue)";
+var rows = db.Select<FunctionResult>(sql, new [] { p });
 ```
 
 ### Hstore support

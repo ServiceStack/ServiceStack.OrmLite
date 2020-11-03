@@ -106,18 +106,16 @@ namespace ServiceStack.OrmLite.SqlServer
 
         public override IDbDataParameter CreateParam() => new SqlParameter();
 
+        private const string DefaultSchema = "dbo";
         public override string ToTableNamesStatement(string schema)
         {
             var sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_TYPE='BASE TABLE'";
-
-            return schema != null 
-                ? sql + " AND TABLE_SCHEMA = {0}".SqlFmt(this, schema) 
-                : sql;
+            return sql + " AND TABLE_SCHEMA = {0}".SqlFmt(this, schema ?? DefaultSchema);
         }
 
         public override string ToTableNamesWithRowCountsStatement(bool live, string schema)
         {
-            var schemaSql = schema != null ? " AND s.Name = {0}".SqlFmt(this, schema) : "";
+            var schemaSql = " AND s.Name = {0}".SqlFmt(this, schema ?? DefaultSchema);
             
             var sql = @"SELECT t.NAME, p.rows FROM sys.tables t INNER JOIN sys.schemas s ON t.schema_id = s.schema_id 
                                INNER JOIN sys.indexes i ON t.OBJECT_ID = i.object_id 
@@ -130,6 +128,13 @@ namespace ServiceStack.OrmLite.SqlServer
         {
             var sql = $"SELECT count(*) FROM sys.schemas WHERE name = '{schemaName.SqlParam()}'";
             var result = dbCmd.ExecLongScalar(sql);
+            return result > 0; 
+        }
+
+        public override async Task<bool> DoesSchemaExistAsync(IDbCommand dbCmd, string schemaName, CancellationToken token = default)
+        {
+            var sql = $"SELECT count(*) FROM sys.schemas WHERE name = '{schemaName.SqlParam()}'";
+            var result = await dbCmd.ExecLongScalarAsync(sql, token);
             return result > 0; 
         }
 
@@ -154,6 +159,21 @@ namespace ServiceStack.OrmLite.SqlServer
             return result > 0;
         }
 
+        public override async Task<bool> DoesTableExistAsync(IDbCommand dbCmd, string tableName, string schema = null, CancellationToken token = default)
+        {
+            var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = {0}"
+                .SqlFmt(this, tableName);
+
+            if (schema != null)
+                sql += " AND TABLE_SCHEMA = {0}".SqlFmt(this, schema);
+            else
+                sql += " AND TABLE_SCHEMA <> 'Security'";
+
+            var result = await dbCmd.ExecLongScalarAsync(sql, token);
+
+            return result > 0;
+        }
+
         public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
         {
             var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName"
@@ -163,6 +183,20 @@ namespace ServiceStack.OrmLite.SqlServer
                 sql += " AND TABLE_SCHEMA = @schema";
 
             var result = db.SqlScalar<long>(sql, new { tableName, columnName, schema });
+
+            return result > 0;
+        }
+
+        public override async Task<bool> DoesColumnExistAsync(IDbConnection db, string columnName, string tableName, string schema = null,
+            CancellationToken token = default)
+        {
+            var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName"
+                .SqlFmt(this, tableName, columnName);
+
+            if (schema != null)
+                sql += " AND TABLE_SCHEMA = @schema";
+
+            var result = await db.SqlScalarAsync<long>(sql, new { tableName, columnName, schema }, token: token);
 
             return result > 0;
         }
@@ -382,7 +416,32 @@ namespace ServiceStack.OrmLite.SqlServer
 
         protected virtual bool SupportsSequences(FieldDefinition fieldDef) => false;
 
-        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
+        public override void EnableIdentityInsert<T>(IDbCommand cmd)
+        {
+            var tableName = cmd.GetDialectProvider().GetQuotedTableName(ModelDefinition<T>.Definition);
+            cmd.ExecNonQuery($"SET IDENTITY_INSERT {tableName} ON");
+        }
+
+        public override Task EnableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default)
+        {
+            var tableName = cmd.GetDialectProvider().GetQuotedTableName(ModelDefinition<T>.Definition);
+            return cmd.ExecNonQueryAsync($"SET IDENTITY_INSERT {tableName} ON", null, token);
+        }
+
+        public override void DisableIdentityInsert<T>(IDbCommand cmd)
+        {
+            var tableName = cmd.GetDialectProvider().GetQuotedTableName(ModelDefinition<T>.Definition);
+            cmd.ExecNonQuery($"SET IDENTITY_INSERT {tableName} OFF");
+        }
+
+        public override Task DisableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default)
+        {
+            var tableName = cmd.GetDialectProvider().GetQuotedTableName(ModelDefinition<T>.Definition);
+            return cmd.ExecNonQueryAsync($"SET IDENTITY_INSERT {tableName} OFF", null, token);
+        }
+
+        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null, 
+            Func<FieldDefinition,bool> shouldInclude=null)
         {
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
@@ -401,7 +460,8 @@ namespace ServiceStack.OrmLite.SqlServer
                     sbReturningColumns.Append("INSERTED." + GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (ShouldSkipInsert(fieldDef) && !fieldDef.AutoId)
+                if ((ShouldSkipInsert(fieldDef) && !fieldDef.AutoId)
+                    && shouldInclude?.Invoke(fieldDef) != true)
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -419,7 +479,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     }
                     else
                     {
-                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName),fieldDef.CustomInsert));
                         AddParameter(cmd, fieldDef);
                     }
                 }
@@ -459,7 +519,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
             foreach (var entry in args)
             {
-                var fieldDef = modelDef.GetFieldDefinition(entry.Key);
+                var fieldDef = modelDef.AssertFieldDefinition(entry.Key);
 
                 if (ShouldReturnOnInsert(modelDef, fieldDef))
                 {
@@ -481,7 +541,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(this.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
+                    sbColumnValues.Append(this.GetInsertParam(dbCmd, value, fieldDef));
                 }
                 catch (Exception ex)
                 {
@@ -624,6 +684,8 @@ namespace ServiceStack.OrmLite.SqlServer
                 ? $"CAST({fieldOrValue} AS VARCHAR(MAX))"
                 : $"CAST({fieldOrValue} AS {castAs})";
 
+        public override string SqlRandom => "NEWID()";
+        
         protected SqlConnection Unwrap(IDbConnection db) => (SqlConnection)db.ToDbConnection();
 
         protected SqlCommand Unwrap(IDbCommand cmd) => (SqlCommand)cmd.ToDbCommand();
@@ -631,22 +693,22 @@ namespace ServiceStack.OrmLite.SqlServer
         protected SqlDataReader Unwrap(IDataReader reader) => (SqlDataReader)reader;
 
 #if ASYNC
-        public override Task OpenAsync(IDbConnection db, CancellationToken token = default(CancellationToken))
+        public override Task OpenAsync(IDbConnection db, CancellationToken token = default)
             => Unwrap(db).OpenAsync(token);
 
-        public override Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        public override Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default)
             => Unwrap(cmd).ExecuteReaderAsync(token).Then(x => (IDataReader)x);
 
-        public override Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        public override Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default)
             => Unwrap(cmd).ExecuteNonQueryAsync(token);
 
-        public override Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        public override Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default)
             => Unwrap(cmd).ExecuteScalarAsync(token);
 
-        public override Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default(CancellationToken))
+        public override Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default)
             => Unwrap(reader).ReadAsync(token);
 
-        public override async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
+        public override async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default)
         {
             try
             {
@@ -664,7 +726,7 @@ namespace ServiceStack.OrmLite.SqlServer
             }
         }
 
-        public override async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default(CancellationToken))
+        public override async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default)
         {
             try
             {
@@ -680,7 +742,7 @@ namespace ServiceStack.OrmLite.SqlServer
             }
         }
 
-        public override async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
+        public override async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default)
         {
             try
             {

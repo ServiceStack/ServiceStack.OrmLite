@@ -190,7 +190,7 @@ namespace ServiceStack.OrmLite.Firebird
         }
 		
         protected override bool ShouldSkipInsert(FieldDefinition fieldDef) => 
-            fieldDef.ShouldSkipInsert() || fieldDef.IsComputed;
+            fieldDef.ShouldSkipInsert() || (fieldDef.IsComputed && !fieldDef.IsPersisted);
 
         protected virtual bool ShouldReturnOnInsert(ModelDefinition modelDef, FieldDefinition fieldDef) =>
             fieldDef.ReturnOnInsert || (fieldDef.IsPrimaryKey && fieldDef.AutoIncrement && HasInsertReturnValues(modelDef)) || fieldDef.AutoId;
@@ -198,7 +198,8 @@ namespace ServiceStack.OrmLite.Firebird
         public override bool HasInsertReturnValues(ModelDefinition modelDef) =>
             modelDef.FieldDefinitions.Any(x => x.ReturnOnInsert || (x.AutoId && x.FieldType == typeof(Guid)));
 
-        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
+        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null, 
+            Func<FieldDefinition,bool> shouldInclude=null)
         {
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
@@ -218,7 +219,9 @@ namespace ServiceStack.OrmLite.Firebird
                     sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (ShouldSkipInsert(fieldDef) && !fieldDef.AutoIncrement && !fieldDef.AutoId && string.IsNullOrEmpty(fieldDef.Sequence))
+                
+                if ((ShouldSkipInsert(fieldDef) && !fieldDef.AutoIncrement && !fieldDef.AutoId && string.IsNullOrEmpty(fieldDef.Sequence))
+                    && shouldInclude?.Invoke(fieldDef) != true)
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -237,7 +240,7 @@ namespace ServiceStack.OrmLite.Firebird
                     }
                     else
                     {
-                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName),fieldDef.CustomInsert));
                         AddParameter(cmd, fieldDef);
                     }
                 }
@@ -268,7 +271,7 @@ namespace ServiceStack.OrmLite.Firebird
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed || fieldDef.IgnoreOnUpdate)
+                if ((fieldDef.IsComputed && !fieldDef.IsPersisted) || fieldDef.IgnoreOnUpdate)
                     continue;
 
                 if ((fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField)
@@ -294,7 +297,7 @@ namespace ServiceStack.OrmLite.Firebird
                 sql
                     .Append(GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(this.AddUpdateParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
+                    .Append(this.GetUpdateParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef));
             }
 
             var strFilter = StringBuilderCacheAlt.ReturnAndFree(sqlFilter);

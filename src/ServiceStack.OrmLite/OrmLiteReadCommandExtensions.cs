@@ -42,6 +42,18 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteReader();
         }
 
+        internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql, CommandBehavior commandBehavior)
+        {
+            dbCmd.CommandText = sql;
+
+            if (Log.IsDebugEnabled)
+                Log.DebugCommand(dbCmd);
+
+            OrmLiteConfig.BeforeExecFilter?.Invoke(dbCmd);
+
+            return dbCmd.ExecuteReader(commandBehavior);
+        }
+
         internal static IDataReader ExecReader(this IDbCommand dbCmd, string sql, IEnumerable<IDataParameter> parameters)
         {
             dbCmd.CommandText = sql;
@@ -218,11 +230,15 @@ namespace ServiceStack.OrmLite
                 : null;
 
             var sqlCopy = sql; //C# doesn't allow changing ref params in lambda's
+            Dictionary<string, PropertyAccessor> anonTypeProps = null;
 
             var paramIndex = 0;
             anonType.ToObjectDictionary().ForEachParam(modelDef, excludeDefaults, (propName, columnName, value) =>
             {
-                var propType = value?.GetType() ?? typeof(object);
+                var propType = value?.GetType() ?? ((anonTypeProps ??= TypeProperties.Get(anonType.GetType()).PropertyMap)
+                   .TryGetValue(propName, out var pType)
+                        ? pType.PropertyInfo.PropertyType
+                        : typeof(object));
                 var inValues = GetMultiValues(value);
                 if (inValues != null)
                 {
@@ -328,7 +344,9 @@ namespace ServiceStack.OrmLite
         internal static Dictionary<string, object> AllFieldsMap<T>(this object anonType)
         {
             var ret = new Dictionary<string, object>();
-            anonType.ToObjectDictionary().ForEachParam(typeof(T).GetModelDefinition(), excludeDefaults: false, fn: (propName, columnName, value) => ret[propName] = value);
+            anonType.ToObjectDictionary()
+                .ForEachParam(typeof(T).GetModelDefinition(), excludeDefaults: false, fn: 
+                    (propName, columnName, value) => ret[propName] = value);
             return ret;
         }
 

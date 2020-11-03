@@ -64,37 +64,30 @@ namespace ServiceStack.OrmLite.Tests
 
             OrmLiteConfig.CommandTimeout = 100;
 
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<Poco>();
-                db.Exec(cmd => Assert.That(cmd.CommandTimeout, Is.EqualTo(100)));
+            using var db = await OpenDbConnectionAsync();
+            db.DropAndCreateTable<Poco>();
+            db.Exec(cmd => Assert.That(cmd.CommandTimeout, Is.EqualTo(100)));
 
-                db.SetCommandTimeout(666);
+            db.SetCommandTimeout(666);
 
-                "{0}:{1}".Print(OrmLiteContext.OrmLiteState, Thread.CurrentThread.ManagedThreadId);
+            "{0}:{1}".Print(OrmLiteContext.OrmLiteState, Thread.CurrentThread.ManagedThreadId);
 
-                ThreadPool.QueueUserWorkItem(_ =>
-                {
-                    using (var dbInner = OpenDbConnection())
-                    {
-                        "inner {0}:{1}".Print(OrmLiteContext.OrmLiteState, Thread.CurrentThread.ManagedThreadId);
-                        dbInner.SetCommandTimeout(1);
-                    }
-                });
-                Thread.Sleep(10);
+            ThreadPool.QueueUserWorkItem(_ => {
+                using var dbInner = OpenDbConnection();
+                "inner {0}:{1}".Print(OrmLiteContext.OrmLiteState, Thread.CurrentThread.ManagedThreadId);
+                dbInner.SetCommandTimeout(1);
+            });
+            Thread.Sleep(10);
 
-                "{0}:{1}".Print(OrmLiteContext.OrmLiteState, Thread.CurrentThread.ManagedThreadId);
+            "{0}:{1}".Print(OrmLiteContext.OrmLiteState, Thread.CurrentThread.ManagedThreadId);
 
-                await db.InsertAsync(new Poco { Name = "Foo" });
-                db.Exec(cmd => Assert.That(cmd.CommandTimeout, Is.EqualTo(666)));
-            }
+            await db.InsertAsync(new Poco { Name = "Foo" });
+            db.Exec(cmd => Assert.That(cmd.CommandTimeout, Is.EqualTo(666)));
 
-            using (var db = OpenDbConnection())
-            {
-                db.CreateTableIfNotExists<Poco>(); //Sqlite :memory: AutoDisposeConnection = true
-                (await db.SelectAsync<Poco>()).PrintDump();
-                db.Exec(cmd => Assert.That(cmd.CommandTimeout, Is.EqualTo(100)));
-            }
+            using var db2 = await OpenDbConnectionAsync();
+            db2.CreateTableIfNotExists<Poco>(); //Sqlite :memory: AutoDisposeConnection = true
+            (await db2.SelectAsync<Poco>()).PrintDump();
+            db2.Exec(cmd => Assert.That(cmd.CommandTimeout, Is.EqualTo(100)));
         }
 
     }

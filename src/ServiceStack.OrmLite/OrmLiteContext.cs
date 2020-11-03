@@ -32,14 +32,8 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public virtual IDictionary Items
         {
-            get
-            {
-                return GetItems() ?? (CreateItems());
-            }
-            set
-            {
-                CreateItems(value);
-            }
+            get => GetItems() ?? (CreateItems());
+            set => CreateItems(value);
         }
 
         private const string _key = "__OrmLite.Items";
@@ -83,17 +77,17 @@ namespace ServiceStack.OrmLite
             {
                 if (UseThreadStatic)
                 {
-                    ContextItems = items ?? (items = new Dictionary<object, object>());
+                    ContextItems = items ??= new Dictionary<object, object>();
                 }
                 else
                 {
-                    CallContext.LogicalSetData(_key, items ?? (items = new ConcurrentDictionary<object, object>()));
+                    CallContext.LogicalSetData(_key, items ??= new ConcurrentDictionary<object, object>());
                 }
             }
             catch (NotImplementedException)
             {
                 //Fixed in Mono master: https://github.com/mono/mono/pull/817
-                CallContext.SetData(_key, items ?? (items = new ConcurrentDictionary<object, object>()));
+                CallContext.SetData(_key, items ??= new ConcurrentDictionary<object, object>());
             }
 #endif
             return items;
@@ -157,10 +151,7 @@ namespace ServiceStack.OrmLite
 
                 return null;
             }
-            set
-            {
-                SetItem("OrmLiteState", value);
-            }
+            set => SetItem("OrmLiteState", value);
         }
 
         //Only used when using OrmLite API's against a native IDbConnection (i.e. not from DbFactory) 
@@ -171,7 +162,7 @@ namespace ServiceStack.OrmLite
                 var state = OrmLiteState;
                 return state?.TSTransaction;
             }
-            set { GetOrCreateState().TSTransaction = value; }
+            set => GetOrCreateState().TSTransaction = value;
         }
     }
 

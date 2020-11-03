@@ -82,6 +82,24 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Insert 1 POCO, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
+        /// <para>var id = db.Insert(new Dictionary&lt;string,object&gt; { ["Id"] = 1, ["FirstName"] = "Jimi }, selectIdentity:true)</para>
+        /// </summary>
+        public static long Insert<T>(this IDbConnection dbConn, Dictionary<string,object> obj, bool selectIdentity = false)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Insert<T>(obj, commandFilter: null, selectIdentity: selectIdentity));
+        }
+
+        /// <summary>
+        /// Insert 1 POCO, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
+        /// <para>var id = db.Insert(new Dictionary&lt;string,object&gt; { ["Id"] = 1, ["FirstName"] = "Jimi }, dbCmd => applyFilter(dbCmd))</para>
+        /// </summary>
+        public static long Insert<T>(this IDbConnection dbConn, Action<IDbCommand> commandFilter, Dictionary<string,object> obj, bool selectIdentity = false)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Insert<T>(obj, commandFilter: commandFilter, selectIdentity: selectIdentity));
+        }
+
+        /// <summary>
         /// Insert 1 or more POCOs in a transaction using Table default values when defined. E.g:
         /// <para>db.InsertUsingDefaults(new Person { FirstName = "Tupac", LastName = "Shakur" },</para>
         /// <para>                       new Person { FirstName = "Biggie", LastName = "Smalls" })</para>
@@ -159,6 +177,15 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Updates 1 POCO. All fields are updated except for the PrimaryKey which is used as the identity selector. E.g:
+        /// <para>db.Update(new Dictionary&lt;string,object&gt; { ["Id"] = 1, ["FirstName"] = "Jimi" })</para>
+        /// </summary>
+        public static int Update<T>(this IDbConnection dbConn, Dictionary<string,object> obj, Action<IDbCommand> commandFilter = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Update<T>(obj, commandFilter));
+        }
+
+        /// <summary>
         /// Updates 1 or more POCOs in a transaction. E.g:
         /// <para>db.Update(new Person { Id = 1, FirstName = "Tupac", LastName = "Shakur", Age = 25 },</para>
         /// <para>new Person { Id = 2, FirstName = "Biggie", LastName = "Smalls", Age = 24 })</para>
@@ -186,9 +213,19 @@ namespace ServiceStack.OrmLite
         /// <para>db.Delete&lt;Person&gt;(new { FirstName = "Jimi", Age = 27 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
-        public static int Delete<T>(this IDbConnection dbConn, object anonFilter)
+        public static int Delete<T>(this IDbConnection dbConn, object anonFilter, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Delete<T>(anonFilter));
+            return dbConn.Exec(dbCmd => dbCmd.Delete<T>(anonFilter, commandFilter));
+        }
+
+        /// <summary>
+        /// Delete rows using an Object Dictionary filters. E.g:
+        /// <para>db.Delete&lt;Person&gt;(new Dictionary&lt;string,object&gt; { ["FirstName"] = "Jimi", ["Age"] = 27 })</para>
+        /// </summary>
+        /// <returns>number of rows deleted</returns>
+        public static int Delete<T>(this IDbConnection dbConn, Dictionary<string, object> filters)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.Delete<T>(filters));
         }
 
         /// <summary>
@@ -196,9 +233,9 @@ namespace ServiceStack.OrmLite
         /// <para>db.Delete(new Person { Id = 1, FirstName = "Jimi", LastName = "Hendrix", Age = 27 })</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
-        public static int Delete<T>(this IDbConnection dbConn, T allFieldsFilter)
+        public static int Delete<T>(this IDbConnection dbConn, T allFieldsFilter, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Delete(allFieldsFilter));
+            return dbConn.Exec(dbCmd => dbCmd.Delete(allFieldsFilter, commandFilter));
         }
 
         /// <summary>
@@ -236,20 +273,20 @@ namespace ServiceStack.OrmLite
         /// <para>db.DeleteById&lt;Person&gt;(1)</para>
         /// </summary>
         /// <returns>number of rows deleted</returns>
-        public static int DeleteById<T>(this IDbConnection dbConn, object id)
+        public static int DeleteById<T>(this IDbConnection dbConn, object id, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.DeleteById<T>(id));
+            return dbConn.Exec(dbCmd => dbCmd.DeleteById<T>(id, commandFilter));
         }
 
         /// <summary>
         /// Delete 1 row by the PrimaryKey where the rowVersion matches the optimistic concurrency field. 
-        /// Will throw <exception cref="OptimisticConcurrencyException">RowModefiedExeption</exception> if the 
+        /// Will throw <exception cref="OptimisticConcurrencyException">RowModifiedException</exception> if the 
         /// row does not exist or has a different row version.
         /// E.g: <para>db.DeleteById&lt;Person&gt;(1)</para>
         /// </summary>
-        public static void DeleteById<T>(this IDbConnection dbConn, object id, ulong rowVersion)
+        public static void DeleteById<T>(this IDbConnection dbConn, object id, ulong rowVersion, Action<IDbCommand> commandFilter = null)
         {
-            dbConn.Exec(dbCmd => dbCmd.DeleteById<T>(id, rowVersion));
+            dbConn.Exec(dbCmd => dbCmd.DeleteById<T>(id, rowVersion, commandFilter));
         }
 
         /// <summary>
@@ -385,6 +422,16 @@ namespace ServiceStack.OrmLite
         public static void SaveReferences<T, TRef>(this IDbConnection dbConn, T instance, IEnumerable<TRef> refs)
         {
             dbConn.Exec(dbCmd => dbCmd.SaveReferences(instance, refs.ToArray()));
+        }
+
+        public static object GetRowVersion<T>(this IDbConnection dbConn, object id)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetRowVersion(typeof(T).GetModelDefinition(), id));
+        }
+
+        public static object GetRowVersion(this IDbConnection dbConn, Type modelType, object id)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.GetRowVersion(modelType.GetModelDefinition(), id));
         }
 
         // Procedures

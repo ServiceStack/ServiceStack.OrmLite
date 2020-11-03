@@ -27,39 +27,37 @@ namespace ServiceStack.OrmLite.Tests
         {
             var sbLogFactory = new StringBuilderLogFactory();
             var testLogger = TestLogger.GetLogs().Count;
-           
-            using (var db = OpenDbConnection())
+
+            using var db = OpenDbConnection();
+            db.DropTable<LogTest>();
+            db.CreateTable<LogTest>();
+
+            db.Insert(new LogTest
             {
-                db.DropTable<LogTest>();
-                db.CreateTable<LogTest>();
+                CustomerId = 2,
+                Name = "Foo"
+            });
 
-                db.Insert(new LogTest
-                {
-                    CustomerId = 2,
-                    Name = "Foo"
-                });
+            var test = db.Single<LogTest>(x => x.CustomerId == 2);
 
-                var test = db.Single<LogTest>(x => x.CustomerId == 2);
+            test.Name = "Bar";
 
-                test.Name = "Bar";
+            db.Update(test);
 
-                db.Update(test);
+            test = db.Single<LogTest>(x => x.CustomerId == 2);
 
-                test = db.Single<LogTest>(x => x.CustomerId == 2);
+            db.DeleteById<LogTest>(test.Id);
 
-                db.DeleteById<LogTest>(test.Id);
+            var logs = sbLogFactory.GetLogs();
+            logs.Print();
 
-                var logs = sbLogFactory.GetLogs();
-                logs.Print();
+            //var logs = TestLogger.GetLogs();
 
-                //var logs = TestLogger.GetLogs();
-
-                Assert.That(logs, Does.Contain("CREATE TABLE"));
-                Assert.That(logs, Does.Contain("INSERT INTO"));
-                Assert.That(logs, Does.Contain("SELECT"));
-                Assert.That(logs, Does.Contain("UPDATE"));
-                Assert.That(logs, Does.Contain("DELETE FROM"));
-            }
+            Assert.That(logs, Does.Contain("CREATE TABLE"));
+            Assert.That(logs, Does.Contain("INSERT INTO"));
+            Assert.That(logs, Does.Contain("SELECT"));
+            Assert.That(logs, Does.Contain("UPDATE"));
+            Assert.That(logs, Does.Contain("DELETE FROM"));
         }
 
         [Test]
@@ -73,20 +71,18 @@ namespace ServiceStack.OrmLite.Tests
                 lastParam = (IDbDataParameter)dbCmd.Parameters[0];
             };
 
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<LogTest>();
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<LogTest>();
 
-                try
-                {
-                    var results = db.Select<LogTest>("Unknown = @arg", new { arg = "foo" });
-                    Assert.Fail("Should throw");
-                }
-                catch (Exception)
-                {
-                    Assert.That(lastSql, Does.Contain("Unknown"));
-                    Assert.That(lastParam.Value, Is.EqualTo("foo"));
-                }
+            try
+            {
+                var results = db.Select<LogTest>("Unknown = @arg", new { arg = "foo" });
+                Assert.Fail("Should throw");
+            }
+            catch (Exception)
+            {
+                Assert.That(lastSql, Does.Contain("Unknown"));
+                Assert.That(lastParam.Value, Is.EqualTo("foo"));
             }
         }
     }

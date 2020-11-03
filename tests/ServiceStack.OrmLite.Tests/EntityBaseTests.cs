@@ -96,26 +96,24 @@ namespace ServiceStack.OrmLite.Tests
         {
             var repo = new TenantRepo(2);
 
-            using (var db = OpenDbConnection())
-            {
-                SeedData(db);
+            using var db = OpenDbConnection();
+            SeedData(db);
 
-                var rows = repo.All<CustomerEntity>(db);
-                Assert.That(rows.Count, Is.EqualTo(2));
-                Assert.That(rows.All(x => x.TenantId == 2));
+            var rows = repo.All<CustomerEntity>(db);
+            Assert.That(rows.Count, Is.EqualTo(2));
+            Assert.That(rows.All(x => x.TenantId == 2));
                 
-                rows = repo.AllTyped<CustomerEntity>(db);
-                Assert.That(rows.Count, Is.EqualTo(2));
-                Assert.That(rows.All(x => x.TenantId == 2));
+            rows = repo.AllTyped<CustomerEntity>(db);
+            Assert.That(rows.Count, Is.EqualTo(2));
+            Assert.That(rows.All(x => x.TenantId == 2));
                 
-                rows = repo.AllUntyped<CustomerEntity>(db);
-                Assert.That(rows.Count, Is.EqualTo(2));
-                Assert.That(rows.All(x => x.TenantId == 2));
+            rows = repo.AllUntyped<CustomerEntity>(db);
+            Assert.That(rows.Count, Is.EqualTo(2));
+            Assert.That(rows.All(x => x.TenantId == 2));
 
-                rows = repo.Where<CustomerEntity>(db, x => x.CustomerName == "Kurt");
-                Assert.That(rows.Count, Is.EqualTo(1));
-                Assert.That(rows[0].TenantId, Is.EqualTo(2));
-            }
+            rows = repo.Where<CustomerEntity>(db, x => x.CustomerName == "Kurt");
+            Assert.That(rows.Count, Is.EqualTo(1));
+            Assert.That(rows[0].TenantId, Is.EqualTo(2));
         }
 
         [Test]
@@ -123,18 +121,16 @@ namespace ServiceStack.OrmLite.Tests
         {
             var repo = new CustomerTenantRepo(2);
 
-            using (var db = OpenDbConnection())
-            {
-                SeedData(db);
+            using var db = OpenDbConnection();
+            SeedData(db);
 
-                var rows = repo.All(db);
-                Assert.That(rows.Count, Is.EqualTo(2));
-                Assert.That(rows.All(x => x.TenantId == 2));
+            var rows = repo.All(db);
+            Assert.That(rows.Count, Is.EqualTo(2));
+            Assert.That(rows.All(x => x.TenantId == 2));
 
-                rows = repo.Where(db, x => x.CustomerName == "Kurt");
-                Assert.That(rows.Count, Is.EqualTo(1));
-                Assert.That(rows[0].TenantId, Is.EqualTo(2));
-            }
+            rows = repo.Where(db, x => x.CustomerName == "Kurt");
+            Assert.That(rows.Count, Is.EqualTo(1));
+            Assert.That(rows[0].TenantId, Is.EqualTo(2));
         }
     }
 }

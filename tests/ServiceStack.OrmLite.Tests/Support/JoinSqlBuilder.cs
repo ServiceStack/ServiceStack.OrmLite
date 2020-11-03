@@ -44,8 +44,8 @@ namespace ServiceStack.OrmLite
 
         private List<string> ColumnList<T>(string tableName, Expression<Func<T, object>> func, bool withTablePrefix = true)
         {
-            List<string> result = new List<string>();
-            if (func == null || func.Body == null)
+            var result = new List<string>();
+            if (func == null)
                 return result;
             PropertyList<T>(tableName, func.Body, result, withTablePrefix);
             return result;
@@ -275,15 +275,14 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-
         public JoinSqlBuilder<TNewPoco, TBasePoco> OrderBy<T>(Expression<Func<T, object>> sourceColumn)
         {
-            return OrderByInternal<T>(false, sourceColumn);
+            return OrderByInternal(false, sourceColumn);
         }
 
         public JoinSqlBuilder<TNewPoco, TBasePoco> OrderByDescending<T>(Expression<Func<T, object>> sourceColumn)
         {
-            return OrderByInternal<T>(true, sourceColumn);
+            return OrderByInternal(true, sourceColumn);
         }
 
         public JoinSqlBuilder<TNewPoco, TBasePoco> Join<TSourceTable, TDestinationTable>(Expression<Func<TSourceTable, object>> sourceColumn, Expression<Func<TDestinationTable, object>> destinationColumn, Expression<Func<TSourceTable, object>> sourceTableColumnSelection = null, Expression<Func<TDestinationTable, object>> destinationTableColumnSelection = null, Expression<Func<TSourceTable, bool>> sourceWhere = null, Expression<Func<TDestinationTable, bool>> destinationWhere = null)

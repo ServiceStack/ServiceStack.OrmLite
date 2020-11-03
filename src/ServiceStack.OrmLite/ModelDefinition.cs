@@ -14,6 +14,7 @@ using System.Collections.Generic;
 using System.Linq;
 using ServiceStack.DataAnnotations;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 
 namespace ServiceStack.OrmLite
 {
@@ -110,9 +111,9 @@ namespace ServiceStack.OrmLite
             foreach (var fieldName in fieldNames)
             {                 
                 var fieldDef = sanitizeFieldName != null 
-                    ? GetFieldDefinition(fieldName, sanitizeFieldName)
-                    : GetFieldDefinition(fieldName);
-                fieldDefs[i++] = fieldDef ?? throw new ArgumentException($"Field '{fieldName}' not found in '{ModelName}'");
+                    ? AssertFieldDefinition(fieldName, sanitizeFieldName)
+                    : AssertFieldDefinition(fieldName);
+                fieldDefs[i++] = fieldDef;
             }
 
             return fieldDefs;
@@ -143,6 +144,19 @@ namespace ServiceStack.OrmLite
         {
             return GetFieldDefinition(ExpressionUtils.GetMemberName(field));
         }
+        
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private void ThrowNoFieldException(string fieldName) =>
+            throw new NotSupportedException($"'{fieldName}' is not a property of '{Name}'");
+
+        public FieldDefinition AssertFieldDefinition(string fieldName)
+        {
+            var fieldDef = GetFieldDefinition(fieldName);
+            if (fieldDef == null)
+                ThrowNoFieldException(fieldName);
+            
+            return fieldDef;
+        }
 
         public FieldDefinition GetFieldDefinition(string fieldName)
         {
@@ -172,6 +186,15 @@ namespace ServiceStack.OrmLite
             return null;
         }
 
+        public FieldDefinition AssertFieldDefinition(string fieldName, Func<string, string> sanitizeFieldName)
+        {
+            var fieldDef = GetFieldDefinition(fieldName, sanitizeFieldName);
+            if (fieldDef == null)
+                ThrowNoFieldException(fieldName);
+
+            return fieldDef;
+        }
+        
         public FieldDefinition GetFieldDefinition(string fieldName, Func<string, string> sanitizeFieldName)
         {
             if (fieldName != null)
@@ -259,9 +282,9 @@ namespace ServiceStack.OrmLite
     public static class ModelDefinition<T>
     {
         private static ModelDefinition definition;
-        public static ModelDefinition Definition => definition ?? (definition = typeof(T).GetModelDefinition());
+        public static ModelDefinition Definition => definition ??= typeof(T).GetModelDefinition();
 
         private static string primaryKeyName;
-        public static string PrimaryKeyName => primaryKeyName ?? (primaryKeyName = Definition.PrimaryKey.FieldName);
+        public static string PrimaryKeyName => primaryKeyName ??= Definition.PrimaryKey.FieldName;
     }
 }

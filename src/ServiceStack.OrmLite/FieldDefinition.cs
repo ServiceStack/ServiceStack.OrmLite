@@ -10,6 +10,7 @@
 //
 
 using System;
+using System.Collections;
 using System.Reflection;
 
 namespace ServiceStack.OrmLite
@@ -68,9 +69,30 @@ namespace ServiceStack.OrmLite
 
         public SetMemberDelegate SetValueFn { get; set; }
 
-        public object GetValue(object onInstance)
+        public object GetValue(object instance)
         {
-            return this.GetValueFn?.Invoke(onInstance);
+            var type = instance.GetType(); 
+            if (PropertyInfo.DeclaringType?.IsAssignableFrom(type) != true)
+            {
+                if (instance is IDictionary d)
+                    return d[Name];
+
+                var accessor = TypeProperties.Get(type).GetAccessor(Name);
+                return accessor?.PublicGetter(instance);
+            }
+            
+            return this.GetValueFn?.Invoke(instance);
+        }
+
+        public void SetValue(object instance, object value)
+        {
+            if (instance is IDictionary d)
+            {
+                d[Name] = value;
+                return;
+            }
+            
+            this.SetValueFn?.Invoke(instance, value);
         }
 
         public string GetQuotedName(IOrmLiteDialectProvider dialectProvider)
@@ -89,10 +111,13 @@ namespace ServiceStack.OrmLite
         public string Sequence { get; set; }
 
         public bool IsComputed { get; set; }
+        public bool IsPersisted { get; set; }
 
         public string ComputeExpression { get; set; }
 
         public string CustomSelect { get; set; }
+        public string CustomInsert { get; set; }
+        public string CustomUpdate { get; set; }
 
         public bool RequiresAlias => Alias != null || CustomSelect != null;
 
@@ -112,11 +137,11 @@ namespace ServiceStack.OrmLite
 
         public override string ToString() => Name;
 
-        public bool ShouldSkipInsert() => IgnoreOnInsert || AutoIncrement || IsComputed || IsRowVersion;
+        public bool ShouldSkipInsert() => IgnoreOnInsert || AutoIncrement || (IsComputed && !IsPersisted) || IsRowVersion;
 
-        public bool ShouldSkipUpdate() => IgnoreOnUpdate || IsComputed;
+        public bool ShouldSkipUpdate() => IgnoreOnUpdate || (IsComputed && !IsPersisted);
 
-        public bool ShouldSkipDelete() => IsComputed;
+        public bool ShouldSkipDelete() => (IsComputed && !IsPersisted);
 
         public bool IsSelfRefField(FieldDefinition fieldDef)
         {
@@ -159,6 +184,7 @@ namespace ServiceStack.OrmLite
                 SetValueFn = SetValueFn,
                 Sequence = Sequence,
                 IsComputed = IsComputed,
+                IsPersisted = IsPersisted, 
                 ComputeExpression = ComputeExpression,
                 CustomSelect = CustomSelect,
                 BelongToModelName = BelongToModelName,

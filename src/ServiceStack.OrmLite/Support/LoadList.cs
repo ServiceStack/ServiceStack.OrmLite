@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Support
 {
@@ -82,7 +83,7 @@ namespace ServiceStack.OrmLite.Support
                 if (map.TryGetValue(pkValue, out refValues))
                 {
                     var castResults = untypedApi.Cast(refValues);
-                    fieldDef.SetValueFn(result, castResults);
+                    fieldDef.SetValue(result, castResults);
                 }
             }
         }
@@ -166,7 +167,7 @@ namespace ServiceStack.OrmLite.Support
                 var fkValue = refSelf.GetValue(result);
                 if (fkValue != null && map.TryGetValue(fkValue, out var childResult))
                 {
-                    fieldDef.SetValueFn(result, childResult);
+                    fieldDef.SetValue(result, childResult);
                 }
             }
         }
@@ -186,7 +187,7 @@ namespace ServiceStack.OrmLite.Support
                 var pkValue = modelDef.PrimaryKey.GetValue(result);
                 if (map.TryGetValue(pkValue, out var childResult))
                 {
-                    fieldDef.SetValueFn(result, childResult);
+                    fieldDef.SetValue(result, childResult);
                 }
             }
         }
@@ -244,7 +245,7 @@ namespace ServiceStack.OrmLite.Support
 
             var sqlRef = GetRefListSql(refModelDef, refField);
 
-            var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token);
+            var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token).ConfigAwait();
 
             SetListChildResults(fieldDef, refType, childResults, refField);
         }
@@ -258,17 +259,17 @@ namespace ServiceStack.OrmLite.Support
                 ? modelDef.GetRefFieldDef(refModelDef, refType)
                 : modelDef.GetRefFieldDefIfExists(refModelDef);
 
-            if (refField != null)
-            {
-                var sqlRef = GetRefFieldSql(refModelDef, refField);
-                var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token);
-                SetRefFieldChildResults(fieldDef, refField, childResults);
-            }
-            else if (refSelf != null)
+            if (refSelf != null)
             {
                 var sqlRef = GetRefSelfSql(modelDef, refSelf, refModelDef);
-                var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token);
+                var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token).ConfigAwait();
                 SetRefSelfChildResults(fieldDef, refModelDef, refSelf, childResults);
+            }
+            else if (refField != null)
+            {
+                var sqlRef = GetRefFieldSql(refModelDef, refField);
+                var childResults = await dbCmd.ConvertToListAsync(refType, sqlRef, token).ConfigAwait();
+                SetRefFieldChildResults(fieldDef, refField, childResults);
             }
         }
     }

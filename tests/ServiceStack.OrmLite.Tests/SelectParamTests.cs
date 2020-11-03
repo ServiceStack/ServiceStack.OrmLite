@@ -46,8 +46,10 @@ namespace ServiceStack.OrmLite.Tests
 
                 var dbCmd = db.CreateCommand();//demo code, just for dbCmd.CreateParam
 
-                // for sqlite that works with paramter with DBNull.Value and usual null.
-                Assert.That(db.Select<Person>("FirstName = @firstname", new List<System.Data.IDbDataParameter> { dbCmd.CreateParam("firstname", null) }).Count, Is.EqualTo(0));
+                // for sqlite that works with parameter with DBNull.Value and usual null.
+                Assert.That(db.Select<Person>("age = @age", new List<System.Data.IDbDataParameter> {
+                    dbCmd.CreateParam("age", null)
+                }).Count, Is.EqualTo(0));
             }
         }
     }

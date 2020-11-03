@@ -15,7 +15,7 @@ namespace ServiceStack.OrmLite.Legacy
         /// <para>db.InsertOnly(new Person { FirstName = "Amy", Age = 27 }, q =&gt; q.Insert(p =&gt; new { p.FirstName, p.Age }))</para>
         /// </summary>
         [Obsolete("Use db.InsertOnlyAsync(obj, db.From<T>())")]
-        public static Task InsertOnlyAsync<T>(this IDbConnection dbConn, T obj, Func<SqlExpression<T>, SqlExpression<T>> onlyFields, CancellationToken token = default(CancellationToken))
+        public static Task InsertOnlyAsync<T>(this IDbConnection dbConn, T obj, Func<SqlExpression<T>, SqlExpression<T>> onlyFields, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.InsertOnlyAsync(obj, onlyFields, token));
         }
@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Legacy
         ///   db.InsertOnly(new Person { FirstName = "Amy" }, q => q.Insert(p => new { p.FirstName }));
         ///   INSERT INTO "Person" ("FirstName") VALUES ('Amy');
         /// </summary>
-        public static Task InsertOnlyAsync<T>(this IDbConnection dbConn, T obj, SqlExpression<T> onlyFields, CancellationToken token = default(CancellationToken))
+        public static Task InsertOnlyAsync<T>(this IDbConnection dbConn, T obj, SqlExpression<T> onlyFields, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.InsertOnlyAsync(obj, onlyFields, token));
         }
@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite.Legacy
         ///   UPDATE "Person" SET "FirstName" = 'JJ'
         /// </summary>
         [Obsolete("Use db.UpdateOnlyAsync(model, db.From<T>())")]
-        public static Task<int> UpdateOnlyAsync<T>(this IDbConnection dbConn, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields, CancellationToken token = default(CancellationToken))
+        public static Task<int> UpdateOnlyAsync<T>(this IDbConnection dbConn, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyAsync(model, onlyFields, token));
         }
@@ -55,7 +55,7 @@ namespace ServiceStack.OrmLite.Legacy
         ///   UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'
         /// </summary>
         [Obsolete(Messages.LegacyApi)]
-        public static Task<int> UpdateFmtAsync<T>(this IDbConnection dbConn, string set = null, string where = null, CancellationToken token = default(CancellationToken))
+        public static Task<int> UpdateFmtAsync<T>(this IDbConnection dbConn, string set = null, string where = null, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateFmtAsync<T>(set, where, token));
         }
@@ -67,7 +67,7 @@ namespace ServiceStack.OrmLite.Legacy
         ///   UPDATE "Person" SET FirstName = 'JJ' WHERE LastName = 'Hendrix'
         /// </summary>
         [Obsolete(Messages.LegacyApi)]
-        public static Task<int> UpdateFmtAsync(this IDbConnection dbConn, string table = null, string set = null, string where = null, CancellationToken token = default(CancellationToken))
+        public static Task<int> UpdateFmtAsync(this IDbConnection dbConn, string table = null, string set = null, string where = null, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateFmtAsync(table, set, where, token));
         }
@@ -79,7 +79,7 @@ namespace ServiceStack.OrmLite.Legacy
         ///   DELETE FROM "Person" WHERE Age = 27
         /// </summary>
         [Obsolete(Messages.LegacyApi)]
-        public static Task<int> DeleteFmtAsync<T>(this IDbConnection dbConn, string where, CancellationToken token = default(CancellationToken))
+        public static Task<int> DeleteFmtAsync<T>(this IDbConnection dbConn, string where, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteFmtAsync<T>(where, token));
         }
@@ -96,7 +96,7 @@ namespace ServiceStack.OrmLite.Legacy
         ///   DELETE FROM "Person" WHERE Age = 27
         /// </summary>
         [Obsolete(Messages.LegacyApi)]
-        public static Task<int> DeleteFmtAsync(this IDbConnection dbConn, string table = null, string where = null, CancellationToken token = default(CancellationToken))
+        public static Task<int> DeleteFmtAsync(this IDbConnection dbConn, string table = null, string where = null, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteFmtAsync(table, where, token));
         }
@@ -108,7 +108,7 @@ namespace ServiceStack.OrmLite.Legacy
         ///   DELETE FROM "Person" WHERE ("Age" = 27)
         /// </summary>
         [Obsolete("Use db.DeleteAsync(db.From<T>())")]
-        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> where, CancellationToken token = default(CancellationToken))
+        public static Task<int> DeleteAsync<T>(this IDbConnection dbConn, Func<SqlExpression<T>, SqlExpression<T>> where, CancellationToken token = default)
         {
             return dbConn.Exec(dbCmd => dbCmd.DeleteAsync(where, token));
         }

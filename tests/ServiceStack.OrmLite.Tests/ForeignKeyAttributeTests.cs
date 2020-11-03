@@ -11,37 +11,31 @@ namespace ServiceStack.OrmLite.Tests
         [OneTimeSetUp]
         public void Setup()
         {
-            using (var dbConn = OpenDbConnection())
-            {
-                dbConn.DropTable<TypeWithOnDeleteAndUpdateCascade>();
-                dbConn.DropTable<TypeWithOnDeleteSetNull>();
-                dbConn.DropTable<TypeWithOnDeleteSetDefault>();
-                dbConn.DropTable<TypeWithOnDeleteRestrict>();
-                dbConn.DropTable<TypeWithOnDeleteNoAction>();
-                dbConn.DropTable<TypeWithOnDeleteCascade>();
-                dbConn.DropTable<TypeWithSimpleForeignKey>();
-                dbConn.DropTable<ReferencedType>();
+            using var dbConn = OpenDbConnection();
+            dbConn.DropTable<TypeWithOnDeleteAndUpdateCascade>();
+            dbConn.DropTable<TypeWithOnDeleteSetNull>();
+            dbConn.DropTable<TypeWithOnDeleteSetDefault>();
+            dbConn.DropTable<TypeWithOnDeleteRestrict>();
+            dbConn.DropTable<TypeWithOnDeleteNoAction>();
+            dbConn.DropTable<TypeWithOnDeleteCascade>();
+            dbConn.DropTable<TypeWithSimpleForeignKey>();
+            dbConn.DropTable<ReferencedType>();
 
-                dbConn.CreateTable<ReferencedType>();
-            }
+            dbConn.CreateTable<ReferencedType>();
         }
 
         [Test]
         public void CanCreateSimpleForeignKey()
         {
-            using (var dbConn = OpenDbConnection())
-            {
-                dbConn.DropAndCreateTable<TypeWithSimpleForeignKey>();
-            }
+            using var dbConn = OpenDbConnection();
+            dbConn.DropAndCreateTable<TypeWithSimpleForeignKey>();
         }
 
         [Test]
         public void CanCreateForeignWithOnDeleteCascade()
         {
-            using (var dbConn = OpenDbConnection())
-            {
-                dbConn.DropAndCreateTable<TypeWithOnDeleteCascade>();
-            }
+            using var dbConn = OpenDbConnection();
+            dbConn.DropAndCreateTable<TypeWithOnDeleteCascade>();
         }
 
         [Test]
@@ -50,48 +44,40 @@ namespace ServiceStack.OrmLite.Tests
         {
             // TODO: group tests around db features
             Setup();
-            using (var db = OpenDbConnection())
-            {
-                db.CreateTableIfNotExists<TypeWithOnDeleteCascade>();
-                db.Save(new ReferencedType { Id = 1 });
-                db.Save(new TypeWithOnDeleteCascade { RefId = 1 });
+            using var db = OpenDbConnection();
+            db.CreateTableIfNotExists<TypeWithOnDeleteCascade>();
+            db.Save(new ReferencedType { Id = 1 });
+            db.Save(new TypeWithOnDeleteCascade { RefId = 1 });
 
-                Assert.AreEqual(1, db.Select<ReferencedType>().Count);
-                Assert.AreEqual(1, db.Select<TypeWithOnDeleteCascade>().Count);
+            Assert.AreEqual(1, db.Select<ReferencedType>().Count);
+            Assert.AreEqual(1, db.Select<TypeWithOnDeleteCascade>().Count);
 
-                db.Delete<ReferencedType>(r => r.Id == 1);
+            db.Delete<ReferencedType>(r => r.Id == 1);
 
-                Assert.AreEqual(0, db.Select<ReferencedType>().Count);
-                Assert.AreEqual(0, db.Select<TypeWithOnDeleteCascade>().Count);
-            }
+            Assert.AreEqual(0, db.Select<ReferencedType>().Count);
+            Assert.AreEqual(0, db.Select<TypeWithOnDeleteCascade>().Count);
         }
 
         [Test]
         public void CanCreateForeignWithOnDeleteCascadeAndOnUpdateCascade()
         {
-            using (var dbConn = OpenDbConnection())
-            {
-                dbConn.DropAndCreateTable<TypeWithOnDeleteAndUpdateCascade>();
-            }
+            using var dbConn = OpenDbConnection();
+            dbConn.DropAndCreateTable<TypeWithOnDeleteAndUpdateCascade>();
         }
 
         [Test]
         [IgnoreDialect(Tests.Dialect.Sqlite, "Not supported in sqlite?")]
         public void CanCreateForeignWithOnDeleteNoAction()
         {
-            using (var dbConn = OpenDbConnection())
-            {
-                dbConn.DropAndCreateTable<TypeWithOnDeleteNoAction>();
-            }
+            using var dbConn = OpenDbConnection();
+            dbConn.DropAndCreateTable<TypeWithOnDeleteNoAction>();
         }
 
         [Test]
         public void CanCreateForeignWithOnDeleteRestrict()
         {
-            using (var dbConn = OpenDbConnection())
-            {
-                dbConn.DropAndCreateTable<TypeWithOnDeleteRestrict>();
-            }
+            using var dbConn = OpenDbConnection();
+            dbConn.DropAndCreateTable<TypeWithOnDeleteRestrict>();
         }
 
         [Test]
@@ -104,19 +90,15 @@ namespace ServiceStack.OrmLite.Tests
                 return;
             }
 
-            using (var dbConn = OpenDbConnection())
-            {
-                dbConn.DropAndCreateTable<TypeWithOnDeleteSetDefault>();
-            }
+            using var dbConn = OpenDbConnection();
+            dbConn.DropAndCreateTable<TypeWithOnDeleteSetDefault>();
         }
 
         [Test]
         public void CanCreateForeignWithOnDeleteSetNull()
         {
-            using (var dbConn = OpenDbConnection())
-            {
-                dbConn.DropAndCreateTable<TypeWithOnDeleteSetNull>();
-            }
+            using var dbConn = OpenDbConnection();
+            dbConn.DropAndCreateTable<TypeWithOnDeleteSetNull>();
         }
 
         [Test]

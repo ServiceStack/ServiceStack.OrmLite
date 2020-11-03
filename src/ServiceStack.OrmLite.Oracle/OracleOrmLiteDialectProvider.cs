@@ -289,7 +289,8 @@ namespace ServiceStack.OrmLite.Oracle
             return StringBuilderCache.ReturnAndFree(sql);
         }
 
-        public override void PrepareParameterizedInsertStatement<T>(IDbCommand dbCommand, ICollection<string> insertFields = null)
+        public override void PrepareParameterizedInsertStatement<T>(IDbCommand dbCommand, ICollection<string> insertFields = null, 
+            Func<FieldDefinition,bool> shouldInclude=null)
         {
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
@@ -301,7 +302,9 @@ namespace ServiceStack.OrmLite.Oracle
             var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
             foreach (var fieldDef in fieldDefs)
             {
-                if (fieldDef.IsComputed || fieldDef.IsRowVersion) continue;
+                if (((fieldDef.IsComputed && !fieldDef.IsPersisted) || fieldDef.IsRowVersion)
+                    && shouldInclude?.Invoke(fieldDef) != true) 
+                    continue;
 
                 if (sbColumnNames.Length > 0) sbColumnNames.Append(",");
                 if (sbColumnValues.Length > 0) sbColumnValues.Append(",");
@@ -309,7 +312,7 @@ namespace ServiceStack.OrmLite.Oracle
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName),fieldDef.CustomInsert));
 
                     AddParameter(dbCommand, fieldDef);
                 }
@@ -384,7 +387,7 @@ namespace ServiceStack.OrmLite.Oracle
             var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
             foreach (var fieldDef in fieldDefs)
             {
-                if (fieldDef.IsComputed)
+                if ((fieldDef.IsComputed && !fieldDef.IsPersisted))
                     continue;
 
                 if ((fieldDef.AutoIncrement || !string.IsNullOrEmpty(fieldDef.Sequence))
@@ -416,9 +419,9 @@ namespace ServiceStack.OrmLite.Oracle
 
                 try
                 {
-                    sbColumnNames.Append(string.Format("{0}", GetQuotedColumnName(fieldDef.FieldName)));
+                    sbColumnNames.Append($"{GetQuotedColumnName(fieldDef.FieldName)}");
                     if (!string.IsNullOrEmpty(fieldDef.Sequence) && dbCommand == null)
-                        sbColumnValues.Append(string.Format(":{0}", fieldDef.Name));
+                        sbColumnValues.Append($":{fieldDef.Name}");
                     else
                         sbColumnValues.Append(fieldDef.GetQuotedValue(objWithProperties));
                 }
@@ -446,7 +449,8 @@ namespace ServiceStack.OrmLite.Oracle
 
             foreach (var fieldDef in modelDef.FieldDefinitions)
             {
-                if (fieldDef.IsComputed) continue;
+                if ((fieldDef.IsComputed && !fieldDef.IsPersisted)) 
+                    continue;
 
                 var updateFieldsEmptyOrNull = updateFields == null || updateFields.Count == 0;
                 if ((fieldDef.IsPrimaryKey || fieldDef.Name == OrmLiteConfig.IdField)
@@ -472,7 +476,7 @@ namespace ServiceStack.OrmLite.Oracle
                 sql
                     .Append(GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(this.AddUpdateParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
+                    .Append(this.GetUpdateParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef));
             }
 
             var strFilter = StringBuilderCacheAlt.ReturnAndFree(sqlFilter);
@@ -492,7 +496,7 @@ namespace ServiceStack.OrmLite.Oracle
             var modelDef = GetModel(tableType);
             foreach (var fieldDef in CreateTableFieldsStrategy(modelDef))
             {
-                if (fieldDef.CustomSelect != null)
+                if (fieldDef.CustomSelect != null || (fieldDef.IsComputed && !fieldDef.IsPersisted))
                     continue;
 
                 if (fieldDef.IsPrimaryKey)
@@ -706,7 +710,9 @@ namespace ServiceStack.OrmLite.Oracle
 
                     foreach (var fieldDef in fromModelDef.FieldDefinitions)
                     {
-                        if (fieldDef.IsComputed) continue;
+                        if (fieldDef.IsComputed) 
+                            continue;
+                        
                         if (fieldDef.ForeignKey != null
                             && GetModel(fieldDef.ForeignKey.ReferenceType).ModelName == modelDef.ModelName)
                         {
@@ -722,7 +728,9 @@ namespace ServiceStack.OrmLite.Oracle
                     var modelDef = GetModel(tableType);
                     foreach (var fieldDef in modelDef.FieldDefinitions)
                     {
-                        if (fieldDef.IsComputed) continue;
+                        if (fieldDef.IsComputed) 
+                            continue;
+                        
                         if (fieldDef.IsPrimaryKey)
                         {
                             if (filter.Length > 0) filter.Append(" AND ");
@@ -1121,6 +1129,8 @@ namespace ServiceStack.OrmLite.Oracle
         }
 
         public override string SqlConcat(IEnumerable<object> args) => string.Join(" || ", args);
+
+        public override string SqlRandom => "dbms_random.value";
         
         protected OracleConnection Unwrap(IDbConnection db)
         {

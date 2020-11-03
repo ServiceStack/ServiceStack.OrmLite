@@ -139,7 +139,7 @@ namespace ServiceStack.OrmLite
                 return db.KeyValuePairsAsync<string, long>(sql);
             }
 
-            var results = await GetResultsAsync();
+            var results = await GetResultsAsync().ConfigAwait();
             results.Sort((x,y) => y.Value.CompareTo(x.Value)); //sort desc
             return results;
         }

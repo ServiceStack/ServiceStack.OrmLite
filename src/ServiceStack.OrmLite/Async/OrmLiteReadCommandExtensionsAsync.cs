@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Logging;
 using ServiceStack.OrmLite.Support;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -215,7 +216,7 @@ namespace ServiceStack.OrmLite
 
         public static async Task<long> LongScalarAsync(this IDbCommand dbCmd, CancellationToken token)
         {
-            var ret = await dbCmd.GetDialectProvider().ExecuteScalarAsync(dbCmd, token);
+            var ret = await dbCmd.GetDialectProvider().ExecuteScalarAsync(dbCmd, token).ConfigAwait();
             return OrmLiteReadCommandExtensions.ToLong(ret);
         }
 
@@ -232,7 +233,7 @@ namespace ServiceStack.OrmLite
             {
                 var value = dialectProvider.FromDbValue(reader, 0, typeof(T));
                 return value == DBNull.Value ? default(T) : value;
-            }, token);
+            }, token).ConfigAwait();
                 
             var columnValues = new List<T>();
             ret.Each(o => columnValues.Add((T)o));
@@ -252,7 +253,7 @@ namespace ServiceStack.OrmLite
             {
                 var value = dialectProvider.FromDbValue(reader, 0, typeof(T));
                 return value == DBNull.Value ? default(T) : value;
-            }, token);
+            }, token).ConfigAwait();
                 
             var columnValues = new HashSet<T>();
             ret.Each(o => columnValues.Add((T)o));
@@ -332,7 +333,7 @@ namespace ServiceStack.OrmLite
 
             sql = dbCmd.GetFilterSql<T>();
 
-            var ret = await dbCmd.ScalarAsync(sql, token);
+            var ret = await dbCmd.ScalarAsync(sql, token).ConfigAwait();
             return ret != null;
         }
 
@@ -340,7 +341,7 @@ namespace ServiceStack.OrmLite
         {
             if (anonType != null) dbCmd.SetParameters(anonType.ToObjectDictionary(), (bool)false, sql:ref sql);
 
-            var ret = await dbCmd.ScalarAsync(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql), token);
+            var ret = await dbCmd.ScalarAsync(dbCmd.GetDialectProvider().ToSelectStatement(typeof(T), sql), token).ConfigAwait();
             return ret != null;
         }
 
@@ -363,74 +364,67 @@ namespace ServiceStack.OrmLite
             return dbCmd.ConvertToListAsync<TOutputModel>(sql, token);
         }
 
-        internal static async Task<T> LoadSingleByIdAsync<T>(this IDbCommand dbCmd, object value, string[] include = null, CancellationToken token = default(CancellationToken))
+        internal static async Task<T> LoadSingleByIdAsync<T>(this IDbCommand dbCmd, object value, string[] include = null, CancellationToken token = default)
         {
-            var row = await dbCmd.SingleByIdAsync<T>(value, token);
+            var row = await dbCmd.SingleByIdAsync<T>(value, token).ConfigAwait();
             if (row == null)
                 return default(T);
 
-            await dbCmd.LoadReferencesAsync(row, include, token);
+            await dbCmd.LoadReferencesAsync(row, include, token).ConfigAwait();
 
             return row;
         }
 
-        public static async Task LoadReferencesAsync<T>(this IDbCommand dbCmd, T instance, string[] include = null, CancellationToken token = default(CancellationToken))
+        public static async Task LoadReferencesAsync<T>(this IDbCommand dbCmd, T instance, string[] include = null, CancellationToken token = default)
         {
             var loadRef = new LoadReferencesAsync<T>(dbCmd, instance);
             var fieldDefs = loadRef.FieldDefs;
 
-            if (!include.IsEmpty())
-            {
-                // Check that any include values aren't reference fields of the specified type
-                var fields = fieldDefs.Select(q => q.FieldName);
-                var invalid = include.Except<string>(fields).ToList();
-                if (invalid.Count > 0)
-                    throw new ArgumentException($"Fields '{invalid.Join("', '")}' are not Reference Properties of Type '{typeof(T).Name}'");
-
-                fieldDefs = fieldDefs.Where(fd => include.Contains(fd.FieldName)).ToList();
-            }
+            var includeSet = include != null
+                ? new HashSet<string>(include, StringComparer.OrdinalIgnoreCase)
+                : null;
 
             foreach (var fieldDef in fieldDefs)
             {
+                if (includeSet != null && !includeSet.Contains(fieldDef.Name))
+                    continue;
+
                 dbCmd.Parameters.Clear();
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
-                    await loadRef.SetRefFieldList(fieldDef, listInterface.GetGenericArguments()[0], token);
+                    await loadRef.SetRefFieldList(fieldDef, listInterface.GetGenericArguments()[0], token).ConfigAwait();
                 }
                 else
                 {
-                    await loadRef.SetRefField(fieldDef, fieldDef.FieldType, token);
+                    await loadRef.SetRefField(fieldDef, fieldDef.FieldType, token).ConfigAwait();
                 }
             }
         }
 
-        internal static async Task<List<Into>> LoadListWithReferences<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expr = null, string[] include = null, CancellationToken token = default(CancellationToken))
+        internal static async Task<List<Into>> LoadListWithReferences<Into, From>(this IDbCommand dbCmd, SqlExpression<From> expr = null, IEnumerable<string> include = null, CancellationToken token = default)
         {
             var loadList = new LoadListAsync<Into, From>(dbCmd, expr);
 
             var fieldDefs = loadList.FieldDefs;
-            if (include?.Length > 0)
-            {
-                // Check that any include values aren't reference fields of the specified From type
-                var fields = fieldDefs.Select(q => q.FieldName);
-                var invalid = include.Except(fields).ToList();
-                if (invalid.Count > 0)
-                    throw new ArgumentException($"Fields '{invalid.Join("', '")}' are not Reference Properties of Type '{typeof(From).Name}'");
 
-                fieldDefs = loadList.FieldDefs.Where(fd => include.Contains(fd.FieldName)).ToList();
-            }
-
+            var includeSet = include != null 
+                ? new HashSet<string>(include, StringComparer.OrdinalIgnoreCase)
+                : null;
+            
             foreach (var fieldDef in fieldDefs)
             {
+                if (includeSet != null && !includeSet.Contains(fieldDef.Name))
+                    continue;
+
                 var listInterface = fieldDef.FieldType.GetTypeWithGenericInterfaceOf(typeof(IList<>));
                 if (listInterface != null)
                 {
-                    await loadList.SetRefFieldListAsync(fieldDef, listInterface.GetGenericArguments()[0], token);
+                    await loadList.SetRefFieldListAsync(fieldDef, listInterface.GetGenericArguments()[0], token).ConfigAwait();
                 }
                 else
                 {
-                    await loadList.SetRefFieldAsync(fieldDef, fieldDef.FieldType, token);
+                    await loadList.SetRefFieldAsync(fieldDef, fieldDef.FieldType, token).ConfigAwait();
                 }
             }
 

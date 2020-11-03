@@ -46,7 +46,6 @@
     <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.Sqlite/obj" />
     <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Data/obj" />
     <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.SqlServer/obj" />
-    <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Data/obj" />
   </Target>
 
   <Target Name="UpdateVersion">
@@ -102,12 +101,6 @@
     <!-- ServiceStack.OrmLite.SqlServer.Core -->
     <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer/ServiceStack.OrmLite.SqlServer.Core.csproj" Targets="Restore" />
     <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer/ServiceStack.OrmLite.SqlServer.Core.csproj"
-             Targets="Build;Pack"
-             Properties="Configuration=$(Configuration)" />
-
-    <!-- ServiceStack.OrmLite.SqlServer.Data.Core -->
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer.Data/ServiceStack.OrmLite.SqlServer.Data.Core.csproj" Targets="Restore" />
-    <MSBuild Projects="$(BuildSolutionDir)/src/ServiceStack.OrmLite.SqlServer.Data/ServiceStack.OrmLite.SqlServer.Data.Core.csproj"
              Targets="Build;Pack"
              Properties="Configuration=$(Configuration)" />
 

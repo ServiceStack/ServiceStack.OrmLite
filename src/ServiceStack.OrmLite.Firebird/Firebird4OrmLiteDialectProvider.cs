@@ -72,7 +72,7 @@ namespace ServiceStack.OrmLite.Firebird
             var modelDef = GetModel(tableType);
             foreach (var fieldDef in CreateTableFieldsStrategy(modelDef))
             {
-                if (fieldDef.CustomSelect != null)
+                if (fieldDef.CustomSelect != null || (fieldDef.IsComputed && !fieldDef.IsPersisted))
                     continue;
 
                 if (fieldDef.IsPrimaryKey)
@@ -168,7 +168,8 @@ namespace ServiceStack.OrmLite.Firebird
             return StringBuilderCacheAlt.ReturnAndFree(sql);
         }
 
-        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
+        public override void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null, 
+            Func<FieldDefinition,bool> shouldInclude=null)
         {
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
@@ -188,7 +189,8 @@ namespace ServiceStack.OrmLite.Firebird
                     sbReturningColumns.Append(GetQuotedColumnName(fieldDef.FieldName));
                 }
 
-                if (ShouldSkipInsert(fieldDef) || (fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence)))
+                if ((ShouldSkipInsert(fieldDef) || (fieldDef.AutoIncrement && string.IsNullOrEmpty(fieldDef.Sequence)))
+                    && shouldInclude?.Invoke(fieldDef) != true)
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -212,7 +214,7 @@ namespace ServiceStack.OrmLite.Firebird
                     }
                     else
                     {
-                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName),fieldDef.CustomInsert));
                         AddParameter(cmd, fieldDef);
                     }
                 }

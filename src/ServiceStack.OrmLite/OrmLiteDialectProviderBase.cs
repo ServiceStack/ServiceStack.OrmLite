@@ -10,6 +10,7 @@
 //
 
 using System;
+using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
@@ -653,7 +654,8 @@ namespace ServiceStack.OrmLite
             return null;
         }
 
-        public virtual void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null)
+        public virtual void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null, 
+            Func<FieldDefinition,bool> shouldInclude=null)
         {
             var sbColumnNames = StringBuilderCache.Allocate();
             var sbColumnValues = StringBuilderCacheAlt.Allocate();
@@ -664,7 +666,7 @@ namespace ServiceStack.OrmLite
             var fieldDefs = GetInsertFieldDefinitions(modelDef, insertFields);
             foreach (var fieldDef in fieldDefs)
             {
-                if (fieldDef.ShouldSkipInsert())
+                if (fieldDef.ShouldSkipInsert() && shouldInclude?.Invoke(fieldDef) != true)
                     continue;
 
                 if (sbColumnNames.Length > 0)
@@ -675,7 +677,7 @@ namespace ServiceStack.OrmLite
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                    sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName),fieldDef.CustomInsert));
 
                     var p = AddParameter(cmd, fieldDef);
 
@@ -705,7 +707,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var entry in args)
             {
-                var fieldDef = modelDef.GetFieldDefinition(entry.Key);
+                var fieldDef = modelDef.AssertFieldDefinition(entry.Key);
                 if (fieldDef.ShouldSkipInsert())
                     continue;
 
@@ -719,7 +721,7 @@ namespace ServiceStack.OrmLite
                 try
                 {
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
-                    sbColumnValues.Append(this.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
+                    sbColumnValues.Append(this.GetInsertParam(dbCmd, value, fieldDef));
                 }
                 catch (Exception ex)
                 {
@@ -810,7 +812,7 @@ namespace ServiceStack.OrmLite
                     sql
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
+                        .Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName), fieldDef.CustomUpdate));
 
                     AddParameter(cmd, fieldDef);
                 }
@@ -922,6 +924,12 @@ namespace ServiceStack.OrmLite
             InitDbParam(p, fieldDef.ColumnType);
         }
 
+        public virtual void EnableIdentityInsert<T>(IDbCommand cmd) {}
+        public virtual Task EnableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default) => TypeConstants.EmptyTask;
+
+        public virtual void DisableIdentityInsert<T>(IDbCommand cmd) {}
+        public virtual Task DisableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default) => TypeConstants.EmptyTask;
+
         public virtual void SetParameterValues<T>(IDbCommand dbCmd, object obj)
         {
             var modelDef = GetModel(typeof(T));
@@ -946,13 +954,13 @@ namespace ServiceStack.OrmLite
 
                 if (fieldDef.AutoId && p.Value != null)
                 {
-                    var existingId = fieldDef.GetValueFn(obj);
+                    var existingId = fieldDef.GetValue(obj);
                     if (existingId is Guid existingGuid && existingGuid != default(Guid))
                     {
                         p.Value = existingGuid; // Use existing value if not default
                     }
 
-                    fieldDef.SetValueFn(obj, p.Value); //Auto populate default values
+                    fieldDef.SetValue(obj, p.Value); //Auto populate default values
                     continue;
                 }
                 
@@ -979,11 +987,7 @@ namespace ServiceStack.OrmLite
 
         protected virtual object GetValue<T>(FieldDefinition fieldDef, object obj)
         {
-            var value = obj is T
-               ? fieldDef.GetValue(obj)
-               : GetAnonValue(fieldDef, obj);
-
-            return GetFieldValue(fieldDef, value);
+            return GetFieldValue(fieldDef, fieldDef.GetValue(obj));
         }
 
         public object GetFieldValue(FieldDefinition fieldDef, object value)
@@ -1031,9 +1035,7 @@ namespace ServiceStack.OrmLite
 
         protected virtual object GetQuotedValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
         {
-            var value = obj is T
-                ? fieldDef.GetValue(obj)
-                : GetAnonValue(fieldDef, obj);
+            var value = fieldDef.GetValue(obj);
 
             if (value == null)
                 return DBNull.Value;
@@ -1045,22 +1047,6 @@ namespace ServiceStack.OrmLite
                 return DBNull.Value;
 
             return unquotedVal;
-        }
-
-        static readonly ConcurrentDictionary<string, GetMemberDelegate> anonValueFnMap =
-            new ConcurrentDictionary<string, GetMemberDelegate>();
-
-        protected virtual object GetAnonValue(FieldDefinition fieldDef, object obj)
-        {
-            var anonType = obj.GetType();
-            var key = anonType.Name + "." + fieldDef.Name;
-
-            var factoryFn = (Func<string, GetMemberDelegate>)(_ =>
-                anonType.GetProperty(fieldDef.Name).CreateGetter());
-
-            var getterFn = anonValueFnMap.GetOrAdd(key, factoryFn);
-
-            return getterFn(obj);
         }
 
         public virtual void PrepareUpdateRowStatement(IDbCommand dbCmd, object objWithProperties, ICollection<string> updateFields = null)
@@ -1099,7 +1085,7 @@ namespace ServiceStack.OrmLite
                     sql
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddUpdateParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef).ParameterName);
+                        .Append(this.GetUpdateParam(dbCmd, fieldDef.GetValue(objWithProperties), fieldDef));
                 }
                 catch (Exception ex)
                 {
@@ -1122,7 +1108,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var entry in args)
             {
-                var fieldDef = modelDef.GetFieldDefinition(entry.Key);
+                var fieldDef = modelDef.AssertFieldDefinition(entry.Key);
                 if (fieldDef.ShouldSkipUpdate() || fieldDef.IsPrimaryKey || fieldDef.AutoIncrement)
                     continue;
 
@@ -1136,7 +1122,7 @@ namespace ServiceStack.OrmLite
                     sql
                         .Append(GetQuotedColumnName(fieldDef.FieldName))
                         .Append("=")
-                        .Append(this.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
+                        .Append(this.GetUpdateParam(dbCmd, value, fieldDef));
                 }
                 catch (Exception ex)
                 {
@@ -1158,7 +1144,7 @@ namespace ServiceStack.OrmLite
 
             foreach (var entry in args)
             {
-                var fieldDef = modelDef.GetFieldDefinition(entry.Key);
+                var fieldDef = modelDef.AssertFieldDefinition(entry.Key);
                 if (fieldDef.ShouldSkipUpdate() || fieldDef.AutoIncrement || fieldDef.IsPrimaryKey ||
                     fieldDef.IsRowVersion || fieldDef.Name == OrmLiteConfig.IdField)
                     continue;
@@ -1179,14 +1165,14 @@ namespace ServiceStack.OrmLite
                             .Append("=")
                             .Append(quotedFieldName)
                             .Append("+")
-                            .Append(this.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
+                            .Append(this.GetUpdateParam(dbCmd, value, fieldDef));
                     }
                     else
                     {
                         sql
                             .Append(quotedFieldName)
                             .Append("=")
-                            .Append(this.AddUpdateParam(dbCmd, value, fieldDef).ParameterName);
+                            .Append(this.GetUpdateParam(dbCmd, value, fieldDef));
                     }
                 }
                 catch (Exception ex)
@@ -1234,7 +1220,7 @@ namespace ServiceStack.OrmLite
         public string GetDefaultValue(Type tableType, string fieldName)
         {
             var modelDef = tableType.GetModelDefinition();
-            var fieldDef = modelDef.GetFieldDefinition(fieldName);
+            var fieldDef = modelDef.AssertFieldDefinition(fieldName);
             return GetDefaultValue(fieldDef);
         }
 
@@ -1274,6 +1260,11 @@ namespace ServiceStack.OrmLite
 
         public abstract bool DoesSchemaExist(IDbCommand dbCmd, string schemaName);
 
+        public virtual Task<bool> DoesSchemaExistAsync(IDbCommand dbCmd, string schema, CancellationToken token = default)
+        {
+            return DoesSchemaExist(dbCmd, schema).InTask();
+        }
+
         public virtual string ToCreateTableStatement(Type tableType)
         {
             var sbColumns = StringBuilderCache.Allocate();
@@ -1282,7 +1273,7 @@ namespace ServiceStack.OrmLite
             var modelDef = tableType.GetModelDefinition();
             foreach (var fieldDef in CreateTableFieldsStrategy(modelDef))
             {
-                if (fieldDef.CustomSelect != null)
+                if (fieldDef.CustomSelect != null || (fieldDef.IsComputed && !fieldDef.IsPersisted))
                     continue;
 
                 var columnDefinition = GetColumnDefinition(fieldDef);
@@ -1420,9 +1411,19 @@ namespace ServiceStack.OrmLite
             return db.Exec(dbCmd => DoesTableExist(dbCmd, tableName, schema));
         }
 
+        public virtual async Task<bool> DoesTableExistAsync(IDbConnection db, string tableName, string schema = null, CancellationToken token = default)
+        {
+            return await db.Exec(async dbCmd => await DoesTableExistAsync(dbCmd, tableName, schema, token));
+        }
+
         public virtual bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null)
         {
             throw new NotImplementedException();
+        }
+
+        public virtual Task<bool> DoesTableExistAsync(IDbCommand dbCmd, string tableName, string schema = null, CancellationToken token = default)
+        {
+            return DoesTableExist(dbCmd, tableName, schema).InTask();
         }
 
         public virtual bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
@@ -1430,9 +1431,19 @@ namespace ServiceStack.OrmLite
             throw new NotImplementedException();
         }
 
+        public virtual Task<bool> DoesColumnExistAsync(IDbConnection db, string columnName, string tableName, string schema = null, CancellationToken token = default)
+        {
+            return DoesColumnExist(db, columnName, tableName, schema).InTask();
+        }
+
         public virtual bool DoesSequenceExist(IDbCommand dbCmd, string sequenceName)
         {
             throw new NotImplementedException();
+        }
+
+        public virtual Task<bool> DoesSequenceExistAsync(IDbCommand dbCmd, string sequenceName, CancellationToken token = default)
+        {
+            return DoesSequenceExist(dbCmd, sequenceName).InTask();
         }
 
         protected virtual string GetIndexName(bool isUnique, string modelName, string fieldName)
@@ -1475,10 +1486,9 @@ namespace ServiceStack.OrmLite
             return "";
         }
 
-        public virtual List<string> SequenceList(Type tableType)
-        {
-            return new List<string>();
-        }
+        public virtual List<string> SequenceList(Type tableType) => new List<string>();
+
+        public virtual Task<List<string>> SequenceListAsync(Type tableType, CancellationToken token = default) => new List<string>().InTask();
 
         // TODO : make abstract  ??
         public virtual string ToExistStatement(Type fromTableType,
@@ -1598,7 +1608,8 @@ namespace ServiceStack.OrmLite
 
         public virtual string GetQuotedValue(object value, Type fieldType)
         {
-            if (value == null) return "NULL";
+            if (value == null) 
+                return "NULL";
 
             var converter = value.GetType().IsEnum
                 ? EnumConverter
@@ -1681,37 +1692,39 @@ namespace ServiceStack.OrmLite
         
         public virtual string SqlCast(object fieldOrValue, string castAs) => $"CAST({fieldOrValue} AS {castAs})";
 
-        //Async API's, should be overrided by Dialect Providers to use .ConfigureAwait(false)
+        public virtual string SqlRandom => "RAND()";
+
+        //Async API's, should be overriden by Dialect Providers to use .ConfigureAwait(false)
         //Default impl below uses TaskAwaiter shim in async.cs
 
-        public virtual Task OpenAsync(IDbConnection db, CancellationToken token = default(CancellationToken))
+        public virtual Task OpenAsync(IDbConnection db, CancellationToken token = default)
         {
             db.Open();
             return TaskResult.Finished;
         }
 
-        public virtual Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        public virtual Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default)
         {
             return cmd.ExecuteReader().InTask();
         }
 
-        public virtual Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        public virtual Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default)
         {
             return cmd.ExecuteNonQuery().InTask();
         }
 
-        public virtual Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken))
+        public virtual Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default)
         {
             return cmd.ExecuteScalar().InTask();
         }
 
-        public virtual Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default(CancellationToken))
+        public virtual Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default)
         {
             return reader.Read().InTask();
         }
 
 #if ASYNC
-        public virtual async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
+        public virtual async Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default)
         {
             try
             {
@@ -1729,7 +1742,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public virtual async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default(CancellationToken))
+        public virtual async Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default)
         {
             try
             {
@@ -1745,7 +1758,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public virtual async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken))
+        public virtual async Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default)
         {
             try
             {

@@ -39,7 +39,7 @@ namespace ReturnAttributeTests
 
         protected string ConnectionString { get; set; }
         protected IOrmLiteDialectProvider DialectProvider { get; set; }
-        protected OrmLiteConnectionFactory DbFactory => dbFactory ?? (dbFactory = new OrmLiteConnectionFactory(ConnectionString, DialectProvider));
+        protected OrmLiteConnectionFactory DbFactory => dbFactory ??= new OrmLiteConnectionFactory(ConnectionString, DialectProvider);
 
         public TestsBase()
         {

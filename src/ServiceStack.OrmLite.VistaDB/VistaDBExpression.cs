@@ -31,11 +31,10 @@ namespace ServiceStack.OrmLite.VistaDB
                 if (setFields.Length > 0)
                     setFields.Append(", ");
 
-                var param = DialectProvider.AddUpdateParam(dbCmd, value, fieldDef);
                 setFields
                     .Append(DialectProvider.GetQuotedColumnName(fieldDef.FieldName))
                     .Append("=")
-                    .Append(param.ParameterName);
+                    .Append(DialectProvider.GetUpdateParam(dbCmd, value, fieldDef));
             }
 
             var strFields = StringBuilderCache.ReturnAndFree(setFields);

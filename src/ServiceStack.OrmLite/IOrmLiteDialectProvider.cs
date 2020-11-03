@@ -122,7 +122,7 @@ namespace ServiceStack.OrmLite
 
         string ToInsertRowStatement(IDbCommand cmd, object objWithProperties, ICollection<string> insertFields = null);
 
-        void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null);
+        void PrepareParameterizedInsertStatement<T>(IDbCommand cmd, ICollection<string> insertFields = null, Func<FieldDefinition,bool> shouldInclude=null);
 
         /// <returns>If had RowVersion</returns>
         bool PrepareParameterizedUpdateStatement<T>(IDbCommand cmd, ICollection<string> updateFields = null);
@@ -135,6 +135,11 @@ namespace ServiceStack.OrmLite
         void SetParameterValues<T>(IDbCommand dbCmd, object obj);
 
         void SetParameter(FieldDefinition fieldDef, IDbDataParameter p);
+
+        void EnableIdentityInsert<T>(IDbCommand cmd);
+        Task EnableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default);
+        void DisableIdentityInsert<T>(IDbCommand cmd);
+        Task DisableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default);
 
         Dictionary<string, FieldDefinition> GetFieldDefinitionMap(ModelDefinition modelDef);
 
@@ -175,12 +180,18 @@ namespace ServiceStack.OrmLite
         string ToCreateSequenceStatement(Type tableType, string sequenceName);
 
         List<string> SequenceList(Type tableType);
+        Task<List<string>> SequenceListAsync(Type tableType, CancellationToken token=default);
         
         bool DoesSchemaExist(IDbCommand dbCmd, string schema);
+        Task<bool> DoesSchemaExistAsync(IDbCommand dbCmd, string schema, CancellationToken token=default);
         bool DoesTableExist(IDbConnection db, string tableName, string schema = null);
+        Task<bool> DoesTableExistAsync(IDbConnection db, string tableName, string schema = null, CancellationToken token=default);
         bool DoesTableExist(IDbCommand dbCmd, string tableName, string schema = null);
+        Task<bool> DoesTableExistAsync(IDbCommand dbCmd, string tableName, string schema = null, CancellationToken token=default);
         bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null);
+        Task<bool> DoesColumnExistAsync(IDbConnection db, string columnName, string tableName, string schema = null, CancellationToken token=default);
         bool DoesSequenceExist(IDbCommand dbCmd, string sequenceName);
+        Task<bool> DoesSequenceExistAsync(IDbCommand dbCmd, string sequenceName, CancellationToken token=default);
 
         void DropColumn(IDbConnection db, Type modelType, string columnName);
 
@@ -211,14 +222,14 @@ namespace ServiceStack.OrmLite
                                          string indexName = null, bool unique = false);
 
         //Async
-        Task OpenAsync(IDbConnection db, CancellationToken token = default(CancellationToken));
-        Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken));
-        Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken));
-        Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default(CancellationToken));
-        Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default(CancellationToken));
-        Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken));
-        Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default(CancellationToken));
-        Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default(CancellationToken));
+        Task OpenAsync(IDbConnection db, CancellationToken token = default);
+        Task<IDataReader> ExecuteReaderAsync(IDbCommand cmd, CancellationToken token = default);
+        Task<int> ExecuteNonQueryAsync(IDbCommand cmd, CancellationToken token = default);
+        Task<object> ExecuteScalarAsync(IDbCommand cmd, CancellationToken token = default);
+        Task<bool> ReadAsync(IDataReader reader, CancellationToken token = default);
+        Task<List<T>> ReaderEach<T>(IDataReader reader, Func<T> fn, CancellationToken token = default);
+        Task<Return> ReaderEach<Return>(IDataReader reader, Action fn, Return source, CancellationToken token = default);
+        Task<T> ReaderRead<T>(IDataReader reader, Func<T> fn, CancellationToken token = default);
 
         Task<long> InsertAndGetLastInsertIdAsync<T>(IDbCommand dbCmd, CancellationToken token);
     
@@ -234,7 +245,7 @@ namespace ServiceStack.OrmLite
         /// <summary>
         /// Return table, row count SQL for listing all tables with their row counts
         /// </summary>
-        /// <param name="live">If true returns live current rowc ounts of each table (slower), otherwise returns cached row counts from RDBMS table stats</param>
+        /// <param name="live">If true returns live current row counts of each table (slower), otherwise returns cached row counts from RDBMS table stats</param>
         /// <param name="schema">The table schema if any</param>
         /// <returns></returns>
         string ToTableNamesWithRowCountsStatement(bool live, string schema);
@@ -247,5 +258,6 @@ namespace ServiceStack.OrmLite
         string SqlBool(bool value);
         string SqlLimit(int? offset = null, int? rows = null);
         string SqlCast(object fieldOrValue, string castAs);
+        string SqlRandom { get; }
     }
 }
