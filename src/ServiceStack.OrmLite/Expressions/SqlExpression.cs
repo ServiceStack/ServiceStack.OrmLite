@@ -775,7 +775,11 @@ namespace ServiceStack.OrmLite
 
         public virtual SqlExpression<T> GroupBy(string groupBy)
         {
-            groupBy.SqlVerifyFragment();
+            return UnsafeGroupBy(groupBy.SqlVerifyFragment());
+        }
+
+        public virtual SqlExpression<T> UnsafeGroupBy(string groupBy)
+        {
             if (!string.IsNullOrEmpty(groupBy))
                 this.groupBy = "GROUP BY " + groupBy;
             return this;
