@@ -1404,7 +1404,7 @@ namespace ServiceStack.OrmLite
             }
 
             if (setFields.Length == 0)
-                throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
+                throw new ArgumentException($"No non-null or non-default values were provided for type: {typeof(T).Name}");
 
             var sql = $"UPDATE {DialectProvider.GetQuotedTableName(modelDef)} " +
                       $"SET {StringBuilderCache.ReturnAndFree(setFields)} {WhereExpression}";
@@ -1446,7 +1446,7 @@ namespace ServiceStack.OrmLite
             }
             
             if (setFields.Length == 0)
-                throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
+                throw new ArgumentException($"No non-null or non-default values were provided for type: {typeof(T).Name}");
 
             var sql = $"UPDATE {DialectProvider.GetQuotedTableName(modelDef)} " +
                       $"SET {StringBuilderCache.ReturnAndFree(setFields)} {WhereExpression}";

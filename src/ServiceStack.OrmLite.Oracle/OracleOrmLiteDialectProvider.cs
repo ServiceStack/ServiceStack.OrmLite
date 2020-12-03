@@ -199,8 +199,7 @@ namespace ServiceStack.OrmLite.Oracle
             }
             catch (Exception ex)
             {
-                Log.Error("Error in {0}.ToDbValue() value '{1}' and Type '{2}'"
-                    .Fmt(converter.GetType().Name, value != null ? value.GetType().Name : "undefined", type.Name), ex);
+                Log.Error($"Error in {converter?.GetType().Name}.ToDbValue() value '{value.GetType().Name}' and Type '{type.Name}'", ex);
                 throw;
             }
 
@@ -218,8 +217,8 @@ namespace ServiceStack.OrmLite.Oracle
 
         internal string GetQuotedDateTimeOffsetValue(DateTimeOffset dateValue)
         {
-            var iso8601Format = string.Format("{0} {1}", GetIsoDateTimeFormat(dateValue.TimeOfDay), IsoTimeZoneFormat);
-            var oracleFormat = string.Format("{0} {1}", GetOracleDateTimeFormat(dateValue.TimeOfDay), OracleTimeZoneFormat);
+            var iso8601Format = $"{GetIsoDateTimeFormat(dateValue.TimeOfDay)} {IsoTimeZoneFormat}";
+            var oracleFormat = $"{GetOracleDateTimeFormat(dateValue.TimeOfDay)} {OracleTimeZoneFormat}";
             return string.Format("TO_TIMESTAMP_TZ({0}, {1})", base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string)), base.GetQuotedValue(oracleFormat, typeof(string)));
         }
 
@@ -246,8 +245,8 @@ namespace ServiceStack.OrmLite.Oracle
             if (isStartOfDay) return dateFormat;
             var hasFractionalSeconds = (timeOfDay.Milliseconds != 0) || ((timeOfDay.Ticks % TimeSpan.TicksPerMillisecond) != 0);
             return hasFractionalSeconds 
-                ? string.Format("{0} {1}.{2}", dateFormat, timeFormat, millisecondFormat) 
-                : string.Format("{0} {1}", dateFormat, timeFormat);
+                ? $"{dateFormat} {timeFormat}.{millisecondFormat}"
+                : $"{dateFormat} {timeFormat}";
         }
 
         public override bool IsFullSelectStatement(string sqlFilter)

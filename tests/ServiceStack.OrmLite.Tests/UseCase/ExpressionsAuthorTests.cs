@@ -46,7 +46,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
 
                 db.DropTable<Author>();
 
-                var tableName = dialect.NamingStrategy.GetTableName(typeof(Author).Name);
+                var tableName = dialect.NamingStrategy.GetTableName(nameof(Author));
                 var tableExists = dialect.DoesTableExist(db, tableName);
                 Assert.That(tableExists, Is.False);
 
