@@ -17,8 +17,7 @@ namespace ServiceStack.OrmLite
             this.Transaction = transaction;
 
             //If OrmLite managed connection assign to connection, otherwise use OrmLiteContext
-            var ormLiteConn = this.db as ISetDbTransaction;
-            if (ormLiteConn != null)
+            if (this.db is ISetDbTransaction ormLiteConn)
             {
                 ormLiteConn.Transaction = this.Transaction = transaction;
             }
@@ -36,8 +35,7 @@ namespace ServiceStack.OrmLite
             }
             finally
             {
-                var ormLiteConn = this.db as ISetDbTransaction;
-                if (ormLiteConn != null)
+                if (this.db is ISetDbTransaction ormLiteConn)
                 {
                     ormLiteConn.Transaction = null;
                 }
