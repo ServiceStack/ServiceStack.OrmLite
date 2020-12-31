@@ -2,10 +2,8 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using MySql.Data.MySqlClient;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.MySql.Tests
 {
@@ -78,7 +76,7 @@ namespace ServiceStack.OrmLite.MySql.Tests
             public override IEnumerable<T> ExecLazy<T>(IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter)
             {
                 var dbCmd = CreateCommand(dbConn);
-                var mysqlCmd = (MySqlCommand) dbCmd.ToDbCommand();
+                //var mysqlCmd = (MySqlCommand) dbCmd.ToDbCommand();
                 
                 try
                 {
@@ -97,15 +95,15 @@ namespace ServiceStack.OrmLite.MySql.Tests
         }
 
         // [Test]
-        public void Can_access_MySqlConnection_in_ExecFilter()
-        {
-            MySqlDialect.Instance.ExecFilter = new MySqlExecFilter();
-        
-            using var db = OpenDbConnection();
-            db.DropAndCreateTable<LetterFrequency>();
-
-            var results = db.SelectLazy<LetterFrequency>().ToList();
-        }
+        // public void Can_access_MySqlConnection_in_ExecFilter()
+        // {
+        //     MySqlDialect.Instance.ExecFilter = new MySqlExecFilter();
+        //
+        //     using var db = OpenDbConnection();
+        //     db.DropAndCreateTable<LetterFrequency>();
+        //
+        //     var results = db.SelectLazy<LetterFrequency>().ToList();
+        // }
 
     }
 }
