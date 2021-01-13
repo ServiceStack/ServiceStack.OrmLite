@@ -34,7 +34,7 @@ level public properties.
 
 # Download 
 
-[![Download on NuGet](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/release-notes/install-ormlite.png)](https://www.nuget.org/packages?q=servicestack+ormlite)
+    > Install-Package ServiceStack.OrmLite.PostgreSQL
 
 ### 8 flavours of OrmLite is on NuGet: 
 
@@ -158,7 +158,7 @@ The best way to learn about OrmLite is to take the [OrmLite Interactive Tour](ht
 which lets you try out and explore different OrmLite features immediately from the comfort of your own 
 browser without needing to install anything:
 
-[![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/ormlite/ormlite-tour.png)](http://gistlyn.com/ormlite)
+[![](https://raw.githubusercontent.com/ServiceStack/docs/master/docs/images/gistcafe/ormlite-tour-screenshot.png)](http://gistlyn.com/ormlite)
 
 ## [Type Converters](https://github.com/ServiceStack/ServiceStack.OrmLite/wiki/OrmLite-Type-Converters)
 
