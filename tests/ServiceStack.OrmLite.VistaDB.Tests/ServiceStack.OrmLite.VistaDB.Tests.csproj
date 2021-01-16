@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net46</TargetFrameworks>
     <DebugType>portable</DebugType>
     <AssemblyName>ServiceStack.OrmLite.VistaDB.Tests</AssemblyName>
     <OutputType>Library</OutputType>
     <PackageId>ServiceStack.OrmLite.VistaDB.Tests</PackageId>
     <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81+xamarinmac</PackageTargetFallback>
     <Copyright>Copyright 2013 Ilya Lukyanov</Copyright>
+    <TargetFramework>net472</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
@@ -17,7 +17,7 @@
     <PackageReference Include="ServiceStack" Version="$(Version)" />
   </ItemGroup>
 
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net46' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
     <Reference Include="System.Configuration" />
     <Reference Include="System.Threading" />
     <Reference Include="System.Threading.Tasks" />

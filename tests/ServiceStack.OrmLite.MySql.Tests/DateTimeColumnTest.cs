@@ -64,10 +64,17 @@ namespace ServiceStack.OrmLite.MySql.Tests
         public void Can_change_DateTime_precision()
         {
             using var db = OpenDbConnection();
+#if MYSQLCONNECTOR
+            if (MySqlConnectorDialect.Provider.GetConverter(typeof(DateTime)) is MySqlDateTimeConverterBase dateConverter)
+            {
+                dateConverter.Precision = 3;
+            }
+#else
             if (MySqlDialect.Provider.GetConverter(typeof(DateTime)) is MySqlDateTimeConverterBase dateConverter)
             {
                 dateConverter.Precision = 3;
             }
+#endif
 
             OrmLiteUtils.PrintSql();
             db.CreateTable<Analyze>(true);

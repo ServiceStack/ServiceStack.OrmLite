@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net472;net5.0</TargetFrameworks>
     <PackageId>ServiceStack.OrmLite.SqlServerTests</PackageId>
     <RootNamespace>ServiceStack.OrmLite.SqlServerTests</RootNamespace>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqlServer.Converters\ServiceStack.OrmLite.SqlServer.Converters.csproj" />
@@ -12,7 +13,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />
     <PackageReference Include="NUnit" Version="3.12.0" />
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Threading" />
