@@ -240,6 +240,11 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<ColumnSchema[]> GetTableColumnsAsync(this IDbConnection dbConn, string sql, CancellationToken token=default) => 
             dbConn.Exec(dbCmd => dbCmd.GetTableColumnsAsync(sql, token));
+
+        public static Task EnableForeignKeysCheckAsync(this IDbConnection dbConn, CancellationToken token=default) => 
+            dbConn.Exec(dbCmd => dbConn.GetDialectProvider().EnableForeignKeysCheckAsync(dbCmd, token));
+        public static Task DisableForeignKeysCheckAsync(this IDbConnection dbConn, CancellationToken token=default) => 
+            dbConn.Exec(dbCmd => dbConn.GetDialectProvider().DisableForeignKeysCheckAsync(dbCmd, token));
     }
 
 }

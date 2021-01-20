@@ -104,59 +104,50 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        public virtual Task<T> Exec<T>(IDbConnection dbConn, Func<IDbCommand, Task<T>> filter)
+        public virtual async Task<T> Exec<T>(IDbConnection dbConn, Func<IDbCommand, Task<T>> filter)
         {
             var dbCmd = CreateCommand(dbConn);
 
             try
             {
-                return filter(dbCmd)
-                    .ContinueWith(t =>
-                    {
-                        if (t.IsFaulted)
-                        {
-                            var ex = t.Exception.UnwrapIfSingleException(); 
-                            OrmLiteConfig.ExceptionFilter?.Invoke(dbCmd, ex);
-                            DisposeCommand(dbCmd, dbConn);
-                            throw ex;
-                        }
-
-                        DisposeCommand(dbCmd, dbConn);
-                        return t.Result;
-                    });
+                return await filter(dbCmd);
             }
-            catch
+            catch (Exception ex)
+            {
+                var useEx = ex.UnwrapIfSingleException(); 
+                OrmLiteConfig.ExceptionFilter?.Invoke(dbCmd, useEx);
+                throw useEx;
+            }
+            finally
             {
                 DisposeCommand(dbCmd, dbConn);
-                throw;
             }
         }
 
-        public virtual Task<IDbCommand> Exec(IDbConnection dbConn, Func<IDbCommand, Task<IDbCommand>> filter)
+        public virtual async Task<IDbCommand> Exec(IDbConnection dbConn, Func<IDbCommand, Task<IDbCommand>> filter)
         {
             var dbCmd = CreateCommand(dbConn);
-
-            return filter(dbCmd).Then(t => t);
+            return await filter(dbCmd);
         }
 
-        public virtual Task Exec(IDbConnection dbConn, Func<IDbCommand, Task> filter)
+        public virtual async Task Exec(IDbConnection dbConn, Func<IDbCommand, Task> filter)
         {
             var dbCmd = CreateCommand(dbConn);
 
-            return filter(dbCmd)
-                .Then(t =>
-                {
-                    if (t.IsFaulted)
-                    {
-                        var ex = t.Exception.UnwrapIfSingleException(); 
-                        OrmLiteConfig.ExceptionFilter?.Invoke(dbCmd, ex);
-                        DisposeCommand(dbCmd, dbConn);
-                        throw ex;
-                    }
-
-                    DisposeCommand(dbCmd, dbConn);
-                    return t;
-                });
+            try
+            {
+                await filter(dbCmd);
+            }
+            catch (Exception ex)
+            {
+                var useEx = ex.UnwrapIfSingleException(); 
+                OrmLiteConfig.ExceptionFilter?.Invoke(dbCmd, useEx);
+                throw useEx;
+            }
+            finally
+            {
+                DisposeCommand(dbCmd, dbConn);
+            }
         }
 
         public virtual IEnumerable<T> ExecLazy<T>(IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter)

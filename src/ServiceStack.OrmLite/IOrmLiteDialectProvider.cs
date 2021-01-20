@@ -141,6 +141,11 @@ namespace ServiceStack.OrmLite
         void DisableIdentityInsert<T>(IDbCommand cmd);
         Task DisableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default);
 
+        void EnableForeignKeysCheck(IDbCommand cmd);
+        Task EnableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token=default);
+        void DisableForeignKeysCheck(IDbCommand cmd);
+        Task DisableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token=default);
+
         Dictionary<string, FieldDefinition> GetFieldDefinitionMap(ModelDefinition modelDef);
 
         object GetFieldValue(FieldDefinition fieldDef, object value);

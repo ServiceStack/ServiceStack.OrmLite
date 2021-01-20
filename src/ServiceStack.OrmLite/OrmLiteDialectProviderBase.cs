@@ -930,6 +930,12 @@ namespace ServiceStack.OrmLite
         public virtual void DisableIdentityInsert<T>(IDbCommand cmd) {}
         public virtual Task DisableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default) => TypeConstants.EmptyTask;
 
+        public virtual void EnableForeignKeysCheck(IDbCommand cmd) {}
+        public virtual Task EnableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token=default) => TypeConstants.EmptyTask;
+
+        public virtual void DisableForeignKeysCheck(IDbCommand cmd) {}
+        public virtual Task DisableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token=default) => TypeConstants.EmptyTask;
+
         public virtual void SetParameterValues<T>(IDbCommand dbCmd, object obj)
         {
             var modelDef = GetModel(typeof(T));

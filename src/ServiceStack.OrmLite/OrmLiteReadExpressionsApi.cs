@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Text;
 
@@ -179,11 +180,31 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
+        /// Returns a new transaction if not yet exists, otherwise null
+        /// </summary>
+        public static IDbTransaction OpenTransactionIfNotExists(this IDbConnection dbConn)
+        {
+            return !dbConn.InTransaction()
+                ? new OrmLiteTransaction(dbConn, dbConn.BeginTransaction())
+                : null;
+        }
+
+        /// <summary>
         /// Open a Transaction in OrmLite
         /// </summary>
         public static IDbTransaction OpenTransaction(this IDbConnection dbConn, IsolationLevel isolationLevel)
         {
             return new OrmLiteTransaction(dbConn, dbConn.BeginTransaction(isolationLevel));
+        }
+
+        /// <summary>
+        /// Returns a new transaction if not yet exists, otherwise null
+        /// </summary>
+        public static IDbTransaction OpenTransactionIfNotExists(this IDbConnection dbConn, IsolationLevel isolationLevel)
+        {
+            return !dbConn.InTransaction()
+                ? new OrmLiteTransaction(dbConn, dbConn.BeginTransaction(isolationLevel))
+                : null;
         }
 
         /// <summary>
@@ -435,5 +456,8 @@ namespace ServiceStack.OrmLite
         /// Get Table Column Schemas for result-set return from specified sql
         /// </summary>
         public static ColumnSchema[] GetTableColumns(this IDbConnection dbConn, string sql) => dbConn.Exec(dbCmd => dbCmd.GetTableColumns(sql));
+        
+        public static void EnableForeignKeysCheck(this IDbConnection dbConn) => dbConn.Exec(dbConn.GetDialectProvider().EnableForeignKeysCheck);
+        public static void DisableForeignKeysCheck(this IDbConnection dbConn) => dbConn.Exec(dbConn.GetDialectProvider().DisableForeignKeysCheck);
     }
 }
