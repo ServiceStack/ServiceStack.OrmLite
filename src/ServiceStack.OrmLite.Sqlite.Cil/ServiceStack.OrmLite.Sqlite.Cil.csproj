@@ -3,8 +3,8 @@
     <PropertyGroup>
         <TargetFramework>net5.0</TargetFramework>
         <AssemblyName>ServiceStack.OrmLite.Sqlite</AssemblyName>
-        <PackageId>ServiceStack.OrmLite.Sqlite</PackageId>
-        <Title>OrmLite.Sqlite - Fast, code-first, config-free POCO ORM</Title>
+        <PackageId>ServiceStack.OrmLite.Sqlite.Cil</PackageId>
+        <Title>OrmLite.Sqlite with SQLitePCLRaw CIL</Title>
         <PackageDescription>
             Light, simple and fast convention-based code-first POCO ORM for SQLite.
             Support for Creating and Dropping Table Schemas from POCOs, Complex Property types transparently stored in schemaless text blobs in SQLite.
