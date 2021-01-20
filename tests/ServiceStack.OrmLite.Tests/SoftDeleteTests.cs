@@ -4,6 +4,7 @@ using System.Data;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Tests.UseCase;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
@@ -179,10 +180,11 @@ namespace ServiceStack.OrmLite.Tests
             using (var db = OpenDbConnection())
             {
                 InitData(db);
+                
 
                 var vendor = db.Single<Vendor>(v=>v.Name == "Active Vendor");
                 db.LoadReferences(vendor);
-
+                
                 Assert.That(vendor.Name, Is.EqualTo("Active Vendor"));
                 Assert.That(vendor.Products.Count, Is.EqualTo(1));
             }

@@ -360,11 +360,16 @@ namespace ServiceStack.OrmLite
             if (!references)
                 return dbConn.Exec(dbCmd => dbCmd.Save(obj));
 
+            var trans = dbConn.OpenTransactionIfNotExists();
             return dbConn.Exec(dbCmd =>
             {
-                var ret = dbCmd.Save(obj);
-                dbCmd.SaveAllReferences(obj);
-                return ret;
+                using (trans)
+                {
+                    var ret = dbCmd.Save(obj);
+                    dbCmd.SaveAllReferences(obj);
+                    trans?.Commit();
+                    return ret;
+                }
             });
         }
 

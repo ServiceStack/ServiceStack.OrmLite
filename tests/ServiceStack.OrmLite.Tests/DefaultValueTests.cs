@@ -385,17 +385,16 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_filter_update_method1_to_insert_date()
         {
-            using (var db = OpenDbConnection())
-            {
-                CreateAndInitialize(db, 2);
+            using var db = OpenDbConnection();
+            CreateAndInitialize(db, 2);
 
-                ResetUpdateDate(db);
-                db.Update(cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider),
-                    new MySqlDefaultValues { Id = 1, DefaultInt = 45 }, 
-                    new MySqlDefaultValues { Id = 2, DefaultInt = 72 });
-                VerifyUpdateDate(db);
-                VerifyUpdateDate(db, id: 2);
-            }
+            ResetUpdateDate(db);
+            db.Update(cmd => 
+                    cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider),
+                new MySqlDefaultValues { Id = 1, DefaultInt = 45 }, 
+                new MySqlDefaultValues { Id = 2, DefaultInt = 72 });
+            VerifyUpdateDate(db);
+            VerifyUpdateDate(db, id: 2);
         }
 
         private static void ResetUpdateDate(IDbConnection db)

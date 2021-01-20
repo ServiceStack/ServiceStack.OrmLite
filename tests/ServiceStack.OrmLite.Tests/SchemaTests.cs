@@ -145,29 +145,27 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Can_get_Schema_Table()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.CreateTableIfNotExists<Person>();
+            using var db = OpenDbConnection();
+            db.CreateTableIfNotExists<Person>();
 
-                var columnSchemas = db.GetTableColumns<Person>();
+            var columnSchemas = db.GetTableColumns<Person>();
                 
-                columnSchemas.Each(x => x.ToString().Print());
+            columnSchemas.Each(x => x.ToString().Print());
                 
-                columnSchemas.Each(x => x.PrintDump());
-            }
+            // columnSchemas.Each(x => x.PrintDump());
+            columnSchemas.Each(x => x.ToString().Print());
         }
 
         [Test]
         public async Task Can_get_Schema_Table_Async()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.CreateTableIfNotExists<Person>();
+            using var db = await OpenDbConnectionAsync();
+            db.CreateTableIfNotExists<Person>();
 
-                var columnSchemas = await db.GetTableColumnsAsync<Person>();
+            var columnSchemas = await db.GetTableColumnsAsync<Person>();
                 
-                columnSchemas.Each(x => x.PrintDump());
-            }
+            // columnSchemas.Each(x => x.PrintDump());
+            columnSchemas.Each(x => x.ToString().Print());
         }
 
         [Test]
