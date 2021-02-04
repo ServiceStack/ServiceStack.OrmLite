@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net472;net5.0</TargetFrameworks>
+    <TargetFramework>net472</TargetFramework>
+<!--    <TargetFrameworks>net472;net5.0</TargetFrameworks>-->
     <DebugType>portable</DebugType>
     <AssemblyName>ServiceStack.OrmLite.MySql.Tests</AssemblyName>
     <OutputType>Library</OutputType>

@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net472;net5.0</TargetFrameworks>
+    <TargetFramework>net472</TargetFramework>
+<!--    <TargetFrameworks>net472;net5.0</TargetFrameworks>-->
     <PackageId>ServiceStack.OrmLite.SqlServerTests</PackageId>
     <RootNamespace>ServiceStack.OrmLite.SqlServerTests</RootNamespace>
     <LangVersion>default</LangVersion>

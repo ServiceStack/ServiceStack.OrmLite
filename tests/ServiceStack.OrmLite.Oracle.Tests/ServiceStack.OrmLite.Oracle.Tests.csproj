@@ -1,6 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net472;net5.0</TargetFrameworks>
+    <TargetFramework>net472</TargetFramework>
+<!--    <TargetFrameworks>net472;net5.0</TargetFrameworks>-->
     <AssemblyName>ServiceStack.OrmLite.Oracle.Tests</AssemblyName>
     <PackageId>ServiceStack.OrmLite.Oracle.Tests</PackageId>
     <LangVersion>default</LangVersion>
