@@ -17,6 +17,7 @@ using System.Reflection;
 using System.Threading;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.Converters;
+using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
@@ -51,10 +52,25 @@ namespace ServiceStack.OrmLite
             var modelAliasAttr = modelType.FirstAttribute<AliasAttribute>();
             var schemaAttr = modelType.FirstAttribute<SchemaAttribute>();
 
-            var preCreate = modelType.FirstAttribute<PreCreateTableAttribute>();
-            var postCreate = modelType.FirstAttribute<PostCreateTableAttribute>();
-            var preDrop = modelType.FirstAttribute<PreDropTableAttribute>();
-            var postDrop = modelType.FirstAttribute<PostDropTableAttribute>();
+            var preCreates = modelType.AllAttributes<PreCreateTableAttribute>();
+            var postCreates = modelType.AllAttributes<PostCreateTableAttribute>();
+            var preDrops = modelType.AllAttributes<PreDropTableAttribute>();
+            var postDrops = modelType.AllAttributes<PostDropTableAttribute>();
+
+            string JoinSql(List<string> statements)
+            {
+                if (statements.Count == 0)
+                    return null;
+                var sb = StringBuilderCache.Allocate();
+                foreach (var sql in statements)
+                {
+                    if (sb.Length > 0)
+                        sb.AppendLine(";");
+                    sb.Append(sql);
+                }
+                var to = StringBuilderCache.ReturnAndFree(sb);
+                return to;
+            }
 
             modelDef = new ModelDefinition
             {
@@ -62,10 +78,10 @@ namespace ServiceStack.OrmLite
                 Name = modelType.Name,
                 Alias = modelAliasAttr?.Name,
                 Schema = schemaAttr?.Name,
-                PreCreateTableSql = preCreate?.Sql,
-                PostCreateTableSql = postCreate?.Sql,
-                PreDropTableSql = preDrop?.Sql,
-                PostDropTableSql = postDrop?.Sql,
+                PreCreateTableSql = JoinSql(preCreates.Map(x => x.Sql)),
+                PostCreateTableSql = JoinSql(postCreates.Map(x => x.Sql)),
+                PreDropTableSql = JoinSql(preDrops.Map(x => x.Sql)),
+                PostDropTableSql = JoinSql(postDrops.Map(x => x.Sql)),
             };
 
             modelDef.CompositeIndexes.AddRange(
