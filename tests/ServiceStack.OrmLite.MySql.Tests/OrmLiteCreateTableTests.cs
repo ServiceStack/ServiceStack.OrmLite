@@ -140,5 +140,25 @@ namespace ServiceStack.OrmLite.MySql.Tests
             Console.WriteLine("createTableSql: " + createTableSql);
             Assert.That(createTableSql.Contains("VARCHAR(255)"), Is.True);
         }
+
+        public class Signal
+        {
+            [AutoIncrement]
+            public int Id { get; set; }
+            public short Code { get; set; }
+        }
+
+        [Test]
+        public void Does_DoesColumnExist()
+        {
+            using var db = OpenDbConnection();
+            db.DropTable<Signal>();
+            var exists = db.ColumnExists<Signal>(x => x.Code);
+            Assert.That(exists, Is.False);
+
+            db.CreateTable<Signal>();
+            exists = db.ColumnExists<Signal>(x => x.Code);
+            Assert.That(exists);
+        }
     }
 }

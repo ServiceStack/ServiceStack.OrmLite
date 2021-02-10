@@ -437,7 +437,7 @@ namespace ServiceStack.OrmLite.MySql
 
         public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
         {
-	        tableName = GetTableName(tableName, schema);
+	        tableName = GetTableName(tableName, schema).StripQuotes();
 	        var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS"
 	                  + " WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName AND TABLE_SCHEMA = @schema"
 		                  .SqlFmt(GetTableName(tableName, schema).StripDbQuotes(), columnName);
@@ -449,7 +449,7 @@ namespace ServiceStack.OrmLite.MySql
 
         public override async Task<bool> DoesColumnExistAsync(IDbConnection db, string columnName, string tableName, string schema = null, CancellationToken token=default)
         {
-	        tableName = GetTableName(tableName, schema);
+	        tableName = GetTableName(tableName, schema).StripQuotes();
 	        var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS"
 	                  + " WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName AND TABLE_SCHEMA = @schema"
 		                  .SqlFmt(GetTableName(tableName, schema).StripDbQuotes(), columnName);
