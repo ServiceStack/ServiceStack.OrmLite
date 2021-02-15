@@ -44,6 +44,7 @@ namespace ServiceStack.OrmLite
         IUntypedSqlExpression UnsafeFrom(string rawFrom);
         IUntypedSqlExpression Where();
         IUntypedSqlExpression UnsafeWhere(string rawSql, params object[] filterParams);
+        IUntypedSqlExpression Ensure(string sqlFilter, params object[] filterParams);
         IUntypedSqlExpression Where(string sqlFilter, params object[] filterParams);
         IUntypedSqlExpression UnsafeAnd(string rawSql, params object[] filterParams);
         IUntypedSqlExpression And(string sqlFilter, params object[] filterParams);
@@ -90,6 +91,8 @@ namespace ServiceStack.OrmLite
         IUntypedSqlExpression FullJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr = null);
         IUntypedSqlExpression CrossJoin<Source, Target>(Expression<Func<Source, Target, bool>> joinExpr = null);
         IUntypedSqlExpression CustomJoin(string joinString);
+        IUntypedSqlExpression Ensure<Target>(Expression<Func<Target, bool>> predicate);
+        IUntypedSqlExpression Ensure<Source, Target>(Expression<Func<Source, Target, bool>> predicate);
         IUntypedSqlExpression Where<Target>(Expression<Func<Target, bool>> predicate);
         IUntypedSqlExpression Where<Source, Target>(Expression<Func<Source, Target, bool>> predicate);
         IUntypedSqlExpression And<Target>(Expression<Func<Target, bool>> predicate);
@@ -283,6 +286,12 @@ namespace ServiceStack.OrmLite
         public IUntypedSqlExpression UnsafeWhere(string rawSql, params object[] filterParams)
         {
             q.UnsafeWhere(rawSql, filterParams);
+            return this;
+        }
+
+        public IUntypedSqlExpression Ensure(string sqlFilter, params object[] filterParams)
+        {
+            q.Ensure(sqlFilter, filterParams);
             return this;
         }
 
@@ -554,9 +563,21 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
+        public IUntypedSqlExpression Ensure<Target>(Expression<Func<Target, bool>> predicate)
+        {
+            q.Ensure(predicate);
+            return this;
+        }
+
         public IUntypedSqlExpression Where<Source, Target>(Expression<Func<Source, Target, bool>> predicate)
         {
             q.Where(predicate);
+            return this;
+        }
+
+        public IUntypedSqlExpression Ensure<Source, Target>(Expression<Func<Source, Target, bool>> predicate)
+        {
+            q.Ensure(predicate);
             return this;
         }
 
