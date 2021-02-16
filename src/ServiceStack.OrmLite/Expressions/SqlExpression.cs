@@ -556,8 +556,15 @@ namespace ServiceStack.OrmLite
 
                 if (filterParam is SqlInValues sqlParams)
                 {
-                    var sqlIn = CreateInParamSql(sqlParams.GetValues());
-                    sqlFilter = sqlFilter.Replace(pLiteral, sqlIn);
+                    if (sqlParams.Count > 0)
+                    {
+                        var sqlIn = CreateInParamSql(sqlParams.GetValues());
+                        sqlFilter = sqlFilter.Replace(pLiteral, sqlIn);
+                    }
+                    else 
+                    {
+                        sqlFilter = sqlFilter.Replace(pLiteral, SqlInValues.EmptyIn);
+                    }
                 }
                 else
                 {
