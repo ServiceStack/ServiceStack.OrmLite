@@ -119,6 +119,13 @@ namespace ServiceStack.OrmLite.Tests.Shared
                 FirstName = "Test",
                 LastName = "McTest",
                 Id = 1
+            },
+            new PersonWithReferenceType
+            {
+                FirstName = "John",
+                LastName = "Doe",
+                Id = 2,
+                BestFriend = new Person(1,"Jane","Doe",33)
             }
         };
         
