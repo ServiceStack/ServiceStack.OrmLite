@@ -1,4 +1,5 @@
-﻿using ServiceStack.DataAnnotations;
+﻿using System;
+using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.Shared
 {
@@ -153,6 +154,51 @@ namespace ServiceStack.OrmLite.Tests.Shared
                 hashCode = (hashCode * 397) ^ (FirstName != null ? FirstName.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (LastName != null ? LastName.GetHashCode() : 0);
                 hashCode = (hashCode * 397) ^ (BestFriend != null ? BestFriend.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
+    }
+    
+    public class TestProduct
+    {
+        public string Id { get; set; }
+
+        public string Name { get; set; }
+
+        public DateTime? Modified { get; set; }
+
+        public static TestProduct[] TestValues =
+        {
+            new TestProduct
+            {
+                Id = "1",
+                Modified = null,
+                Name = "Testing"
+            }
+        };
+        
+        protected bool Equals(TestProduct other)
+        {
+            return Id == other.Id &&
+                   string.Equals(Name, other.Name) &&
+                   Modified.Equals(other.Modified);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((TestProduct)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (Id != null ? Id.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Modified != null ? Modified.GetHashCode() : 0);
                 return hashCode;
             }
         }
