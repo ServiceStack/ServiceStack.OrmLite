@@ -105,4 +105,49 @@ namespace ServiceStack.OrmLite.Tests.Shared
         Male
     }
 
+    public class PersonWithReferenceType
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public Person BestFriend { get; set; }
+
+        public static PersonWithReferenceType[] TestValues = new[]
+        {
+            new PersonWithReferenceType
+            {
+                FirstName = "Test",
+                LastName = "McTest",
+                Id = 1
+            }
+        };
+        
+        protected bool Equals(PersonWithReferenceType other)
+        {
+            return Id == other.Id &&
+                   string.Equals(FirstName, other.FirstName) &&
+                   string.Equals(LastName, other.LastName) &&
+                   ((BestFriend == null && other.BestFriend == null) || (BestFriend != null && BestFriend.Equals(other.BestFriend))) ;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((PersonWithReferenceType)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Id;
+                hashCode = (hashCode * 397) ^ (FirstName != null ? FirstName.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (LastName != null ? LastName.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (BestFriend != null ? BestFriend.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
+    }
 }

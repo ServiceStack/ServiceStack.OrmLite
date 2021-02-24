@@ -1614,7 +1614,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string GetQuotedValue(object value, Type fieldType)
         {
-            if (value == null) 
+            if (value == null || value == DBNull.Value) 
                 return "NULL";
 
             var converter = value.GetType().IsEnum
