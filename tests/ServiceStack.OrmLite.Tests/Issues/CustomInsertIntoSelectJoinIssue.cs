@@ -73,6 +73,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     UserAuthCustomId = w.UserAuthCustomId,
                     DomainKey = w.DomainKey,
                     CreateDate = DateTime.UtcNow,
+                    DeferUntil = (DateTime?) null,
                     TargetDomainKey = t.DomainKey,
                     Tries = 0,
                     TargetDomainRecordId = w.TargetDomainRecordId,
