@@ -60,35 +60,35 @@ namespace ServiceStack.OrmLite
 
         public IDbConnection Connection
         {
-            get { return dbCmd.Connection; }
-            set { dbCmd.Connection = value; }
+            get => dbCmd.Connection;
+            set => dbCmd.Connection = value;
         }
         public IDbTransaction Transaction
         {
-            get { return dbCmd.Transaction; }
-            set { dbCmd.Transaction = value; }
+            get => dbCmd.Transaction;
+            set => dbCmd.Transaction = value;
         }
         public string CommandText
         {
-            get { return dbCmd.CommandText; }
-            set { dbCmd.CommandText = value; }
+            get => dbCmd.CommandText;
+            set => dbCmd.CommandText = value;
         }
         public int CommandTimeout
         {
-            get { return dbCmd.CommandTimeout; }
-            set { dbCmd.CommandTimeout = value; }
+            get => dbCmd.CommandTimeout;
+            set => dbCmd.CommandTimeout = value;
         }
         public CommandType CommandType
         {
-            get { return dbCmd.CommandType; }
-            set { dbCmd.CommandType = value; }
+            get => dbCmd.CommandType;
+            set => dbCmd.CommandType = value;
         }
         public IDataParameterCollection Parameters => dbCmd.Parameters;
 
         public UpdateRowSource UpdatedRowSource
         {
-            get { return dbCmd.UpdatedRowSource; }
-            set { dbCmd.UpdatedRowSource = value; }
+            get => dbCmd.UpdatedRowSource;
+            set => dbCmd.UpdatedRowSource = value;
         }
 
         public IDbCommand DbCommand => dbCmd;
