@@ -584,12 +584,20 @@ namespace ServiceStack.OrmLite
         protected virtual bool ShouldSkipInsert(FieldDefinition fieldDef) => 
             fieldDef.ShouldSkipInsert();
 
+        public virtual string ColumnNameOnly(string columnExpr)
+        {
+            var nameOnly = columnExpr.LastRightPart('.');
+            var ret = nameOnly.StripDbQuotes();
+            return ret;
+        }
+
         public virtual FieldDefinition[] GetInsertFieldDefinitions(ModelDefinition modelDef, ICollection<string> insertFields)
         {
-            return insertFields != null 
+            var insertColumns = insertFields?.Map(ColumnNameOnly);
+            return insertColumns != null 
                 ? NamingStrategy.GetType() == typeof(OrmLiteNamingStrategyBase) 
-                    ? modelDef.GetOrderedFieldDefinitions(insertFields)
-                    : modelDef.GetOrderedFieldDefinitions(insertFields, name => NamingStrategy.GetColumnName(name)) 
+                    ? modelDef.GetOrderedFieldDefinitions(insertColumns)
+                    : modelDef.GetOrderedFieldDefinitions(insertColumns, name => NamingStrategy.GetColumnName(name)) 
                 : modelDef.FieldDefinitionsArray;
         }
 

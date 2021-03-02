@@ -812,6 +812,12 @@ namespace ServiceStack.OrmLite
 
         public static char[] QuotedChars = { '"', '`', '[', ']' };
 
+        public static string AliasOrColumn(this string quotedExpr)
+        {
+            var aliasOrSelectColumn = quotedExpr.LastRightPart(" AS ");
+            return aliasOrSelectColumn;
+        }
+
         public static string StripDbQuotes(this string quotedExpr)
         {
             return quotedExpr.Trim(QuotedChars);

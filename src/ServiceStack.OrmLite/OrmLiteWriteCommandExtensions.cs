@@ -831,7 +831,7 @@ namespace ServiceStack.OrmLite
 
         internal static long InsertIntoSelect<T>(this IDbCommand dbCmd, ISqlExpression query, Action<IDbCommand> commandFilter) => 
             dbCmd.InsertIntoSelectInternal<T>(query, commandFilter).ExecNonQuery();
-
+        
         internal static IDbCommand InsertIntoSelectInternal<T>(this IDbCommand dbCmd, ISqlExpression query, Action<IDbCommand> commandFilter)
         {
             var dialectProvider = dbCmd.GetDialectProvider();
@@ -843,7 +843,7 @@ namespace ServiceStack.OrmLite
                 .ParseCommands();
 
             var fieldsOrAliases = selectFields
-                .Map(x => x.Original.ToString().LastRightPart(" AS ").Trim().StripDbQuotes());
+                .Map(x => x.Original.ToString().AliasOrColumn());
 
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, insertFields: fieldsOrAliases);
 
