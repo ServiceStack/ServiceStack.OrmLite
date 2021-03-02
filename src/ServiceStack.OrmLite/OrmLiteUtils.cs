@@ -810,12 +810,12 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sb).Trim();
         }
 
-        public static char[] QuotedChars = { '"', '`', '[', ']' };
+        private static readonly char[] QuotedChars = { '"', '`', '[', ']' };
 
         public static string AliasOrColumn(this string quotedExpr)
         {
-            var aliasOrSelectColumn = quotedExpr.LastRightPart(" AS ");
-            return aliasOrSelectColumn;
+            var ret = quotedExpr.LastRightPart(" AS ").Trim();
+            return ret;
         }
 
         public static string StripDbQuotes(this string quotedExpr)
