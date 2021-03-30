@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
@@ -453,6 +454,21 @@ namespace ServiceStack.OrmLite.Tests
                 
             Assert.That(rows[0].someEnum, Is.EqualTo(SomeEnum.Value2));
         }
+
+        [Test]
+        public void Does_insert_types_with_EnumMembers()
+        {
+            OrmLiteUtils.PrintSql();
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<TypeWithEnumMember>();
+
+            db.Insert(new TypeWithEnumMember {Id = 1, WorkflowType = WorkflowType.SalesInvoice});
+            db.Insert(new TypeWithEnumMember {Id = 2, WorkflowType = WorkflowType.PurchaseInvoice});
+
+            var results = db.Select<TypeWithEnumMember>().ToDictionary(x => x.Id);
+            Assert.That(results[1].WorkflowType, Is.EqualTo(WorkflowType.SalesInvoice));
+            Assert.That(results[2].WorkflowType, Is.EqualTo(WorkflowType.PurchaseInvoice));
+        }
     }
 
     [EnumAsChar]
@@ -544,5 +560,22 @@ namespace ServiceStack.OrmLite.Tests
         public int Id { get; set; }
         public SomeEnum EnumValue { get; set; }
         public SomeEnum? NullableEnumValue { get; set; }
+    }
+    
+    public enum WorkflowType
+    {
+        Unknown,
+        [EnumMember(Value = "Sales Invoices")]
+        SalesInvoice,
+        [EnumMember(Value = "Purchase Invoices")]
+        PurchaseInvoice,
+        [EnumMember(Value = "Supplier Statement")]
+        SupplierStatement
+    }
+
+    public class TypeWithEnumMember
+    {
+        public int Id { get; set; }
+        public WorkflowType WorkflowType { get; set; }
     }
 }
