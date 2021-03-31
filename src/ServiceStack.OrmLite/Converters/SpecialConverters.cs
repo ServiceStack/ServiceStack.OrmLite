@@ -78,7 +78,9 @@ namespace ServiceStack.OrmLite.Converters
             if (!isEnumFlags && long.TryParse(value.ToString(), out var enumValue))
                 value = Enum.ToObject(fieldType, enumValue);
 
-            var enumString = DialectProvider.StringSerializer.SerializeToString(value);
+            var enumString = enumKind == EnumKind.EnumMember
+                ? value.ToString()
+                : DialectProvider.StringSerializer.SerializeToString(value);
             if (enumString == null || enumString == "null")
                 enumString = value.ToString();
 
@@ -136,7 +138,7 @@ namespace ServiceStack.OrmLite.Converters
         }
 
         //cache expensive to calculate operation
-        static readonly ConcurrentDictionary<Type, bool> intEnums = new ConcurrentDictionary<Type, bool>();
+        static readonly ConcurrentDictionary<Type, bool> intEnums = new();
 
         public static bool IsIntEnum(Type fieldType)
         {

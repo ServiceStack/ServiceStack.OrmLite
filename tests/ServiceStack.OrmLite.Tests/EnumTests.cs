@@ -458,7 +458,6 @@ namespace ServiceStack.OrmLite.Tests
         [Test]
         public void Does_insert_types_with_EnumMembers()
         {
-            OrmLiteUtils.PrintSql();
             using var db = OpenDbConnection();
             db.DropAndCreateTable<TypeWithEnumMember>();
 
@@ -468,6 +467,19 @@ namespace ServiceStack.OrmLite.Tests
             var results = db.Select<TypeWithEnumMember>().ToDictionary(x => x.Id);
             Assert.That(results[1].WorkflowType, Is.EqualTo(WorkflowType.SalesInvoice));
             Assert.That(results[2].WorkflowType, Is.EqualTo(WorkflowType.PurchaseInvoice));
+        }
+
+        [Test]
+        public void Can_query_EnumMembers_with_SqlFmt()
+        {
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<TypeWithEnumMember>();
+
+            var id = 1;
+            db.Insert(new TypeWithEnumMember {Id = id, WorkflowType = WorkflowType.PurchaseInvoice});
+            var result = db.Single<TypeWithEnumMember>(
+                "select * from TypeWithEnumMember as db where db.Id = {0} and db.WorkflowType = {1}".SqlFmt(id, WorkflowType.PurchaseInvoice));
+            Assert.That(result.WorkflowType, Is.EqualTo(WorkflowType.PurchaseInvoice));
         }
     }
 
