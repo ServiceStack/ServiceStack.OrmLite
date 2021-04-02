@@ -478,7 +478,7 @@ namespace ServiceStack.OrmLite.Tests
             var id = 1;
             db.Insert(new TypeWithEnumMember {Id = id, WorkflowType = WorkflowType.PurchaseInvoice});
             var result = db.Single<TypeWithEnumMember>(
-                "select * from TypeWithEnumMember as db where db.Id = {0} and db.WorkflowType = {1}".SqlFmt(id, WorkflowType.PurchaseInvoice));
+                "select * from " + db.GetTableName<TypeWithEnumMember>() + " as db where db.Id = {0} and db.WorkflowType = {1}".SqlFmt(id, WorkflowType.PurchaseInvoice));
             Assert.That(result.WorkflowType, Is.EqualTo(WorkflowType.PurchaseInvoice));
         }
     }
