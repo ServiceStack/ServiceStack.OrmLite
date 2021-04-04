@@ -6,7 +6,7 @@ using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    [TestFixtureOrmLiteDialects(Dialect.Sqlite)]
+    [TestFixtureOrmLiteDialects(Dialect.Sqlite | Dialect.MySql)]
     public class LoadReferenceIssueWithCyclicalForeignKeys : OrmLiteProvidersTestBase
     {
         public LoadReferenceIssueWithCyclicalForeignKeys(DialectContext context) : base(context) { }
@@ -44,8 +44,10 @@ namespace ServiceStack.OrmLite.Tests.Issues
         private void RecreateTables(IDbConnection db)
         {
             db.DisableForeignKeysCheck();
-            db.DropAndCreateTable<NameEntity>();
-            db.DropAndCreateTable<ResearchEntity>();
+            db.DropTable<NameEntity>();
+            db.DropTable<ResearchEntity>();
+            db.CreateTable<NameEntity>();
+            db.CreateTable<ResearchEntity>();
             db.EnableForeignKeysCheck();
         }
 

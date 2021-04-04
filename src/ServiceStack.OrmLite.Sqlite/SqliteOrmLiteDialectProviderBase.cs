@@ -248,13 +248,13 @@ namespace ServiceStack.OrmLite.Sqlite
 
         public override string SqlRandom => "random()";
 
-        public override void EnableForeignKeysCheck(IDbCommand cmd) => cmd.ExecNonQuery($"PRAGMA foreign_keys = ON;");
+        public override void EnableForeignKeysCheck(IDbCommand cmd) => cmd.ExecNonQuery("PRAGMA foreign_keys = ON;");
         public override Task EnableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token = default) => 
-            cmd.ExecNonQueryAsync($"PRAGMA foreign_keys = ON;", null, token);
+            cmd.ExecNonQueryAsync("PRAGMA foreign_keys = ON;", null, token);
 
-        public override void DisableForeignKeysCheck(IDbCommand cmd) => cmd.ExecNonQuery($"PRAGMA foreign_keys = OFF;");
+        public override void DisableForeignKeysCheck(IDbCommand cmd) => cmd.ExecNonQuery("PRAGMA foreign_keys = OFF;");
         public override Task DisableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token = default) => 
-            cmd.ExecNonQueryAsync($"PRAGMA foreign_keys = OFF;", null, token);
+            cmd.ExecNonQueryAsync("PRAGMA foreign_keys = OFF;", null, token);
     }
 
     public static class SqliteExtensions

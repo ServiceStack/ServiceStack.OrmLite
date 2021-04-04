@@ -554,6 +554,13 @@ namespace ServiceStack.OrmLite.MySql
 
         public override string SqlBool(bool value) => value ? "1" : "0";
 
+        public override void EnableForeignKeysCheck(IDbCommand cmd) => cmd.ExecNonQuery("SET FOREIGN_KEY_CHECKS=1;");
+        public override Task EnableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token = default) => 
+	        cmd.ExecNonQueryAsync("SET FOREIGN_KEY_CHECKS=1;", null, token);
+        public override void DisableForeignKeysCheck(IDbCommand cmd) => cmd.ExecNonQuery("SET FOREIGN_KEY_CHECKS=0;");
+        public override Task DisableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token = default) => 
+	        cmd.ExecNonQueryAsync("SET FOREIGN_KEY_CHECKS=0;", null, token);
+
         protected DbConnection Unwrap(IDbConnection db)
         {
             return (DbConnection)db.ToDbConnection();

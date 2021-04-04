@@ -685,6 +685,13 @@ namespace ServiceStack.OrmLite.SqlServer
                 : $"CAST({fieldOrValue} AS {castAs})";
 
         public override string SqlRandom => "NEWID()";
+
+        public override void EnableForeignKeysCheck(IDbCommand cmd) => cmd.ExecNonQuery("EXEC sp_msforeachtable \"ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all\"");
+        public override Task EnableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token = default) => 
+            cmd.ExecNonQueryAsync("EXEC sp_msforeachtable \"ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all\"", null, token);
+        public override void DisableForeignKeysCheck(IDbCommand cmd) => cmd.ExecNonQuery("EXEC sp_msforeachtable \"ALTER TABLE ? NOCHECK CONSTRAINT all\"");
+        public override Task DisableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token = default) => 
+            cmd.ExecNonQueryAsync("EXEC sp_msforeachtable \"ALTER TABLE ? NOCHECK CONSTRAINT all\"", null, token);
         
         protected SqlConnection Unwrap(IDbConnection db) => (SqlConnection)db.ToDbConnection();
 
