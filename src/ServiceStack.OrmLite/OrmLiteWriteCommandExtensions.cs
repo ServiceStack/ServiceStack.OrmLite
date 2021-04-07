@@ -84,22 +84,12 @@ namespace ServiceStack.OrmLite
             var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName, schema);
             if (overwrite && tableExists)
             {
-                if (modelDef.PreDropTableSql != null)
-                {
-                    ExecuteSql(dbCmd, modelDef.PreDropTableSql);
-                }
-
                 DropTable(dbCmd, modelDef);
 
                 var postDropTableSql = dialectProvider.ToPostDropTableStatement(modelDef);
                 if (postDropTableSql != null)
                 {
                     ExecuteSql(dbCmd, postDropTableSql);
-                }
-
-                if (modelDef.PostDropTableSql != null)
-                {
-                    ExecuteSql(dbCmd, modelDef.PostDropTableSql);
                 }
 
                 tableExists = false;

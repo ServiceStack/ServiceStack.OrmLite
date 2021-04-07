@@ -80,6 +80,18 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
+    [PreDropTable("-- PreDropTable")]
+    [PostDropTable("-- PostDropTable")]
+    [PreCreateTable("-- PreCreateTable")]
+    [PostCreateTable("-- PostCreateTable")]
+    public class ModelWithPreAndPostDrop
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+    }
+
     [TestFixtureOrmLite]
     public class CustomSqlTests : OrmLiteProvidersTestBase
     {
@@ -163,6 +175,14 @@ namespace ServiceStack.OrmLite.Tests
             var seedDataNames = db.Select<DynamicAttributeSeedData>().ConvertAll(x => x.Name);
 
             Assert.That(seedDataNames, Is.EquivalentTo(new[] {"Foo", "Bar"}));
+        }
+
+        [Test]
+        public void Does_execute_PostCreateTable_and_PreDropTable()
+        {
+            OrmLiteUtils.PrintSql();
+            using var db = OpenDbConnection();
+            db.CreateTable<ModelWithPreAndPostDrop>(true);
         }
 
         [Test]
