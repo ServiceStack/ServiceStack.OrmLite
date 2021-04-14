@@ -32,18 +32,27 @@ a convenient API to persist related models. Effectively this allows you to creat
 POCO type and it should persist as expected in a DB Table with columns for each of the classes 1st 
 level public properties.
 
-# Download 
+## Download
 
-    > Install-Package ServiceStack.OrmLite.PostgreSQL
+Install the NuGet package for your RDBMS Provider, e.g: 
 
-### 8 flavours of OrmLite is on NuGet: 
+    $ dotnet add package ServiceStack.OrmLite.PostgreSQL
 
+Package Reference:
+
+```xml
+<PackageReference Include="ServiceStack.OrmLite.SqlServer" Version="5.*" />
+```
+
+### OrmLite RDBMS Providers
+
+  - [ServiceStack.OrmLite.PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
   - [ServiceStack.OrmLite.SqlServer](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
   - [ServiceStack.OrmLite.SqlServer.Data](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer.Data) (uses [Microsoft.Data.SqlClient](https://devblogs.microsoft.com/dotnet/introducing-the-new-microsoftdatasqlclient/))
   - [ServiceStack.OrmLite.Sqlite](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite)
   - [ServiceStack.OrmLite.Sqlite.Data](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Data) (uses [Microsoft.Data.SQLite](https://stackoverflow.com/a/52025556/85785))
+  - [ServiceStack.OrmLite.Sqlite.Cil](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Cil)
   - [ServiceStack.OrmLite.Sqlite.Windows](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Windows) (Windows / .NET Framework only)
-  - [ServiceStack.OrmLite.PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
   - [ServiceStack.OrmLite.MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
   - [ServiceStack.OrmLite.MySqlConnector](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySqlConnector) (uses [MySqlConnector](https://github.com/mysql-net/MySqlConnector))
 
