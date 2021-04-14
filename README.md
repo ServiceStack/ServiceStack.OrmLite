@@ -51,7 +51,7 @@ Package Reference:
   - [ServiceStack.OrmLite.SqlServer.Data](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer.Data) (uses [Microsoft.Data.SqlClient](https://devblogs.microsoft.com/dotnet/introducing-the-new-microsoftdatasqlclient/))
   - [ServiceStack.OrmLite.Sqlite](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite)
   - [ServiceStack.OrmLite.Sqlite.Data](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Data) (uses [Microsoft.Data.SQLite](https://stackoverflow.com/a/52025556/85785))
-  - [ServiceStack.OrmLite.Sqlite.Cil](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Cil)
+  - [ServiceStack.OrmLite.Sqlite.Cil](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Cil) (uses [Uses SQLitePCLRaw.bundle_cil](https://ericsink.com/entries/sqlite_llama_preview.html))
   - [ServiceStack.OrmLite.Sqlite.Windows](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Windows) (Windows / .NET Framework only)
   - [ServiceStack.OrmLite.MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
   - [ServiceStack.OrmLite.MySqlConnector](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySqlConnector) (uses [MySqlConnector](https://github.com/mysql-net/MySqlConnector))
