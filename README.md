@@ -3413,6 +3413,8 @@ For simplicity, and to be able to have the same POCO class persisted in db4o, me
 to be `Id` although you use `[Alias("DbFieldName")]` attribute it map it to a column with a different name or use 
 the `[PrimaryKey]` attribute to tell OrmLite to use a different property for the primary key.
 
+If an `Id` property or `[PrimaryKey]` attribute isn't specified, a Primary Key is assigned to `[AutoIncrement]` and `[AutoId]` properties, otherwise it's assumed the first property is the tables Primary Key.
+
 You can still `SELECT` from these tables, you will just be unable to make use of APIs that rely on it, e.g. 
 `Update` or `Delete` where the filter is implied (i.e. not specified), all the APIs that end with `ById`, etc.
 
