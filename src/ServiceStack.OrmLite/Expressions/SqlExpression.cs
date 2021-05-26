@@ -2140,7 +2140,8 @@ namespace ServiceStack.OrmLite
             {
                 if (UseSelectPropertiesAsAliases ||                  // Use anon property alias when explicitly requested
                     propExpr.Member.Name != member.Name ||           // or when names don't match 
-                    propExpr.Expression.Type != ModelDef.ModelType)  // or when selecting a field from a different table
+                    propExpr.Expression.Type != ModelDef.ModelType || // or when selecting a field from a different table
+                    member.Name != ModelDef.FieldDefinitions.First(x => x.Name == member.Name).FieldName)  //or when name and alias don't match  
                     return new SelectItemExpression(DialectProvider, expr.ToString(), member.Name);
 
                 return expr;

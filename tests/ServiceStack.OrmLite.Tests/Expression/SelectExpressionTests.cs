@@ -291,6 +291,27 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(result, Is.Not.Null);
             }
         }
+
+
+        [Test]
+        public void Can_Select_Filed_Alias_Expression()
+        {
+
+            using (var db = OpenDbConnection())
+            {
+                var sql = db.From<Employee>()
+                    .Join<Company>((e, c) => e.CompanyId == c.Id)
+                    .Select<Employee, Company>((e, c) =>
+                        new
+                        {
+                            Id = e.Id,
+                            Name = e.Name, // test this property use alias
+                            CompanyName = c.Name
+                        });
+                Assert.AreEqual(sql.SelectExpression, "SELECT \"Employee\".\"Id\", \"Employee\".\"EmployeeName\" AS \"Name\", \"Company\".\"CompanyName\" AS \"CompanyName\"");
+            }
+
+        }
     }
 
     public class Submission
@@ -299,6 +320,21 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public DateTime StoryDate { get; set; }
         public string Headline { get; set; }
         public string Body { get; set; }
+    }
+
+    public class Company
+    {
+        public int Id { get; set; }
+        [Alias("CompanyName")] 
+        public string Name { get; set; }
+    }
+
+    public class Employee
+    {
+        public int Id { get; set; }
+        public int CompanyId { get; set; }
+        [Alias("EmployeeName")] 
+        public string Name { get; set; }
     }
 
 }
