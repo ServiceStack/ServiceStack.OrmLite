@@ -292,25 +292,19 @@ namespace ServiceStack.OrmLite.Tests.Expression
             }
         }
 
-
         [Test]
         public void Can_Select_Filed_Alias_Expression()
         {
-
-            using (var db = OpenDbConnection())
-            {
-                var sql = db.From<Employee>()
-                    .Join<Company>((e, c) => e.CompanyId == c.Id)
-                    .Select<Employee, Company>((e, c) =>
-                        new
-                        {
-                            Id = e.Id,
-                            Name = e.Name, // test this property use alias
-                            CompanyName = c.Name
-                        });
-                Assert.AreEqual(sql.SelectExpression, "SELECT \"Employee\".\"Id\", \"Employee\".\"EmployeeName\" AS \"Name\", \"Company\".\"CompanyName\" AS \"CompanyName\"");
-            }
-
+            using var db = OpenDbConnection();
+            var sql = db.From<Employee>()
+                .Join<Company>((e, c) => e.CompanyId == c.Id)
+                .Select<Employee, Company>((e, c) => new {
+                        Id = e.Id,
+                        Name = e.Name, // test this property use alias
+                        CompanyName = c.Name
+                    });
+            Assert.That(sql.SelectExpression.NormalizeSql(), Is.EqualTo(
+                "select employee.id, employee.employeename as name, company.companyname as companyname"));
         }
     }
 
