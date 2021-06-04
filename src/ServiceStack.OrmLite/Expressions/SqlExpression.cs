@@ -861,7 +861,7 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public virtual SqlExpression<T> Having(Expression<Func<T, bool>> predicate)
+        protected SqlExpression<T> AppendHaving(Expression predicate)
         {
             if (predicate != null)
             {
@@ -876,6 +876,11 @@ namespace ServiceStack.OrmLite
 
             return this;
         }
+
+        public virtual SqlExpression<T> Having(Expression<Func<T, bool>> predicate) => AppendHaving(predicate);
+        public virtual SqlExpression<T> Having<Table>(Expression<Func<Table, bool>> predicate) => AppendHaving(predicate);
+        public virtual SqlExpression<T> Having<Table1, Table2>(Expression<Func<Table1, Table2, bool>> predicate) => AppendHaving(predicate);
+        public virtual SqlExpression<T> Having<Table1, Table2, Table3>(Expression<Func<Table1, Table2, Table3, bool>> predicate) => AppendHaving(predicate);
 
         public virtual SqlExpression<T> OrderBy() => OrderBy(string.Empty);
 
