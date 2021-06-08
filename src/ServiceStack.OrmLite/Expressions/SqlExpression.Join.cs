@@ -22,7 +22,14 @@ namespace ServiceStack.OrmLite
 
     public abstract partial class SqlExpression<T> : ISqlExpression
     {
-        protected List<ModelDefinition> tableDefs = new List<ModelDefinition>();
+        protected List<ModelDefinition> tableDefs = new();
+
+        public List<ModelDefinition> GetAllTables()
+        {
+            var allTableDefs = new List<ModelDefinition> { modelDef };
+            allTableDefs.AddRange(tableDefs);
+            return allTableDefs;
+        }
 
         public bool IsJoinedTable(Type type)
         {

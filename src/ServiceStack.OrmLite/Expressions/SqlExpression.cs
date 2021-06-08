@@ -18,7 +18,7 @@ namespace ServiceStack.OrmLite
         public const string FalseLiteral = "(1=0)";
 
         private Expression<Func<T, bool>> underlyingExpression;
-        private List<string> orderByProperties = new List<string>();
+        private List<string> orderByProperties = new();
         private string selectExpression = string.Empty;
         private string fromExpression = null;
         private string whereExpression;
@@ -286,8 +286,7 @@ namespace ServiceStack.OrmLite
 
             useFieldName = true;
 
-            var allTableDefs = new List<ModelDefinition> { modelDef };
-            allTableDefs.AddRange(tableDefs);
+            var allTableDefs = GetAllTables();
 
             var fieldsList = new List<string>();
             var sb = StringBuilderCache.Allocate();
