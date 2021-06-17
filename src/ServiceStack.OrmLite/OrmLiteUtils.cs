@@ -311,13 +311,19 @@ namespace ServiceStack.OrmLite
                     if (string.Equals("EOT", reader.GetName(endPos), StringComparison.OrdinalIgnoreCase))
                         break;
                 }
+                
+                var noEOT = endPos == reader.FieldCount; // If no explicit EOT delimiter, split by field count
+                if (genericArgs.Length > 0 && noEOT)
+                {
+                    endPos = startPos + modelDef.FieldDefinitionsArray.Length;
+                }
 
                 var indexCache = reader.GetIndexFieldsCache(modelDef, dialectProvider, onlyFields,
                     startPos: startPos, endPos: endPos);
 
                 modelIndexCaches.Add(indexCache);
 
-                startPos = endPos + 1;
+                startPos = noEOT ? endPos : endPos + 1;
             }
             return modelIndexCaches;
         }

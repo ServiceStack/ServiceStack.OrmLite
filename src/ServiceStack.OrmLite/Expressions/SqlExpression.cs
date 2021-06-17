@@ -361,7 +361,6 @@ namespace ServiceStack.OrmLite
         /// <param name='fields'>
         /// x=> x.SomeProperty1 or x=> new{ x.SomeProperty1, x.SomeProperty2}
         /// </param>
-        /// </typeparam>
         public virtual SqlExpression<T> Select(Expression<Func<T, object>> fields)
         {
             return InternalSelect(fields);
@@ -1510,10 +1509,7 @@ namespace ServiceStack.OrmLite
                     BuildSelectExpression(string.Empty, false);
                 return selectExpression;
             }
-            set
-            {
-                selectExpression = value;
-            }
+            set => selectExpression = value;
         }
 
         public string FromExpression
@@ -2181,8 +2177,21 @@ namespace ServiceStack.OrmLite
             var methodCallExpr = arg as MethodCallExpression;
             var mi = methodCallExpr?.Method;
             var declareType = mi?.DeclaringType;
-            if (declareType != null && declareType.Name == "Sql" && mi.Name != "Desc" && mi.Name != "Asc" && mi.Name != "As" && mi.Name != "AllFields") 
-                return new PartialSqlString(expr + " AS " + member.Name);    // new { Alias = Sql.Count("*") }
+            if (declareType != null && declareType.Name == nameof(Sql))
+            {
+                if (mi.Name == nameof(Sql.TableAlias) || mi.Name == nameof(Sql.JoinAlias))
+                {
+                    if (expr is PartialSqlString ps && ps.Text.IndexOf(',') >= 0)
+                        return ps;                                               // new { buyer = Sql.TableAlias(b, "buyer")
+                    return new PartialSqlString(expr + " AS " + member.Name);    // new { BuyerName = Sql.TableAlias(b.Name, "buyer") }
+                }
+                
+                if (mi.Name != nameof(Sql.Desc) && mi.Name != nameof(Sql.Asc) && mi.Name != nameof(Sql.As) && mi.Name != nameof(Sql.AllFields))
+                    return new PartialSqlString(expr + " AS " + member.Name);    // new { Alias = Sql.Count("*") }
+            }
+
+            if (expr is string s && s == Sql.EOT) // new { t1 = Sql.EOT, t2 = "0 EOT" }
+                return new PartialSqlString(s);
 
             if (arg is ConditionalExpression ce ||                           // new { Alias = x.Value > 1 ? 1 : x.Value }
                 arg is BinaryExpression      be ||                           // new { Alias = x.First + " " + x.Last }
@@ -2194,7 +2203,7 @@ namespace ServiceStack.OrmLite
                     ? converter.ToQuotedString(expr.GetType(), expr)
                     : expr.ToString();
                 
-                return new PartialSqlString(OrmLiteUtils.UnquotedColumnName(strExpr) != member.Name 
+                return new PartialSqlString(OrmLiteUtils.UnquotedColumnName(strExpr) != member.Name
                     ? strExpr + " AS " + member.Name 
                     : strExpr);
             }
@@ -2835,6 +2844,9 @@ namespace ServiceStack.OrmLite
                 case nameof(Sql.In):
                     statement = ConvertInExpressionToSql(m, quotedColName);
                     break;
+                case nameof(Sql.Asc):
+                    statement = $"{quotedColName} ASC";
+                    break;
                 case nameof(Sql.Desc):
                     statement = $"{quotedColName} DESC";
                     break;
@@ -2860,7 +2872,16 @@ namespace ServiceStack.OrmLite
                     break;
                 case nameof(Sql.JoinAlias):
                 case nameof(Sql.TableAlias):
-                    statement = args[0] + "." + quotedColName.ToString().LastRightPart('.');
+                    if (quotedColName is SelectList && m.Arguments.Count == 2 && m.Arguments[0] is ParameterExpression p)
+                    {
+                        var paramModelDef = p.Type.GetModelDefinition();
+                        var alias = Visit(m.Arguments[1]).ToString();
+                        statement = new SelectList(DialectProvider.GetColumnNames(paramModelDef, alias)).ToString();
+                    }
+                    else
+                    {
+                        statement = args[0] + "." + quotedColName.ToString().LastRightPart('.');
+                    }
                     break;
                 case nameof(Sql.Custom):
                     statement = quotedColName.ToString();
