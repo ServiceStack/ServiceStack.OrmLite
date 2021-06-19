@@ -65,6 +65,8 @@ The `.Core` packages contains only **.NET Standard 2.0** versions which can be u
   - [ServiceStack.OrmLite.MySql.Core](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql.Core)
   - [ServiceStack.OrmLite.Sqlite.Core](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Core) 
 
+#### Community Providers
+
 Unofficial Releases maintained by ServiceStack Community:
 
   - [ServiceStack.OrmLite.Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle)
