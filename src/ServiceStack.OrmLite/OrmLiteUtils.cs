@@ -305,6 +305,9 @@ namespace ServiceStack.OrmLite
             foreach (var modelType in genericArgs)
             {
                 var modelDef = modelType.GetModelDefinition();
+                if (modelDef == null)
+                    throw new Exception($"'{modelType.Name}' is not a table type");
+                
                 var endPos = startPos;
                 for (; endPos < reader.FieldCount; endPos++)
                 {
@@ -314,9 +317,7 @@ namespace ServiceStack.OrmLite
                 
                 var noEOT = endPos == reader.FieldCount; // If no explicit EOT delimiter, split by field count
                 if (genericArgs.Length > 0 && noEOT)
-                {
                     endPos = startPos + modelDef.FieldDefinitionsArray.Length;
-                }
 
                 var indexCache = reader.GetIndexFieldsCache(modelDef, dialectProvider, onlyFields,
                     startPos: startPos, endPos: endPos);
