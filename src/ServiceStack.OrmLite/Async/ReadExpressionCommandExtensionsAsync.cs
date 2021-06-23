@@ -38,68 +38,68 @@ namespace ServiceStack.OrmLite
         internal static Task<List<Tuple<T, T2>>> SelectMultiAsync<T, T2>(this IDbCommand dbCmd, SqlExpression<T> q, CancellationToken token)
         {
             q.Select(q.CreateMultiSelect<T, T2, EOT, EOT, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
-            return dbCmd.ExprConvertToListAsync<Tuple<T, T2>>(q.ToSelectStatement(), q.Params, q.OnlyFields, token);
+            return dbCmd.ExprConvertToListAsync<Tuple<T, T2>>(q.ToSelectStatement(QueryType.Select), q.Params, q.OnlyFields, token);
         }
 
         internal static Task<List<Tuple<T, T2, T3>>> SelectMultiAsync<T, T2, T3>(this IDbCommand dbCmd, SqlExpression<T> q, CancellationToken token)
         {
             q.Select(q.CreateMultiSelect<T, T2, T3, EOT, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
-            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3>>(q.ToSelectStatement(), q.Params, q.OnlyFields, token);
+            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3>>(q.ToSelectStatement(QueryType.Select), q.Params, q.OnlyFields, token);
         }
 
         internal static Task<List<Tuple<T, T2, T3, T4>>> SelectMultiAsync<T, T2, T3, T4>(this IDbCommand dbCmd, SqlExpression<T> q, CancellationToken token)
         {
             q.Select(q.CreateMultiSelect<T, T2, T3, T4, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
-            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4>>(q.ToSelectStatement(), q.Params, q.OnlyFields, token);
+            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4>>(q.ToSelectStatement(QueryType.Select), q.Params, q.OnlyFields, token);
         }
 
         internal static Task<List<Tuple<T, T2, T3, T4, T5>>> SelectMultiAsync<T, T2, T3, T4, T5>(this IDbCommand dbCmd, SqlExpression<T> q, CancellationToken token)
         {
             q.Select(q.CreateMultiSelect<T, T2, T3, T4, T5, EOT, EOT>(dbCmd.GetDialectProvider()));
-            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4, T5>>(q.ToSelectStatement(), q.Params, q.OnlyFields, token);
+            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4, T5>>(q.ToSelectStatement(QueryType.Select), q.Params, q.OnlyFields, token);
         }
 
         internal static Task<List<Tuple<T, T2, T3, T4, T5, T6>>> SelectMultiAsync<T, T2, T3, T4, T5, T6>(this IDbCommand dbCmd, SqlExpression<T> q, CancellationToken token)
         {
             q.Select(q.CreateMultiSelect<T, T2, T3, T4, T5, T6, EOT>(dbCmd.GetDialectProvider()));
-            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4, T5, T6>>(q.ToSelectStatement(), q.Params, q.OnlyFields, token);
+            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4, T5, T6>>(q.ToSelectStatement(QueryType.Select), q.Params, q.OnlyFields, token);
         }
 
         internal static Task<List<Tuple<T, T2, T3, T4, T5, T6, T7>>> SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(this IDbCommand dbCmd, SqlExpression<T> q, CancellationToken token)
         {
             q.Select(q.CreateMultiSelect<T, T2, T3, T4, T5, T6, T7>(dbCmd.GetDialectProvider()));
-            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4, T5, T6, T7>>(q.ToSelectStatement(), q.Params, q.OnlyFields, token);
+            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4, T5, T6, T7>>(q.ToSelectStatement(QueryType.Select), q.Params, q.OnlyFields, token);
         }
 
 
         internal static Task<List<Tuple<T, T2>>> SelectMultiAsync<T, T2>(this IDbCommand dbCmd, SqlExpression<T> q, string[] tableSelects, CancellationToken token)
         {
-            return dbCmd.ExprConvertToListAsync<Tuple<T, T2>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(), q.Params, q.OnlyFields, token);
+            return dbCmd.ExprConvertToListAsync<Tuple<T, T2>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(QueryType.Select), q.Params, q.OnlyFields, token);
         }
 
         internal static Task<List<Tuple<T, T2, T3>>> SelectMultiAsync<T, T2, T3>(this IDbCommand dbCmd, SqlExpression<T> q, string[] tableSelects, CancellationToken token)
         {
-            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(), q.Params, q.OnlyFields, token);
+            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(QueryType.Select), q.Params, q.OnlyFields, token);
         }
 
         internal static Task<List<Tuple<T, T2, T3, T4>>> SelectMultiAsync<T, T2, T3, T4>(this IDbCommand dbCmd, SqlExpression<T> q, string[] tableSelects, CancellationToken token)
         {
-            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(), q.Params, q.OnlyFields, token);
+            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(QueryType.Select), q.Params, q.OnlyFields, token);
         }
 
         internal static Task<List<Tuple<T, T2, T3, T4, T5>>> SelectMultiAsync<T, T2, T3, T4, T5>(this IDbCommand dbCmd, SqlExpression<T> q, string[] tableSelects, CancellationToken token)
         {
-            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4, T5>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(), q.Params, q.OnlyFields, token);
+            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4, T5>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(QueryType.Select), q.Params, q.OnlyFields, token);
         }
 
         internal static Task<List<Tuple<T, T2, T3, T4, T5, T6>>> SelectMultiAsync<T, T2, T3, T4, T5, T6>(this IDbCommand dbCmd, SqlExpression<T> q, string[] tableSelects, CancellationToken token)
         {
-            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4, T5, T6>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(), q.Params, q.OnlyFields, token);
+            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4, T5, T6>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(QueryType.Select), q.Params, q.OnlyFields, token);
         }
 
         internal static Task<List<Tuple<T, T2, T3, T4, T5, T6, T7>>> SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(this IDbCommand dbCmd, SqlExpression<T> q, string[] tableSelects, CancellationToken token)
         {
-            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4, T5, T6, T7>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(), q.Params, q.OnlyFields, token);
+            return dbCmd.ExprConvertToListAsync<Tuple<T, T2, T3, T4, T5, T6, T7>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(QueryType.Select), q.Params, q.OnlyFields, token);
         }
 
 
@@ -164,7 +164,7 @@ namespace ServiceStack.OrmLite
         internal static Task<long> RowCountAsync<T>(this IDbCommand dbCmd, SqlExpression<T> expression, CancellationToken token)
         {
             var countExpr = expression.Clone().OrderBy();
-            return dbCmd.ScalarAsync<long>(dbCmd.GetDialectProvider().ToRowCountStatement(countExpr.ToSelectStatement()), countExpr.Params, token);
+            return dbCmd.ScalarAsync<long>(dbCmd.GetDialectProvider().ToRowCountStatement(countExpr.ToSelectStatement(QueryType.Scalar)), countExpr.Params, token);
         }
 
         internal static Task<long> RowCountAsync(this IDbCommand dbCmd, string sql, object anonType, CancellationToken token)

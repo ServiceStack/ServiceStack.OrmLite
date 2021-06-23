@@ -75,7 +75,7 @@ namespace ServiceStack.OrmLite.SqlServer
             return gens;
         }
 
-        public override string ToSelectStatement(ModelDefinition modelDef,
+        public override string ToSelectStatement(QueryType queryType, ModelDefinition modelDef,
             string selectExpression,
             string bodyExpression,
             string orderByExpression = null,
@@ -89,11 +89,11 @@ namespace ServiceStack.OrmLite.SqlServer
             if (orderByExpression != null)
                 sb.Append(orderByExpression);
 
-            if (offset != null || rows != null)
+            if (queryType == QueryType.Select || (rows == 1 && offset is null or 0))
             {
-                if (orderByExpression.IsEmpty())
+                if (queryType == QueryType.Select && orderByExpression.IsEmpty())
                 {
-                    var orderBy = offset == null && rows == 1 //Avoid for Single requests
+                    var orderBy = (offset is null or 0) && rows == 1 //Avoid for Single requests
                         ? "1"
                         : this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey);
 

@@ -1060,8 +1060,7 @@ namespace ServiceStack.OrmLite.Oracle
                 .Replace("%", @"^%");
         }
 
-
-        public override string ToSelectStatement(ModelDefinition modelDef,
+        public override string ToSelectStatement(QueryType queryType, ModelDefinition modelDef,
             string selectExpression,
             string bodyExpression,
             string orderByExpression = null,
@@ -1083,7 +1082,7 @@ namespace ServiceStack.OrmLite.Oracle
             if (!offset.HasValue)
                 offset = 0;
 
-            if (string.IsNullOrEmpty(orderByExpression) && rows.HasValue)
+            if ((queryType == QueryType.Select || (rows == 1 && offset is null or 0)) && string.IsNullOrEmpty(orderByExpression))
             {
                 var primaryKey = modelDef.FieldDefinitions.FirstOrDefault(x => x.IsPrimaryKey);
                 if (primaryKey == null)
@@ -1091,7 +1090,7 @@ namespace ServiceStack.OrmLite.Oracle
                     if (rows.Value == 1 && offset.Value == 0)
                     {
                         // Probably used Single<> extension method on a table with a composite key so let it through.
-                        // Lack of an orderby expression will mean it returns a random matching row, but that is OK.
+                        // Lack of an order by expression will mean it returns a random matching row, but that is OK.
                         orderByExpression = "";
                     }
                     else
@@ -1099,8 +1098,7 @@ namespace ServiceStack.OrmLite.Oracle
                 }
                 else
                 {
-                    orderByExpression = string.Format("ORDER BY {0}",
-                        this.GetQuotedColumnName(modelDef, primaryKey.FieldName));
+                    orderByExpression = $"ORDER BY {this.GetQuotedColumnName(modelDef, primaryKey.FieldName)}";
                 }
             }
             sbInner.Append(" " + orderByExpression);

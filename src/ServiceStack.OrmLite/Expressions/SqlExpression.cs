@@ -1371,7 +1371,7 @@ namespace ServiceStack.OrmLite
                 var clone = this.Clone();
                 var pk = DialectProvider.GetQuotedColumnName(modelDef, modelDef.PrimaryKey);
                 clone.Select(pk);
-                var subSql = clone.ToSelectStatement();
+                var subSql = clone.ToSelectStatement(QueryType.Select);
                 sql = $"DELETE FROM {DialectProvider.GetQuotedTableName(modelDef)} WHERE {pk} IN ({subSql})";
             }
             else
@@ -1466,13 +1466,15 @@ namespace ServiceStack.OrmLite
                 : sql;
         }
 
-        public virtual string ToSelectStatement()
+        public virtual string ToSelectStatement() => ToSelectStatement(QueryType.Select);
+
+        public virtual string ToSelectStatement(QueryType forType)
         {
             SelectFilter?.Invoke(this);
             OrmLiteConfig.SqlExpressionSelectFilter?.Invoke(GetUntyped());
 
             var sql = DialectProvider
-                .ToSelectStatement(modelDef, SelectExpression, BodyExpression, OrderByExpression, Offset, Rows);
+                .ToSelectStatement(forType, modelDef, SelectExpression, BodyExpression, OrderByExpression, offset: Offset, rows: Rows);
 
             return SqlFilter != null
                 ? SqlFilter(sql)
@@ -1484,7 +1486,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public virtual string ToMergedParamsSelectStatement()
         {
-            var sql = this.ToSelectStatement();
+            var sql = this.ToSelectStatement(QueryType.Select);
             var mergedSql = DialectProvider.MergeParamsIntoSql(sql, Params);
             return mergedSql;
         }
@@ -2912,7 +2914,7 @@ namespace ServiceStack.OrmLite
 
             if (argValue is ISqlExpression exprArg)
             {
-                var subSelect = exprArg.ToSelectStatement();
+                var subSelect = exprArg.ToSelectStatement(QueryType.Select);
                 var renameParams = new List<Tuple<string,string>>();
                 foreach (var p in exprArg.Params)
                 {
@@ -3067,7 +3069,15 @@ namespace ServiceStack.OrmLite
         List<IDbDataParameter> Params { get; }
 
         string ToSelectStatement();
+        string ToSelectStatement(QueryType forType);
         string SelectInto<TModel>();
+    }
+
+    public enum QueryType
+    {
+        Select,
+        Single,
+        Scalar,
     }
 
     public interface IHasDialectProvider

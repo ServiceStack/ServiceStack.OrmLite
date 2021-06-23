@@ -591,8 +591,7 @@ namespace ServiceStack.OrmLite
                 sbOrderBy.Append(" \n");
             }
 
-            var sql = dialectProvider.ToSelectStatement(
-                modelDef, StringBuilderCache.ReturnAndFree(sbSelect), StringBuilderCacheAlt.ReturnAndFree(sbBody), sbOrderBy.ToString(), Offset, Rows);
+            var sql = dialectProvider.ToSelectStatement(QueryType.Select, modelDef, StringBuilderCache.ReturnAndFree(sbSelect), StringBuilderCacheAlt.ReturnAndFree(sbBody), sbOrderBy.ToString(), offset: Offset, rows: Rows);
 
             return sql; 
         }
@@ -604,7 +603,8 @@ namespace ServiceStack.OrmLite
 
         public List<IDbDataParameter> Params { get; private set; }
 
-        public string ToSelectStatement()
+        public string ToSelectStatement() => ToSelectStatement(QueryType.Select);
+        public string ToSelectStatement(QueryType forType)
         {
             return SelectInto<TNewPoco>();
         }

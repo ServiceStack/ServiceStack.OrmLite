@@ -513,7 +513,7 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sql);
         }
 
-        public virtual string ToSelectStatement(ModelDefinition modelDef,
+        public virtual string ToSelectStatement(QueryType queryType, ModelDefinition modelDef,
             string selectExpression,
             string bodyExpression,
             string orderByExpression = null,
@@ -529,7 +529,7 @@ namespace ServiceStack.OrmLite
                 sb.Append(orderByExpression);
             }
 
-            if (offset != null || rows != null)
+            if ((queryType == QueryType.Select || (rows == 1 && offset is null or 0)) && (offset != null || rows != null))
             {
                 sb.Append("\n");
                 sb.Append(SqlLimit(offset, rows));
@@ -1660,7 +1660,7 @@ namespace ServiceStack.OrmLite
             var modelDef = expr.ModelDef;
             expr.UnsafeSelect(this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey));
 
-            var subSql = expr.ToSelectStatement();
+            var subSql = expr.ToSelectStatement(QueryType.Select);
 
             return subSql;
         }

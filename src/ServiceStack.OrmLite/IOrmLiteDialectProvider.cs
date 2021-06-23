@@ -118,7 +118,8 @@ namespace ServiceStack.OrmLite
 
         string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
-        string ToSelectStatement(ModelDefinition modelDef, string selectExpression, string bodyExpression, string orderByExpression = null, int? offset = null, int? rows = null);
+        string ToSelectStatement(QueryType queryType, ModelDefinition modelDef, string selectExpression,
+            string bodyExpression, string orderByExpression = null, int? offset = null, int? rows = null);
 
         string ToInsertRowStatement(IDbCommand cmd, object objWithProperties, ICollection<string> insertFields = null);
 

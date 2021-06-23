@@ -272,7 +272,7 @@ namespace ServiceStack.OrmLite
         {
             if ((CustomSelect && OnlyFields == null) || (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName))
             {
-                return ToSelectStatement();
+                return ToSelectStatement(QueryType.Select);
             }
 
             useFieldName = true;
@@ -411,7 +411,7 @@ namespace ServiceStack.OrmLite
             var columns = select.Length > 0 ? select : "*";
             SelectExpression = "SELECT " + (selectDistinct ? "DISTINCT " : "") + columns;
 
-            return ToSelectStatement();
+            return ToSelectStatement(QueryType.Select);
         }
 
         private static FieldDefinition FindWeakMatch(ModelDefinition tableDef, FieldDefinition fieldDef)

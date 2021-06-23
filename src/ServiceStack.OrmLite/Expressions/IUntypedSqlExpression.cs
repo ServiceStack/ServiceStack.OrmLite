@@ -620,9 +620,10 @@ namespace ServiceStack.OrmLite
             return q.ToDeleteRowStatement();
         }
 
-        public string ToSelectStatement()
+        public string ToSelectStatement() => ToSelectStatement(QueryType.Select);
+        public string ToSelectStatement(QueryType forType)
         {
-            return q.ToSelectStatement();
+            return q.ToSelectStatement(forType);
         }
 
         public string ToCountStatement()
