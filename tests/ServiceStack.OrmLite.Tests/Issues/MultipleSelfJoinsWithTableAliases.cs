@@ -350,5 +350,35 @@ namespace ServiceStack.OrmLite.Tests.Issues
             Assert.That(result.FirstName, Is.Not.Null);
             Assert.That(result.LastName, Is.Not.Null);
         }
+        
+        public class ContactIssueJson
+        {
+            public string Json { get; set; }
+        }
+
+        [Test]
+        public async Task Can_select_custom_json_result_in_Table_type()
+        {
+            if ((Dialect & Dialect.AnyPostgreSql) != Dialect)
+                return;
+            
+            using var db = await OpenDbConnectionAsync();
+            var tenantId = Guid.NewGuid();
+            var sale = PopulateData(db, tenantId);
+            
+            var q = db.From<Sale>()
+                .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.TableAlias("seller"))
+                .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.TableAlias("buyer"))
+                .GroupBy<Sale, ContactIssue>((s,c) => new { SaleId = s.Id, BuyerId = Sql.TableAlias(c.Id, "buyer") })
+                .Select<Sale,ContactIssue>((s,c) => new {
+                    s, 
+                    buyer = Sql.TableAlias(c, "buyer"), 
+                    Json = Sql.Custom($"json_agg(seller)"),
+                });
+            
+            var results = db.Select<Tuple<Sale, ContactIssue, ContactIssueJson>>(q);
+            Assert.That(results[0].Item3.Json, Does.StartWith("["));
+        }
+
     }
 }
