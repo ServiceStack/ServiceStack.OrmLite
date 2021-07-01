@@ -588,13 +588,7 @@ namespace ServiceStack.OrmLite.SqlServer
             {
                 var sql = StringBuilderCache.ReturnAndFree(sb) + orderByExpression;
 
-                if (take == int.MaxValue)
-                    return sql;
-
-                if (sql.Length < "SELECT".Length)
-                    return sql;
-
-                return $"{selectType} TOP {take + sql.Substring(selectType.Length)}";
+                return AddSqlServerTop(take, sql, selectType);
             }
 
             // Required because ordering is done by Windowing function
@@ -611,6 +605,17 @@ namespace ServiceStack.OrmLite.SqlServer
             var ret = $"SELECT * FROM (SELECT {selectExpression.Substring(selectType.Length)}, ROW_NUMBER() OVER ({orderByExpression}) As RowNum {bodyExpression}) AS RowConstrainedResult WHERE RowNum > {skip} AND RowNum <= {row}";
 
             return ret;
+        }
+
+        protected static string AddSqlServerTop(int take, string sql, string selectType)
+        {
+            if (take == int.MaxValue)
+                return sql;
+
+            if (sql.Length < "SELECT".Length)
+                return sql;
+
+            return $"{selectType} TOP {take + sql.Substring(selectType.Length)}";
         }
 
         //SELECT without RowNum and prefer aliases to be able to use in SELECT IN () Reference Queries

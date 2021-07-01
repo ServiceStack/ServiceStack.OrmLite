@@ -86,21 +86,33 @@ namespace ServiceStack.OrmLite.SqlServer
                 .Append(selectExpression)
                 .Append(bodyExpression);
 
-            if (orderByExpression != null)
+            if (!string.IsNullOrEmpty(orderByExpression))
                 sb.Append(orderByExpression);
 
-            if (queryType == QueryType.Select || (rows == 1 && offset is null or 0))
+            var skip = offset ?? 0;
+            if (skip > 0 || rows is > 0)
             {
-                if (queryType == QueryType.Select && orderByExpression.IsEmpty())
+                if (queryType == QueryType.Select || (rows == 1 && offset is null or 0))
                 {
-                    var orderBy = (offset is null or 0) && rows == 1 //Avoid for Single requests
-                        ? "1"
-                        : this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey);
+                    // Use TOP if offset is unspecified
+                    if (offset is null or 0)
+                    {
+                        var selectType = selectExpression.StartsWithIgnoreCase("SELECT DISTINCT") ? "SELECT DISTINCT" : "SELECT";
+                        var sql = StringBuilderCache.ReturnAndFree(sb);
+                        return AddSqlServerTop(rows.GetValueOrDefault(), sql, selectType);
+                    }
 
-                    sb.Append(" ORDER BY " + orderBy);
+                    // ORDER BY mandatory when using OFFSET/FETCH NEXT
+                    if (orderByExpression.IsEmpty())
+                    {
+                        var orderBy = rows == 1 //Avoid for Single requests
+                            ? "1"
+                            : this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey);
+
+                        sb.Append(" ORDER BY " + orderBy);
+                    }
+                    sb.Append(" ").Append(SqlLimit(offset, rows));
                 }
-
-                sb.Append(" ").Append(SqlLimit(offset, rows));
             }
 
             return StringBuilderCache.ReturnAndFree(sb);
