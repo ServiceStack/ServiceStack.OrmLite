@@ -92,16 +92,15 @@ namespace ServiceStack.OrmLite.SqlServer
             var skip = offset ?? 0;
             if (skip > 0 || rows is > 0)
             {
-                if (queryType == QueryType.Select || (rows == 1 && offset is null or 0))
+                // Use TOP if offset is unspecified
+                if (skip == 0)
                 {
-                    // Use TOP if offset is unspecified
-                    if (offset is null or 0)
-                    {
-                        var selectType = selectExpression.StartsWithIgnoreCase("SELECT DISTINCT") ? "SELECT DISTINCT" : "SELECT";
-                        var sql = StringBuilderCache.ReturnAndFree(sb);
-                        return AddSqlServerTop(rows.GetValueOrDefault(), sql, selectType);
-                    }
+                    var sql = StringBuilderCache.ReturnAndFree(sb);
+                    return SqlTop(sql, rows.GetValueOrDefault());
+                }
 
+                if (queryType == QueryType.Select || rows == 1)
+                {
                     // ORDER BY mandatory when using OFFSET/FETCH NEXT
                     if (orderByExpression.IsEmpty())
                     {

@@ -583,12 +583,11 @@ namespace ServiceStack.OrmLite.SqlServer
 
             var selectType = selectExpression.StartsWithIgnoreCase("SELECT DISTINCT") ? "SELECT DISTINCT" : "SELECT";
 
-            //Temp hack for SqlServer <= 2008
+            //avoid Windowing function if unnecessary
             if (skip == 0)
             {
                 var sql = StringBuilderCache.ReturnAndFree(sb) + orderByExpression;
-
-                return AddSqlServerTop(take, sql, selectType);
+                return SqlTop(sql, take, selectType);
             }
 
             // Required because ordering is done by Windowing function
@@ -607,15 +606,17 @@ namespace ServiceStack.OrmLite.SqlServer
             return ret;
         }
 
-        protected static string AddSqlServerTop(int take, string sql, string selectType)
+        protected static string SqlTop(string sql, int take, string selectType = null)
         {
+            selectType ??= sql.StartsWithIgnoreCase("SELECT DISTINCT") ? "SELECT DISTINCT" : "SELECT";
+
             if (take == int.MaxValue)
                 return sql;
 
             if (sql.Length < "SELECT".Length)
                 return sql;
 
-            return $"{selectType} TOP {take + sql.Substring(selectType.Length)}";
+            return selectType + " TOP " + take + sql.Substring(selectType.Length);
         }
 
         //SELECT without RowNum and prefer aliases to be able to use in SELECT IN () Reference Queries
