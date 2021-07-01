@@ -492,7 +492,8 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public string SelectInto<T>()
+        public string SelectInto<T>() => SelectInto<T>(QueryType.Select);
+        public string SelectInto<T>(QueryType queryType)
         {
             var modelDef = typeof(T).GetModelMetadata();
 
@@ -598,7 +599,7 @@ namespace ServiceStack.OrmLite
 
         public string ToSql()
         {
-            return SelectInto<TNewPoco>();
+            return SelectInto<TNewPoco>(QueryType.Select);
         }
 
         public List<IDbDataParameter> Params { get; private set; }
@@ -606,7 +607,7 @@ namespace ServiceStack.OrmLite
         public string ToSelectStatement() => ToSelectStatement(QueryType.Select);
         public string ToSelectStatement(QueryType forType)
         {
-            return SelectInto<TNewPoco>();
+            return SelectInto<TNewPoco>(forType);
         }
     }
 

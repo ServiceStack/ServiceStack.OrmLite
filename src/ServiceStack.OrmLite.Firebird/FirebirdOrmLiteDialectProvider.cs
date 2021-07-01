@@ -801,7 +801,7 @@ namespace ServiceStack.OrmLite.Firebird
                 .Append(selectExpression)
                 .Append(bodyExpression);
 
-            if (orderByExpression != null)
+            if (!string.IsNullOrEmpty(orderByExpression))
                 sb.Append(orderByExpression);
 
             if ((queryType == QueryType.Select || (rows == 1 && offset is null or 0)) && (offset != null || rows != null))

@@ -524,7 +524,7 @@ namespace ServiceStack.OrmLite
             var sb = StringBuilderCache.Allocate();
             sb.Append(selectExpression);
             sb.Append(bodyExpression);
-            if (orderByExpression != null)
+            if (!string.IsNullOrEmpty(orderByExpression))
             {
                 sb.Append(orderByExpression);
             }

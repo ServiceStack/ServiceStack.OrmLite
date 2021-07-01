@@ -224,13 +224,13 @@ namespace ServiceStack.OrmLite.Tests
             var q1 = db.From<WaybillIn>();
             q1.PrefixFieldWithTableName = true;
             q1.Select(x => new {x.Name, x.Number});
-            q1.SelectInto<WaybillIn>();
+            q1.SelectInto<WaybillIn>(QueryType.Select);
             var sql1 = q1.SelectExpression;
 
             var q2 = db.From<WaybillBase>();
             q2.PrefixFieldWithTableName = true;
             q2.Select(x => new {x.Name, x.Number});
-            q2.SelectInto<WaybillIn>();
+            q2.SelectInto<WaybillIn>(QueryType.Select);
             var sql2 = q2.SelectExpression;
 
             Assert.AreEqual(sql1, sql2);

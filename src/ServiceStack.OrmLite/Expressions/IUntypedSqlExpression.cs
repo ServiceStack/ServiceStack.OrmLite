@@ -641,10 +641,8 @@ namespace ServiceStack.OrmLite
             return q.FirstMatchingField(fieldName);
         }
 
-        public string SelectInto<TModel>()
-        {
-            return q.SelectInto<TModel>();
-        }
+        public string SelectInto<TModel>() => q.SelectInto<TModel>();
+        public string SelectInto<TModel>(QueryType queryType) => q.SelectInto<TModel>(queryType);
     }
 
     public static class SqlExpressionExtensions

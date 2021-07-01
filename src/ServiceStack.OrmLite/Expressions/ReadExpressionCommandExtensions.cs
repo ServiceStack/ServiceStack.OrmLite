@@ -12,14 +12,14 @@ namespace ServiceStack.OrmLite
     {
         internal static List<T> Select<T>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
-            string sql = q.SelectInto<T>();
+            string sql = q.SelectInto<T>(QueryType.Select);
             return dbCmd.ExprConvertToList<T>(sql, q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
-            string sql = q.Where(predicate).SelectInto<T>();
+            string sql = q.Where(predicate).SelectInto<T>(QueryType.Select);
 
             return dbCmd.ExprConvertToList<T>(sql, q.Params);
         }
@@ -135,14 +135,14 @@ namespace ServiceStack.OrmLite
 
         internal static T Single<T>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
-            string sql = q.Limit(1).SelectInto<T>();
+            string sql = q.Limit(1).SelectInto<T>(QueryType.Single);
 
             return dbCmd.ExprConvertTo<T>(sql, q.Params, onlyFields:q.OnlyFields);
         }
 
         public static TKey Scalar<T, TKey>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
-            var sql = expression.SelectInto<T>();
+            var sql = expression.SelectInto<T>(QueryType.Scalar);
             return dbCmd.Scalar<TKey>(sql, expression.Params);
         }
 
@@ -150,7 +150,7 @@ namespace ServiceStack.OrmLite
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Select(field);
-            var sql = q.SelectInto<T>();
+            var sql = q.SelectInto<T>(QueryType.Scalar);
             return dbCmd.Scalar<TKey>(sql, q.Params);
         }
 
@@ -159,7 +159,7 @@ namespace ServiceStack.OrmLite
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Select(field).Where(predicate);
-            string sql = q.SelectInto<T>();
+            string sql = q.SelectInto<T>(QueryType.Scalar);
             return dbCmd.Scalar<TKey>(sql, q.Params);
         }
 

@@ -1082,7 +1082,7 @@ namespace ServiceStack.OrmLite.Oracle
             if (!offset.HasValue)
                 offset = 0;
 
-            if ((queryType == QueryType.Select || (rows == 1 && offset is null or 0)) && string.IsNullOrEmpty(orderByExpression))
+            if (queryType == QueryType.Select && (offset.GetValueOrDefault() > 0 || rows.GetValueOrDefault() > 1) && orderByExpression.IsEmpty())
             {
                 var primaryKey = modelDef.FieldDefinitions.FirstOrDefault(x => x.IsPrimaryKey);
                 if (primaryKey == null)

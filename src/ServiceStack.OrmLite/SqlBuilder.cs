@@ -235,10 +235,8 @@ namespace ServiceStack.OrmLite
                 return RawSql;
             }
 
-            public string SelectInto<T>()
-            {
-                return RawSql;
-            }
+            public string SelectInto<T>() => RawSql;
+            public string SelectInto<T>(QueryType queryType) => RawSql;
         }
 
         public Template AddTemplate(string sql, object parameters = null)
