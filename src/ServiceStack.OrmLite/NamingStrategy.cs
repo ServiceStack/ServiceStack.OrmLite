@@ -2,10 +2,11 @@
 
 namespace ServiceStack.OrmLite
 {
+    public class OrmLiteDefaultNamingStrategy : OrmLiteNamingStrategyBase {}
     public class AliasNamingStrategy : OrmLiteNamingStrategyBase
     {
-        public Dictionary<string, string> TableAliases = new Dictionary<string, string>();
-        public Dictionary<string, string> ColumnAliases = new Dictionary<string, string>();
+        public Dictionary<string, string> TableAliases = new();
+        public Dictionary<string, string> ColumnAliases = new();
         public INamingStrategy UseNamingStrategy { get; set; }
 
         public override string GetTableName(string name)
@@ -50,4 +51,23 @@ namespace ServiceStack.OrmLite
             return name.ToUpper();
         }
     }
+
+    public class PrefixNamingStrategy : OrmLiteNamingStrategyBase
+    {
+        public string TablePrefix { get; set; }
+
+        public string ColumnPrefix { get; set; }
+
+        public override string GetTableName(string name)
+        {
+            return TablePrefix + name;
+        }
+
+        public override string GetColumnName(string name)
+        {
+            return ColumnPrefix + name;
+        }
+
+    }
+    
 }
