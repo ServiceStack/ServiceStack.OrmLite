@@ -230,6 +230,8 @@ namespace ServiceStack.OrmLite
             var dialectProvider = dbCmd.GetDialectProvider();
             var sql = dialectProvider.ToInsertRowStatement(dbCmd, obj, onlyFields);
 
+            dialectProvider.SetParameterValues<T>(dbCmd, obj);
+
             if (selectIdentity)
                 return dbCmd.ExecLongScalar(sql + dialectProvider.GetLastInsertIdSqlSuffix<T>());
 
