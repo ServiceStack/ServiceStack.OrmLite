@@ -44,6 +44,16 @@ namespace ServiceStack.OrmLite.Tests
         public string Name { get; set; }
     }
 
+    [PostCreateTable("INSERT INTO ModelWithSeedDataSqlMulti (Name) VALUES ('Foo')"),
+     PostCreateTable("INSERT INTO ModelWithSeedDataSqlMulti (Name) VALUES ('Bar')")]
+    public class ModelWithSeedDataSqlMulti
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+    }
+
     public class DynamicAttributeSeedData
     {
         [AutoIncrement]
@@ -63,6 +73,18 @@ namespace ServiceStack.OrmLite.Tests
 
     [PostDropTable("CREATE INDEX udxNoTable on NonExistingTable (Name);")]
     public class ModelWithPostDropSql
+    {
+        [AutoIncrement]
+        public int Id { get; set; }
+
+        public string Name { get; set; }
+    }
+
+    [PreDropTable("-- PreDropTable")]
+    [PostDropTable("-- PostDropTable")]
+    [PreCreateTable("-- PreCreateTable")]
+    [PostCreateTable("-- PostCreateTable")]
+    public class ModelWithPreAndPostDrop
     {
         [AutoIncrement]
         public int Id { get; set; }
@@ -128,6 +150,18 @@ namespace ServiceStack.OrmLite.Tests
 
         [Test]
         [IgnoreDialect(Dialect.AnyOracle | Dialect.AnyPostgreSql, "multiple SQL statements need to be wrapped in an anonymous block")]
+        public void Does_execute_multi_CustomSql_after_table_created()
+        {
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<ModelWithSeedDataSqlMulti>();
+
+            var seedDataNames = db.Select<ModelWithSeedDataSqlMulti>().ConvertAll(x => x.Name);
+
+            Assert.That(seedDataNames, Is.EquivalentTo(new[] {"Foo", "Bar"}));
+        }
+
+        [Test]
+        [IgnoreDialect(Dialect.AnyOracle | Dialect.AnyPostgreSql, "multiple SQL statements need to be wrapped in an anonymous block")]
         public void Does_execute_CustomSql_after_table_created_using_dynamic_attribute()
         {
             typeof(DynamicAttributeSeedData)
@@ -141,6 +175,14 @@ namespace ServiceStack.OrmLite.Tests
             var seedDataNames = db.Select<DynamicAttributeSeedData>().ConvertAll(x => x.Name);
 
             Assert.That(seedDataNames, Is.EquivalentTo(new[] {"Foo", "Bar"}));
+        }
+
+        [Test]
+        public void Does_execute_PostCreateTable_and_PreDropTable()
+        {
+            OrmLiteUtils.PrintSql();
+            using var db = OpenDbConnection();
+            db.CreateTable<ModelWithPreAndPostDrop>(true);
         }
 
         [Test]

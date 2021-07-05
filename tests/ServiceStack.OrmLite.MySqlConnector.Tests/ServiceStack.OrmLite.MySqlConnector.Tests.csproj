@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net46;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net472;net5.0</TargetFrameworks>
     <DebugType>portable</DebugType>
     <AssemblyName>ServiceStack.OrmLite.MySqlConnector.Tests</AssemblyName>
     <OutputType>Library</OutputType>
     <PackageId>ServiceStack.OrmLite.MySqlMySqlConnector.Tests</PackageId>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
@@ -148,7 +149,7 @@
 
   <ItemGroup>
     <PackageReference Include="NUnit3TestAdapter" Version="3.10.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />
     <PackageReference Include="NUnit" Version="3.10.1" />
     <PackageReference Include="ServiceStack" Version="$(Version)" />
   </ItemGroup>

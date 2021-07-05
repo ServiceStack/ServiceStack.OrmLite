@@ -395,7 +395,7 @@ namespace ServiceStack.OrmLite
             var fieldsWithoutDefaults = modelDef.FieldDefinitionsArray
                 .Where(x => x.DefaultValue == null)
                 .Select(x => x.Name)
-                .ToHashSet(); 
+                .ToSet(); 
 
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, insertFields: fieldsWithoutDefaults);
 

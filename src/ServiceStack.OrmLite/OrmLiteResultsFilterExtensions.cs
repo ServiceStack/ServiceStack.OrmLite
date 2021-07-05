@@ -95,12 +95,10 @@ namespace ServiceStack.OrmLite
                     : OrmLiteConfig.ResultsFilter.GetList<T>(dbCmd);
             }
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return isScalar
-                    ? reader.Column<T>(dbCmd.GetDialectProvider())
-                    : reader.ConvertToList<T>(dbCmd.GetDialectProvider());
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return isScalar
+                ? reader.Column<T>(dbCmd.GetDialectProvider())
+                : reader.ConvertToList<T>(dbCmd.GetDialectProvider());
         }
 
         public static IList ConvertToList(this IDbCommand dbCmd, Type refType, string sql = null)
@@ -111,10 +109,8 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetRefList(dbCmd, refType);
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return reader.ConvertToList(dbCmd.GetDialectProvider(), refType);
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return reader.ConvertToList(dbCmd.GetDialectProvider(), refType);
         }
 
         public static IDbDataParameter PopulateWith(this IDbDataParameter to, IDbDataParameter from)
@@ -143,10 +139,8 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetList<T>(dbCmd);
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return reader.ConvertToList<T>(dbCmd.GetDialectProvider(), onlyFields:onlyFields);
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return reader.ConvertToList<T>(dbCmd.GetDialectProvider(), onlyFields:onlyFields);
         }
 
         public static T ConvertTo<T>(this IDbCommand dbCmd, string sql = null)
@@ -157,10 +151,8 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetSingle<T>(dbCmd);
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return reader.ConvertTo<T>(dbCmd.GetDialectProvider());
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return reader.ConvertTo<T>(dbCmd.GetDialectProvider());
         }
 
         internal static object ConvertTo(this IDbCommand dbCmd, Type refType, string sql = null)
@@ -171,10 +163,8 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetRefSingle(dbCmd, refType);
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return reader.ConvertTo(dbCmd.GetDialectProvider(), refType);
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return reader.ConvertTo(dbCmd.GetDialectProvider(), refType);
         }
 
         internal static T Scalar<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
@@ -190,15 +180,13 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetScalar<T>(dbCmd);
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return reader.Scalar<T>(dbCmd.GetDialectProvider());
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return reader.Scalar<T>(dbCmd.GetDialectProvider());
         }
 
         public static object Scalar(this IDbCommand dbCmd, ISqlExpression sqlExpression)
         {
-            dbCmd.PopulateWith(sqlExpression);
+            dbCmd.PopulateWith(sqlExpression, QueryType.Scalar);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetScalar(dbCmd);
@@ -243,10 +231,8 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetSingle<T>(dbCmd);
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return reader.ConvertTo<T>(dbCmd.GetDialectProvider(), onlyFields: onlyFields);
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return reader.ConvertTo<T>(dbCmd.GetDialectProvider(), onlyFields: onlyFields);
         }
 
         internal static List<T> Column<T>(this IDbCommand dbCmd, string sql = null)
@@ -257,10 +243,8 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetColumn<T>(dbCmd);
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return reader.Column<T>(dbCmd.GetDialectProvider());
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return reader.Column<T>(dbCmd.GetDialectProvider());
         }
 
         internal static List<T> Column<T>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
@@ -276,23 +260,19 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetColumnDistinct<T>(dbCmd);
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return reader.ColumnDistinct<T>(dbCmd.GetDialectProvider());
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return reader.ColumnDistinct<T>(dbCmd.GetDialectProvider());
         }
 
         internal static HashSet<T> ColumnDistinct<T>(this IDbCommand dbCmd, ISqlExpression expression)
         {
-            dbCmd.PopulateWith(expression);
+            dbCmd.PopulateWith(expression, QueryType.Select);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetColumnDistinct<T>(dbCmd);
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return reader.ColumnDistinct<T>(dbCmd.GetDialectProvider());
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return reader.ColumnDistinct<T>(dbCmd.GetDialectProvider());
         }
 
         internal static Dictionary<K, V> Dictionary<K, V>(this IDbCommand dbCmd, string sql = null)
@@ -303,23 +283,19 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetDictionary<K, V>(dbCmd);
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return reader.Dictionary<K, V>(dbCmd.GetDialectProvider());
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return reader.Dictionary<K, V>(dbCmd.GetDialectProvider());
         }
 
         internal static Dictionary<K, V> Dictionary<K, V>(this IDbCommand dbCmd, ISqlExpression expression)
         {
-            dbCmd.PopulateWith(expression);
+            dbCmd.PopulateWith(expression, QueryType.Select);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetDictionary<K, V>(dbCmd);
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return reader.Dictionary<K, V>(dbCmd.GetDialectProvider());
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return reader.Dictionary<K, V>(dbCmd.GetDialectProvider());
         }
 
         internal static List<KeyValuePair<K, V>> KeyValuePairs<K, V>(this IDbCommand dbCmd, string sql = null)
@@ -330,23 +306,19 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetKeyValuePairs<K, V>(dbCmd);
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return reader.KeyValuePairs<K, V>(dbCmd.GetDialectProvider());
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return reader.KeyValuePairs<K, V>(dbCmd.GetDialectProvider());
         }
 
         internal static List<KeyValuePair<K, V>> KeyValuePairs<K, V>(this IDbCommand dbCmd, ISqlExpression expression)
         {
-            dbCmd.PopulateWith(expression);
+            dbCmd.PopulateWith(expression, QueryType.Select);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetKeyValuePairs<K,V>(dbCmd);
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return reader.KeyValuePairs<K, V>(dbCmd.GetDialectProvider());
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return reader.KeyValuePairs<K, V>(dbCmd.GetDialectProvider());
         }
 
         internal static Dictionary<K, List<V>> Lookup<K, V>(this IDbCommand dbCmd, string sql, IEnumerable<IDbDataParameter> sqlParams)
@@ -362,10 +334,8 @@ namespace ServiceStack.OrmLite
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetLookup<K, V>(dbCmd);
 
-            using (var reader = dbCmd.ExecReader(dbCmd.CommandText))
-            {
-                return reader.Lookup<K, V>(dbCmd.GetDialectProvider());
-            }
+            using var reader = dbCmd.ExecReader(dbCmd.CommandText);
+            return reader.Lookup<K, V>(dbCmd.GetDialectProvider());
         }
     }
 }

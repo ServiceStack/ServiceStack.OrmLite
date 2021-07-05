@@ -229,15 +229,14 @@ namespace ServiceStack.OrmLite
 
             public List<IDbDataParameter> Params { get; private set; }
 
-            public string ToSelectStatement()
+            public string ToSelectStatement() => ToSelectStatement(QueryType.Select);
+            public string ToSelectStatement(QueryType forType)
             {
                 return RawSql;
             }
 
-            public string SelectInto<T>()
-            {
-                return RawSql;
-            }
+            public string SelectInto<T>() => RawSql;
+            public string SelectInto<T>(QueryType queryType) => RawSql;
         }
 
         public Template AddTemplate(string sql, object parameters = null)

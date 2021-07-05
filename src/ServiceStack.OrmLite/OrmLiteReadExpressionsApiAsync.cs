@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite
         /// Returns results from using an SqlExpression lambda. E.g:
         /// <para>db.SelectAsync(db.From&lt;Person&gt;().Where(x =&gt; x.Age &gt; 40))</para>
         /// </summary>
-        public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, ISqlExpression expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SqlListAsync<T>(expression.SelectInto<T>(), expression.Params, token));
+        public static Task<List<T>> SelectAsync<T>(this IDbConnection dbConn, ISqlExpression expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SqlListAsync<T>(expression.SelectInto<T>(QueryType.Select), expression.Params, token));
 
         public static Task<List<Tuple<T, T2>>> SelectMultiAsync<T, T2>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2>(expression, token));
 
@@ -94,7 +94,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<T> SingleAsync<T>(this IDbConnection dbConn, ISqlExpression expression, CancellationToken token = default)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SingleAsync<T>(expression.SelectInto<T>(), expression.Params, token));
+            return dbConn.Exec(dbCmd => dbCmd.SingleAsync<T>(expression.SelectInto<T>(QueryType.Single), expression.Params, token));
         }
 
         /// <summary>
@@ -240,6 +240,11 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static Task<ColumnSchema[]> GetTableColumnsAsync(this IDbConnection dbConn, string sql, CancellationToken token=default) => 
             dbConn.Exec(dbCmd => dbCmd.GetTableColumnsAsync(sql, token));
+
+        public static Task EnableForeignKeysCheckAsync(this IDbConnection dbConn, CancellationToken token=default) => 
+            dbConn.Exec(dbCmd => dbConn.GetDialectProvider().EnableForeignKeysCheckAsync(dbCmd, token));
+        public static Task DisableForeignKeysCheckAsync(this IDbConnection dbConn, CancellationToken token=default) => 
+            dbConn.Exec(dbCmd => dbConn.GetDialectProvider().DisableForeignKeysCheckAsync(dbCmd, token));
     }
 
 }

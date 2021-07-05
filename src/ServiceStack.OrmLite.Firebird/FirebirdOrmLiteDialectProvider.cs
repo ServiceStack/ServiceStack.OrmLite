@@ -789,7 +789,7 @@ namespace ServiceStack.OrmLite.Firebird
         }
         #endregion DDL
 
-        public override string ToSelectStatement(ModelDefinition modelDef,
+        public override string ToSelectStatement(QueryType queryType, ModelDefinition modelDef,
             string selectExpression,
             string bodyExpression,
             string orderByExpression = null,
@@ -801,10 +801,10 @@ namespace ServiceStack.OrmLite.Firebird
                 .Append(selectExpression)
                 .Append(bodyExpression);
 
-            if (orderByExpression != null)
+            if (!string.IsNullOrEmpty(orderByExpression))
                 sb.Append(orderByExpression);
 
-            if (rows != null || offset != null)
+            if ((queryType == QueryType.Select || (rows == 1 && offset is null or 0)) && (offset != null || rows != null))
             {
                 var sqlPrefix = "SELECT";
                 if (rows != null)

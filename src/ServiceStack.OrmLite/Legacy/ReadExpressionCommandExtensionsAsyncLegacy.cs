@@ -17,7 +17,7 @@ namespace ServiceStack.OrmLite.Legacy
         internal static Task<List<T>> SelectAsync<T>(this IDbCommand dbCmd, Func<SqlExpression<T>, SqlExpression<T>> expression, CancellationToken token)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
-            var sql = expression(q).SelectInto<T>();
+            var sql = expression(q).SelectInto<T>(QueryType.Select);
             return dbCmd.ExprConvertToListAsync<T>(sql, q.Params, q.OnlyFields, token);
         }
 
@@ -25,7 +25,7 @@ namespace ServiceStack.OrmLite.Legacy
         internal static Task<List<Into>> SelectAsync<Into, From>(this IDbCommand dbCmd, Func<SqlExpression<From>, SqlExpression<From>> expression, CancellationToken token)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<From>();
-            string sql = expression(q).SelectInto<Into>();
+            string sql = expression(q).SelectInto<Into>(QueryType.Select);
             return dbCmd.ExprConvertToListAsync<Into>(sql, q.Params, q.OnlyFields, token);
         }
 

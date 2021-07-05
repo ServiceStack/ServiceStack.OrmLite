@@ -118,7 +118,8 @@ namespace ServiceStack.OrmLite
 
         string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
-        string ToSelectStatement(ModelDefinition modelDef, string selectExpression, string bodyExpression, string orderByExpression = null, int? offset = null, int? rows = null);
+        string ToSelectStatement(QueryType queryType, ModelDefinition modelDef, string selectExpression,
+            string bodyExpression, string orderByExpression = null, int? offset = null, int? rows = null);
 
         string ToInsertRowStatement(IDbCommand cmd, object objWithProperties, ICollection<string> insertFields = null);
 
@@ -140,6 +141,11 @@ namespace ServiceStack.OrmLite
         Task EnableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default);
         void DisableIdentityInsert<T>(IDbCommand cmd);
         Task DisableIdentityInsertAsync<T>(IDbCommand cmd, CancellationToken token=default);
+
+        void EnableForeignKeysCheck(IDbCommand cmd);
+        Task EnableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token=default);
+        void DisableForeignKeysCheck(IDbCommand cmd);
+        Task DisableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token=default);
 
         Dictionary<string, FieldDefinition> GetFieldDefinitionMap(ModelDefinition modelDef);
 

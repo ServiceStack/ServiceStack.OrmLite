@@ -1,4 +1,5 @@
-﻿using ServiceStack.DataAnnotations;
+﻿using System;
+using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.Shared
 {
@@ -105,4 +106,101 @@ namespace ServiceStack.OrmLite.Tests.Shared
         Male
     }
 
+    public class PersonWithReferenceType
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; }
+        public string LastName { get; set; }
+        public Person BestFriend { get; set; }
+
+        public static PersonWithReferenceType[] TestValues = new[]
+        {
+            new PersonWithReferenceType
+            {
+                FirstName = "Test",
+                LastName = "McTest",
+                Id = 1
+            },
+            new PersonWithReferenceType
+            {
+                FirstName = "John",
+                LastName = "Doe",
+                Id = 2,
+                BestFriend = new Person(1,"Jane","Doe",33)
+            }
+        };
+        
+        protected bool Equals(PersonWithReferenceType other)
+        {
+            return Id == other.Id &&
+                   string.Equals(FirstName, other.FirstName) &&
+                   string.Equals(LastName, other.LastName) &&
+                   ((BestFriend == null && other.BestFriend == null) || (BestFriend != null && BestFriend.Equals(other.BestFriend))) ;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((PersonWithReferenceType)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = Id;
+                hashCode = (hashCode * 397) ^ (FirstName != null ? FirstName.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (LastName != null ? LastName.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (BestFriend != null ? BestFriend.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
+    }
+    
+    public class TestProduct
+    {
+        public string Id { get; set; }
+
+        public string Name { get; set; }
+
+        public DateTime? Modified { get; set; }
+
+        public static TestProduct[] TestValues =
+        {
+            new TestProduct
+            {
+                Id = "1",
+                Modified = null,
+                Name = "Testing"
+            }
+        };
+        
+        protected bool Equals(TestProduct other)
+        {
+            return Id == other.Id &&
+                   string.Equals(Name, other.Name) &&
+                   Modified.Equals(other.Modified);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != this.GetType()) return false;
+            return Equals((TestProduct)obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                var hashCode = (Id != null ? Id.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Name != null ? Name.GetHashCode() : 0);
+                hashCode = (hashCode * 397) ^ (Modified != null ? Modified.GetHashCode() : 0);
+                return hashCode;
+            }
+        }
+    }
 }

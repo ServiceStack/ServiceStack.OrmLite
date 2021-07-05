@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
@@ -101,20 +102,51 @@ namespace ServiceStack.OrmLite.Tests.Issues
             public string Details { get; set; }
         }
 
+        private static void InitDb(IDbConnection db)
+        {
+            db.DropTable<UserMeta>();
+            db.DropTable<UserAddress>();
+            db.DropTable<UserBranch>();
+            db.DropTable<User>();
+
+            db.CreateTable<User>();
+            db.CreateTable<UserBranch>();
+            db.CreateTable<UserAddress>();
+            db.CreateTable<UserMeta>();
+        }
+
         [Test]
-        public async Task Can_create_tables_with_multiple_references()
+        public void Can_create_tables_with_multiple_references()
+        {
+            using (var db = OpenDbConnection())
+            {
+                InitDb(db);
+            }
+            
+            var userMeta = new UserMeta();
+            var user = new User
+            {
+                Meta = userMeta
+            };
+
+            using (var db = OpenDbConnection())
+            {
+                user.Branches = new List<UserBranch> { new() { UserId = user.Id }};
+                user.Addresses = new List<UserAddress> { new() { UserId = user.Id }};
+
+                db.Save(user, references: true);
+
+                var fromDb = db.LoadSingleById<User>(user.Id);
+                fromDb.Dump().Print();
+            }
+        }
+
+        [Test]
+        public async Task Can_create_tables_with_multiple_references_async()
         {
             using (var db = await OpenDbConnectionAsync())
             {
-                db.DropTable<UserMeta>();
-                db.DropTable<UserAddress>();
-                db.DropTable<UserBranch>();
-                db.DropTable<User>();
-                
-                db.CreateTable<User>();
-                db.CreateTable<UserBranch>();
-                db.CreateTable<UserAddress>();
-                db.CreateTable<UserMeta>();
+                InitDb(db);
             }
             
             var userMeta = new UserMeta();
@@ -125,8 +157,8 @@ namespace ServiceStack.OrmLite.Tests.Issues
 
             using (var db = await OpenDbConnectionAsync())
             {
-                user.Branches = new List<UserBranch> { new UserBranch { UserId = user.Id }};
-                user.Addresses = new List<UserAddress> { new UserAddress { UserId = user.Id }};
+                user.Branches = new List<UserBranch> { new() { UserId = user.Id }};
+                user.Addresses = new List<UserAddress> { new() { UserId = user.Id }};
 
                 await db.SaveAsync(user, references: true);
 

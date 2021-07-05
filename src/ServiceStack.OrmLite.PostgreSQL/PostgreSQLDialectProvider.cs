@@ -652,7 +652,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
         public NpgsqlDbType GetDbType<T>() => GetDbType(typeof(T));
         public NpgsqlDbType GetDbType(Type type)
         {
-            if (PostgreSqlDialect.Instance.TypesMap.TryGetValue(type, out var paramType))
+            if (TypesMap.TryGetValue(type, out var paramType))
                 return paramType;
             var genericEnum = type.GetTypeWithGenericTypeDefinitionOf(typeof(IEnumerable<>));
             if (genericEnum != null)

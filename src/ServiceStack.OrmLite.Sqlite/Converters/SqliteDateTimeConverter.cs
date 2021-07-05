@@ -81,7 +81,7 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
     /// <summary>
     /// New behavior from using System.Data.SQLite.Core
     /// </summary>
-    public class SqliteSystemDataDateTimeConverter : SqliteNativeDateTimeConverter
+    public class SqliteCoreDateTimeConverter : SqliteNativeDateTimeConverter
     {
         public override object ToDbValue(Type fieldType, object value)
         {
@@ -139,6 +139,29 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
         {
             var ret = base.GetValue(reader, columnIndex, values);
             return ret;
+        }
+    }
+
+    public class SqliteDataDateTimeConverter : SqliteCoreDateTimeConverter
+    {
+        public override object FromDbValue(Type fieldType, object value)
+        {
+            var dateTime = (DateTime)value;
+
+            if (DateStyle == DateTimeKind.Utc)
+            {
+                //.NET Core returns correct Local time but as Unspecified so change to Local and Convert to UTC
+                dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Utc); // don't convert
+            }
+
+            if (DateStyle == DateTimeKind.Local && dateTime.Kind != DateTimeKind.Local)
+            {
+                dateTime = dateTime.Kind == DateTimeKind.Utc
+                    ? dateTime.ToLocalTime()
+                    : DateTime.SpecifyKind(dateTime, DateTimeKind.Local);
+            }
+
+            return dateTime;
         }
     }
 

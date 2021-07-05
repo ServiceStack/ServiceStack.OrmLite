@@ -255,7 +255,7 @@ namespace ServiceStack.OrmLite
         {
             Filter(dbCmd);
             var results = GetColumnDistinctResults<T>(dbCmd) ?? GetColumnResults<T>(dbCmd);
-            return (from object result in results select (T)result).ToHashSet();
+            return (from object result in results select (T)result).ToSet();
         }
 
         public Dictionary<K, V> GetDictionary<K, V>(IDbCommand dbCmd)

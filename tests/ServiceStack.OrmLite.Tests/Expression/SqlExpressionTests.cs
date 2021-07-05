@@ -515,7 +515,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 db.GetLastSql().Print();
                 Assert.That(rowCount, Is.EqualTo(4));
 
-                var table = typeof(LetterFrequency).Name.SqlTable(DialectProvider);
+                var table = nameof(LetterFrequency).SqlTable(DialectProvider);
 
                 rowCount = db.RowCount("SELECT * FROM {0} WHERE Letter = @p1".PreNormalizeSql(db).Fmt(table), new { p1 = "B" });
                 Assert.That(rowCount, Is.EqualTo(4));

@@ -492,7 +492,8 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public string SelectInto<T>()
+        public string SelectInto<T>() => SelectInto<T>(QueryType.Select);
+        public string SelectInto<T>(QueryType queryType)
         {
             var modelDef = typeof(T).GetModelMetadata();
 
@@ -591,22 +592,22 @@ namespace ServiceStack.OrmLite
                 sbOrderBy.Append(" \n");
             }
 
-            var sql = dialectProvider.ToSelectStatement(
-                modelDef, StringBuilderCache.ReturnAndFree(sbSelect), StringBuilderCacheAlt.ReturnAndFree(sbBody), sbOrderBy.ToString(), Offset, Rows);
+            var sql = dialectProvider.ToSelectStatement(QueryType.Select, modelDef, StringBuilderCache.ReturnAndFree(sbSelect), StringBuilderCacheAlt.ReturnAndFree(sbBody), sbOrderBy.ToString(), offset: Offset, rows: Rows);
 
             return sql; 
         }
 
         public string ToSql()
         {
-            return SelectInto<TNewPoco>();
+            return SelectInto<TNewPoco>(QueryType.Select);
         }
 
         public List<IDbDataParameter> Params { get; private set; }
 
-        public string ToSelectStatement()
+        public string ToSelectStatement() => ToSelectStatement(QueryType.Select);
+        public string ToSelectStatement(QueryType forType)
         {
-            return SelectInto<TNewPoco>();
+            return SelectInto<TNewPoco>(forType);
         }
     }
 

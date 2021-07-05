@@ -96,7 +96,7 @@ namespace ServiceStack.OrmLite.SqlServer
 
             var strFields = StringBuilderCache.ReturnAndFree(setFields);
             if (strFields.Length == 0)
-                throw new ArgumentException("No non-null or non-default values were provided for type: " + typeof(T).Name);
+                throw new ArgumentException($"No non-null or non-default values were provided for type: {typeof(T).Name}");
 
             dbCmd.CommandText = $"UPDATE {dialectProvider.GetQuotedTableName(modelDef)} SET {strFields} {q.WhereExpression}";
         }

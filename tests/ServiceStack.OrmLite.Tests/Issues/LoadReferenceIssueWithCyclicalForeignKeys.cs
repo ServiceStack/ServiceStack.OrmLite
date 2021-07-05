@@ -1,11 +1,12 @@
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 
 namespace ServiceStack.OrmLite.Tests.Issues
 {
-    [TestFixtureOrmLiteDialects(Dialect.Sqlite)]
+    [TestFixtureOrmLiteDialects(Dialect.Sqlite | Dialect.MySql)]
     public class LoadReferenceIssueWithCyclicalForeignKeys : OrmLiteProvidersTestBase
     {
         public LoadReferenceIssueWithCyclicalForeignKeys(DialectContext context) : base(context) { }
@@ -40,12 +41,21 @@ namespace ServiceStack.OrmLite.Tests.Issues
             public ResearchEntity Research { get; set; }
         }
 
+        private void RecreateTables(IDbConnection db)
+        {
+            db.DisableForeignKeysCheck();
+            db.DropTable<NameEntity>();
+            db.DropTable<ResearchEntity>();
+            db.CreateTable<NameEntity>();
+            db.CreateTable<ResearchEntity>();
+            db.EnableForeignKeysCheck();
+        }
+
         [Test]
         public void Does_update_self_FK_Key_when_saving_references()
         {
             using var db = OpenDbConnection();
-            db.DropAndCreateTable<NameEntity>();
-            db.DropAndCreateTable<ResearchEntity>();
+            RecreateTables(db);
 
             for (var i = 1; i <= 5; i++)
             {
@@ -70,8 +80,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
         public async Task Does_update_self_FK_Key_when_saving_references_Async()
         {
             using var db = await OpenDbConnectionAsync();
-            db.DropAndCreateTable<NameEntity>();
-            db.DropAndCreateTable<ResearchEntity>();
+            RecreateTables(db);
 
             for (var i = 1; i <= 5; i++)
             {

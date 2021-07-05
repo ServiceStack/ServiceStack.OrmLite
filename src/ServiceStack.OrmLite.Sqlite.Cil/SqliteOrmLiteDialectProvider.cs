@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Data;
 using Microsoft.Data.Sqlite;
 using ServiceStack.OrmLite.Sqlite.Converters;
@@ -17,6 +17,11 @@ namespace ServiceStack.OrmLite.Sqlite
 
         protected override IDbConnection CreateConnection(string connectionString)
         {
+            // Microsoft.Data.Sqlite no like
+            connectionString = connectionString
+                .Replace(";Version=3", "")
+                .Replace(";New=True", "")
+                .Replace(";Compress=True", ""); 
             return new SqliteConnection(connectionString);
         }
 

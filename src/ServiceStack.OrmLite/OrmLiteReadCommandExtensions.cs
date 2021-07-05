@@ -99,9 +99,9 @@ namespace ServiceStack.OrmLite
             return dbCmd;
         }
 
-        internal static void PopulateWith(this IDbCommand dbCmd, ISqlExpression expression)
+        internal static void PopulateWith(this IDbCommand dbCmd, ISqlExpression expression, QueryType queryType)
         {
-            dbCmd.CommandText = expression.ToSelectStatement(); //needs to evaluate SQL before setting params
+            dbCmd.CommandText = expression.ToSelectStatement(queryType); //needs to evaluate SQL before setting params
             dbCmd.SetParameters(expression.Params);
         }
 

@@ -161,7 +161,7 @@ namespace ServiceStack.OrmLite.Tests
                 using (var cmd = db.OpenCommand())
                 {
                     cmd.CommandText = "INSERT INTO {0} VALUES({1}, {2})"
-                        .Fmt(typeof(DateTimeObject).Name.SqlTable(DialectProvider),
+                        .Fmt(nameof(DateTimeObject).SqlTable(DialectProvider),
                             DialectProvider.GetParam("p1"),
                             DialectProvider.GetParam("p2"));
 
@@ -173,7 +173,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 using (var cmd = db.OpenCommand())
                 {
-                    cmd.CommandText = "SELECT * FROM {0}".Fmt(typeof(DateTimeObject).Name.SqlTable(DialectProvider));
+                    cmd.CommandText = "SELECT * FROM {0}".Fmt(nameof(DateTimeObject).SqlTable(DialectProvider));
 
                     using (var reader = cmd.ExecuteReader())
                     {

@@ -20,13 +20,13 @@ namespace ServiceStack.OrmLite.FirebirdTests
 				db.DropTable<ModelWithAutoIncrement>();
 
 				Assert.That(
-					OrmLiteConfig.DialectProvider.DoesTableExist(db, typeof(ModelWithAutoIncrement).Name),
+					OrmLiteConfig.DialectProvider.DoesTableExist(db, nameof(ModelWithAutoIncrement)),
 					Is.False);
 				
 				db.CreateTable<ModelWithAutoIncrement>(true);
 
 				Assert.That(
-					OrmLiteConfig.DialectProvider.DoesTableExist(db, typeof(ModelWithAutoIncrement).Name),
+					OrmLiteConfig.DialectProvider.DoesTableExist(db, nameof(ModelWithAutoIncrement)),
 					Is.True);
 			}
 		}
@@ -38,12 +38,12 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			{
 				db.CreateTable<ModelWithAutoIncrement>(true);
 				Assert.That(
-					OrmLiteConfig.DialectProvider.DoesTableExist(db, typeof(ModelWithAutoIncrement).Name),
+					OrmLiteConfig.DialectProvider.DoesTableExist(db, nameof(ModelWithAutoIncrement)),
 					Is.True);
 
 				db.DropTable<ModelWithAutoIncrement>();
 				Assert.That(
-					OrmLiteConfig.DialectProvider.DoesTableExist(db, typeof(ModelWithAutoIncrement).Name),
+					OrmLiteConfig.DialectProvider.DoesTableExist(db, nameof(ModelWithAutoIncrement)),
 					Is.False);
 			}
 		}
@@ -55,12 +55,12 @@ namespace ServiceStack.OrmLite.FirebirdTests
 			{
 				db.CreateTable<ModelWithAutoId>(true);
                 Assert.That(
-                    OrmLiteConfig.DialectProvider.DoesTableExist(db, typeof(ModelWithAutoId).Name),
+                    OrmLiteConfig.DialectProvider.DoesTableExist(db, nameof(ModelWithAutoId)),
                     Is.True);
 
                 db.DropTable<ModelWithAutoId>();
                 Assert.That(
-                    OrmLiteConfig.DialectProvider.DoesTableExist(db, typeof(ModelWithAutoId).Name),
+                    OrmLiteConfig.DialectProvider.DoesTableExist(db, nameof(ModelWithAutoId)),
                     Is.False);
             }
         }

@@ -305,19 +305,26 @@ namespace ServiceStack.OrmLite
             foreach (var modelType in genericArgs)
             {
                 var modelDef = modelType.GetModelDefinition();
+                if (modelDef == null)
+                    throw new Exception($"'{modelType.Name}' is not a table type");
+                
                 var endPos = startPos;
                 for (; endPos < reader.FieldCount; endPos++)
                 {
                     if (string.Equals("EOT", reader.GetName(endPos), StringComparison.OrdinalIgnoreCase))
                         break;
                 }
+                
+                var noEOT = endPos == reader.FieldCount; // If no explicit EOT delimiter, split by field count
+                if (genericArgs.Length > 0 && noEOT)
+                    endPos = startPos + modelDef.FieldDefinitionsArray.Length;
 
                 var indexCache = reader.GetIndexFieldsCache(modelDef, dialectProvider, onlyFields,
                     startPos: startPos, endPos: endPos);
 
                 modelIndexCaches.Add(indexCache);
 
-                startPos = endPos + 1;
+                startPos = noEOT ? endPos : endPos + 1;
             }
             return modelIndexCaches;
         }
@@ -810,7 +817,13 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sb).Trim();
         }
 
-        public static char[] QuotedChars = { '"', '`', '[', ']' };
+        private static readonly char[] QuotedChars = { '"', '`', '[', ']' };
+
+        public static string AliasOrColumn(this string quotedExpr)
+        {
+            var ret = quotedExpr.LastRightPart(" AS ").Trim();
+            return ret;
+        }
 
         public static string StripDbQuotes(this string quotedExpr)
         {

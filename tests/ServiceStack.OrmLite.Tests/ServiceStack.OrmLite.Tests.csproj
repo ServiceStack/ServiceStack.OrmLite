@@ -1,31 +1,42 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net461;netcoreapp2.1</TargetFrameworks>
+    <TargetFrameworks>net472;net5.0</TargetFrameworks>
+<!--    <TargetFramework>net5.0</TargetFramework>-->
     <DebugType>portable</DebugType>
     <AssemblyName>ServiceStack.OrmLite.Tests</AssemblyName>
     <OutputType>Library</OutputType>
     <PackageId>ServiceStack.OrmLite.Tests</PackageId>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="NUnit" Version="3.12.0" />
-    <PackageReference Include="NUnit3TestAdapter" Version="3.15.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
+    <PackageReference Include="NUnit3TestAdapter" Version="3.17.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />
     <PackageReference Include="ServiceStack" Version="$(Version)" />
-    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.113.1" />
+    <PackageReference Include="System.Data.SQLite.Core" Version="1.0.113.7" />
 
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite\ServiceStack.OrmLite.csproj" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySql\ServiceStack.OrmLite.MySql.csproj" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.MySqlConnector\ServiceStack.OrmLite.MySqlConnector.csproj" />
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.csproj" />
-    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.csproj" />
-<!--    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqlServer.Data\ServiceStack.OrmLite.SqlServer.Data.csproj" />-->
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.PostgreSQL\ServiceStack.OrmLite.PostgreSQL.csproj" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Oracle\ServiceStack.OrmLite.Oracle.csproj" />
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Firebird\ServiceStack.OrmLite.Firebird.csproj" />
+    
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite\ServiceStack.OrmLite.Sqlite.csproj" />
+<!--    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite.Data\ServiceStack.OrmLite.Sqlite.Data.csproj" />-->
+<!--    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.Sqlite.Cil\ServiceStack.OrmLite.Sqlite.Cil.csproj" />-->
+    
+    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqlServer\ServiceStack.OrmLite.SqlServer.csproj" />
+<!--    <ProjectReference Include="..\..\src\ServiceStack.OrmLite.SqlServer.Data\ServiceStack.OrmLite.SqlServer.Data.csproj" />-->
   </ItemGroup>
-  <ItemGroup Condition=" '$(TargetFramework)' == 'net461' ">
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net472' ">
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.VistaDB\ServiceStack.OrmLite.VistaDB.csproj" />
   </ItemGroup>
+
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
+    <DefineConstants>$(DefineConstants);NETCORE_SUPPORT;NETCORE</DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
     <Compile Include="..\ServiceStack.OrmLite.Tests.Setup\TestConfig.cs">
       <Link>TestConfig.cs</Link>

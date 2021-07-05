@@ -45,7 +45,9 @@
     <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/obj" />
     <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.Sqlite/obj" />
     <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Data/obj" />
+    <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Cil/obj" />
     <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.SqlServer/obj" />
+    <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Data/obj" />
   </Target>
 
   <Target Name="UpdateVersion">

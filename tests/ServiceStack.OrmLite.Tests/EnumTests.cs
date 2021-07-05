@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Logging;
@@ -453,6 +454,35 @@ namespace ServiceStack.OrmLite.Tests
                 
             Assert.That(rows[0].someEnum, Is.EqualTo(SomeEnum.Value2));
         }
+
+        [Test]
+        public void Does_insert_types_with_EnumMembers()
+        {
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<TypeWithEnumMember>();
+
+            db.Insert(new TypeWithEnumMember {Id = 1, WorkflowType = WorkflowType.SalesInvoice});
+            db.Insert(new TypeWithEnumMember {Id = 2, WorkflowType = WorkflowType.PurchaseInvoice});
+
+            var results = db.Select<TypeWithEnumMember>().ToDictionary(x => x.Id);
+            Assert.That(results[1].WorkflowType, Is.EqualTo(WorkflowType.SalesInvoice));
+            Assert.That(results[2].WorkflowType, Is.EqualTo(WorkflowType.PurchaseInvoice));
+        }
+
+        [Test]
+        public void Can_query_EnumMembers_with_SqlFmt()
+        {
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<TypeWithEnumMember>();
+
+            var id = 1;
+            db.Insert(new TypeWithEnumMember {Id = id, WorkflowType = WorkflowType.PurchaseInvoice});
+            var q = db.From<TypeWithEnumMember>();
+            var result = db.Single<TypeWithEnumMember>(
+                ("select * from " + q.Table<TypeWithEnumMember>() + " as db where db.Id = {0} and db."
+                 + q.Column<TypeWithEnumMember>(x => x.WorkflowType) + " = {1}").SqlFmt(id, WorkflowType.PurchaseInvoice));
+            Assert.That(result.WorkflowType, Is.EqualTo(WorkflowType.PurchaseInvoice));
+        }
     }
 
     [EnumAsChar]
@@ -544,5 +574,22 @@ namespace ServiceStack.OrmLite.Tests
         public int Id { get; set; }
         public SomeEnum EnumValue { get; set; }
         public SomeEnum? NullableEnumValue { get; set; }
+    }
+    
+    public enum WorkflowType
+    {
+        Unknown,
+        [EnumMember(Value = "Sales Invoices")]
+        SalesInvoice,
+        [EnumMember(Value = "Purchase Invoices")]
+        PurchaseInvoice,
+        [EnumMember(Value = "Supplier Statement")]
+        SupplierStatement
+    }
+
+    public class TypeWithEnumMember
+    {
+        public int Id { get; set; }
+        public WorkflowType WorkflowType { get; set; }
     }
 }

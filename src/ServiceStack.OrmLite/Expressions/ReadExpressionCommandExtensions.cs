@@ -12,14 +12,14 @@ namespace ServiceStack.OrmLite
     {
         internal static List<T> Select<T>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
-            string sql = q.SelectInto<T>();
+            string sql = q.SelectInto<T>(QueryType.Select);
             return dbCmd.ExprConvertToList<T>(sql, q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<T> Select<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
-            string sql = q.Where(predicate).SelectInto<T>();
+            string sql = q.Where(predicate).SelectInto<T>(QueryType.Select);
 
             return dbCmd.ExprConvertToList<T>(sql, q.Params);
         }
@@ -27,37 +27,37 @@ namespace ServiceStack.OrmLite
         internal static List<Tuple<T, T2>> SelectMulti<T, T2>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
             q.SelectIfDistinct(q.CreateMultiSelect<T, T2, EOT, EOT, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
-            return dbCmd.ExprConvertToList<Tuple<T, T2>>(q.ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+            return dbCmd.ExprConvertToList<Tuple<T, T2>>(q.ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3>> SelectMulti<T, T2, T3>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
             q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, EOT, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
-            return dbCmd.ExprConvertToList<Tuple<T, T2, T3>>(q.ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3>>(q.ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3, T4>> SelectMulti<T, T2, T3, T4>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
             q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, T4, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
-            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4>>(q.ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4>>(q.ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3, T4, T5>> SelectMulti<T, T2, T3, T4, T5>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
             q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, T4, T5, EOT, EOT>(dbCmd.GetDialectProvider()));
-            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5>>(q.ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5>>(q.ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3, T4, T5, T6>> SelectMulti<T, T2, T3, T4, T5, T6>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
             q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, T4, T5, T6, EOT>(dbCmd.GetDialectProvider()));
-            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6>>(q.ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6>>(q.ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3, T4, T5, T6, T7>> SelectMulti<T, T2, T3, T4, T5, T6, T7>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
             q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, T4, T5, T6, T7>(dbCmd.GetDialectProvider()));
-            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6, T7>>(q.ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6, T7>>(q.ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static string CreateMultiSelect<T, T2, T3, T4, T5, T6, T7>(this SqlExpression<T> q, IOrmLiteDialectProvider dialectProvider)
@@ -98,32 +98,32 @@ namespace ServiceStack.OrmLite
 
         internal static List<Tuple<T, T2>> SelectMulti<T, T2>(this IDbCommand dbCmd, SqlExpression<T> q, string[] tableSelects)
         {
-            return dbCmd.ExprConvertToList<Tuple<T, T2>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+            return dbCmd.ExprConvertToList<Tuple<T, T2>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3>> SelectMulti<T, T2, T3>(this IDbCommand dbCmd, SqlExpression<T> q, string[] tableSelects)
         {
-            return dbCmd.ExprConvertToList<Tuple<T, T2, T3>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3, T4>> SelectMulti<T, T2, T3, T4>(this IDbCommand dbCmd, SqlExpression<T> q, string[] tableSelects)
         {
-            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3, T4, T5>> SelectMulti<T, T2, T3, T4, T5>(this IDbCommand dbCmd, SqlExpression<T> q, string[] tableSelects)
         {
-            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3, T4, T5, T6>> SelectMulti<T, T2, T3, T4, T5, T6>(this IDbCommand dbCmd, SqlExpression<T> q, string[] tableSelects)
         {
-            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3, T4, T5, T6, T7>> SelectMulti<T, T2, T3, T4, T5, T6, T7>(this IDbCommand dbCmd, SqlExpression<T> q, string[] tableSelects)
         {
-            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6, T7>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(), q.Params, onlyFields: q.OnlyFields);
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6, T7>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static T Single<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)
@@ -135,14 +135,14 @@ namespace ServiceStack.OrmLite
 
         internal static T Single<T>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
-            string sql = q.Limit(1).SelectInto<T>();
+            string sql = q.Limit(1).SelectInto<T>(QueryType.Single);
 
             return dbCmd.ExprConvertTo<T>(sql, q.Params, onlyFields:q.OnlyFields);
         }
 
         public static TKey Scalar<T, TKey>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
-            var sql = expression.SelectInto<T>();
+            var sql = expression.SelectInto<T>(QueryType.Scalar);
             return dbCmd.Scalar<TKey>(sql, expression.Params);
         }
 
@@ -150,7 +150,7 @@ namespace ServiceStack.OrmLite
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Select(field);
-            var sql = q.SelectInto<T>();
+            var sql = q.SelectInto<T>(QueryType.Scalar);
             return dbCmd.Scalar<TKey>(sql, q.Params);
         }
 
@@ -159,7 +159,7 @@ namespace ServiceStack.OrmLite
         {
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Select(field).Where(predicate);
-            string sql = q.SelectInto<T>();
+            string sql = q.SelectInto<T>(QueryType.Scalar);
             return dbCmd.Scalar<TKey>(sql, q.Params);
         }
 
@@ -196,9 +196,9 @@ namespace ServiceStack.OrmLite
 
         internal static long RowCount<T>(this IDbCommand dbCmd, SqlExpression<T> expression)
         {
-            //ORDER BY throws when used in subselects in SQL Server. Removing OrderBy() clause since it doesn't impact results
+            //ORDER BY throws when used in sub selects in SQL Server. Removing OrderBy() clause since it doesn't impact results
             var countExpr = expression.Clone().OrderBy(); 
-            return dbCmd.Scalar<long>(dbCmd.GetDialectProvider().ToRowCountStatement(countExpr.ToSelectStatement()), countExpr.Params);
+            return dbCmd.Scalar<long>(dbCmd.GetDialectProvider().ToRowCountStatement(countExpr.ToSelectStatement(QueryType.Scalar)), countExpr.Params);
         }
 
         internal static long RowCount(this IDbCommand dbCmd, string sql, object anonType)

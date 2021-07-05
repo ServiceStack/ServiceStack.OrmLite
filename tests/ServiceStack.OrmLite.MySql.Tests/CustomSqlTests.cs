@@ -1,4 +1,7 @@
-﻿using System.Data;
+﻿using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 
@@ -25,51 +28,82 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_execute_stored_procedure_using_SqlList_with_out_params()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.DropAndCreateTable<LetterFrequency>();
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<LetterFrequency>();
 
-                var rows = "A,B,B,C,C,C,D,D,E".Split(',').Map(x => new LetterFrequency { Letter = x });
-                db.InsertAll(rows);
+            var rows = "A,B,B,C,C,C,D,D,E".Split(',').Map(x => new LetterFrequency { Letter = x });
+            db.InsertAll(rows);
 
-                db.ExecuteSql(spSql);
+            db.ExecuteSql(spSql);
 
-                IDbDataParameter pTotal = null;
-                var results = db.SqlList<LetterFrequency>("spSearchLetters",
-                    cmd =>
-                    {
-                        cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.AddParam("pLetter", "C");
-                        pTotal = cmd.AddParam("pTotal", direction: ParameterDirection.Output);
-                    });
+            IDbDataParameter pTotal = null;
+            var results = db.SqlList<LetterFrequency>("spSearchLetters",
+                cmd =>
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.AddParam("pLetter", "C");
+                    pTotal = cmd.AddParam("pTotal", direction: ParameterDirection.Output);
+                });
 
-                Assert.That(results.Count, Is.EqualTo(3));
-                Assert.That(pTotal.Value, Is.EqualTo(3));
-            }
+            Assert.That(results.Count, Is.EqualTo(3));
+            Assert.That(pTotal.Value, Is.EqualTo(3));
         }
 
         [Test]
         public void Can_execute_stored_procedure_using_SqlProc_with_out_params()
         {
-            using (var db = OpenDbConnection())
+            using var db = OpenDbConnection();
+            db.DropAndCreateTable<LetterFrequency>();
+
+            var rows = "A,B,B,C,C,C,D,D,E".Split(',').Map(x => new LetterFrequency { Letter = x });
+            db.InsertAll(rows);
+
+            db.ExecuteSql(spSql);
+
+            var cmd = db.SqlProc("spSearchLetters", new { pLetter = "C" });
+
+            Assert.That(((OrmLiteCommand)cmd).IsDisposed, Is.False);
+
+            var pTotal = cmd.AddParam("pTotal", direction: ParameterDirection.Output);
+            var results = cmd.ConvertToList<LetterFrequency>();
+
+            Assert.That(results.Count, Is.EqualTo(3));
+            Assert.That(pTotal.Value, Is.EqualTo(3));
+        }
+
+        public class MySqlExecFilter : OrmLiteExecFilter
+        {
+            public override IEnumerable<T> ExecLazy<T>(IDbConnection dbConn, Func<IDbCommand, IEnumerable<T>> filter)
             {
-                db.DropAndCreateTable<LetterFrequency>();
+                var dbCmd = CreateCommand(dbConn);
+                //var mysqlCmd = (MySqlCommand) dbCmd.ToDbCommand();
+                
+                try
+                {
+                    var results = filter(dbCmd);
 
-                var rows = "A,B,B,C,C,C,D,D,E".Split(',').Map(x => new LetterFrequency { Letter = x });
-                db.InsertAll(rows);
-
-                db.ExecuteSql(spSql);
-
-                var cmd = db.SqlProc("spSearchLetters", new { pLetter = "C" });
-
-                Assert.That(((OrmLiteCommand)cmd).IsDisposed, Is.False);
-
-                var pTotal = cmd.AddParam("pTotal", direction: ParameterDirection.Output);
-                var results = cmd.ConvertToList<LetterFrequency>();
-
-                Assert.That(results.Count, Is.EqualTo(3));
-                Assert.That(pTotal.Value, Is.EqualTo(3));
+                    foreach (var item in results)
+                    {
+                        yield return item;
+                    }
+                }
+                finally
+                {
+                    DisposeCommand(dbCmd, dbConn);
+                }
             }
         }
+
+        // [Test]
+        // public void Can_access_MySqlConnection_in_ExecFilter()
+        // {
+        //     MySqlDialect.Instance.ExecFilter = new MySqlExecFilter();
+        //
+        //     using var db = OpenDbConnection();
+        //     db.DropAndCreateTable<LetterFrequency>();
+        //
+        //     var results = db.SelectLazy<LetterFrequency>().ToList();
+        // }
+
     }
 }

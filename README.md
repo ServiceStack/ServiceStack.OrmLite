@@ -1,4 +1,4 @@
-Follow [@ServiceStack](https://twitter.com/servicestack) or [view the docs](https://docs.servicestack.net), use [StackOverflow](http://stackoverflow.com/questions/ask) or the [Customer Forums](https://forums.servicestack.net/) for support.
+Follow [@ServiceStack](https://twitter.com/servicestack), [view the docs](https://docs.servicestack.net), use [StackOverflow](https://stackoverflow.com/questions/ask?tags=servicestack,ormlite-servicestack) or [Customer Forums](https://forums.servicestack.net/) for support.
 
 # Fast, Simple, Typed ORM for .NET
 
@@ -32,18 +32,27 @@ a convenient API to persist related models. Effectively this allows you to creat
 POCO type and it should persist as expected in a DB Table with columns for each of the classes 1st 
 level public properties.
 
-# Download 
+## Download
 
-[![Download on NuGet](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/release-notes/install-ormlite.png)](https://www.nuget.org/packages?q=servicestack+ormlite)
+Install the NuGet package for your RDBMS Provider, e.g: 
 
-### 8 flavours of OrmLite is on NuGet: 
+    $ dotnet add package ServiceStack.OrmLite.PostgreSQL
 
+Package Reference:
+
+```xml
+<PackageReference Include="ServiceStack.OrmLite.SqlServer" Version="5.*" />
+```
+
+### OrmLite RDBMS Providers
+
+  - [ServiceStack.OrmLite.PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
   - [ServiceStack.OrmLite.SqlServer](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer)
   - [ServiceStack.OrmLite.SqlServer.Data](http://nuget.org/List/Packages/ServiceStack.OrmLite.SqlServer.Data) (uses [Microsoft.Data.SqlClient](https://devblogs.microsoft.com/dotnet/introducing-the-new-microsoftdatasqlclient/))
   - [ServiceStack.OrmLite.Sqlite](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite)
   - [ServiceStack.OrmLite.Sqlite.Data](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Data) (uses [Microsoft.Data.SQLite](https://stackoverflow.com/a/52025556/85785))
+  - [ServiceStack.OrmLite.Sqlite.Cil](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Cil) (uses [Uses SQLitePCLRaw.bundle_cil](https://ericsink.com/entries/sqlite_llama_preview.html))
   - [ServiceStack.OrmLite.Sqlite.Windows](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Windows) (Windows / .NET Framework only)
-  - [ServiceStack.OrmLite.PostgreSQL](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL)
   - [ServiceStack.OrmLite.MySql](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql)
   - [ServiceStack.OrmLite.MySqlConnector](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySqlConnector) (uses [MySqlConnector](https://github.com/mysql-net/MySqlConnector))
 
@@ -55,6 +64,8 @@ The `.Core` packages contains only **.NET Standard 2.0** versions which can be u
   - [ServiceStack.OrmLite.PostgreSQL.Core](http://nuget.org/List/Packages/ServiceStack.OrmLite.PostgreSQL.Core)
   - [ServiceStack.OrmLite.MySql.Core](http://nuget.org/List/Packages/ServiceStack.OrmLite.MySql.Core)
   - [ServiceStack.OrmLite.Sqlite.Core](http://nuget.org/packages/ServiceStack.OrmLite.Sqlite.Core) 
+
+#### Community Providers
 
 Unofficial Releases maintained by ServiceStack Community:
 
@@ -152,13 +163,13 @@ using (var db = dbFactory.Open())
 }
 ```
 
-## [OrmLite Interactive Tour](http://gistlyn.com/ormlite)
+## [OrmLite Interactive Tour](https://gist.cafe/ormlite)
 
-The best way to learn about OrmLite is to take the [OrmLite Interactive Tour](http://gistlyn.com/ormlite)
+The best way to learn about OrmLite is to take the [OrmLite Interactive Tour](https://gist.cafe/ormlite)
 which lets you try out and explore different OrmLite features immediately from the comfort of your own 
 browser without needing to install anything:
 
-[![](https://raw.githubusercontent.com/ServiceStack/Assets/master/img/ormlite/ormlite-tour.png)](http://gistlyn.com/ormlite)
+[![](https://raw.githubusercontent.com/ServiceStack/docs/master/docs/images/gistcafe/ormlite-tour-screenshot.png)](https://gist.cafe/ormlite)
 
 ## [Type Converters](https://github.com/ServiceStack/ServiceStack.OrmLite/wiki/OrmLite-Type-Converters)
 
@@ -3403,6 +3414,8 @@ var result = db.Single<TableJson>("table_json->'SubType'->>'Name' = 'JSON'");
 For simplicity, and to be able to have the same POCO class persisted in db4o, memcached, redis or on the filesystem (i.e. providers included in ServiceStack), each model must have a single primary key, by convention OrmLite expects it
 to be `Id` although you use `[Alias("DbFieldName")]` attribute it map it to a column with a different name or use 
 the `[PrimaryKey]` attribute to tell OrmLite to use a different property for the primary key.
+
+If an `Id` property or `[PrimaryKey]` attribute isn't specified, a Primary Key is assigned to `[AutoIncrement]` and `[AutoId]` properties, otherwise it's assumed the first property is the tables Primary Key.
 
 You can still `SELECT` from these tables, you will just be unable to make use of APIs that rely on it, e.g. 
 `Update` or `Delete` where the filter is implied (i.e. not specified), all the APIs that end with `ById`, etc.

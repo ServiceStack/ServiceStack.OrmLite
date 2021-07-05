@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 using System.Linq;
 using System.Text;
-using MySql.Data.MySqlClient;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
 using ServiceStack.Model;
@@ -18,76 +17,64 @@ namespace ServiceStack.OrmLite.MySql.Tests
         [Test]
         public void Can_create_primary_key_varchar_with_string_length_255()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.CreateTable<TypeWithStringId_255>(true);
-            }
+            using var db = OpenDbConnection();
+            db.CreateTable<TypeWithStringId_255>(true);
         }
 
         [Test]
         public void Can_create_primary_key_varchar_without_setting_string_length()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.CreateTable<TypeWithStringId>(true);
-            }
+            using var db = OpenDbConnection();
+            db.CreateTable<TypeWithStringId>(true);
         }
 
         [Test]
         public void Can_create_unique_key_on_varchar_without_setting_string_length()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.CreateTable<TypeWithUniqeKeyOnVarchar>(true);
-            }
+            using var db = OpenDbConnection();
+            db.CreateTable<TypeWithUniqeKeyOnVarchar>(true);
         }
 
         [Test]
         public void Can_store_and_retrieve_string_with_8000_characters_from_varchar_field()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.CreateTable<TypeWithStringId>(true);
+            using var db = OpenDbConnection();
+            db.CreateTable<TypeWithStringId>(true);
 
-                var obj = new TypeWithStringId {
-                    Id = "a",
-                    Value = CreateString(8000)
-                };
+            var obj = new TypeWithStringId {
+                Id = "a",
+                Value = CreateString(8000)
+            };
 
-                Assert.AreEqual(8000, obj.Value.Length);
+            Assert.AreEqual(8000, obj.Value.Length);
 
-                db.Save(obj);
-                var target = db.SingleById<TypeWithStringId>(obj.Id);
+            db.Save(obj);
+            var target = db.SingleById<TypeWithStringId>(obj.Id);
 
-                Assert.AreEqual(obj.Value, target.Value);
-                Assert.AreEqual(8000, obj.Value.Length);
-            }
+            Assert.AreEqual(obj.Value, target.Value);
+            Assert.AreEqual(8000, obj.Value.Length);
         }
 
         [Test]
         public void Can_store_and_retrieve_string_with_8000_characters_from_text_field()
         {
-            using (var db = OpenDbConnection())
-            {
-                db.CreateTable<TypeWithTextField>(true);
+            using var db = OpenDbConnection();
+            db.CreateTable<TypeWithTextField>(true);
 
-                var obj = new TypeWithTextField() {
-                    Value = CreateString(8000)
-                };
+            var obj = new TypeWithTextField() {
+                Value = CreateString(8000)
+            };
 
-                Assert.AreEqual(8000, obj.Value.Length);
+            Assert.AreEqual(8000, obj.Value.Length);
 
-                db.Save(obj);
-                obj.Id = (int)db.LastInsertId();
+            db.Save(obj);
+            obj.Id = (int)db.LastInsertId();
 
-                var target = db.SingleById<TypeWithTextField>(obj.Id);
+            var target = db.SingleById<TypeWithTextField>(obj.Id);
 
-                Assert.AreEqual(obj.Value, target.Value);
-                Assert.AreEqual(8000, obj.Value.Length);
-            }
+            Assert.AreEqual(obj.Value, target.Value);
+            Assert.AreEqual(8000, obj.Value.Length);
         }
-
-        #region classes
 
         class TypeWithUniqeKeyOnVarchar
         {
@@ -145,8 +132,6 @@ namespace ServiceStack.OrmLite.MySql.Tests
             public string Id { get; set; }
             public string Value { get; set; }
         }
-
-        #endregion
 
         private static string CreateString(int length)
         {

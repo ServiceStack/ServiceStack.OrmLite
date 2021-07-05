@@ -437,7 +437,7 @@ namespace ServiceStack.OrmLite.MySql
 
         public override bool DoesColumnExist(IDbConnection db, string columnName, string tableName, string schema = null)
         {
-	        tableName = GetTableName(tableName, schema);
+	        tableName = GetTableName(tableName, schema).StripQuotes();
 	        var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS"
 	                  + " WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName AND TABLE_SCHEMA = @schema"
 		                  .SqlFmt(GetTableName(tableName, schema).StripDbQuotes(), columnName);
@@ -449,7 +449,7 @@ namespace ServiceStack.OrmLite.MySql
 
         public override async Task<bool> DoesColumnExistAsync(IDbConnection db, string columnName, string tableName, string schema = null, CancellationToken token=default)
         {
-	        tableName = GetTableName(tableName, schema);
+	        tableName = GetTableName(tableName, schema).StripQuotes();
 	        var sql = "SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS"
 	                  + " WHERE TABLE_NAME = @tableName AND COLUMN_NAME = @columnName AND TABLE_SCHEMA = @schema"
 		                  .SqlFmt(GetTableName(tableName, schema).StripDbQuotes(), columnName);
@@ -553,6 +553,13 @@ namespace ServiceStack.OrmLite.MySql
                 : $"CAST({fieldOrValue} AS {castAs})";
 
         public override string SqlBool(bool value) => value ? "1" : "0";
+
+        public override void EnableForeignKeysCheck(IDbCommand cmd) => cmd.ExecNonQuery("SET FOREIGN_KEY_CHECKS=1;");
+        public override Task EnableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token = default) => 
+	        cmd.ExecNonQueryAsync("SET FOREIGN_KEY_CHECKS=1;", null, token);
+        public override void DisableForeignKeysCheck(IDbCommand cmd) => cmd.ExecNonQuery("SET FOREIGN_KEY_CHECKS=0;");
+        public override Task DisableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token = default) => 
+	        cmd.ExecNonQueryAsync("SET FOREIGN_KEY_CHECKS=0;", null, token);
 
         protected DbConnection Unwrap(IDbConnection db)
         {

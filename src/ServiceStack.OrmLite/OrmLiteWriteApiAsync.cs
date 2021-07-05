@@ -348,11 +348,16 @@ namespace ServiceStack.OrmLite
             if (!references)
                 return await dbConn.Exec(dbCmd => dbCmd.SaveAsync(obj, token)).ConfigAwait();
 
+            var trans = dbConn.OpenTransactionIfNotExists();
             return await dbConn.Exec(async dbCmd =>
             {
-                var ret = await dbCmd.SaveAsync(obj, token).ConfigAwait();
-                await dbCmd.SaveAllReferencesAsync(obj, token).ConfigAwait();
-                return ret;
+                using (trans)
+                {
+                    var ret = await dbCmd.SaveAsync(obj, token).ConfigAwait();
+                    await dbCmd.SaveAllReferencesAsync(obj, token).ConfigAwait();
+                    trans?.Commit();
+                    return ret;
+                }
             }).ConfigAwait();
         }
 

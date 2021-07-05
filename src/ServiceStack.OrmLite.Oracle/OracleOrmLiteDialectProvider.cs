@@ -199,8 +199,7 @@ namespace ServiceStack.OrmLite.Oracle
             }
             catch (Exception ex)
             {
-                Log.Error("Error in {0}.ToDbValue() value '{1}' and Type '{2}'"
-                    .Fmt(converter.GetType().Name, value != null ? value.GetType().Name : "undefined", type.Name), ex);
+                Log.Error($"Error in {converter?.GetType().Name}.ToDbValue() value '{value.GetType().Name}' and Type '{type.Name}'", ex);
                 throw;
             }
 
@@ -218,8 +217,8 @@ namespace ServiceStack.OrmLite.Oracle
 
         internal string GetQuotedDateTimeOffsetValue(DateTimeOffset dateValue)
         {
-            var iso8601Format = string.Format("{0} {1}", GetIsoDateTimeFormat(dateValue.TimeOfDay), IsoTimeZoneFormat);
-            var oracleFormat = string.Format("{0} {1}", GetOracleDateTimeFormat(dateValue.TimeOfDay), OracleTimeZoneFormat);
+            var iso8601Format = $"{GetIsoDateTimeFormat(dateValue.TimeOfDay)} {IsoTimeZoneFormat}";
+            var oracleFormat = $"{GetOracleDateTimeFormat(dateValue.TimeOfDay)} {OracleTimeZoneFormat}";
             return string.Format("TO_TIMESTAMP_TZ({0}, {1})", base.GetQuotedValue(dateValue.ToString(iso8601Format), typeof(string)), base.GetQuotedValue(oracleFormat, typeof(string)));
         }
 
@@ -246,8 +245,8 @@ namespace ServiceStack.OrmLite.Oracle
             if (isStartOfDay) return dateFormat;
             var hasFractionalSeconds = (timeOfDay.Milliseconds != 0) || ((timeOfDay.Ticks % TimeSpan.TicksPerMillisecond) != 0);
             return hasFractionalSeconds 
-                ? string.Format("{0} {1}.{2}", dateFormat, timeFormat, millisecondFormat) 
-                : string.Format("{0} {1}", dateFormat, timeFormat);
+                ? $"{dateFormat} {timeFormat}.{millisecondFormat}"
+                : $"{dateFormat} {timeFormat}";
         }
 
         public override bool IsFullSelectStatement(string sqlFilter)
@@ -1061,8 +1060,7 @@ namespace ServiceStack.OrmLite.Oracle
                 .Replace("%", @"^%");
         }
 
-
-        public override string ToSelectStatement(ModelDefinition modelDef,
+        public override string ToSelectStatement(QueryType queryType, ModelDefinition modelDef,
             string selectExpression,
             string bodyExpression,
             string orderByExpression = null,
@@ -1084,7 +1082,7 @@ namespace ServiceStack.OrmLite.Oracle
             if (!offset.HasValue)
                 offset = 0;
 
-            if (string.IsNullOrEmpty(orderByExpression) && rows.HasValue)
+            if (queryType == QueryType.Select && (offset.GetValueOrDefault() > 0 || rows.GetValueOrDefault() > 1) && orderByExpression.IsEmpty())
             {
                 var primaryKey = modelDef.FieldDefinitions.FirstOrDefault(x => x.IsPrimaryKey);
                 if (primaryKey == null)
@@ -1092,7 +1090,7 @@ namespace ServiceStack.OrmLite.Oracle
                     if (rows.Value == 1 && offset.Value == 0)
                     {
                         // Probably used Single<> extension method on a table with a composite key so let it through.
-                        // Lack of an orderby expression will mean it returns a random matching row, but that is OK.
+                        // Lack of an order by expression will mean it returns a random matching row, but that is OK.
                         orderByExpression = "";
                     }
                     else
@@ -1100,8 +1098,7 @@ namespace ServiceStack.OrmLite.Oracle
                 }
                 else
                 {
-                    orderByExpression = string.Format("ORDER BY {0}",
-                        this.GetQuotedColumnName(modelDef, primaryKey.FieldName));
+                    orderByExpression = $"ORDER BY {this.GetQuotedColumnName(modelDef, primaryKey.FieldName)}";
                 }
             }
             sbInner.Append(" " + orderByExpression);
