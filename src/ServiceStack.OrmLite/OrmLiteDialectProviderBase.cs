@@ -991,6 +991,11 @@ namespace ServiceStack.OrmLite
             var value = GetValueOrDbNull<T>(fieldDef, obj);
             p.Value = value;
 
+            SetParameterSize(fieldDef, p);
+        }
+
+        public virtual void SetParameterSize(FieldDefinition fieldDef, IDataParameter p)
+        {
             if (p.Value is string s && p is IDbDataParameter dataParam && dataParam.Size > 0 && s.Length > dataParam.Size)
             {
                 // db param Size set in StringConverter
