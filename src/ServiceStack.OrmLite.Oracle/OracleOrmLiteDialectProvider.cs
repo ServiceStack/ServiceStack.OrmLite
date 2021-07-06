@@ -370,7 +370,7 @@ namespace ServiceStack.OrmLite.Oracle
                         pi.SetProperty(obj, Convert.ToInt64(result));
                 }
 
-                SetParameterValue<T>(fieldDef, p, obj);
+                SetParameterValue(fieldDef, p, obj);
             }
         }
 
