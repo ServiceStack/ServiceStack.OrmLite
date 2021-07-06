@@ -190,7 +190,11 @@ namespace ServiceStack.OrmLite
 
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
-            var sql = dbCmd.GetDialectProvider().ToInsertRowStatement(dbCmd, obj, onlyFields);
+            var dialectProvider = dbCmd.GetDialectProvider();
+            var sql = dialectProvider.ToInsertRowStatement(dbCmd, obj, onlyFields);
+
+            dialectProvider.SetParameterValues<T>(dbCmd, obj);
+
             return dbCmd.ExecuteSqlAsync(sql, token);
         }
 
