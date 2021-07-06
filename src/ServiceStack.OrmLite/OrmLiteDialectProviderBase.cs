@@ -977,7 +977,7 @@ namespace ServiceStack.OrmLite
                     continue;
                 }
                 
-                SetParameterValue<T>(fieldDef, p, obj);
+                SetParameterValue(fieldDef, p, obj);
             }
         }
 
@@ -986,11 +986,16 @@ namespace ServiceStack.OrmLite
             return modelDef.GetFieldDefinitionMap(SanitizeFieldNameForParamName);
         }
 
-        public virtual void SetParameterValue<T>(FieldDefinition fieldDef, IDataParameter p, object obj)
+        public virtual void SetParameterValue(FieldDefinition fieldDef, IDataParameter p, object obj)
         {
-            var value = GetValueOrDbNull<T>(fieldDef, obj);
+            var value = GetValueOrDbNull(fieldDef, obj);
             p.Value = value;
 
+            SetParameterSize(fieldDef, p);
+        }
+
+        protected virtual void SetParameterSize(FieldDefinition fieldDef, IDataParameter p)
+        {
             if (p.Value is string s && p is IDbDataParameter dataParam && dataParam.Size > 0 && s.Length > dataParam.Size)
             {
                 // db param Size set in StringConverter
@@ -998,7 +1003,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected virtual object GetValue<T>(FieldDefinition fieldDef, object obj)
+        protected virtual object GetValue(FieldDefinition fieldDef, object obj)
         {
             return GetFieldValue(fieldDef, fieldDef.GetValue(obj));
         }
@@ -1037,9 +1042,9 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected virtual object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
+        protected virtual object GetValueOrDbNull(FieldDefinition fieldDef, object obj)
         {
-            var value = GetValue<T>(fieldDef, obj);
+            var value = GetValue(fieldDef, obj);
             if (value == null)
                 return DBNull.Value;
 

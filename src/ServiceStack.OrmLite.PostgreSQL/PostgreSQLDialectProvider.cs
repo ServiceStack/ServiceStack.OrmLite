@@ -695,7 +695,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
         public virtual bool UseRawValue(string columnDef) => columnDef?.EndsWith("[]") == true;
 
-        protected override object GetValue<T>(FieldDefinition fieldDef, object obj)
+        protected override object GetValue(FieldDefinition fieldDef, object obj)
         {
             if (fieldDef.CustomFieldDefinition != null && NativeTypes.ContainsKey(fieldDef.CustomFieldDefinition)
                 && UseRawValue(fieldDef.CustomFieldDefinition))
@@ -703,7 +703,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
                 return fieldDef.GetValue(obj);
             }
 
-            return base.GetValue<T>(fieldDef, obj);
+            return base.GetValue(fieldDef, obj);
         }
 
         public override void PrepareStoredProcedureStatement<T>(IDbCommand cmd, T obj)
