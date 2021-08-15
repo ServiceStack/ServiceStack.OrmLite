@@ -235,7 +235,7 @@ namespace ServiceStack.OrmLite.Tests
                 DateTimeOffset = new DateTimeOffset(new DateTime(2000 + i, (i + 1) % 12, (i + 1) % 28)),
                 Guid = Guid.NewGuid(),
                 Bool = i % 2 == 0,
-                Char = (char)(i + 1), //TODO: NPGSQL fails on \0
+                Char = (char)(i + 65), //TODO: NPGSQL fails on \0
                 NullableDateTime = new DateTime(2000 + i, (i + 1) % 12, (i + 1) % 28),
                 NullableTimeSpan = new TimeSpan(i, i, i, i, i),
                 ByteArray = new[] { (byte)i, (byte)(i + 1) },
