@@ -68,10 +68,7 @@ namespace ServiceStack.OrmLite
             tableDefs.Add(modelDef);
 
             var initFilter = OrmLiteConfig.SqlExpressionInitFilter;
-            if (initFilter != null)
-            {
-                initFilter(this.GetUntyped());
-            }
+            initFilter?.Invoke(this.GetUntyped());
         }
 
         public SqlExpression<T> Clone()
@@ -1638,7 +1635,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected internal virtual object VisitJoin(Expression exp)
+        protected virtual object VisitJoin(Expression exp)
         {
             skipParameterizationForThisExpression = true;
             var visitedExpression = Visit(exp);
@@ -1670,10 +1667,10 @@ namespace ServiceStack.OrmLite
             }
             else if (lambda.Body.NodeType == ExpressionType.Conditional && sep == " ")
             {
-                ConditionalExpression c = lambda.Body as ConditionalExpression;
+                var c = lambda.Body as ConditionalExpression;
 
                 var r = VisitConditional(c);
-                if (!(r is PartialSqlString))
+                if (r is not PartialSqlString)
                     return r;
 
                 return $"{r}={GetQuotedTrueValue()}";
@@ -1695,7 +1692,7 @@ namespace ServiceStack.OrmLite
         {
             object originalLeft = null, originalRight = null, left, right;
             var operand = BindOperant(b.NodeType);   //sep= " " ??
-            if (operand == "AND" || operand == "OR")
+            if (operand is "AND" or "OR")
             {
                 if (IsBooleanComparison(b.Left))
                 {
@@ -1703,9 +1700,9 @@ namespace ServiceStack.OrmLite
                     if (left is PartialSqlString)
                         left = new PartialSqlString($"{left}={GetQuotedTrueValue()}");
                 }
-                else if (b.Left is ConditionalExpression)
+                else if (b.Left is ConditionalExpression expr)
                 {
-                    left = VisitConditional((ConditionalExpression) b.Left);
+                    left = VisitConditional(expr);
                     if (left is PartialSqlString)
                         left = new PartialSqlString($"{left}={GetQuotedTrueValue()}");
                 }
@@ -1717,29 +1714,28 @@ namespace ServiceStack.OrmLite
                     if (right is PartialSqlString)
                         right = new PartialSqlString($"{right}={GetQuotedTrueValue()}");
                 }
-                else if (b.Right is ConditionalExpression)
+                else if (b.Right is ConditionalExpression expr)
                 {
-                    right = VisitConditional((ConditionalExpression) b.Right);
+                    right = VisitConditional(expr);
                     if (right is PartialSqlString)
                         right = new PartialSqlString($"{right}={GetQuotedTrueValue()}");
                 }
                 else right = Visit(b.Right);
 
-                if (!(left is PartialSqlString) && !(right is PartialSqlString))
+                if (left is not PartialSqlString && right is not PartialSqlString)
                 {
                     var result = CachedExpressionCompiler.Evaluate(PreEvaluateBinary(b, left, right));
                     return result;
                 }
 
-                if (!(left is PartialSqlString))
+                if (left is not PartialSqlString)
                     left = ((bool)left) ? GetTrueExpression() : GetFalseExpression();
-                if (!(right is PartialSqlString))
+                if (right is not PartialSqlString)
                     right = ((bool)right) ? GetTrueExpression() : GetFalseExpression();
             }
-            else if ((operand == "=" || operand == "<>") && b.Left is MethodCallExpression && ((MethodCallExpression)b.Left).Method.Name == "CompareString")
+            else if ((operand is "=" or "<>") && b.Left is MethodCallExpression methodExpr && methodExpr.Method.Name == "CompareString")
             {
                 //Handle VB.NET converting (x => x.Name == "Foo") into (x => CompareString(x.Name, "Foo", False)
-                var methodExpr = (MethodCallExpression)b.Left;
                 var args = this.VisitExpressionList(methodExpr.Arguments);
                 right = GetValue(args[1], typeof(string));
                 ConvertToPlaceholderAndParameter(ref right);
@@ -1751,8 +1747,7 @@ namespace ServiceStack.OrmLite
                 originalRight = right = Visit(b.Right);
 
                 // Handle "expr = true/false", including with the constant on the left
-
-                if (operand == "=" || operand == "<>")
+                if (operand is "=" or "<>")
                 {
                     if (left is bool)
                     {
@@ -1768,12 +1763,13 @@ namespace ServiceStack.OrmLite
                             return true; // "null != true/false" becomes "true"
                     }
 
-                    if (right is bool && !IsFieldName(left) && !(b.Left is ConditionalExpression)) // Don't change anything when "expr" is a column name or ConditionalExpression - then we really want "ColName = 1" or (Case When 1=0 Then 1 Else 0 End = 1)
+                    // Don't change anything when "expr" is a column name or ConditionalExpression - then we really want "ColName = 1" or (Case When 1=0 Then 1 Else 0 End = 1)
+                    if (right is bool rightBool && !IsFieldName(left) && b.Left is not ConditionalExpression) 
                     {
                         if (operand == "=")
-                            return (bool)right ? left : GetNotValue(left); // "expr == true" becomes "expr", "expr == false" becomes "not (expr)"
+                            return rightBool ? left : GetNotValue(left); // "expr == true" becomes "expr", "expr == false" becomes "not (expr)"
                         if (operand == "<>")
-                            return (bool)right ? GetNotValue(left) : left; // "expr != true" becomes "not (expr)", "expr != false" becomes "expr"
+                            return rightBool ? GetNotValue(left) : left; // "expr != true" becomes "not (expr)", "expr != false" becomes "expr"
                     }
                 }
 
@@ -1793,23 +1789,22 @@ namespace ServiceStack.OrmLite
                 }
                 else if (leftNeedsCoercing)
                 {
-                    var leftPartialSql = left as PartialSqlString;
-                    if (leftPartialSql == null)
+                    if (left is not PartialSqlString)
                     {
                         left = DialectProvider.GetQuotedValue(left, rightEnum.EnumType);
                     }
                 }
-                else if (!(left is PartialSqlString) && !(right is PartialSqlString))
+                else if (left is not PartialSqlString && right is not PartialSqlString)
                 {
                     var evaluatedValue = CachedExpressionCompiler.Evaluate(PreEvaluateBinary(b, left, right));
                     var result = VisitConstant(Expression.Constant(evaluatedValue));
                     return result;
                 }
-                else if (!(left is PartialSqlString))
+                else if (left is not PartialSqlString)
                 {
                     left = DialectProvider.GetQuotedValue(left, left?.GetType());
                 }
-                else if (!(right is PartialSqlString))
+                else if (right is not PartialSqlString)
                 {
                     right = GetValue(right, right?.GetType());
                 }
@@ -1870,9 +1865,8 @@ namespace ServiceStack.OrmLite
         /// otherwise, false.</returns>
         protected virtual bool IsBooleanComparison(Expression e)
         {
-            if (!(e is MemberExpression)) return false;
-
-            var m = (MemberExpression)e;
+            if (e is not MemberExpression m) 
+                return false;
 
             if (m.Member.DeclaringType.IsNullableType() &&
                 m.Member.Name == "HasValue") //nameof(Nullable<bool>.HasValue)
