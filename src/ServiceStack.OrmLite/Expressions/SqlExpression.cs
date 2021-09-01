@@ -48,6 +48,7 @@ namespace ServiceStack.OrmLite
         protected bool selectDistinct = false;
         protected bool visitedExpressionIsTableColumn = false;
         protected bool skipParameterizationForThisExpression = false;
+        protected bool isSelectExpression = false;
         private bool hasEnsureConditions = false;
         private bool inSqlMethodCall = false;
 
@@ -346,7 +347,11 @@ namespace ServiceStack.OrmLite
             Reset(sep=string.Empty);
 
             CustomSelect = true;
+            
+            isSelectExpression = true;
             var selectSql = Visit(fields);
+            isSelectExpression = false;
+            
             if (!IsSqlClass(selectSql))
             {
                 selectSql = ConvertToParam(selectSql);
@@ -2100,10 +2105,12 @@ namespace ServiceStack.OrmLite
             if (isAnonType)
             {
                 var exprs = VisitExpressionList(nex.Arguments);
-
-                for (var i = 0; i < exprs.Count; ++i)
+                if (isSelectExpression)
                 {
-                    exprs[i] = SetAnonTypePropertyNamesForSelectExpression(exprs[i], nex.Arguments[i], nex.Members[i]);
+                    for (var i = 0; i < exprs.Count; ++i)
+                    {
+                        exprs[i] = SetAnonTypePropertyNamesForSelectExpression(exprs[i], nex.Arguments[i], nex.Members[i]);
+                    }
                 }
 
                 return new SelectList(exprs);
