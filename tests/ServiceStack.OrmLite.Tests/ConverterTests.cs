@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
+using System.Globalization;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
+using ServiceStack.OrmLite.Converters;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -20,6 +23,35 @@ namespace ServiceStack.OrmLite.Tests
             var dialectProvider = DialectProvider;
             var convertedValue = dialectProvider.FromDbValue(12345, typeof(TestStruct));
             Assert.That(convertedValue, Is.Null);
+        }
+
+        [Test]
+        public void ToDbValue_does_not_throw_Exception()
+        {
+            var dialectProvider = DialectProvider;
+            var convertedValue = dialectProvider.ToDbValue (89.123456789, typeof(decimal));
+            Assert.AreEqual(convertedValue, 89.123456789);
+        }
+
+        [Test]
+        public void ToQuotedString_FloatConverter_not_throw_Exception()
+        {
+            var floatConverter = new FloatConverter();
+            floatConverter.ToQuotedString(typeof(decimal), 89.123456789);
+            floatConverter.ToQuotedString(typeof(float), 89.123456789);
+            floatConverter.ToQuotedString(typeof(double), 89.123456789);
+        }
+
+        [Test]
+        public void ToQuotedString_LegacyFloatConverter_throw_Exception()
+        {
+            Assert.Catch(typeof(InvalidCastException), () =>
+            {
+                var floatConverter = new LegacyFloatConverter();
+                floatConverter.ToQuotedString(typeof(decimal), 89.123456789);
+                floatConverter.ToQuotedString(typeof(float), 89.123456789);
+                floatConverter.ToQuotedString(typeof(double), 89.123456789);
+            });
         }
 
         [Test]
@@ -298,4 +330,36 @@ namespace ServiceStack.OrmLite.Tests
         }
     }
 
+    //A copy of the original implementation code 
+    internal class LegacyFloatConverter : NativeValueOrmLiteConverter
+    {
+        public override string ColumnDefinition => "DOUBLE";
+        public override DbType DbType => DbType.Single;
+
+        public override object ToDbValue(Type fieldType, object value)
+        {
+            return this.ConvertNumber(fieldType, value);
+        }
+
+        public override object FromDbValue(Type fieldType, object value)
+        {
+            return this.ConvertNumber(fieldType, value);
+        }
+
+        public override string ToQuotedString(Type fieldType, object value)
+        {
+            var typeCode = fieldType.GetTypeCode();
+            switch (typeCode)
+            {
+                case TypeCode.Single:
+                    return ((float)value).ToString(CultureInfo.InvariantCulture);
+                case TypeCode.Double:
+                    return ((double)value).ToString(CultureInfo.InvariantCulture);
+                case TypeCode.Decimal:
+                    return ((decimal)value).ToString(CultureInfo.InvariantCulture);
+            }
+
+            return base.ToQuotedString(fieldType, value);
+        }
+    }
 }

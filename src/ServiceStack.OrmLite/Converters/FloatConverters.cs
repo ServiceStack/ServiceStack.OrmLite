@@ -25,11 +25,11 @@ namespace ServiceStack.OrmLite.Converters
             switch (typeCode)
             {
                 case TypeCode.Single:
-                    return ((float)value).ToString(CultureInfo.InvariantCulture);
+                    return Convert.ToSingle(value).ToString(CultureInfo.InvariantCulture);
                 case TypeCode.Double:
-                    return ((double)value).ToString(CultureInfo.InvariantCulture);
+                    return Convert.ToDouble(value).ToString(CultureInfo.InvariantCulture);
                 case TypeCode.Decimal:
-                    return ((decimal)value).ToString(CultureInfo.InvariantCulture);
+                    return Convert.ToDecimal(value).ToString(CultureInfo.InvariantCulture);
             }
 
             return base.ToQuotedString(fieldType, value);
