@@ -75,7 +75,7 @@ namespace ServiceStack.OrmLite.SqlServer
             return gens;
         }
 
-        public override string ToSelectStatement(ModelDefinition modelDef,
+        public override string ToSelectStatement(QueryType queryType, ModelDefinition modelDef,
             string selectExpression,
             string bodyExpression,
             string orderByExpression = null,
@@ -86,21 +86,32 @@ namespace ServiceStack.OrmLite.SqlServer
                 .Append(selectExpression)
                 .Append(bodyExpression);
 
-            if (orderByExpression != null)
+            if (!string.IsNullOrEmpty(orderByExpression))
                 sb.Append(orderByExpression);
 
-            if (offset != null || rows != null)
+            var skip = offset ?? 0;
+            if (skip > 0 || rows is > 0)
             {
-                if (orderByExpression.IsEmpty())
+                // Use TOP if offset is unspecified
+                if (skip == 0)
                 {
-                    var orderBy = offset == null && rows == 1 //Avoid for Single requests
-                        ? "1"
-                        : this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey);
-
-                    sb.Append(" ORDER BY " + orderBy);
+                    var sql = StringBuilderCache.ReturnAndFree(sb);
+                    return SqlTop(sql, rows.GetValueOrDefault());
                 }
 
-                sb.Append(" ").Append(SqlLimit(offset, rows));
+                if (queryType == QueryType.Select || rows == 1)
+                {
+                    // ORDER BY mandatory when using OFFSET/FETCH NEXT
+                    if (orderByExpression.IsEmpty())
+                    {
+                        var orderBy = rows == 1 //Avoid for Single requests
+                            ? "1"
+                            : this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey);
+
+                        sb.Append(" ORDER BY " + orderBy);
+                    }
+                    sb.Append(" ").Append(SqlLimit(offset, rows));
+                }
             }
 
             return StringBuilderCache.ReturnAndFree(sb);

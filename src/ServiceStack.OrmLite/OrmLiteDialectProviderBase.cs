@@ -174,7 +174,7 @@ namespace ServiceStack.OrmLite
 
         public string ParamString { get; set; } = "@";
 
-        public INamingStrategy NamingStrategy { get; set; } = new OrmLiteNamingStrategyBase();
+        public INamingStrategy NamingStrategy { get; set; } = new OrmLiteDefaultNamingStrategy();
 
         public IStringSerializer StringSerializer { get; set; }
 
@@ -513,7 +513,7 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sql);
         }
 
-        public virtual string ToSelectStatement(ModelDefinition modelDef,
+        public virtual string ToSelectStatement(QueryType queryType, ModelDefinition modelDef,
             string selectExpression,
             string bodyExpression,
             string orderByExpression = null,
@@ -524,12 +524,12 @@ namespace ServiceStack.OrmLite
             var sb = StringBuilderCache.Allocate();
             sb.Append(selectExpression);
             sb.Append(bodyExpression);
-            if (orderByExpression != null)
+            if (!string.IsNullOrEmpty(orderByExpression))
             {
                 sb.Append(orderByExpression);
             }
 
-            if (offset != null || rows != null)
+            if ((queryType == QueryType.Select || (rows == 1 && offset is null or 0)) && (offset != null || rows != null))
             {
                 sb.Append("\n");
                 sb.Append(SqlLimit(offset, rows));
@@ -584,12 +584,20 @@ namespace ServiceStack.OrmLite
         protected virtual bool ShouldSkipInsert(FieldDefinition fieldDef) => 
             fieldDef.ShouldSkipInsert();
 
+        public virtual string ColumnNameOnly(string columnExpr)
+        {
+            var nameOnly = columnExpr.LastRightPart('.');
+            var ret = nameOnly.StripDbQuotes();
+            return ret;
+        }
+
         public virtual FieldDefinition[] GetInsertFieldDefinitions(ModelDefinition modelDef, ICollection<string> insertFields)
         {
-            return insertFields != null 
-                ? NamingStrategy.GetType() == typeof(OrmLiteNamingStrategyBase) 
-                    ? modelDef.GetOrderedFieldDefinitions(insertFields)
-                    : modelDef.GetOrderedFieldDefinitions(insertFields, name => NamingStrategy.GetColumnName(name)) 
+            var insertColumns = insertFields?.Map(ColumnNameOnly);
+            return insertColumns != null 
+                ? NamingStrategy.GetType() == typeof(OrmLiteDefaultNamingStrategy) 
+                    ? modelDef.GetOrderedFieldDefinitions(insertColumns)
+                    : modelDef.GetOrderedFieldDefinitions(insertColumns, name => NamingStrategy.GetColumnName(name)) 
                 : modelDef.FieldDefinitionsArray;
         }
 
@@ -615,8 +623,7 @@ namespace ServiceStack.OrmLite
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
                     sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
 
-                    var p = AddParameter(cmd, fieldDef);
-                    p.Value = GetFieldValue(fieldDef, fieldDef.GetValue(objWithProperties)) ?? DBNull.Value;
+                    AddParameter(cmd, fieldDef);
                 }
                 catch (Exception ex)
                 {
@@ -970,7 +977,7 @@ namespace ServiceStack.OrmLite
                     continue;
                 }
                 
-                SetParameterValue<T>(fieldDef, p, obj);
+                SetParameterValue(fieldDef, p, obj);
             }
         }
 
@@ -979,11 +986,16 @@ namespace ServiceStack.OrmLite
             return modelDef.GetFieldDefinitionMap(SanitizeFieldNameForParamName);
         }
 
-        public virtual void SetParameterValue<T>(FieldDefinition fieldDef, IDataParameter p, object obj)
+        public virtual void SetParameterValue(FieldDefinition fieldDef, IDataParameter p, object obj)
         {
-            var value = GetValueOrDbNull<T>(fieldDef, obj);
+            var value = GetValueOrDbNull(fieldDef, obj);
             p.Value = value;
 
+            SetParameterSize(fieldDef, p);
+        }
+
+        protected virtual void SetParameterSize(FieldDefinition fieldDef, IDataParameter p)
+        {
             if (p.Value is string s && p is IDbDataParameter dataParam && dataParam.Size > 0 && s.Length > dataParam.Size)
             {
                 // db param Size set in StringConverter
@@ -991,7 +1003,7 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected virtual object GetValue<T>(FieldDefinition fieldDef, object obj)
+        protected virtual object GetValue(FieldDefinition fieldDef, object obj)
         {
             return GetFieldValue(fieldDef, fieldDef.GetValue(obj));
         }
@@ -1030,9 +1042,9 @@ namespace ServiceStack.OrmLite
             }
         }
 
-        protected virtual object GetValueOrDbNull<T>(FieldDefinition fieldDef, object obj)
+        protected virtual object GetValueOrDbNull(FieldDefinition fieldDef, object obj)
         {
-            var value = GetValue<T>(fieldDef, obj);
+            var value = GetValue(fieldDef, obj);
             if (value == null)
                 return DBNull.Value;
 
@@ -1614,7 +1626,7 @@ namespace ServiceStack.OrmLite
 
         public virtual string GetQuotedValue(object value, Type fieldType)
         {
-            if (value == null) 
+            if (value == null || value == DBNull.Value) 
                 return "NULL";
 
             var converter = value.GetType().IsEnum
@@ -1652,7 +1664,7 @@ namespace ServiceStack.OrmLite
             var modelDef = expr.ModelDef;
             expr.UnsafeSelect(this.GetQuotedColumnName(modelDef, modelDef.PrimaryKey));
 
-            var subSql = expr.ToSelectStatement();
+            var subSql = expr.ToSelectStatement(QueryType.Select);
 
             return subSql;
         }

@@ -17,6 +17,9 @@ namespace ServiceStack.OrmLite.Tests.Expression
         public int Id { get; set; }
 
         public string Letter { get; set; }
+        
+        [Alias("AliasValue")]
+        public int Value { get; set; }
     }
 
     public class LetterWeighting
@@ -39,13 +42,13 @@ namespace ServiceStack.OrmLite.Tests.Expression
     {
         public SqlExpressionTests(DialectContext context) : base(context) {}
 
-        private int letterFrequenceMaxId;
+        private int letterFrequencyMaxId;
         private int letterFrequencyMinId;
         private int letterFrequencySumId;
 
         private void GetIdStats(IDbConnection db)
         {
-            letterFrequenceMaxId = db.Scalar<int>(db.From<LetterFrequency>().Select(Sql.Max("Id")));
+            letterFrequencyMaxId = db.Scalar<int>(db.From<LetterFrequency>().Select(Sql.Max("Id")));
             letterFrequencyMinId = db.Scalar<int>(db.From<LetterFrequency>().Select(Sql.Min("Id")));
             letterFrequencySumId = db.Scalar<int>(db.From<LetterFrequency>().Select(Sql.Sum("Id")));
         }
@@ -251,7 +254,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         private void CheckDbTypeInsensitiveEquivalency(List<object> result)
         {
             Assert.That(Convert.ToInt64(result[0]), Is.EqualTo(10));
-            Assert.That(Convert.ToInt64(result[1]), Is.EqualTo(letterFrequenceMaxId));
+            Assert.That(Convert.ToInt64(result[1]), Is.EqualTo(letterFrequencyMaxId));
             Assert.That(Convert.ToInt64(result[2]), Is.EqualTo(letterFrequencyMinId));
             Assert.That(Convert.ToInt64(result[3]), Is.EqualTo(letterFrequencySumId));
         }
@@ -286,7 +289,7 @@ namespace ServiceStack.OrmLite.Tests.Expression
         private void CheckDbTypeInsensitiveEquivalency(Dictionary<string, object> result)
         {
             Assert.That(Convert.ToInt64(result["Count"]), Is.EqualTo(10));
-            Assert.That(Convert.ToInt64(result["Max"]), Is.EqualTo(letterFrequenceMaxId));
+            Assert.That(Convert.ToInt64(result["Max"]), Is.EqualTo(letterFrequencyMaxId));
             Assert.That(Convert.ToInt64(result["Min"]), Is.EqualTo(letterFrequencyMinId));
             Assert.That(Convert.ToInt64(result["Sum"]), Is.EqualTo(letterFrequencySumId));
         }

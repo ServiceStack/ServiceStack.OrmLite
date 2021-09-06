@@ -55,7 +55,11 @@ namespace ServiceStack.OrmLite.Legacy
             if (OrmLiteConfig.InsertFilter != null)
                 OrmLiteConfig.InsertFilter(dbCmd, obj);
 
-            var sql = dbCmd.GetDialectProvider().ToInsertRowStatement(dbCmd, obj, onlyFields.InsertFields);
+            var dialectProvider = dbCmd.GetDialectProvider();
+            var sql = dialectProvider.ToInsertRowStatement(dbCmd, obj, onlyFields.InsertFields);
+
+            dialectProvider.SetParameterValues<T>(dbCmd, obj);
+            
             return dbCmd.ExecuteSqlAsync(sql, token);
         }
     }

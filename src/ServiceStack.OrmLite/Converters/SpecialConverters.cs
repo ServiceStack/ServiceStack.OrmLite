@@ -3,6 +3,8 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
+using System.Reflection;
+using System.Runtime.Serialization;
 using ServiceStack.DataAnnotations;
 #if NETSTANDARD2_0
 using System.Globalization;
@@ -14,7 +16,8 @@ namespace ServiceStack.OrmLite.Converters
     {
         String,
         Int,
-        Char
+        Char,
+        EnumMember,
     }
     
     public class EnumConverter : StringConverter
@@ -32,7 +35,9 @@ namespace ServiceStack.OrmLite.Converters
                 ? EnumKind.Int
                 : enumType.HasAttributeCached<EnumAsCharAttribute>()
                     ? EnumKind.Char
-                    : EnumKind.String;
+                    : HasEnumMembers(enumType) 
+                        ? EnumKind.EnumMember
+                        : EnumKind.String;
 
             Dictionary<Type, EnumKind> snapshot, newCache;
             do
@@ -73,7 +78,9 @@ namespace ServiceStack.OrmLite.Converters
             if (!isEnumFlags && long.TryParse(value.ToString(), out var enumValue))
                 value = Enum.ToObject(fieldType, enumValue);
 
-            var enumString = DialectProvider.StringSerializer.SerializeToString(value);
+            var enumString = enumKind == EnumKind.EnumMember
+                ? value.ToString()
+                : DialectProvider.StringSerializer.SerializeToString(value);
             if (enumString == null || enumString == "null")
                 enumString = value.ToString();
 
@@ -109,6 +116,9 @@ namespace ServiceStack.OrmLite.Converters
                 value = Enum.ToObject(fieldType, enumValue);
             }
 
+            if (enumKind == EnumKind.EnumMember) // Don't use serialized Enum Value
+                return value.ToString();
+
             var enumString = DialectProvider.StringSerializer.SerializeToString(value);
             return enumString != null && enumString != "null"
                 ? enumString.Trim('"') 
@@ -128,7 +138,7 @@ namespace ServiceStack.OrmLite.Converters
         }
 
         //cache expensive to calculate operation
-        static readonly ConcurrentDictionary<Type, bool> intEnums = new ConcurrentDictionary<Type, bool>();
+        static readonly ConcurrentDictionary<Type, bool> intEnums = new();
 
         public static bool IsIntEnum(Type fieldType)
         {
@@ -139,6 +149,18 @@ namespace ServiceStack.OrmLite.Converters
                 type.IsNumericType()); //i.e. is real int && not Enum)
 
             return isIntEnum;
+        }
+
+        public static bool HasEnumMembers(Type enumType)
+        {
+            var enumMembers = enumType.GetFields(BindingFlags.Public | BindingFlags.Static);
+            foreach (var fi in enumMembers)
+            {
+                var enumMemberAttr = fi.FirstAttribute<EnumMemberAttribute>();
+                if (enumMemberAttr?.Value != null)
+                    return true;
+            }
+            return false;
         }
 
         public override object FromDbValue(Type fieldType, object value)

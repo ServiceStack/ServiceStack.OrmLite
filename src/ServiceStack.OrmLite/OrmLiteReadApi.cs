@@ -145,7 +145,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static IEnumerable<T> SelectLazy<T>(this IDbConnection dbConn, SqlExpression<T> expression)
         {
-            return dbConn.ExecLazy(dbCmd => dbCmd.SelectLazy<T>(expression.ToSelectStatement(), expression.Params));
+            return dbConn.ExecLazy(dbCmd => dbCmd.SelectLazy<T>(expression.ToSelectStatement(QueryType.Select), expression.Params));
         }
 
         /// <summary>
@@ -208,7 +208,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static T Scalar<T>(this IDbConnection dbConn, ISqlExpression sqlExpression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Scalar<T>(sqlExpression.ToSelectStatement(), sqlExpression.Params));
+            return dbConn.Exec(dbCmd => dbCmd.Scalar<T>(sqlExpression.ToSelectStatement(QueryType.Scalar), sqlExpression.Params));
         }
 
         /// <summary>
@@ -235,7 +235,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static List<T> Column<T>(this IDbConnection dbConn, ISqlExpression query)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Column<T>(query.ToSelectStatement(), query.Params));
+            return dbConn.Exec(dbCmd => dbCmd.Column<T>(query.ToSelectStatement(QueryType.Select), query.Params));
         }
 
         /// <summary>
@@ -253,7 +253,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static IEnumerable<T> ColumnLazy<T>(this IDbConnection dbConn, ISqlExpression query)
         {
-            return dbConn.ExecLazy(dbCmd => dbCmd.ColumnLazy<T>(query.ToSelectStatement(), query.Params));
+            return dbConn.ExecLazy(dbCmd => dbCmd.ColumnLazy<T>(query.ToSelectStatement(QueryType.Select), query.Params));
         }
 
         /// <summary>
@@ -312,11 +312,11 @@ namespace ServiceStack.OrmLite
 
         /// <summary>
         /// Returns an Dictionary&lt;K, List&lt;V&gt;&gt; grouping made from the first two columns using an Sql Expression. E.g:
-        /// <para>db.Lookup&lt;int, string&gt;(db.From&lt;Person&gt;().Select(x => new { x.Age, x.LastName }).Where(q => q.Age < 50))</para>
+        /// <para>db.Lookup&lt;int, string&gt;(db.From&lt;Person&gt;().Select(x => new { x.Age, x.LastName }).Where(q => q.Age &lt; 50))</para>
         /// </summary>
         public static Dictionary<K, List<V>> Lookup<K, V>(this IDbConnection dbConn, ISqlExpression sqlExpression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Lookup<K, V>(sqlExpression.ToSelectStatement(), sqlExpression.Params));
+            return dbConn.Exec(dbCmd => dbCmd.Lookup<K, V>(sqlExpression.ToSelectStatement(QueryType.Select), sqlExpression.Params));
         }
 
         /// <summary>
@@ -415,7 +415,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static List<T> SqlList<T>(this IDbConnection dbConn, ISqlExpression sqlExpression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sqlExpression.ToSelectStatement(), sqlExpression.Params));
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(sqlExpression.ToSelectStatement(QueryType.Select), sqlExpression.Params));
         }
 
         /// <summary>
@@ -469,7 +469,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static List<T> SqlColumn<T>(this IDbConnection dbConn, ISqlExpression sqlExpression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlColumn<T>(sqlExpression.ToSelectStatement(), sqlExpression.Params));
+            return dbConn.Exec(dbCmd => dbCmd.SqlColumn<T>(sqlExpression.ToSelectStatement(QueryType.Select), sqlExpression.Params));
         }
 
         /// <summary>
@@ -505,7 +505,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static T SqlScalar<T>(this IDbConnection dbConn, ISqlExpression sqlExpression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.SqlScalar<T>(sqlExpression.ToSelectStatement(), sqlExpression.Params));
+            return dbConn.Exec(dbCmd => dbCmd.SqlScalar<T>(sqlExpression.ToSelectStatement(QueryType.Scalar), sqlExpression.Params));
         }
 
         /// <summary>

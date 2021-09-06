@@ -361,8 +361,7 @@ namespace ServiceStack.OrmLite.SqlServer
                     sbColumnNames.Append(GetQuotedColumnName(fieldDef.FieldName));
                     sbColumnValues.Append(this.GetParam(SanitizeFieldNameForParamName(fieldDef.FieldName)));
 
-                    var p = AddParameter(cmd, fieldDef);
-                    p.Value = GetFieldValue(fieldDef, fieldDef.GetValue(objWithProperties)) ?? DBNull.Value;
+                    AddParameter(cmd, fieldDef);
                 }
                 catch (Exception ex)
                 {
@@ -558,7 +557,7 @@ namespace ServiceStack.OrmLite.SqlServer
                 : $"INSERT INTO {GetQuotedTableName(modelDef)} {strReturning}DEFAULT VALUES";
         }
  
-        public override string ToSelectStatement(ModelDefinition modelDef,
+        public override string ToSelectStatement(QueryType queryType, ModelDefinition modelDef,
             string selectExpression,
             string bodyExpression,
             string orderByExpression = null,
@@ -568,14 +567,14 @@ namespace ServiceStack.OrmLite.SqlServer
             var sb = StringBuilderCache.Allocate()
                 .Append(selectExpression)
                 .Append(bodyExpression);
-
-            if (!offset.HasValue && !rows.HasValue)
+            
+            if (!offset.HasValue && !rows.HasValue || (queryType != QueryType.Select && rows != 1))
                 return StringBuilderCache.ReturnAndFree(sb) + orderByExpression;
 
-            if (offset.HasValue && offset.Value < 0)
+            if (offset is < 0)
                 throw new ArgumentException($"Skip value:'{offset.Value}' must be>=0");
 
-            if (rows.HasValue && rows.Value < 0)
+            if (rows is < 0)
                 throw new ArgumentException($"Rows value:'{rows.Value}' must be>=0");
 
             var skip = offset ?? 0;
@@ -583,18 +582,11 @@ namespace ServiceStack.OrmLite.SqlServer
 
             var selectType = selectExpression.StartsWithIgnoreCase("SELECT DISTINCT") ? "SELECT DISTINCT" : "SELECT";
 
-            //Temporary hack till we come up with a more robust paging sln for SqlServer
+            //avoid Windowing function if unnecessary
             if (skip == 0)
             {
                 var sql = StringBuilderCache.ReturnAndFree(sb) + orderByExpression;
-
-                if (take == int.MaxValue)
-                    return sql;
-
-                if (sql.Length < "SELECT".Length)
-                    return sql;
-
-                return $"{selectType} TOP {take + sql.Substring(selectType.Length)}";
+                return SqlTop(sql, take, selectType);
             }
 
             // Required because ordering is done by Windowing function
@@ -611,6 +603,19 @@ namespace ServiceStack.OrmLite.SqlServer
             var ret = $"SELECT * FROM (SELECT {selectExpression.Substring(selectType.Length)}, ROW_NUMBER() OVER ({orderByExpression}) As RowNum {bodyExpression}) AS RowConstrainedResult WHERE RowNum > {skip} AND RowNum <= {row}";
 
             return ret;
+        }
+
+        protected static string SqlTop(string sql, int take, string selectType = null)
+        {
+            selectType ??= sql.StartsWithIgnoreCase("SELECT DISTINCT") ? "SELECT DISTINCT" : "SELECT";
+
+            if (take == int.MaxValue)
+                return sql;
+
+            if (sql.Length < "SELECT".Length)
+                return sql;
+
+            return selectType + " TOP " + take + sql.Substring(selectType.Length);
         }
 
         //SELECT without RowNum and prefer aliases to be able to use in SELECT IN () Reference Queries
@@ -685,6 +690,13 @@ namespace ServiceStack.OrmLite.SqlServer
                 : $"CAST({fieldOrValue} AS {castAs})";
 
         public override string SqlRandom => "NEWID()";
+
+        public override void EnableForeignKeysCheck(IDbCommand cmd) => cmd.ExecNonQuery("EXEC sp_msforeachtable \"ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all\"");
+        public override Task EnableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token = default) => 
+            cmd.ExecNonQueryAsync("EXEC sp_msforeachtable \"ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all\"", null, token);
+        public override void DisableForeignKeysCheck(IDbCommand cmd) => cmd.ExecNonQuery("EXEC sp_msforeachtable \"ALTER TABLE ? NOCHECK CONSTRAINT all\"");
+        public override Task DisableForeignKeysCheckAsync(IDbCommand cmd, CancellationToken token = default) => 
+            cmd.ExecNonQueryAsync("EXEC sp_msforeachtable \"ALTER TABLE ? NOCHECK CONSTRAINT all\"", null, token);
         
         protected SqlConnection Unwrap(IDbConnection db) => (SqlConnection)db.ToDbConnection();
 

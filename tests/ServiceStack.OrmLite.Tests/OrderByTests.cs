@@ -83,5 +83,26 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(OrmLiteUtils.OrderByFields(d,"-a,b").NormalizeQuotes(), Is.EqualTo("'a' desc, 'b'"));
             Assert.That(OrmLiteUtils.OrderByFields(d,"a,-b").NormalizeQuotes(), Is.EqualTo("'a', 'b' desc"));
         }
+        
+        [Test]
+        public void Can_Multi_OrderBy_AliasValue()
+        {
+            using var db = OpenDbConnection();
+
+            db.DropAndCreateTable<LetterFrequency>();
+            var items = 5.Times(x => new LetterFrequency {
+                Letter = $"{'A' + x}",
+                Value = x + 1
+            });
+            db.InsertAll(items);
+
+            OrmLiteUtils.PrintSql();
+            var q = db.From<LetterFrequency>();
+            q.OrderBy(x => new { x.Value });
+            // q.OrderBy(x => x.Value);
+            var results = db.Select(q);
+            
+            Assert.That(results.Map(x => x.Value), Is.EqualTo(new[]{ 1, 2, 3, 4, 5}));
+        }
     }
 }

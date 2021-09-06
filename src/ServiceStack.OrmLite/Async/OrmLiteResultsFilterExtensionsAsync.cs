@@ -181,7 +181,7 @@ namespace ServiceStack.OrmLite
 
         public static Task<object> ScalarAsync(this IDbCommand dbCmd, ISqlExpression expression, CancellationToken token)
         {
-            dbCmd.PopulateWith(expression);
+            dbCmd.PopulateWith(expression, QueryType.Scalar);
 
             if (OrmLiteConfig.ResultsFilter != null)
                 return OrmLiteConfig.ResultsFilter.GetScalar(dbCmd).InTask();

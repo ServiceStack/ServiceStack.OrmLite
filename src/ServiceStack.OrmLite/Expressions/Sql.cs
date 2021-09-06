@@ -34,6 +34,7 @@ namespace ServiceStack.OrmLite
 
         public static bool In<T, TItem>(T value, SqlExpression<TItem> query) => value != null && query != null;
 
+        public static string Asc<T>(T value) => value == null ? "" : value + " ASC";
         public static string Desc<T>(T value) => value == null ? "" : value + " DESC";
 
         public static string As<T>(T value, object asValue) => value == null ? "" : $"{value} AS {asValue}";

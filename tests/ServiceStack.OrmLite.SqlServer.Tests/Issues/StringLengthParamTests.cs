@@ -40,5 +40,30 @@ namespace ServiceStack.OrmLite.SqlServerTests.Issues
 
             OrmLiteConfig.DialectProvider.GetStringConverter().UseUnicode = hold;
         }
+
+        [Test]
+        public void Can_insert_only_param_greater_than_default_length()
+        {
+            var hold = OrmLiteConfig.DialectProvider.GetStringConverter().UseUnicode;
+            OrmLiteConfig.DialectProvider.GetStringConverter().UseUnicode = true;
+
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<StringLengthParamTest>();
+
+                var name = "a" + new string('b', 8000) + "c";
+
+                db.InsertOnly(new StringLengthParamTest
+                {
+                    Name = name
+                }, s => s.Name);
+
+                var people = db.Select<StringLengthParamTest>(p => p.Name == name);
+
+                Assert.That(people.Count, Is.EqualTo(1));
+            }
+
+            OrmLiteConfig.DialectProvider.GetStringConverter().UseUnicode = hold;
+        }
     }
 }

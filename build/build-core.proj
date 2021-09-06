@@ -12,6 +12,7 @@
   <PropertyGroup>
     <BuildSolutionDir>$(MSBuildProjectDirectory)/..</BuildSolutionDir>
     <SrcDir>$(BuildSolutionDir)/src</SrcDir>
+    <TestsDir>$(BuildSolutionDir)/tests</TestsDir>
     <Configuration Condition="$(Configuration) == ''">Release</Configuration>
     <PackageVersion>$(MajorVersion).$(MinorVersion).$(PatchVersion)</PackageVersion>
   </PropertyGroup>
@@ -45,7 +46,12 @@
     <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.PostgreSQL/obj" />
     <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.Sqlite/obj" />
     <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Data/obj" />
+    <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Cil/obj" />
     <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.SqlServer/obj" />
+    <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Data/obj" />
+    <RemoveDir Directories="$(TestsDir)/ServiceStack.OrmLite.Tests/obj" />
+    <RemoveDir Directories="$(TestsDir)/ServiceStack.OrmLite.SqliteTests/obj" />
+    <RemoveDir Directories="$(TestsDir)/ServiceStack.OrmLite.Tests.Setup/obj" />
   </Target>
 
   <Target Name="UpdateVersion">

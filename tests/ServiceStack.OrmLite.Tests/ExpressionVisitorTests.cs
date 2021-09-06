@@ -493,7 +493,7 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_Where_using_constant_filter()
         {
             object left = null;
-            var right = new PartialSqlString("null");
+            var right = PartialSqlString.Null;
 
             System.Linq.Expressions.Expression<Func<TestType, bool>> filter = x => left == right;
             var q = Db.From<TestType>().Where(filter);//todo: here Where: null is NULL. May be need to change to 1=1 ?

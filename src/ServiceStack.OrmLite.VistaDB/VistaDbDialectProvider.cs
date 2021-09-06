@@ -389,8 +389,8 @@ namespace ServiceStack.OrmLite.VistaDB
         }
 
         /// Limit/Offset paging logic needs to be implemented here:
-        public override string ToSelectStatement(
-            ModelDefinition modelDef, string selectExpression, string bodyExpression, string orderByExpression = null, int? offset = null, int? rows = null)
+        public override string ToSelectStatement(QueryType queryType, ModelDefinition modelDef, string selectExpression,
+            string bodyExpression, string orderByExpression = null, int? offset = null, int? rows = null)
         {
             var sb = StringBuilderCache.Allocate()
                 .Append(selectExpression)
@@ -399,7 +399,7 @@ namespace ServiceStack.OrmLite.VistaDB
             var hasOrderBy = !string.IsNullOrWhiteSpace(orderByExpression);
 
             var skip = offset.GetValueOrDefault();
-            if ((skip > 0 || rows.HasValue) && !hasOrderBy)
+            if (queryType == QueryType.Select && (skip > 0 || rows.HasValue) && !hasOrderBy)
             {
                 hasOrderBy = true;
                 //Ordering by the first column in select list
@@ -409,15 +409,18 @@ namespace ServiceStack.OrmLite.VistaDB
             if (hasOrderBy)
                 sb.Append(orderByExpression);
 
-            if (skip > 0)
-                sb.Append(this.GetPagingOffsetExpression(skip));
-
-            if (rows.HasValue)
+            if (queryType == QueryType.Select)
             {
-                if (skip == 0)
-                    sb.Append(this.GetPagingOffsetExpression(0));
+                if (skip > 0)
+                    sb.Append(this.GetPagingOffsetExpression(skip));
 
-                sb.Append(this.GetPagingFetchExpression(rows.Value));
+                if (rows.HasValue)
+                {
+                    if (skip == 0)
+                        sb.Append(this.GetPagingOffsetExpression(0));
+
+                    sb.Append(this.GetPagingFetchExpression(rows.Value));
+                }
             }
 
             return StringBuilderCache.ReturnAndFree(sb);

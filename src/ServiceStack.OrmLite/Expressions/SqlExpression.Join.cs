@@ -22,7 +22,14 @@ namespace ServiceStack.OrmLite
 
     public abstract partial class SqlExpression<T> : ISqlExpression
     {
-        protected List<ModelDefinition> tableDefs = new List<ModelDefinition>();
+        protected List<ModelDefinition> tableDefs = new();
+
+        public List<ModelDefinition> GetAllTables()
+        {
+            var allTableDefs = new List<ModelDefinition> { modelDef };
+            allTableDefs.AddRange(tableDefs);
+            return allTableDefs;
+        }
 
         public bool IsJoinedTable(Type type)
         {
@@ -261,11 +268,12 @@ namespace ServiceStack.OrmLite
             return this;
         }
 
-        public string SelectInto<TModel>()
+        public string SelectInto<TModel>() => SelectInto<TModel>(QueryType.Select);
+        public string SelectInto<TModel>(QueryType queryType)
         {
             if ((CustomSelect && OnlyFields == null) || (typeof(TModel) == typeof(T) && !PrefixFieldWithTableName))
             {
-                return ToSelectStatement();
+                return ToSelectStatement(queryType);
             }
 
             useFieldName = true;
@@ -404,7 +412,7 @@ namespace ServiceStack.OrmLite
             var columns = select.Length > 0 ? select : "*";
             SelectExpression = "SELECT " + (selectDistinct ? "DISTINCT " : "") + columns;
 
-            return ToSelectStatement();
+            return ToSelectStatement(queryType);
         }
 
         private static FieldDefinition FindWeakMatch(ModelDefinition tableDef, FieldDefinition fieldDef)

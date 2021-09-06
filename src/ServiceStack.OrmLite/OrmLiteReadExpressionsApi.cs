@@ -240,12 +240,12 @@ namespace ServiceStack.OrmLite
         public static List<T> Select<T>(this IDbConnection dbConn, ISqlExpression expression, object anonType = null)
         {
             if (anonType != null)
-                return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(), anonType));
+                return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(QueryType.Select), anonType));
 
             if (expression.Params != null && expression.Params.Any())
-                return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(), expression.Params.ToDictionary(param => param.ParameterName, param => param.Value)));
+                return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(QueryType.Select), expression.Params.ToDictionary(param => param.ParameterName, param => param.Value)));
 
-            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(), expression.Params));
+            return dbConn.Exec(dbCmd => dbCmd.SqlList<T>(expression.SelectInto<T>(QueryType.Select), expression.Params));
         }
 
         public static List<Tuple<T, T2>> SelectMulti<T, T2>(this IDbConnection dbConn, SqlExpression<T> expression) => dbConn.Exec(dbCmd => dbCmd.SelectMulti<T, T2>(expression));
@@ -297,7 +297,7 @@ namespace ServiceStack.OrmLite
         /// </summary>
         public static T Single<T>(this IDbConnection dbConn, ISqlExpression expression)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Single<T>(expression.SelectInto<T>(), expression.Params));
+            return dbConn.Exec(dbCmd => dbCmd.Single<T>(expression.SelectInto<T>(QueryType.Single), expression.Params));
         }
 
         /// <summary>

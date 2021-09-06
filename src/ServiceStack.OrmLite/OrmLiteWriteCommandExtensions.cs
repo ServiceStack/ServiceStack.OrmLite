@@ -84,22 +84,12 @@ namespace ServiceStack.OrmLite
             var tableExists = dialectProvider.DoesTableExist(dbCmd, tableName, schema);
             if (overwrite && tableExists)
             {
-                if (modelDef.PreDropTableSql != null)
-                {
-                    ExecuteSql(dbCmd, modelDef.PreDropTableSql);
-                }
-
                 DropTable(dbCmd, modelDef);
 
                 var postDropTableSql = dialectProvider.ToPostDropTableStatement(modelDef);
                 if (postDropTableSql != null)
                 {
                     ExecuteSql(dbCmd, postDropTableSql);
-                }
-
-                if (modelDef.PostDropTableSql != null)
-                {
-                    ExecuteSql(dbCmd, modelDef.PostDropTableSql);
                 }
 
                 tableExists = false;
@@ -831,19 +821,19 @@ namespace ServiceStack.OrmLite
 
         internal static long InsertIntoSelect<T>(this IDbCommand dbCmd, ISqlExpression query, Action<IDbCommand> commandFilter) => 
             dbCmd.InsertIntoSelectInternal<T>(query, commandFilter).ExecNonQuery();
-
+        
         internal static IDbCommand InsertIntoSelectInternal<T>(this IDbCommand dbCmd, ISqlExpression query, Action<IDbCommand> commandFilter)
         {
             var dialectProvider = dbCmd.GetDialectProvider();
 
-            var sql = query.ToSelectStatement();
+            var sql = query.ToSelectStatement(QueryType.Select);
             var selectFields = query.GetUntypedSqlExpression()
                 .SelectExpression
                 .Substring("SELECT ".Length)
                 .ParseCommands();
 
             var fieldsOrAliases = selectFields
-                .Map(x => x.Original.ToString().LastRightPart(" AS ").Trim().StripDbQuotes());
+                .Map(x => x.Original.ToString().AliasOrColumn());
 
             dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, insertFields: fieldsOrAliases);
 

@@ -37,7 +37,7 @@ namespace ServiceStack.OrmLite.Support
 
             //Use .Clone() to prevent SqlExpressionSelectFilter from adding params to original query
             var parentQ = q.Clone();
-            var sql = parentQ.SelectInto<Into>();
+            var sql = parentQ.SelectInto<Into>(QueryType.Select);
             parentResults = dbCmd.ExprConvertToList<Into>(sql, parentQ.Params, onlyFields:q.OnlyFields);
 
             modelDef = ModelDefinition<Into>.Definition;

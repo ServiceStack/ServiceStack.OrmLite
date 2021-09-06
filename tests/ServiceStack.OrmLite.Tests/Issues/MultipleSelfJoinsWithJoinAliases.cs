@@ -54,67 +54,66 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_use_custom_SqlExpression_to_add_multiple_self_Left_Joins()
         {
-            using (var db = OpenDbConnection())
-            {
-                var tenantId = Guid.NewGuid();
-                var sale = PopulateData(db, tenantId);
+            using var db = OpenDbConnection();
+            var tenantId = Guid.NewGuid();
+            var sale = PopulateData(db, tenantId);
 
-                var q = db.From<Sale>()
-                    .CustomJoin("LEFT JOIN {0} seller on (Sale.{1} = seller.Id)"
-                        .Fmt("ContactIssue".SqlTable(DialectProvider), "SellerId".SqlColumn(DialectProvider)))
-                    .CustomJoin("LEFT JOIN {0} buyer on (Sale.{1} = buyer.Id)"
-                        .Fmt("ContactIssue".SqlTable(DialectProvider), "BuyerId".SqlColumn(DialectProvider)))
-                    .Select(@"Sale.*
+            var q = db.From<Sale>()
+                .CustomJoin("LEFT JOIN {0} seller on (Sale.{1} = seller.Id)"
+                    .Fmt("ContactIssue".SqlTable(DialectProvider), "SellerId".SqlColumn(DialectProvider)))
+                .CustomJoin("LEFT JOIN {0} buyer on (Sale.{1} = buyer.Id)"
+                    .Fmt("ContactIssue".SqlTable(DialectProvider), "BuyerId".SqlColumn(DialectProvider)))
+                .Select(@"Sale.*
                         , buyer.{0} AS BuyerFirstName
                         , buyer.{1} AS BuyerLastName
                         , seller.{0} AS SellerFirstName
                         , seller.{1} AS SellerLastName"
                     .Fmt("FirstName".SqlColumn(DialectProvider), "LastName".SqlColumn(DialectProvider)));
 
-                q.Where(x => x.TenantId == tenantId);
+            q.Where(x => x.TenantId == tenantId);
 
-                var sales = db.Select<SaleView>(q);
-                Assert.That(sales.Count, Is.EqualTo(1));
+            var sales = db.Select<SaleView>(q);
+            Assert.That(sales.Count, Is.EqualTo(1));
 
-                //Alternative
-                q = db.From<Sale>()
-                    .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.JoinAlias("seller"))
-                    .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.JoinAlias("buyer"))
-                    .Select<Sale, ContactIssue>((s, c) => new
-                    {
-                        s,
-                        BuyerFirstName = Sql.JoinAlias(c.FirstName, "buyer"),
-                        BuyerLastName = Sql.JoinAlias(c.LastName, "buyer"),
-                        SellerFirstName = Sql.JoinAlias(c.FirstName, "seller"),
-                        SellerLastName = Sql.JoinAlias(c.LastName, "seller"),
-                    });
+            OrmLiteUtils.PrintSql();
+            //Alternative
+            q = db.From<Sale>()
+                .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.TableAlias("seller"))
+                .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.TableAlias("buyer"))
+                .Select<Sale, ContactIssue>((s, c) => new
+                {
+                    s,
+                    BuyerFirstName = Sql.TableAlias(c.FirstName, "buyer"),
+                    BuyerLastName = Sql.TableAlias(c.LastName, "buyer"),
+                    SellerFirstName = Sql.TableAlias(c.FirstName, "seller"),
+                    SellerLastName = Sql.TableAlias(c.LastName, "seller"),
+                });
 
-                q.Where(x => x.TenantId == tenantId);
+            q.Where(x => x.TenantId == tenantId);
 
-                sales = db.Select<SaleView>(q);
-                Assert.That(sales.Count, Is.EqualTo(1));
+            sales = db.Select<SaleView>(q);
+            Assert.That(sales.Count, Is.EqualTo(1));
 
 
-                var salesView = sales[0];
+            var salesView = sales[0];
 
-                //salesView.PrintDump();
+            //salesView.PrintDump();
 
-                Assert.That(salesView.Id, Is.EqualTo(sale.Id));
-                Assert.That(salesView.TenantId, Is.EqualTo(sale.TenantId));
-                Assert.That(salesView.AmountCents, Is.EqualTo(sale.AmountCents));
-                Assert.That(salesView.BuyerFirstName, Is.EqualTo("BuyerFirst"));
-                Assert.That(salesView.BuyerLastName, Is.EqualTo("LastBuyer"));
-                Assert.That(salesView.SellerFirstName, Is.EqualTo("SellerFirst"));
-                Assert.That(salesView.SellerLastName, Is.EqualTo("LastSeller"));
+            Assert.That(salesView.Id, Is.EqualTo(sale.Id));
+            Assert.That(salesView.TenantId, Is.EqualTo(sale.TenantId));
+            Assert.That(salesView.AmountCents, Is.EqualTo(sale.AmountCents));
+            Assert.That(salesView.BuyerFirstName, Is.EqualTo("BuyerFirst"));
+            Assert.That(salesView.BuyerLastName, Is.EqualTo("LastBuyer"));
+            Assert.That(salesView.SellerFirstName, Is.EqualTo("SellerFirst"));
+            Assert.That(salesView.SellerLastName, Is.EqualTo("LastSeller"));
 
-                q.Select("seller.*, 0 EOT, buyer.*");
+            q.Select("seller.*, 0 EOT, buyer.*");
 
-                var multi = db.Select<Tuple<ContactIssue, ContactIssue>>(q);
-                multi.PrintDump();
+            var multi = db.Select<Tuple<ContactIssue, ContactIssue>>(q);
+            multi.PrintDump();
 
-                Assert.That(multi[0].Item1.FirstName, Is.EqualTo("SellerFirst"));
-                Assert.That(multi[0].Item2.FirstName, Is.EqualTo("BuyerFirst"));
-            }
+            Assert.That(multi[0].Item1.FirstName, Is.EqualTo("SellerFirst"));
+            Assert.That(multi[0].Item2.FirstName, Is.EqualTo("BuyerFirst"));
         }
 
         [Test]
@@ -129,35 +128,33 @@ namespace ServiceStack.OrmLite.Tests.Issues
             if (string.IsNullOrEmpty(customFmt))
                 return;
 
-            using (var db = OpenDbConnection())
-            {
-                var tenantId = Guid.NewGuid();
-                var sale = PopulateData(db, tenantId);
+            using var db = OpenDbConnection();
+            var tenantId = Guid.NewGuid();
+            var sale = PopulateData(db, tenantId);
 
-                var q = db.From<Sale>()
-                    .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.JoinAlias("seller"))
-                    .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.JoinAlias("buyer"))
-                    .Select<Sale, ContactIssue>((s, c) => new
-                    {
-                        s,
-                        BuyerFirstName = Sql.JoinAlias(c.FirstName, "buyer"),
-                        BuyerLastName = Sql.JoinAlias(c.LastName, "buyer"),
-                        BuyerInitials = Sql.Custom(customFmt.Fmt("buyer.FirstName", "buyer.LastName")),
-                        SellerFirstName = Sql.JoinAlias(c.FirstName, "seller"),
-                        SellerLastName = Sql.JoinAlias(c.LastName, "seller"),
-                        SellerInitials = Sql.Custom(customFmt.Fmt("seller.FirstName", "seller.LastName")),
-                    });
+            var q = db.From<Sale>()
+                .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.TableAlias("seller"))
+                .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.TableAlias("buyer"))
+                .Select<Sale, ContactIssue>((s, c) => new
+                {
+                    s,
+                    BuyerFirstName = Sql.TableAlias(c.FirstName, "buyer"),
+                    BuyerLastName = Sql.TableAlias(c.LastName, "buyer"),
+                    BuyerInitials = Sql.Custom(customFmt.Fmt("buyer.FirstName", "buyer.LastName")),
+                    SellerFirstName = Sql.TableAlias(c.FirstName, "seller"),
+                    SellerLastName = Sql.TableAlias(c.LastName, "seller"),
+                    SellerInitials = Sql.Custom(customFmt.Fmt("seller.FirstName", "seller.LastName")),
+                });
 
-                var sales = db.Select<SaleView>(q);
-                var salesView = sales[0];
+            var sales = db.Select<SaleView>(q);
+            var salesView = sales[0];
 
-                Assert.That(salesView.BuyerFirstName, Is.EqualTo("BuyerFirst"));
-                Assert.That(salesView.BuyerLastName, Is.EqualTo("LastBuyer"));
-                Assert.That(salesView.BuyerInitials, Is.EqualTo("BL"));
-                Assert.That(salesView.SellerFirstName, Is.EqualTo("SellerFirst"));
-                Assert.That(salesView.SellerLastName, Is.EqualTo("LastSeller"));
-                Assert.That(salesView.SellerInitials, Is.EqualTo("SL"));
-            }
+            Assert.That(salesView.BuyerFirstName, Is.EqualTo("BuyerFirst"));
+            Assert.That(salesView.BuyerLastName, Is.EqualTo("LastBuyer"));
+            Assert.That(salesView.BuyerInitials, Is.EqualTo("BL"));
+            Assert.That(salesView.SellerFirstName, Is.EqualTo("SellerFirst"));
+            Assert.That(salesView.SellerLastName, Is.EqualTo("LastSeller"));
+            Assert.That(salesView.SellerInitials, Is.EqualTo("SL"));
         }
 
         void AssertTupleResults(List<Tuple<Sale, ContactIssue, ContactIssue>> results)
@@ -177,47 +174,91 @@ namespace ServiceStack.OrmLite.Tests.Issues
         [Test]
         public void Can_use_Custom_Select_with_Tuples()
         {
-            using (var db = OpenDbConnection())
-            {
-                var tenantId = Guid.NewGuid();
-                var sale = PopulateData(db, tenantId);
+            using var db = OpenDbConnection();
+            var tenantId = Guid.NewGuid();
+            var sale = PopulateData(db, tenantId);
 
-                var q = db.From<Sale>()
-                    .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.JoinAlias("seller"))
-                    .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.JoinAlias("buyer"))
-                    .Select("Sale.*, 0 EOT, buyer.*, 0 EOT, seller.*, 0 EOT");
+            var q = db.From<Sale>()
+                .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.TableAlias("seller"))
+                .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.TableAlias("buyer"))
+                .Select<Sale,ContactIssue>((s,c) => new {
+                    s, 
+                    buyer = Sql.TableAlias(c, "buyer"), 
+                    seller = Sql.TableAlias(c, "seller"),
+                });
 
-                AssertTupleResults(db.Select<Tuple<Sale, ContactIssue, ContactIssue>>(q));
+            AssertTupleResults(db.Select<Tuple<Sale, ContactIssue, ContactIssue>>(q));
 
-                q = db.From<Sale>()
-                    .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.JoinAlias("seller"))
-                    .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.JoinAlias("buyer"));
+            q = db.From<Sale>()
+                .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.TableAlias("seller"))
+                .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.TableAlias("buyer"))
+                .Select<Sale,ContactIssue>((s,c) => new {
+                    s,
+                    t1 = Sql.EOT,
+                    buyer = Sql.TableAlias(c, "buyer"), 
+                    t2 = Sql.EOT,
+                    seller = Sql.TableAlias(c, "seller"),
+                });
 
-                AssertTupleResults(db.SelectMulti<Sale, ContactIssue, ContactIssue>(q, new[] { "Sale.*", "buyer.*", "seller.*" }));
-            }
+            AssertTupleResults(db.Select<Tuple<Sale, ContactIssue, ContactIssue>>(q));
+
+            q = db.From<Sale>()
+                .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.TableAlias("seller"))
+                .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.TableAlias("buyer"))
+                .Select("Sale.*, 0 EOT, buyer.*, 0 EOT, seller.*, 0 EOT");
+
+            AssertTupleResults(db.Select<Tuple<Sale, ContactIssue, ContactIssue>>(q));
+
+            q = db.From<Sale>()
+                .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.TableAlias("seller"))
+                .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.TableAlias("buyer"));
+
+            AssertTupleResults(db.SelectMulti<Sale, ContactIssue, ContactIssue>(q, new[] { "Sale.*", "buyer.*", "seller.*" }));
         }
 
         [Test]
         public async Task Can_use_Custom_Select_with_Tuples_Async()
         {
-            using (var db = OpenDbConnection())
-            {
-                var tenantId = Guid.NewGuid();
-                var sale = PopulateData(db, tenantId);
+            using var db = await OpenDbConnectionAsync();
+            var tenantId = Guid.NewGuid();
+            var sale = PopulateData(db, tenantId);
 
-                var q = db.From<Sale>()
-                    .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.JoinAlias("seller"))
-                    .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.JoinAlias("buyer"))
-                    .Select("Sale.*, 0 EOT, buyer.*, 0 EOT, seller.*, 0 EOT");
+            var q = db.From<Sale>()
+                .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.TableAlias("seller"))
+                .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.TableAlias("buyer"))
+                .Select<Sale,ContactIssue>((s,c) => new {
+                    s, 
+                    buyer = Sql.TableAlias(c, "buyer"), 
+                    seller = Sql.TableAlias(c, "seller"),
+                });
 
-                AssertTupleResults(await db.SelectAsync<Tuple<Sale, ContactIssue, ContactIssue>>(q));
+            AssertTupleResults(await db.SelectAsync<Tuple<Sale, ContactIssue, ContactIssue>>(q));
 
-                q = db.From<Sale>()
-                    .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.JoinAlias("seller"))
-                    .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.JoinAlias("buyer"));
+            q = db.From<Sale>()
+                .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.TableAlias("seller"))
+                .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.TableAlias("buyer"))
+                .Select<Sale,ContactIssue>((s,c) => new {
+                    s,
+                    t1 = Sql.EOT,
+                    buyer = Sql.TableAlias(c, "buyer"), 
+                    t2 = Sql.EOT,
+                    seller = Sql.TableAlias(c, "seller"),
+                });
 
-                AssertTupleResults(await db.SelectMultiAsync<Sale, ContactIssue, ContactIssue>(q, new[] { "Sale.*", "buyer.*", "seller.*" }));
-            }            
+            AssertTupleResults(await db.SelectAsync<Tuple<Sale, ContactIssue, ContactIssue>>(q));
+
+            q = db.From<Sale>()
+                .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.TableAlias("seller"))
+                .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.TableAlias("buyer"))
+                .Select("Sale.*, 0 EOT, buyer.*, 0 EOT, seller.*, 0 EOT");
+
+            AssertTupleResults(await db.SelectAsync<Tuple<Sale, ContactIssue, ContactIssue>>(q));
+
+            q = db.From<Sale>()
+                .LeftJoin<ContactIssue>((s, c) => s.SellerId == c.Id, db.TableAlias("seller"))
+                .LeftJoin<ContactIssue>((s, c) => s.BuyerId == c.Id, db.TableAlias("buyer"));
+
+            AssertTupleResults(await db.SelectMultiAsync<Sale, ContactIssue, ContactIssue>(q, new[] { "Sale.*", "buyer.*", "seller.*" }));
         }
     }
 }
