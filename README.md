@@ -1463,7 +1463,7 @@ db.Delete<Rockstar>(new Dictionary<string, object> {
 });
 ```
 
-### BelongsTo Attribute
+### BelongTo Attribute
 
 The `[BelongTo]` attribute can be used for specifying how Custom POCO results are mapped when the resultset is ambiguous, e.g:
 
