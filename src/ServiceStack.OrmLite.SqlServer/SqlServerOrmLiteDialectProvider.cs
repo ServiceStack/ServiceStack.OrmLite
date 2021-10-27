@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 using ServiceStack.DataAnnotations;
 using ServiceStack.OrmLite.SqlServer.Converters;
 using ServiceStack.Text;
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NET6_0
 using ApplicationException = System.InvalidOperationException;
 #endif
 

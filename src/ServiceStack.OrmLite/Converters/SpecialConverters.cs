@@ -6,7 +6,7 @@ using System.Data;
 using System.Reflection;
 using System.Runtime.Serialization;
 using ServiceStack.DataAnnotations;
-#if NETSTANDARD2_0
+#if NETSTANDARD2_0 || NET6_0
 using System.Globalization;
 #endif
 
