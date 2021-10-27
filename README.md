@@ -163,13 +163,13 @@ using (var db = dbFactory.Open())
 }
 ```
 
-## [OrmLite Interactive Tour](https://gist.cafe/ormlite)
+## [OrmLite Interactive Tour](https://gist.cafe/87164fa870ac7503b43333d1d275456c?docs=8a70f8bf2755f0a755afeca6b2a5238e)
 
-The best way to learn about OrmLite is to take the [OrmLite Interactive Tour](https://gist.cafe/ormlite)
+The best way to learn about OrmLite is to take the [OrmLite Interactive Tour](https://gist.cafe/87164fa870ac7503b43333d1d275456c?docs=8a70f8bf2755f0a755afeca6b2a5238e)
 which lets you try out and explore different OrmLite features immediately from the comfort of your own 
 browser without needing to install anything:
 
-[![](https://raw.githubusercontent.com/ServiceStack/docs/master/docs/images/gistcafe/ormlite-tour-screenshot.png)](https://gist.cafe/ormlite)
+[![](https://raw.githubusercontent.com/ServiceStack/docs/master/docs/images/gistcafe/ormlite-tour-screenshot.png)](https://gist.cafe/87164fa870ac7503b43333d1d275456c?docs=8a70f8bf2755f0a755afeca6b2a5238e)
 
 ## [Type Converters](https://github.com/ServiceStack/ServiceStack.OrmLite/wiki/OrmLite-Type-Converters)
 
