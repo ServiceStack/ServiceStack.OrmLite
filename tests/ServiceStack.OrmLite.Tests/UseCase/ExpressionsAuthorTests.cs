@@ -184,7 +184,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 expected = 2;
                 var rate = 0;
                 q.Where().Where(rn => rn.Rate == rate).Update(rn => rn.Active);
-                var rows = db.UpdateOnly(new Author { Active = false }, q);
+                var rows = db.UpdateOnlyFields(new Author { Active = false }, q);
                 q.WhereExpression.Print();
                 Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
 
@@ -200,7 +200,7 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 //update comment for City == null 
                 expected = 2;
                 q.Where().Where(rn => rn.City == null).Update(rn => rn.Comments);
-                rows = db.UpdateOnly(new Author() { Comments = "No comments" }, q);
+                rows = db.UpdateOnlyFields(new Author() { Comments = "No comments" }, q);
                 Console.WriteLine("Expected:{0}  Selected:{1}  {2}", expected, rows, expected == rows ? "OK" : "**************  FAILED ***************");
 
                 // delete where City is null 
@@ -384,17 +384,17 @@ namespace ServiceStack.OrmLite.Tests.UseCase
                 rr.City = "Madrid";
                 rr.Comments = "Updated";
                 q.Where().Where(r => r.Id == rr.Id); // if omit,  then all records will be updated 
-                rows = db.UpdateOnly(rr, q); // == dbCmd.Update(rr) but it returns void
+                rows = db.UpdateOnlyFields(rr, q); // == dbCmd.Update(rr) but it returns void
                 Assert.That(rows, Is.EqualTo(expected));
 
                 expected = 0;
                 q.Where().Where(r => r.City == "Ciudad Gotica");
-                rows = db.UpdateOnly(rr, q);
+                rows = db.UpdateOnlyFields(rr, q);
                 Assert.That(rows, Is.EqualTo(expected));
 
                 expected = db.Select<Author>(x => x.City == "Madrid").Count;
                 author = new Author { Active = false };
-                rows = db.UpdateOnly(author, x => x.Active, x => x.City == "Madrid");
+                rows = db.UpdateOnlyFields(author, x => x.Active, x => x.City == "Madrid");
                 Assert.That(rows, Is.EqualTo(expected));
 
                 expected = db.Select<Author>(x => x.Active == false).Count;

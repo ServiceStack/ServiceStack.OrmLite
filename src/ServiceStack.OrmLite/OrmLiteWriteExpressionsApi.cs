@@ -11,17 +11,55 @@ namespace ServiceStack.OrmLite
         /// Use an SqlExpression to select which fields to update and construct the where expression, E.g: 
         /// 
         ///   var q = db.From&gt;Person&lt;());
-        ///   db.UpdateOnly(new Person { FirstName = "JJ" }, q.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+        ///   db.UpdateOnlyFields(new Person { FirstName = "JJ" }, q.Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
         ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
         /// 
         ///   What's not in the update expression doesn't get updated. No where expression updates all rows. E.g:
         /// 
-        ///   db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, ev.Update(p => p.FirstName));
+        ///   db.UpdateOnlyFields(new Person { FirstName = "JJ", LastName = "Hendo" }, ev.Update(p => p.FirstName));
         ///   UPDATE "Person" SET "FirstName" = 'JJ'
         /// </summary>
-        public static int UpdateOnly<T>(this IDbConnection dbConn, T model, SqlExpression<T> onlyFields, Action<IDbCommand> commandFilter = null)
+        public static int UpdateOnlyFields<T>(this IDbConnection dbConn, 
+            T model, SqlExpression<T> onlyFields, 
+            Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(model, onlyFields, commandFilter));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyFields(model, onlyFields, commandFilter));
+        }
+
+        /// <summary>
+        /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+        /// 
+        ///   db.UpdateOnly(new Person { FirstName = "JJ" }, new[]{ "FirstName" }, p => p.LastName == "Hendrix");
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')
+        /// </summary>
+        public static int UpdateOnlyFields<T>(this IDbConnection dbConn, 
+            T obj,
+            string[] onlyFields,
+            Expression<Func<T, bool>> where = null,
+            Action<IDbCommand> commandFilter = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyFields(obj, onlyFields, where, commandFilter));
+        }
+
+        /// <summary>
+        /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+        /// 
+        ///   db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')
+        ///
+        ///   db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
+        ///   UPDATE "Person" SET "FirstName" = 'JJ'
+        ///
+        ///   db.UpdateOnly(new Person { FirstName = "JJ", Age = 27 }, p => new { p.FirstName, p.Age );
+        ///   UPDATE "Person" SET "FirstName" = 'JJ', "Age" = 27
+        /// </summary>
+        public static int UpdateOnlyFields<T>(this IDbConnection dbConn, 
+            T obj,
+            Expression<Func<T, object>> onlyFields = null,
+            Expression<Func<T, bool>> where = null,
+            Action<IDbCommand> commandFilter = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnlyFields(obj, onlyFields, where, commandFilter));
         }
 
         /// <summary>
@@ -72,37 +110,36 @@ namespace ServiceStack.OrmLite
         }
 
         /// <summary>
-        /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+        /// Updates all values from Object Dictionary matching the where condition. E.g
         /// 
-        ///   db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
-        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')
-        ///
-        ///   db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
-        ///   UPDATE "Person" SET "FirstName" = 'JJ'
-        ///
-        ///   db.UpdateOnly(new Person { FirstName = "JJ", Age = 27 }, p => new { p.FirstName, p.Age );
-        ///   UPDATE "Person" SET "FirstName" = 'JJ', "Age" = 27
+        ///   db.UpdateOnly&lt;Person&gt;(new Dictionary&lt;string,object&lt; { {"FirstName", "JJ"} }, where:p => p.FirstName == "Jimi");
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
         /// </summary>
-        public static int UpdateOnly<T>(this IDbConnection dbConn, T obj,
-            Expression<Func<T, object>> onlyFields = null,
-            Expression<Func<T, bool>> where = null,
-            Action<IDbCommand> commandFilter = null)
+        public static int UpdateOnly<T>(this IDbConnection dbConn, Dictionary<string, object> updateFields, Expression<Func<T, bool>> obj)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(obj, onlyFields, where, commandFilter));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(updateFields, obj));
         }
 
         /// <summary>
-        /// Update record, updating only fields specified in updateOnly that matches the where condition (if any), E.g:
+        /// Updates all values from Object Dictionary, Requires Id which is used as a Primary Key Filter. E.g
         /// 
-        ///   db.UpdateOnly(new Person { FirstName = "JJ" }, new[]{ "FirstName" }, p => p.LastName == "Hendrix");
-        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("LastName" = 'Hendrix')
+        ///   db.UpdateOnly&lt;Person&gt;(new Dictionary&lt;string,object&lt; { {"Id", 1}, {"FirstName", "JJ"} });
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("Id" = 1)
         /// </summary>
-        public static int UpdateOnly<T>(this IDbConnection dbConn, T obj,
-            string[] onlyFields,
-            Expression<Func<T, bool>> where = null,
-            Action<IDbCommand> commandFilter = null)
+        public static int UpdateOnly<T>(this IDbConnection dbConn, Dictionary<string, object> updateFields, Action<IDbCommand> commandFilter = null)
         {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(obj, onlyFields, where, commandFilter));
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly<T>(updateFields, commandFilter));
+        }
+
+        /// <summary>
+        /// Updates all values from Object Dictionary matching the where condition. E.g
+        /// 
+        ///   db.UpdateOnly&lt;Person&gt;(new Dictionary&lt;string,object&lt; { {"FirstName", "JJ"} }, "FirstName == {0}", new[] { "Jimi" });
+        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
+        /// </summary>
+        public static int UpdateOnly<T>(this IDbConnection dbConn, Dictionary<string, object> updateFields, string whereExpression, object[] whereParams, Action<IDbCommand> commandFilter = null)
+        {
+            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly<T>(updateFields, whereExpression, whereParams, commandFilter));
         }
 
         /// <summary>
@@ -138,39 +175,6 @@ namespace ServiceStack.OrmLite
             Action<IDbCommand> commandFilter = null)
         {
             return dbConn.Exec(dbCmd => dbCmd.UpdateAdd(updateFields, q, commandFilter));
-        }
-
-        /// <summary>
-        /// Updates all values from Object Dictionary matching the where condition. E.g
-        /// 
-        ///   db.UpdateOnly&lt;Person&gt;(new Dictionary&lt;string,object&lt; { {"FirstName", "JJ"} }, where:p => p.FirstName == "Jimi");
-        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
-        /// </summary>
-        public static int UpdateOnly<T>(this IDbConnection dbConn, Dictionary<string, object> updateFields, Expression<Func<T, bool>> obj)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly(updateFields, obj));
-        }
-
-        /// <summary>
-        /// Updates all values from Object Dictionary, Requires Id which is used as a Primary Key Filter. E.g
-        /// 
-        ///   db.UpdateOnly&lt;Person&gt;(new Dictionary&lt;string,object&lt; { {"Id", 1}, {"FirstName", "JJ"} });
-        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("Id" = 1)
-        /// </summary>
-        public static int UpdateOnly<T>(this IDbConnection dbConn, Dictionary<string, object> updateFields, Action<IDbCommand> commandFilter = null)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly<T>(updateFields, commandFilter));
-        }
-
-        /// <summary>
-        /// Updates all values from Object Dictionary matching the where condition. E.g
-        /// 
-        ///   db.UpdateOnly&lt;Person&gt;(new Dictionary&lt;string,object&lt; { {"FirstName", "JJ"} }, "FirstName == {0}", new[] { "Jimi" });
-        ///   UPDATE "Person" SET "FirstName" = 'JJ' WHERE ("FirstName" = 'Jimi')
-        /// </summary>
-        public static int UpdateOnly<T>(this IDbConnection dbConn, Dictionary<string, object> updateFields, string whereExpression, object[] whereParams, Action<IDbCommand> commandFilter = null)
-        {
-            return dbConn.Exec(dbCmd => dbCmd.UpdateOnly<T>(updateFields, whereExpression, whereParams, commandFilter));
         }
 
         /// <summary>

@@ -133,7 +133,7 @@ namespace ServiceStack.OrmLite.Tests
             existingPerson.FirstName = "JJ";
             existingPerson.Age = 12;
 
-            db.UpdateOnly(existingPerson,
+            db.UpdateOnlyFields(existingPerson,
                 onlyFields: p => new { p.FirstName, p.Age });
 
             var person = db.Select<Person>().First();
@@ -161,17 +161,17 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
 
             Reset(db);
-            db.UpdateOnly(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => p.FirstName);
+            db.UpdateOnlyFields(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => p.FirstName);
             row = db.Select<Person>().First();
             Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 100)));
 
             Reset(db);
-            db.UpdateOnly(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => new { p.FirstName, p.Age });
+            db.UpdateOnlyFields(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => new { p.FirstName, p.Age });
             row = db.Select<Person>().First();
             Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
 
             Reset(db);
-            db.UpdateOnly(new Person { FirstName = "UpdatedFirst", Age = 27 }, new[] { "FirstName", "Age" });
+            db.UpdateOnlyFields(new Person { FirstName = "UpdatedFirst", Age = 27 }, new[] { "FirstName", "Age" });
             row = db.Select<Person>().First();
             Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
 
@@ -205,17 +205,17 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
 
             Reset(db);
-            await db.UpdateOnlyAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => p.FirstName);
+            await db.UpdateOnlyFieldsAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => p.FirstName);
             row = db.Select<Person>().First();
             Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 100)));
 
             Reset(db);
-            await db.UpdateOnlyAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => new { p.FirstName, p.Age });
+            await db.UpdateOnlyFieldsAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, p => new { p.FirstName, p.Age });
             row = db.Select<Person>().First();
             Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
 
             Reset(db);
-            await db.UpdateOnlyAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, new[] { "FirstName", "Age" });
+            await db.UpdateOnlyFieldsAsync(new Person { FirstName = "UpdatedFirst", Age = 27 }, new[] { "FirstName", "Age" });
             row = db.Select<Person>().First();
             Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
 
@@ -254,7 +254,7 @@ namespace ServiceStack.OrmLite.Tests
             existing.Blob2 = new byte[blob2Bytes];
             Buffer.BlockCopy(blob2Array, 0, existing.Blob2, 0, blob2Bytes);
 
-            db.UpdateOnly(existing, p => new { p.Blob1, p.Blob2, p.FirstName }, r => r.LastName == "Last" && r.FirstName == "Bro");
+            db.UpdateOnlyFields(existing, p => new { p.Blob1, p.Blob2, p.FirstName }, r => r.LastName == "Last" && r.FirstName == "Bro");
 
             var verify = db.Select<SomeBlobs>(p => p.FirstName == "Bro").First();
 
@@ -294,7 +294,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.Throws<ArgumentException>(() =>
                 db.UpdateNonDefaults(new PocoWithBool { Bool = false }, x => x.Id == 1));
 
-            db.UpdateOnly(new PocoWithBool { Bool = false },
+            db.UpdateOnlyFields(new PocoWithBool { Bool = false },
                 onlyFields: x => x.Bool,
                 @where: x => x.Id == 1);
             row = db.SingleById<PocoWithBool>(1);
@@ -598,7 +598,7 @@ namespace ServiceStack.OrmLite.Tests
             db.DropAndCreateTable<Person>();
             db.InsertAll(Person.Rockstars);
 
-            db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
+            db.UpdateOnlyFields(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
 
             var sql = db.GetLastSql().NormalizeSql();
             Assert.That(sql, Does.Contain("where (lastname = @0)"));
@@ -662,7 +662,7 @@ namespace ServiceStack.OrmLite.Tests
             db.DropAndCreateTable<Person>();
             db.InsertAll(Person.Rockstars);
 
-            db.UpdateOnly(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+            db.UpdateOnlyFields(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
 
             var sql = db.GetLastSql().NormalizeSql();
             Assert.That(sql, Does.Contain("where (firstname = @0)"));
@@ -709,7 +709,7 @@ namespace ServiceStack.OrmLite.Tests
 
             var q = db.From<Person>().Update(new[] { "FIRSTNAME" });
 
-            db.UpdateOnly(hendrix, q);
+            db.UpdateOnlyFields(hendrix, q);
 
             var updatedRow = db.SingleById<Person>(hendrix.Id);
 

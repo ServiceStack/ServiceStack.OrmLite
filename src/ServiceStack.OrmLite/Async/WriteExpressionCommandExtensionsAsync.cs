@@ -10,7 +10,7 @@ namespace ServiceStack.OrmLite
 {
     internal static class WriteExpressionCommandExtensionsAsync
     {
-        internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields, Action<IDbCommand> commandFilter, CancellationToken token)
+        internal static Task<int> UpdateOnlyFieldsAsync<T>(this IDbCommand dbCmd, T model, SqlExpression<T> onlyFields, Action<IDbCommand> commandFilter, CancellationToken token)
         {
             OrmLiteUtils.AssertNotAnonType<T>();
             
@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecNonQueryAsync(token);
         }
 
-        internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T obj,
+        internal static Task<int> UpdateOnlyFieldsAsync<T>(this IDbCommand dbCmd, T obj,
             Expression<Func<T, object>> onlyFields,
             Expression<Func<T, bool>> where,
             Action<IDbCommand> commandFilter,
@@ -33,10 +33,10 @@ namespace ServiceStack.OrmLite
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Update(onlyFields);
             q.Where(where);
-            return dbCmd.UpdateOnlyAsync(obj, q, commandFilter, token);
+            return dbCmd.UpdateOnlyFieldsAsync(obj, q, commandFilter, token);
         }
 
-        internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T obj,
+        internal static Task<int> UpdateOnlyFieldsAsync<T>(this IDbCommand dbCmd, T obj,
             string[] onlyFields,
             Expression<Func<T, bool>> where,
             Action<IDbCommand> commandFilter,
@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Update(onlyFields);
             q.Where(where);
-            return dbCmd.UpdateOnlyAsync(obj, q, commandFilter, token);
+            return dbCmd.UpdateOnlyFieldsAsync(obj, q, commandFilter, token);
         }
 
         internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd,

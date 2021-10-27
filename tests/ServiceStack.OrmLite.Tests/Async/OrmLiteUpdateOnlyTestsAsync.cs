@@ -26,7 +26,7 @@ namespace ServiceStack.OrmLite.Tests.Async
             await db.InsertAsync(new Person
                 {Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100});
 
-            await db.UpdateOnlyAsync(new Person {FirstName = "UpdatedFirst", Age = 27}, p => p.FirstName);
+            await db.UpdateOnlyFieldsAsync(new Person {FirstName = "UpdatedFirst", Age = 27}, p => p.FirstName);
             row = (await db.SelectAsync<Person>()).First();
             Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 100)));
 
@@ -34,7 +34,7 @@ namespace ServiceStack.OrmLite.Tests.Async
             await db.InsertAsync(new Person
                 {Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100});
 
-            await db.UpdateOnlyAsync(new Person {FirstName = "UpdatedFirst", Age = 27},
+            await db.UpdateOnlyFieldsAsync(new Person {FirstName = "UpdatedFirst", Age = 27},
                 p => new {p.FirstName, p.Age});
             row = (await db.SelectAsync<Person>()).First();
             Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
@@ -43,7 +43,7 @@ namespace ServiceStack.OrmLite.Tests.Async
             await db.InsertAsync(new Person
                 {Id = 1, FirstName = "OriginalFirst", LastName = "OriginalLast", Age = 100});
 
-            await db.UpdateOnlyAsync(new Person {FirstName = "UpdatedFirst", Age = 27}, new[] {"FirstName", "Age"});
+            await db.UpdateOnlyFieldsAsync(new Person {FirstName = "UpdatedFirst", Age = 27}, new[] {"FirstName", "Age"});
             row = (await db.SelectAsync<Person>()).First();
             Assert.That(row, Is.EqualTo(new Person(1, "UpdatedFirst", "OriginalLast", 27)));
         }

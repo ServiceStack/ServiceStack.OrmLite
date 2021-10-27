@@ -44,7 +44,7 @@ namespace ServiceStack.OrmLite.VistaDB.Tests
                 ev.Where(q => q.Id == storedObj.Id); 
                 storedObj.Name = "Someothername";
 
-                con.UpdateOnly(storedObj, ev);
+                con.UpdateOnlyFields(storedObj, ev);
 
                 var target = con.SingleById<SimpleType>(storedObj.Id);
 

@@ -12,7 +12,7 @@ namespace ServiceStack.OrmLite
 {
     internal static class WriteExpressionCommandExtensions
     {
-        public static int UpdateOnly<T>(this IDbCommand dbCmd,
+        public static int UpdateOnlyFields<T>(this IDbCommand dbCmd,
             T model,
             SqlExpression<T> onlyFields,
             Action<IDbCommand> commandFilter = null)
@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite
                 dbCmd.CommandText += " " + onlyFields.WhereExpression;
         }
 
-        internal static int UpdateOnly<T>(this IDbCommand dbCmd, T obj,
+        internal static int UpdateOnlyFields<T>(this IDbCommand dbCmd, T obj,
             Expression<Func<T, object>> onlyFields = null,
             Expression<Func<T, bool>> where = null,
             Action<IDbCommand> commandFilter = null)
@@ -55,10 +55,10 @@ namespace ServiceStack.OrmLite
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Update(onlyFields);
             q.Where(where);
-            return dbCmd.UpdateOnly(obj, q, commandFilter);
+            return dbCmd.UpdateOnlyFields(obj, q, commandFilter);
         }
 
-        internal static int UpdateOnly<T>(this IDbCommand dbCmd, T obj,
+        internal static int UpdateOnlyFields<T>(this IDbCommand dbCmd, T obj,
             string[] onlyFields = null,
             Expression<Func<T, bool>> where = null,
             Action<IDbCommand> commandFilter = null)
@@ -71,7 +71,7 @@ namespace ServiceStack.OrmLite
             var q = dbCmd.GetDialectProvider().SqlExpression<T>();
             q.Update(onlyFields);
             q.Where(where);
-            return dbCmd.UpdateOnly(obj, q, commandFilter);
+            return dbCmd.UpdateOnlyFields(obj, q, commandFilter);
         }
 
         internal static int UpdateOnly<T>(this IDbCommand dbCmd,

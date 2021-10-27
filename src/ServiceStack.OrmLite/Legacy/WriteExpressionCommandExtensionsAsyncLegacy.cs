@@ -19,7 +19,7 @@ namespace ServiceStack.OrmLite.Legacy
         [Obsolete("Use db.UpdateOnlyAsync(model, db.From<T>())")]
         internal static Task<int> UpdateOnlyAsync<T>(this IDbCommand dbCmd, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields, CancellationToken token)
         {
-            return dbCmd.UpdateOnlyAsync(model, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()), null, token);
+            return dbCmd.UpdateOnlyFieldsAsync(model, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()), null, token);
         }
 
         internal static Task<int> UpdateFmtAsync<T>(this IDbCommand dbCmd, string set, string where, CancellationToken token)

@@ -193,7 +193,7 @@ namespace ServiceStack.OrmLite.Tests
             ResetUpdateDate(db);
             var row = db.SingleById<DefaultValues>(1);
             row.DefaultDouble = 978.423;
-            db.UpdateOnly(row, db.From<DefaultValues>().Update(p => p.DefaultDouble),
+            db.UpdateOnlyFields(row, db.From<DefaultValues>().Update(p => p.DefaultDouble),
                 cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
             VerifyUpdateDate(db);
         }
@@ -208,7 +208,7 @@ namespace ServiceStack.OrmLite.Tests
                 ResetUpdateDate(db);
                 var row = db.SingleById<DefaultValues>(1);
                 row.DefaultDouble = 978.423;
-                db.UpdateOnly(row, p => p.DefaultDouble, p => p.Id == 1,
+                db.UpdateOnlyFields(row, p => p.DefaultDouble, p => p.Id == 1,
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
                 VerifyUpdateDate(db);
             }
@@ -224,7 +224,7 @@ namespace ServiceStack.OrmLite.Tests
                 ResetUpdateDate(db);
                 var row = db.SingleById<DefaultValues>(1);
                 row.DefaultDouble = 978.423;
-                db.UpdateOnly(row, new[] { nameof(DefaultValues.DefaultDouble) }, p => p.Id == 1,
+                db.UpdateOnlyFields(row, new[] { nameof(DefaultValues.DefaultDouble) }, p => p.Id == 1,
                     cmd => cmd.SetUpdateDate<DefaultValues>(nameof(DefaultValues.UpdatedDateUtc), DialectProvider));
                 VerifyUpdateDate(db);
             }
@@ -510,7 +510,7 @@ namespace ServiceStack.OrmLite.Tests
                 ResetUpdateDate(db);
                 var row = db.SingleById<MySqlDefaultValues>(1);
                 row.DefaultDouble = 978.423;
-                db.UpdateOnly(row, db.From<MySqlDefaultValues>().Update(p => p.DefaultDouble),
+                db.UpdateOnlyFields(row, db.From<MySqlDefaultValues>().Update(p => p.DefaultDouble),
                     cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider));
                 VerifyUpdateDate(db);
             }
@@ -526,7 +526,7 @@ namespace ServiceStack.OrmLite.Tests
                 ResetUpdateDate(db);
                 var row = db.SingleById<MySqlDefaultValues>(1);
                 row.DefaultDouble = 978.423;
-                db.UpdateOnly(row, p => p.DefaultDouble, p => p.Id == 1,
+                db.UpdateOnlyFields(row, p => p.DefaultDouble, p => p.Id == 1,
                     cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider));
                 VerifyUpdateDate(db);
             }
@@ -542,7 +542,7 @@ namespace ServiceStack.OrmLite.Tests
                 ResetUpdateDate(db);
                 var row = db.SingleById<MySqlDefaultValues>(1);
                 row.DefaultDouble = 978.423;
-                db.UpdateOnly(row, new[] { nameof(MySqlDefaultValues.DefaultDouble) }, p => p.Id == 1,
+                db.UpdateOnlyFields(row, new[] { nameof(MySqlDefaultValues.DefaultDouble) }, p => p.Id == 1,
                     cmd => cmd.SetUpdateDate<MySqlDefaultValues>(nameof(MySqlDefaultValues.UpdatedDateUtc), DialectProvider));
                 VerifyUpdateDate(db);
             }
