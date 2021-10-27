@@ -2,11 +2,8 @@
 
   <PropertyGroup>
     <Version>5.12.1</Version>
-    <AssemblyVersion>5.0.0.0</AssemblyVersion>
     <LangVersion>latest</LangVersion>
-  	<Authors>ServiceStack</Authors>
-    <Company>ServiceStack, Inc.</Company>
-    <Copyright>&#169; 2008-2018 ServiceStack, Inc</Copyright>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -30,7 +27,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <DefineConstants>$(DefineConstants);NETSTANDARD;NETSTANDARD2_0</DefineConstants>
+    <DefineConstants>$(DefineConstants);NETCORE;NETSTANDARD2_0</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.1' ">
@@ -38,11 +35,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <DefineConstants>$(DefineConstants);NET6_0</DefineConstants>
+    <DefineConstants>$(DefineConstants);NET6_0;NET6_0_OR_GREATER</DefineConstants>
   </PropertyGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1' OR '$(TargetFramework)' == 'netcoreapp3.1' OR '$(TargetFramework)' == 'net6.0' ">
-    <DefineConstants>$(DefineConstants);NETCORE_SUPPORT;NETCORE</DefineConstants>
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' OR '$(TargetFramework)' == 'netstandard2.1' OR '$(TargetFramework)' == 'netcoreapp3.1' OR '$(TargetFramework)' == 'net5.0' OR '$(TargetFramework)' == 'net6.0' ">
+    <DefineConstants>$(DefineConstants);NETCORE;NETCORE_SUPPORT</DefineConstants>
   </PropertyGroup>
 
 </Project>
