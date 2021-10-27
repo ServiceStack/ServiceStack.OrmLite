@@ -4,7 +4,7 @@
     <PackageId>ServiceStack.OrmLite.Firebird.Core</PackageId>
     <AssemblyName>ServiceStack.OrmLite.Firebird</AssemblyName>
     <RootNamespace>ServiceStack.OrmLite.Firebird</RootNamespace>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <Title>ServiceStack.OrmLite.Firebird .NET Standard 2.0</Title>
     <PackageDescription>
       .NET Standard 2.0 version of ServiceStack.OrmLite.Firebird
