@@ -67,9 +67,9 @@ namespace ServiceStack.OrmLite
         /// Insert 1 POCO, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
         /// <para>var id = db.Insert(new Person { Id = 1, FirstName = "Jimi }, selectIdentity:true)</para>
         /// </summary>
-        public static long Insert<T>(this IDbConnection dbConn, T obj, bool selectIdentity = false)
+        public static long Insert<T>(this IDbConnection dbConn, T obj, bool selectIdentity = false,bool enableIdentityInsert = false)
         {
-            return dbConn.Exec(dbCmd => dbCmd.Insert(obj, commandFilter: null, selectIdentity: selectIdentity));
+            return dbConn.Exec(dbCmd => dbCmd.Insert(obj, commandFilter: null, selectIdentity: selectIdentity, enableIdentityInsert));
         }
 
         /// <summary>

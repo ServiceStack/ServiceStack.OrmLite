@@ -711,17 +711,42 @@ namespace ServiceStack.OrmLite
             return dbCmd.ExecuteSql(dbCmd.GetDialectProvider().ToDeleteStatement(tableType, sql));
         }
         
-        internal static long Insert<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter, bool selectIdentity = false)
+        internal static long Insert<T>(this IDbCommand dbCmd, T obj, Action<IDbCommand> commandFilter, bool selectIdentity = false, bool enableIdentityInsert=false)
         {
             OrmLiteUtils.AssertNotAnonType<T>();
             
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
-            dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd, 
-                insertFields: dialectProvider.GetNonDefaultValueInsertFields<T>(obj));
+            var pkField = ModelDefinition<T>.Definition.FieldDefinitions.FirstOrDefault(f => f.IsPrimaryKey);
+            if (!enableIdentityInsert || pkField == null || !pkField.AutoIncrement)
+            {
+                dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
+                    insertFields: dialectProvider.GetNonDefaultValueInsertFields<T>(obj));
 
-            return InsertInternal<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity);
+                return InsertInternal<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity);
+            }
+            else
+            {
+                try
+                {
+                    dialectProvider.EnableIdentityInsert<T>(dbCmd);
+                    dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
+                        insertFields: dialectProvider.GetNonDefaultValueInsertFields<T>(obj),
+                        shouldInclude: f => f == pkField);
+                    InsertInternal<T>(dialectProvider, dbCmd, obj, commandFilter, selectIdentity);
+                    if (selectIdentity)
+                    {
+                        var id = pkField.GetValue(obj);
+                        return Convert.ToInt64(id);
+                    }
+                    return default;
+                }
+                finally
+                {
+                    dialectProvider.DisableIdentityInsert<T>(dbCmd);
+                }
+            }
         }
         
         internal static long Insert<T>(this IDbCommand dbCmd, Dictionary<string,object> obj, Action<IDbCommand> commandFilter, bool selectIdentity = false)

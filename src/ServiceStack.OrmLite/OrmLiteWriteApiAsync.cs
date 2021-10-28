@@ -38,18 +38,19 @@ namespace ServiceStack.OrmLite
         /// Insert 1 POCO, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
         /// <para>var id = db.Insert(new Person { Id = 1, FirstName = "Jimi }, selectIdentity:true)</para>
         /// </summary>
-        public static Task<long> InsertAsync<T>(this IDbConnection dbConn, T obj, bool selectIdentity = false, CancellationToken token = default)
+        public static Task<long> InsertAsync<T>(this IDbConnection dbConn, T obj, bool selectIdentity = false,
+            bool enableIdentityInsert =false,CancellationToken token = default)
         {
-            return dbConn.Exec(dbCmd => dbCmd.InsertAsync(obj, commandFilter: null, selectIdentity: selectIdentity, token: token));
+            return dbConn.Exec(dbCmd => dbCmd.InsertAsync(obj, commandFilter: null, selectIdentity: selectIdentity,  enableIdentityInsert,token: token));
         }
 
         /// <summary>
         /// Insert 1 POCO, use selectIdentity to retrieve the last insert AutoIncrement id (if any). E.g:
         /// <para>var id = db.Insert(new Person { Id = 1, FirstName = "Jimi }, selectIdentity:true)</para>
         /// </summary>
-        public static Task<long> InsertAsync<T>(this IDbConnection dbConn, T obj, Action<IDbCommand> commandFilter, bool selectIdentity = false, CancellationToken token = default)
+        public static Task<long> InsertAsync<T>(this IDbConnection dbConn, T obj, Action<IDbCommand> commandFilter, bool selectIdentity = false, bool enableIdentityInsert = false, CancellationToken token = default)
         {
-            return dbConn.Exec(dbCmd => dbCmd.InsertAsync(obj, commandFilter: commandFilter, selectIdentity: selectIdentity, token: token));
+            return dbConn.Exec(dbCmd => dbCmd.InsertAsync(obj, commandFilter: commandFilter, selectIdentity: selectIdentity, enableIdentityInsert, token: token));
         }
 
         /// <summary>
