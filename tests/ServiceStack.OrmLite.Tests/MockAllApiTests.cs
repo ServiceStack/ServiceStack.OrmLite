@@ -243,10 +243,10 @@ namespace ServiceStack.OrmLite.Tests
                 Assert.That(db.Update(new Person { Id = 1, FirstName = "JJ", Age = 27 }, p => p.LastName == "Hendrix"), Is.EqualTo(10));
                 Assert.That(db.Update<Person>(new { FirstName = "JJ" }, p => p.LastName == "Hendrix"), Is.EqualTo(10));
                 Assert.That(db.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix"), Is.EqualTo(10));
-                Assert.That(db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName), Is.EqualTo(10));
-                Assert.That(db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix"), Is.EqualTo(10));
-                Assert.That(db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, db.From<Person>().Update(p => p.FirstName)), Is.EqualTo(10));
-                Assert.That(db.UpdateOnly(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi")), Is.EqualTo(10));
+                Assert.That(db.UpdateOnlyFields(new Person { FirstName = "JJ" }, p => p.FirstName), Is.EqualTo(10));
+                Assert.That(db.UpdateOnlyFields(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix"), Is.EqualTo(10));
+                Assert.That(db.UpdateOnlyFields(new Person { FirstName = "JJ", LastName = "Hendo" }, db.From<Person>().Update(p => p.FirstName)), Is.EqualTo(10));
+                Assert.That(db.UpdateOnlyFields(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi")), Is.EqualTo(10));
             }
         }
 

@@ -154,7 +154,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
                 expected = 2;
                 var rate = 0;
 				ev.Where().Where(rn => rn.Rate == rate).Update(rn => rn.Active);
-                var rows = db.UpdateOnly(new Author() { Active = false }, ev);
+                var rows = db.UpdateOnlyFields(new Author() { Active = false }, ev);
                 Assert.AreEqual(expected, rows);
 
                 // insert values  only in Id, Name, Birthday, Rate and Active fields 
@@ -168,7 +168,7 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
                 //update comment for City == null 
                 expected = 2;
 				ev.Where().Where(rn => rn.City == null).Update(rn => rn.Comments);
-                rows = db.UpdateOnly(new Author() { Comments = "No comments" }, ev);
+                rows = db.UpdateOnlyFields(new Author() { Comments = "No comments" }, ev);
                 Assert.AreEqual(expected, rows);
 
                 // delete where City is null 
@@ -338,17 +338,17 @@ namespace ServiceStack.OrmLite.MySql.Tests.Expressions
                 rr.City = "Madrid";
                 rr.Comments = "Updated";
 				ev.Where().Where(r => r.Id == rr.Id); // if omit,  then all records will be updated 
-                rows = db.UpdateOnly(rr, ev); // == dbCmd.Update(rr) but it returns void
+                rows = db.UpdateOnlyFields(rr, ev); // == dbCmd.Update(rr) but it returns void
                 Assert.AreEqual(expected, rows);
 
                 expected = 0;
 				ev.Where().Where(r => r.City == "Ciudad Gotica");
-                rows = db.UpdateOnly(rr, ev);
+                rows = db.UpdateOnlyFields(rr, ev);
                 Assert.AreEqual(expected, rows);
 
                 expected = db.Select<Author>(x => x.City == "Madrid").Count;
                 author = new Author() { Active = false };
-                rows = db.UpdateOnly(author, x => x.Active, x => x.City == "Madrid");
+                rows = db.UpdateOnlyFields(author, x => x.Active, x => x.City == "Madrid");
                 Assert.AreEqual(expected, rows);
 
                 expected = db.Select<Author>(x => x.Active == false).Count;

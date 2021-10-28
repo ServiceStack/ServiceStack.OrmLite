@@ -182,7 +182,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Does.Contain("=@Flags").Or.Contain("=:Flags"));
             db.GetLastSql().Print();
 
-            db.UpdateOnly(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree }, onlyFields: q => q.Flags);
+            db.UpdateOnlyFields(new TypeWithFlagsEnum { Id = 1, Flags = FlagsEnum.FlagThree }, onlyFields: q => q.Flags);
             Assert.That(db.GetLastSql().NormalizeSql(), Does.Contain("=@flags"));
 
             var row = db.SingleById<TypeWithFlagsEnum>(1);
@@ -204,7 +204,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Does.Contain("=@EnumValue").Or.Contain("=:EnumValue"));
             db.GetLastSql().Print();
 
-            db.UpdateOnly(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value3 }, 
+            db.UpdateOnlyFields(new TypeWithEnumAsInt { Id = 1, EnumValue = SomeEnumAsInt.Value3 }, 
                 onlyFields: q => q.EnumValue);
             Assert.That(db.GetLastSql().NormalizeSql(), Does.Contain("=@enumvalue"));
 
@@ -230,7 +230,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(db.GetLastSql(), Does.Contain("=@EnumValue").Or.Contain("=:EnumValue"));
             db.GetLastSql().Print();
 
-            db.UpdateOnly(new TypeWithEnumAsChar { Id = 1, EnumValue = CharEnum.Value3 }, 
+            db.UpdateOnlyFields(new TypeWithEnumAsChar { Id = 1, EnumValue = CharEnum.Value3 }, 
                 onlyFields: q => q.EnumValue);
             Assert.That(db.GetLastSql().NormalizeSql(), Does.Contain("=@enumvalue"));
 

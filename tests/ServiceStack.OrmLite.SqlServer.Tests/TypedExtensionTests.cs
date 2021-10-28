@@ -31,39 +31,29 @@ namespace ServiceStack.OrmLite.SqlServerTests
         {
             OrmLiteConfig.DialectProvider = provider;
 
-            using (var connection = factory.OpenDbConnection())
+            using var connection = factory.OpenDbConnection();
+            if (connection.TableExists<TestDao>())
             {
-                if (connection.TableExists<TestDao>())
-                {
-                    connection.DropTable<TestDao>();
-                }
+                connection.DropTable<TestDao>();
             }
         }
 
         [Test]
         public void GivenAnOrmLiteTypedConnectionFactory_WhenUsingOrmLiteExtensionsAndGlobalProviderNotSet_ThenArgumentNullExceptionIsNotThrown()
         {
-            using (var connection = factory.OpenDbConnection())
-            {
-                Assert.That(() =>
-                {
-                    connection.CreateTableIfNotExists<TestDao>();
+            using var db = factory.OpenDbConnection();
+            db.CreateTableIfNotExists<TestDao>();
 
-                    var dao = new TestDao {Id = 1, Thing = "Thing"};
+            var dao = new TestDao {Id = 1, Thing = "Thing"};
 
-                    connection.Insert(dao);
-                    connection.SingleById<TestDao>(1);
+            db.Insert(dao);
+            db.SingleById<TestDao>(1);
 
-                    dao.Thing = "New Thing";
+            dao.Thing = "New Thing";
 
-                    connection.Update(dao, d => d.Id == dao.Id);
-
-                    connection.Delete(dao);
-
-                    connection.DropTable<TestDao>();
-
-                }, Throws.Nothing);
-            }
+            db.Update(dao, d => d.Id == dao.Id);
+            db.Delete(dao);
+            db.DropTable<TestDao>();
         }
     }
 }

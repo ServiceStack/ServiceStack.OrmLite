@@ -57,7 +57,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     },
                 });
 
-                db.UpdateOnly(new Team { TeamLeaderId = 1 }, 
+                db.UpdateOnlyFields(new Team { TeamLeaderId = 1 }, 
                     onlyFields: x => x.TeamLeaderId, 
                     where: x => x.Id == 1);
 
@@ -111,7 +111,7 @@ namespace ServiceStack.OrmLite.Tests.Issues
                     },
                 });
 
-                db.UpdateOnly(new Team { TeamLeaderId = 1 }, 
+                db.UpdateOnlyFields(new Team { TeamLeaderId = 1 }, 
                     onlyFields: x => x.TeamLeaderId, 
                     where: x => x.Id == 1);
 

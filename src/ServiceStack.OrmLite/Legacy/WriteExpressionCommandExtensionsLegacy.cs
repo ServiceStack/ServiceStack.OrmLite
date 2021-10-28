@@ -16,7 +16,7 @@ namespace ServiceStack.OrmLite.Legacy
         [Obsolete("Use db.UpdateOnly(model, db.From<T>())")]
         public static int UpdateOnly<T>(this IDbCommand dbCmd, T model, Func<SqlExpression<T>, SqlExpression<T>> onlyFields)
         {
-            return dbCmd.UpdateOnly(model, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()));
+            return dbCmd.UpdateOnlyFields(model, onlyFields(dbCmd.GetDialectProvider().SqlExpression<T>()));
         }
 
         public static int UpdateFmt<T>(this IDbCommand dbCmd, string set = null, string where = null)

@@ -265,16 +265,16 @@ namespace ServiceStack.OrmLite.Tests
             db.UpdateOnly(() => new Person { FirstName = "JJ" });
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@FirstName"));
 
-            db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
+            db.UpdateOnlyFields(new Person { FirstName = "JJ" }, p => p.FirstName);
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@FirstName"));
 
-            db.UpdateOnly(new Person { FirstName = "JJ", Age = 27 }, p => new { p.FirstName, p.Age });
+            db.UpdateOnlyFields(new Person { FirstName = "JJ", Age = 27 }, p => new { p.FirstName, p.Age });
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@FirstName, \"Age\"=@Age"));
 
-            db.UpdateOnly(new Person { FirstName = "JJ", Age = 27 }, new[] { "FirstName", "Age" });
+            db.UpdateOnlyFields(new Person { FirstName = "JJ", Age = 27 }, new[] { "FirstName", "Age" });
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@FirstName, \"Age\"=@Age"));
 
-            db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
+            db.UpdateOnlyFields(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@FirstName WHERE (\"LastName\" = @0)"));
 
             db.UpdateOnly(() => new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
@@ -283,7 +283,7 @@ namespace ServiceStack.OrmLite.Tests
             db.UpdateOnly(() => new Person { FirstName = "JJ" }, db.From<Person>().Where(p => p.LastName == "Hendrix"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@FirstName WHERE (\"LastName\" = @0)"));
 
-            db.UpdateOnly(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+            db.UpdateOnlyFields(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
             Assert.That(db.GetLastSql(), Is.EqualTo("UPDATE \"Person\" SET \"FirstName\"=@FirstName WHERE (\"FirstName\" = @0)"));
 
             db.UpdateAdd(() => new Person { Age = 3 });

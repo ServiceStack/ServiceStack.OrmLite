@@ -202,7 +202,7 @@ namespace ServiceStack.OrmLite.Tests
 
                 var updatedData = key.Data + "0123456789";
                 
-                var exists = db.UpdateOnly(new CacheEntry
+                var exists = db.UpdateOnlyFields(new CacheEntry
                      {
                          Id = id,
                          Data = updatedData,

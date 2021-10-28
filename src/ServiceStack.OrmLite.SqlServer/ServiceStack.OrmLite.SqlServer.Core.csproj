@@ -4,7 +4,7 @@
     <PackageId>ServiceStack.OrmLite.SqlServer.Core</PackageId>
     <AssemblyName>ServiceStack.OrmLite.SqlServer</AssemblyName>
     <RootNamespace>ServiceStack.OrmLite.SqlServer</RootNamespace>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <Title>ServiceStack.OrmLite.SqlServer .NET Standard 2.0</Title>
     <PackageDescription>
       .NET Standard 2.0 version of ServiceStack.OrmLite.SqlServer
@@ -19,6 +19,10 @@
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
   </ItemGroup>
 

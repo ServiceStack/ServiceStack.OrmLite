@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net472;net5.0</TargetFrameworks>
-<!--    <TargetFramework>net5.0</TargetFramework>-->
+    <TargetFrameworks>net472;net6.0</TargetFrameworks>
+<!--    <TargetFramework>net6.0</TargetFramework>-->
     <DebugType>portable</DebugType>
     <AssemblyName>ServiceStack.OrmLite.Tests</AssemblyName>
     <OutputType>Library</OutputType>
@@ -33,7 +33,7 @@
     <ProjectReference Include="..\..\src\ServiceStack.OrmLite.VistaDB\ServiceStack.OrmLite.VistaDB.csproj" />
   </ItemGroup>
 
-  <PropertyGroup Condition=" '$(TargetFramework)' == 'net5.0' ">
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
     <DefineConstants>$(DefineConstants);NETCORE_SUPPORT;NETCORE</DefineConstants>
   </PropertyGroup>
 

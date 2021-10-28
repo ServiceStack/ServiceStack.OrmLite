@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <PackageId>ServiceStack.OrmLite.SqlServer.Data.Core</PackageId>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <AssemblyName>ServiceStack.OrmLite.SqlServer.Data</AssemblyName>
     <RootNamespace>ServiceStack.OrmLite.SqlServer</RootNamespace>
     <Title>ServiceStack.OrmLite.SqlServer.Data .NET Standard 2.0</Title>

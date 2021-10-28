@@ -167,7 +167,7 @@ namespace ServiceStack.OrmLite.Tests.Async
             await ResetUpdateDateAsync(db);
             var row = await db.SingleByIdAsync<DefaultValuesUpdate>(1);
             row.DefaultDouble = 978.423;
-            await db.UpdateOnlyAsync(row, db.From<DefaultValuesUpdate>().Update(p => p.DefaultDouble),
+            await db.UpdateOnlyFieldsAsync(row, db.From<DefaultValuesUpdate>().Update(p => p.DefaultDouble),
                 cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
             await VerifyUpdateDateAsync(db);
         }
@@ -181,7 +181,7 @@ namespace ServiceStack.OrmLite.Tests.Async
             await ResetUpdateDateAsync(db);
             var row = await db.SingleByIdAsync<DefaultValuesUpdate>(1);
             row.DefaultDouble = 978.423;
-            await db.UpdateOnlyAsync(row, p => p.DefaultDouble, p => p.Id == 1,
+            await db.UpdateOnlyFieldsAsync(row, p => p.DefaultDouble, p => p.Id == 1,
                 cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
             await VerifyUpdateDateAsync(db);
         }
@@ -195,7 +195,7 @@ namespace ServiceStack.OrmLite.Tests.Async
             await ResetUpdateDateAsync(db);
             var row = await db.SingleByIdAsync<DefaultValuesUpdate>(1);
             row.DefaultDouble = 978.423;
-            await db.UpdateOnlyAsync(row, new[] { nameof(DefaultValuesUpdate.DefaultDouble) }, p => p.Id == 1,
+            await db.UpdateOnlyFieldsAsync(row, new[] { nameof(DefaultValuesUpdate.DefaultDouble) }, p => p.Id == 1,
                 cmd => cmd.SetUpdateDate<DefaultValuesUpdate>(nameof(DefaultValuesUpdate.UpdatedDateUtc), DialectProvider));
             await VerifyUpdateDateAsync(db);
         }

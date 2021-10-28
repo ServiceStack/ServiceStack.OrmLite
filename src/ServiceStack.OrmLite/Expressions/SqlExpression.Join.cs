@@ -315,13 +315,13 @@ namespace ServiceStack.OrmLite
 
                                 if (fieldDef.CustomSelect == null)
                                 {
-                                    if (!fieldDef.IsRowVersion)
+                                    if (fieldDef.IsRowVersion)
                                     {
-                                        sbSelect.Append($"{GetQuotedColumnName(tableDef, matchingField.Name)} AS {SqlColumn(fieldDef.Name)}");
+                                        sbSelect.Append(DialectProvider.GetRowVersionSelectColumn(fieldDef, DialectProvider.GetTableName(tableDef.ModelName)));
                                     }
                                     else
                                     {
-                                        sbSelect.Append(DialectProvider.GetRowVersionSelectColumn(fieldDef, DialectProvider.GetTableName(tableDef.ModelName)));
+                                        sbSelect.Append($"{GetQuotedColumnName(tableDef, matchingField.Name)} AS {SqlColumn(fieldDef.Name)}");
                                     }
                                 }
                                 else
@@ -353,18 +353,19 @@ namespace ServiceStack.OrmLite
                                     
                             if (fieldDef.CustomSelect == null)
                             {
-                                if (!fieldDef.IsRowVersion)
+                                if (fieldDef.IsRowVersion)
                                 {
-                                    sbSelect.Append(tableAlias == null 
+                                    sbSelect.Append(DialectProvider.GetRowVersionSelectColumn(fieldDef,
+                                        DialectProvider.GetTableName(tableAlias ?? tableDef.ModelName, tableDef.Schema)));
+                                }
+                                else
+                                {
+                                    sbSelect.Append(tableAlias == null
                                         ? GetQuotedColumnName(tableDef, tableFieldDef.Name)
                                         : GetQuotedColumnName(tableDef, tableAlias, tableFieldDef.Name));
 
                                     if (tableFieldDef.RequiresAlias)
                                         sbSelect.Append(" AS ").Append(SqlColumn(fieldDef.Name));
-                                }
-                                else
-                                {
-                                    sbSelect.Append(DialectProvider.GetRowVersionSelectColumn(fieldDef, DialectProvider.GetTableName(tableAlias ?? tableDef.ModelName, tableDef.Schema)));
                                 }
                             }
                             else

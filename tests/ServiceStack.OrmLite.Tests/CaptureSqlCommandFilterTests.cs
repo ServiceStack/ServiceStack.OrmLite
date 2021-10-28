@@ -171,10 +171,10 @@ namespace ServiceStack.OrmLite.Tests
             i++; db.Update(new Person { Id = 1, FirstName = "JJ", Age = 27 }, p => p.LastName == "Hendrix");
             i++; db.Update<Person>(new { FirstName = "JJ" }, p => p.LastName == "Hendrix");
             i++; db.UpdateNonDefaults(new Person { FirstName = "JJ" }, p => p.LastName == "Hendrix");
-            i++; db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName);
-            i++; db.UpdateOnly(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
-            i++; db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, db.From<Person>().Update(p => p.FirstName));
-            i++; db.UpdateOnly(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
+            i++; db.UpdateOnlyFields(new Person { FirstName = "JJ" }, p => p.FirstName);
+            i++; db.UpdateOnlyFields(new Person { FirstName = "JJ" }, p => p.FirstName, p => p.LastName == "Hendrix");
+            i++; db.UpdateOnlyFields(new Person { FirstName = "JJ", LastName = "Hendo" }, db.From<Person>().Update(p => p.FirstName));
+            i++; db.UpdateOnlyFields(new Person { FirstName = "JJ" }, db.From<Person>().Update(p => p.FirstName).Where(x => x.FirstName == "Jimi"));
 
             Assert.That(captured.SqlCommandHistory.Count, Is.EqualTo(i));
 

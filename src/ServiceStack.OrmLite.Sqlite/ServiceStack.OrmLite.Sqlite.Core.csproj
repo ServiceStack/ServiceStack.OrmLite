@@ -4,7 +4,7 @@
     <PackageId>ServiceStack.OrmLite.Sqlite.Core</PackageId>
     <AssemblyName>ServiceStack.OrmLite.Sqlite</AssemblyName>
     <RootNamespace>ServiceStack.OrmLite.Sqlite</RootNamespace>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;net6.0</TargetFrameworks>
     <Title>ServiceStack.OrmLite.Sqlite .NET Standard 2.0</Title>
     <PackageDescription>
       .NET Standard 2.0 version of ServiceStack.OrmLite.Sqlite

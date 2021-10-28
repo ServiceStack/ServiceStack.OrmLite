@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
-#if !NETSTANDARD2_0
+#if !NETCORE
 using System.Runtime.Remoting.Messaging;
 #endif
 using System.Threading;
@@ -23,8 +23,8 @@ namespace ServiceStack.OrmLite
         [ThreadStatic]
         public static IDictionary ContextItems;
 
-#if NETSTANDARD2_0
-        AsyncLocal<IDictionary> localContextItems = new AsyncLocal<IDictionary>();
+#if NETCORE
+        AsyncLocal<IDictionary> localContextItems = new();
 #endif
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace ServiceStack.OrmLite
 
         private IDictionary GetItems()
         {
-#if NETSTANDARD2_0
+#if NETCORE
             if (UseThreadStatic)
                 return ContextItems;
 
@@ -63,14 +63,14 @@ namespace ServiceStack.OrmLite
 
         private IDictionary CreateItems(IDictionary items = null)
         {
-#if NETSTANDARD2_0
+#if NETCORE
                 if (UseThreadStatic)
                 {
-                    ContextItems = items ?? (items = new Dictionary<object, object>());
+                    ContextItems = items ??= new Dictionary<object, object>();
                 }
                 else
                 {
-                    localContextItems.Value = items ?? (items = new ConcurrentDictionary<object, object>());
+                    localContextItems.Value = items ??= new ConcurrentDictionary<object, object>();
                 }
 #else                
             try
@@ -101,7 +101,7 @@ namespace ServiceStack.OrmLite
             }
             else
             {
-#if NETSTANDARD2_0
+#if NETCORE
                 localContextItems.Value = new ConcurrentDictionary<object, object>();                
 #else                
                 CallContext.FreeNamedDataSlot(_key);

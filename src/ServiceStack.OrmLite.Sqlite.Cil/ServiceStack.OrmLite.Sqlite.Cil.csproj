@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net5.0</TargetFramework>
+        <TargetFramework>net6.0</TargetFramework>
         <AssemblyName>ServiceStack.OrmLite.Sqlite</AssemblyName>
         <PackageId>ServiceStack.OrmLite.Sqlite.Cil</PackageId>
         <Title>OrmLite.Sqlite with SQLitePCLRaw CIL</Title>

@@ -117,7 +117,7 @@ namespace ServiceStack.OrmLite.Sqlite.Converters
 
             if (DateStyle == DateTimeKind.Utc)
             {
-#if NETSTANDARD2_0
+#if NETCORE
                 //.NET Core returns correct Local time but as Unspecified so change to Local and Convert to UTC
                 dateTime = DateTime.SpecifyKind(dateTime, DateTimeKind.Local).ToUniversalTime();
 #else
