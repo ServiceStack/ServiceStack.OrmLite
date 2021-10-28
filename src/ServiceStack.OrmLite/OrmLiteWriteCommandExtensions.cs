@@ -718,7 +718,7 @@ namespace ServiceStack.OrmLite
             OrmLiteConfig.InsertFilter?.Invoke(dbCmd, obj);
 
             var dialectProvider = dbCmd.GetDialectProvider();
-            var pkField = ModelDefinition<T>.Definition.PrimaryKey;
+            var pkField = ModelDefinition<T>.Definition.FieldDefinitions.FirstOrDefault(f => f.IsPrimaryKey);
             if (!enableIdentityInsert || pkField == null || !pkField.AutoIncrement)
             {
                 dialectProvider.PrepareParameterizedInsertStatement<T>(dbCmd,
