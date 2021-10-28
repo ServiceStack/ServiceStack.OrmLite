@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.Versioning;
 using System.Threading.Tasks;
 using NUnit.Framework;
@@ -11,11 +12,55 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
 {
+    internal class CustomerWithAutoIncrementPrimaryKey
+    {
+        [PrimaryKey, AutoIncrement]
+        public int Id { get; set; }
+        public string Name { get; set; }
+    }
 
     [TestFixtureOrmLite]
     public class OrmLiteInsertTests : OrmLiteProvidersTestBase
     {
         public OrmLiteInsertTests(DialectContext context) : base(context) {}
+
+        [Test]
+        public void Can_insert_into_CustomerWithAutoIncrementPrimaryKey_table()
+        {
+            var id = (int)DateTime.Now.ToOADate();
+            using (var db = OpenDbConnection())
+            {
+                db.CreateTable<CustomerWithAutoIncrementPrimaryKey>(true);
+
+                var row = new CustomerWithAutoIncrementPrimaryKey()
+                {
+                    Id = id,
+                    Name = Guid.NewGuid().ToString()
+                };
+
+                var ret = db.Insert(row, true, true);
+                Debug.Assert(ret == id);
+            }
+        }
+
+        [Test]
+        public async Task Can_insert_async_into_CustomerWithAutoIncrementPrimaryKey_table()
+        {
+            var id = (int)DateTime.Now.ToOADate();
+            using (var db =await OpenDbConnectionAsync())
+            {
+                db.CreateTable<CustomerWithAutoIncrementPrimaryKey>(true);
+
+                var row = new CustomerWithAutoIncrementPrimaryKey()
+                {
+                    Id = id,
+                    Name = Guid.NewGuid().ToString()
+                };
+
+                var ret =await db.InsertAsync(row, true, true);
+                Debug.Assert(ret == id);
+            }
+        }
 
         [Test]
         public void Can_insert_into_ModelWithFieldsOfDifferentTypes_table()
