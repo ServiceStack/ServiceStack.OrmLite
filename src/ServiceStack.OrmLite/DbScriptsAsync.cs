@@ -9,9 +9,6 @@ using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite
 {
-    [Obsolete("Use DbScriptsAsync")]
-    public class TemplateDbFiltersAsync : DbScriptsAsync {}
-    
     public partial class DbScriptsAsync : ScriptMethods
     {
         private const string DbInfo = "__dbinfo"; // Keywords.DbInfo

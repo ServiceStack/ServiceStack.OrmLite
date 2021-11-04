@@ -25,6 +25,8 @@ namespace ServiceStack.OrmLite
 
         public OrmLiteConnectionFactory(string connectionString, IOrmLiteDialectProvider dialectProvider, bool setGlobalDialectProvider)
         {
+            if (connectionString == "DataSource=:memory:")
+                connectionString = ":memory:";
             ConnectionString = connectionString;
             AutoDisposeConnection = connectionString != ":memory:";
             this.DialectProvider = dialectProvider ?? OrmLiteConfig.DialectProvider;
