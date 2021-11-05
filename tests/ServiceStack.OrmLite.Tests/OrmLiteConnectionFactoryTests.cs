@@ -189,7 +189,7 @@ namespace ServiceStack.OrmLite.Tests
             var factory = new OrmLiteConnectionFactory("DataSource=:memory:", SqliteDialect.Provider);
             using var db = factory.OpenDbConnection();
             Assert.That(db.State, Is.EqualTo(ConnectionState.Open));
-            Assert.That(db.ConnectionString, Is.EqualTo("DataSource=:memory:"));
+            Assert.That(db.ConnectionString, Is.EqualTo(":memory:"));
 
             var dbFilePath = "~/db.sqlite".MapAbsolutePath();
             using var dbFile = factory.OpenDbConnectionString(dbFilePath);
