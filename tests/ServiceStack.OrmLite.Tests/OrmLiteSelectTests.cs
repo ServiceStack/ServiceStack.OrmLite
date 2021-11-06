@@ -1,8 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.Common.Tests.Models;
+using ServiceStack.OrmLite.Tests.Expression;
 using ServiceStack.Text;
 
 namespace ServiceStack.OrmLite.Tests
@@ -10,7 +12,7 @@ namespace ServiceStack.OrmLite.Tests
     [TestFixtureOrmLite]
     public class OrmLiteSelectTests : OrmLiteProvidersTestBase
     {
-        public OrmLiteSelectTests(DialectContext context) : base(context) {}
+        public OrmLiteSelectTests(DialectContext context) : base(context) { }
 
         [Test]
         public void Can_GetById_int_from_ModelWithFieldsOfDifferentTypes_table()
@@ -369,14 +371,14 @@ namespace ServiceStack.OrmLite.Tests
                 var q = db.From<ModelWithIdAndName>();
 
                 db.ExecuteSql($"UPDATE {q.Table<ModelWithIdAndName>()} SET Name = 'updated' WHERE Id IN (@ids)",
-                    new {ids = new[] {1, 2, 3}});
+                    new { ids = new[] { 1, 2, 3 } });
 
                 var count = db.Count<ModelWithIdAndName>(x => x.Name == "updated");
                 Assert.That(count, Is.EqualTo(3));
-                
+
                 db.ExecuteSql($"UPDATE {q.Table<ModelWithIdAndName>()} SET Name = 'updated' WHERE Name IN (@names)",
-                    new {names = new[] {"Name4", "Name5"}});
-                
+                    new { names = new[] { "Name4", "Name5" } });
+
                 count = db.Count<ModelWithIdAndName>(x => x.Name == "updated");
                 Assert.That(count, Is.EqualTo(5));
             }
@@ -500,7 +502,7 @@ namespace ServiceStack.OrmLite.Tests
                                              Or.EqualTo(9.9999999999999992E+124d)); //Firebird
             }
         }
-        
+
         public class CustomSql
         {
             public int Id { get; set; }
@@ -519,11 +521,12 @@ namespace ServiceStack.OrmLite.Tests
                 db.DropAndCreateTable<RockstarAlbum>();
                 db.Insert(AutoQueryTests.SeedRockstars);
                 db.Insert(AutoQueryTests.SeedAlbums);
-                
+
                 var q = db.From<Rockstar>()
                     .Join<RockstarAlbum>()
                     .GroupBy(r => new { r.Id, r.FirstName, r.LastName })
-                    .Select<Rockstar, RockstarAlbum>((r,a) => new {
+                    .Select<Rockstar, RockstarAlbum>((r, a) => new
+                    {
                         r.Id,
                         Name = r.FirstName + " " + r.LastName,
                         CustomMax = Sql.Max(r.Id),
@@ -532,15 +535,89 @@ namespace ServiceStack.OrmLite.Tests
 
                 var results = db.Select<CustomSql>(q);
                 var result = results[0];
-                
-//                results.PrintDump();
+
+                //                results.PrintDump();
 
                 Assert.That(result.Id, Is.GreaterThan(0));
                 Assert.That(result.Name, Is.Not.Null);
                 Assert.That(result.CustomMax, Is.GreaterThan(0));
                 Assert.That(result.CustomCount, Is.GreaterThan(0));
             }
-            
+
+        }
+
+        [Test]
+        public void Can_select_from_Tasked_with_single_tags()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Tasked>();
+
+                var parentId = db.Insert(new Tasked { Created = new DateTime(2000, 01, 01) }, selectIdentity: true);
+                db.Insert(new Tasked { ParentId = parentId, Created = new DateTime(2001, 01, 01) }, selectIdentity: true);
+                var tag = "Query Tasked";
+                var q = db.From<Tasked>().TagWith(tag);
+
+                Debug.Assert(q.Tags.Count == 1);
+                Debug.Assert(q.Tags.ToList()[0]== tag);
+
+                var select = q.ToSelectStatement();
+                Debug.Assert(select.Contains(tag));
+
+                var results = db.Select(q);
+                Debug.Assert(results.Count == 2);
+            }
+        }
+
+        [Test]
+        public void Can_select_from_Tasked_with_multi_tags()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Tasked>();
+
+                var parentId = db.Insert(new Tasked { Created = new DateTime(2000, 01, 01) }, selectIdentity: true);
+                db.Insert(new Tasked { ParentId = parentId, Created = new DateTime(2001, 01, 01) }, selectIdentity: true);
+                var tag1 = "Query Tasked 1";
+                var tag2 = "Query Tasked 2";
+                var q = db.From<Tasked>()
+                    .TagWith(tag1)
+                    .TagWith(tag2);
+
+                Debug.Assert(q.Tags.Count == 2);
+                Debug.Assert(q.Tags.ToList()[0] == tag1);
+                Debug.Assert(q.Tags.ToList()[1] == tag2);
+
+                var select = q.ToSelectStatement();
+                Debug.Assert(select.Contains(tag1));
+                Debug.Assert(select.Contains(tag2));
+
+                var results = db.Select(q);
+                Debug.Assert(results.Count == 2);
+            }
+        }
+
+        [Test]
+        public void Can_select_from_Tasked_with_callsite_tags()
+        {
+            using (var db = OpenDbConnection())
+            {
+                db.DropAndCreateTable<Tasked>();
+
+                var parentId = db.Insert(new Tasked { Created = new DateTime(2000, 01, 01) }, selectIdentity: true);
+                db.Insert(new Tasked { ParentId = parentId, Created = new DateTime(2001, 01, 01) }, selectIdentity: true);
+
+                var q = db.From<Tasked>().TagWithCallSite(nameof(OrmLiteSelectTests), 13);
+                var tag = $"File: {nameof(OrmLiteSelectTests)}:13";
+                Debug.Assert(q.Tags.Count == 1);
+                Debug.Assert(q.Tags.ToList()[0] == tag);
+
+                var select = q.ToSelectStatement();
+                Debug.Assert(select.Contains(tag));
+
+                var results = db.Select(q);
+                Debug.Assert(results.Count == 2);
+            }
         }
     }
 }

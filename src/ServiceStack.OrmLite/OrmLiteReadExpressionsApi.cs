@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
 using ServiceStack.Text;
@@ -88,6 +89,20 @@ namespace ServiceStack.OrmLite
             if (!string.IsNullOrEmpty(tableOptions.Alias))
                 expr.SetTableAlias(tableOptions.Alias);
             return expr;
+        }
+
+        public static SqlExpression<T> TagWith<T>(this SqlExpression<T> expression,string tag)
+        {
+            expression.AddTag(tag);
+            return expression;
+        }
+
+        public static SqlExpression<T> TagWithCallSite<T>(this SqlExpression<T> expression,
+            [CallerFilePath] string filePath = null,
+            [CallerLineNumber] int lineNumber = 0)
+        {
+            expression.AddTag($"File: {filePath}:{lineNumber.ToString()}");
+            return expression;
         }
 
         public static SqlExpression<T> From<T>(this IDbConnection dbConn, TableOptions tableOptions,

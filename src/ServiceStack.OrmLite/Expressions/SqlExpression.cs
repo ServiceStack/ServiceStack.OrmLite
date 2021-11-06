@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -42,6 +43,7 @@ namespace ServiceStack.OrmLite
         public bool PrefixFieldWithTableName { get; set; }
         public bool UseSelectPropertiesAsAliases { get; set; }
         public bool WhereStatementWithoutWhereString { get; set; }
+        public ISet<string> Tags { get; } = new HashSet<string>();
 
         protected bool CustomSelect { get; set; }
         protected bool useFieldName = false;
@@ -74,6 +76,12 @@ namespace ServiceStack.OrmLite
         public SqlExpression<T> Clone()
         {
             return CopyTo(DialectProvider.SqlExpression<T>());
+        }
+
+        public virtual void AddTag(string tag)
+        {
+            Debug.Assert(!string.IsNullOrEmpty(tag));
+            Tags.Add(tag);
         }
 
         protected virtual SqlExpression<T> CopyTo(SqlExpression<T> to)
@@ -1476,7 +1484,7 @@ namespace ServiceStack.OrmLite
             OrmLiteConfig.SqlExpressionSelectFilter?.Invoke(GetUntyped());
 
             var sql = DialectProvider
-                .ToSelectStatement(forType, modelDef, SelectExpression, BodyExpression, OrderByExpression, offset: Offset, rows: Rows);
+                .ToSelectStatement(forType, modelDef, SelectExpression, BodyExpression, OrderByExpression, offset: Offset, rows: Rows,Tags);
 
             return SqlFilter != null
                 ? SqlFilter(sql)

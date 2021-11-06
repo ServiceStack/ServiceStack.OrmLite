@@ -80,11 +80,14 @@ namespace ServiceStack.OrmLite.SqlServer
             string bodyExpression,
             string orderByExpression = null,
             int? offset = null,
-            int? rows = null)
+            int? rows = null,
+            ISet<string> tags=null)
         {
-            var sb = StringBuilderCache.Allocate()
-                .Append(selectExpression)
-                .Append(bodyExpression);
+            var sb = StringBuilderCache.Allocate();
+            ApplyTags(sb, tags);
+
+            sb.Append(selectExpression)
+            .Append(bodyExpression);
 
             if (!string.IsNullOrEmpty(orderByExpression))
                 sb.Append(orderByExpression);

@@ -390,11 +390,13 @@ namespace ServiceStack.OrmLite.VistaDB
 
         /// Limit/Offset paging logic needs to be implemented here:
         public override string ToSelectStatement(QueryType queryType, ModelDefinition modelDef, string selectExpression,
-            string bodyExpression, string orderByExpression = null, int? offset = null, int? rows = null)
+            string bodyExpression, string orderByExpression = null, int? offset = null, int? rows = null,ISet<string> tags=null)
         {
-            var sb = StringBuilderCache.Allocate()
-                .Append(selectExpression)
-                .Append(bodyExpression);
+            var sb = StringBuilderCache.Allocate();
+            ApplyTags(sb, tags);
+
+            sb.Append(selectExpression)
+            .Append(bodyExpression);
 
             var hasOrderBy = !string.IsNullOrWhiteSpace(orderByExpression);
 
