@@ -7,9 +7,6 @@ using ServiceStack.Script;
 
 namespace ServiceStack.OrmLite
 {
-    [Obsolete("Use DbScripts")]
-    public class TemplateDbFilters : DbScripts {}
-
     [Obsolete("Use DbScriptsAsync")]
     public class DbScripts : ScriptMethods
     {

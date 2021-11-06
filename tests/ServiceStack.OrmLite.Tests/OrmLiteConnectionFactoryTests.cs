@@ -173,18 +173,28 @@ namespace ServiceStack.OrmLite.Tests
         public void Can_open_different_ConnectionString_with_DbFactory()
         {
             var factory = new OrmLiteConnectionFactory(":memory:", SqliteDialect.Provider);
-            using (var db = factory.OpenDbConnection())
-            {
-                Assert.That(db.State, Is.EqualTo(ConnectionState.Open));
-                Assert.That(db.ConnectionString, Is.EqualTo(":memory:"));
+            using var db = factory.OpenDbConnection();
+            Assert.That(db.State, Is.EqualTo(ConnectionState.Open));
+            Assert.That(db.ConnectionString, Is.EqualTo(":memory:"));
 
-                var dbFilePath = "~/db.sqlite".MapAbsolutePath();
-                using (var dbFile = factory.OpenDbConnectionString(dbFilePath))
-                {
-                    Assert.That(dbFile.State, Is.EqualTo(ConnectionState.Open));
-                    Assert.That(dbFile.ConnectionString, Is.EqualTo(dbFilePath));                    
-                }
-            }
+            var dbFilePath = "~/db.sqlite".MapAbsolutePath();
+            using var dbFile = factory.OpenDbConnectionString(dbFilePath);
+            Assert.That(dbFile.State, Is.EqualTo(ConnectionState.Open));
+            Assert.That(dbFile.ConnectionString, Is.EqualTo(dbFilePath));
+        }
+
+        [Test]
+        public void Can_open_different_ConnectionString_with_DbFactory_DataSource()
+        {
+            var factory = new OrmLiteConnectionFactory("DataSource=:memory:", SqliteDialect.Provider);
+            using var db = factory.OpenDbConnection();
+            Assert.That(db.State, Is.EqualTo(ConnectionState.Open));
+            Assert.That(db.ConnectionString, Is.EqualTo(":memory:"));
+
+            var dbFilePath = "~/db.sqlite".MapAbsolutePath();
+            using var dbFile = factory.OpenDbConnectionString(dbFilePath);
+            Assert.That(dbFile.State, Is.EqualTo(ConnectionState.Open));
+            Assert.That(dbFile.ConnectionString, Is.EqualTo(dbFilePath));
         }
 
         [Test]

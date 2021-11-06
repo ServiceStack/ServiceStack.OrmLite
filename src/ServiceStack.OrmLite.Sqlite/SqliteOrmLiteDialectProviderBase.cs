@@ -102,6 +102,9 @@ namespace ServiceStack.OrmLite.Sqlite
 
         public override IDbConnection CreateConnection(string connectionString, Dictionary<string, string> options)
         {
+            if (connectionString == "DataSource=:memory:")
+                connectionString = ":memory:";
+            
             var isFullConnectionString = connectionString.Contains(";");
             var connString = StringBuilderCache.Allocate();
             if (!isFullConnectionString)

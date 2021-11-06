@@ -48,6 +48,8 @@
     <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.Sqlite.Cil/obj" />
     <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.SqlServer/obj" />
     <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Data/obj" />
+    <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.SqlServer.Converters/obj" />
+    <RemoveDir Directories="$(SrcDir)/ServiceStack.OrmLite.Oracle/obj" />
   </Target>
 
   <Target Name="UpdateVersion">
