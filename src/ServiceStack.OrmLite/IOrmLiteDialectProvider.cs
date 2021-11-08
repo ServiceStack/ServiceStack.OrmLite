@@ -118,8 +118,15 @@ namespace ServiceStack.OrmLite
 
         string ToSelectStatement(Type tableType, string sqlFilter, params object[] filterParams);
 
-        string ToSelectStatement(QueryType queryType, ModelDefinition modelDef, string selectExpression,
-            string bodyExpression, string orderByExpression = null, int? offset = null, int? rows = null);
+        string ToSelectStatement(
+            QueryType queryType, 
+            ModelDefinition modelDef,
+            string selectExpression,
+            string bodyExpression, 
+            string orderByExpression = null, 
+            int? offset = null,
+            int? rows = null,
+            ISet<string> tags=null);
 
         string ToInsertRowStatement(IDbCommand cmd, object objWithProperties, ICollection<string> insertFields = null);
 
@@ -265,5 +272,12 @@ namespace ServiceStack.OrmLite
         string SqlLimit(int? offset = null, int? rows = null);
         string SqlCast(object fieldOrValue, string castAs);
         string SqlRandom { get; }
+
+        /// <summary>
+        ///  Generates a SQL comment.
+        /// </summary>
+        /// <param name="text">The comment text.</param>
+        /// <returns>The generated SQL.</returns>
+        string GenerateComment(in string text);
     }
 }

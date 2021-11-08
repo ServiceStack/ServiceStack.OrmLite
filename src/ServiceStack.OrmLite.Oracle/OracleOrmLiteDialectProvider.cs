@@ -1065,10 +1065,13 @@ namespace ServiceStack.OrmLite.Oracle
             string bodyExpression,
             string orderByExpression = null,
             int? offset = null,
-            int? rows = null)
+            int? rows = null,
+            ISet<string> tags=null)
         {
-            var sbInner = StringBuilderCache.Allocate()
-                .Append(selectExpression);
+            var sbInner = StringBuilderCache.Allocate();
+            ApplyTags(sbInner, tags);
+
+            sbInner.Append(selectExpression);
             if (!bodyExpression.StartsWith(" ") && !bodyExpression.StartsWith("\n")
                 && !selectExpression.EndsWith(" ") && !selectExpression.EndsWith("\n"))
             {

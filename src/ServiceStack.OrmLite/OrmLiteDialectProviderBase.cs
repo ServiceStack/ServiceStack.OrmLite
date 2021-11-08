@@ -513,15 +513,32 @@ namespace ServiceStack.OrmLite
             return StringBuilderCache.ReturnAndFree(sql);
         }
 
-        public virtual string ToSelectStatement(QueryType queryType, ModelDefinition modelDef,
+        protected virtual void ApplyTags(StringBuilder sqlBuilder, ISet<string> tags)
+        {
+            if (tags != null && tags.Count > 0)
+            {
+                foreach (var tag in tags)
+                {
+                    sqlBuilder.AppendLine(GenerateComment(tag));
+                }
+                sqlBuilder.Append("\n");
+            }
+        }
+
+        public virtual string ToSelectStatement(
+            QueryType queryType, 
+            ModelDefinition modelDef,
             string selectExpression,
             string bodyExpression,
             string orderByExpression = null,
             int? offset = null,
-            int? rows = null)
+            int? rows = null,
+            ISet<string> tags = null)
         {
-
             var sb = StringBuilderCache.Allocate();
+
+            ApplyTags(sb, tags);
+
             sb.Append(selectExpression);
             sb.Append(bodyExpression);
             if (!string.IsNullOrEmpty(orderByExpression))
@@ -536,6 +553,11 @@ namespace ServiceStack.OrmLite
             }
 
             return StringBuilderCache.ReturnAndFree(sb);
+        }
+
+        public virtual string GenerateComment(in string text)
+        {
+            return $"-- {text}";
         }
 
         public virtual SelectItem GetRowVersionSelectColumn(FieldDefinition field, string tablePrefix = null)
