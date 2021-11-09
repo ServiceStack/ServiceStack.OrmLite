@@ -26,41 +26,47 @@ namespace ServiceStack.OrmLite
 
         internal static List<Tuple<T, T2>> SelectMulti<T, T2>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
-            q.SelectIfDistinct(q.CreateMultiSelect<T, T2, EOT, EOT, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
+            q.SelectIfDistinct(q.CreateMultiSelect<T, T2, EOT, EOT, EOT, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
             return dbCmd.ExprConvertToList<Tuple<T, T2>>(q.ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3>> SelectMulti<T, T2, T3>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
-            q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, EOT, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
+            q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, EOT, EOT, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
             return dbCmd.ExprConvertToList<Tuple<T, T2, T3>>(q.ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3, T4>> SelectMulti<T, T2, T3, T4>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
-            q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, T4, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
+            q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, T4, EOT, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
             return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4>>(q.ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3, T4, T5>> SelectMulti<T, T2, T3, T4, T5>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
-            q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, T4, T5, EOT, EOT>(dbCmd.GetDialectProvider()));
+            q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, T4, T5, EOT, EOT, EOT>(dbCmd.GetDialectProvider()));
             return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5>>(q.ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3, T4, T5, T6>> SelectMulti<T, T2, T3, T4, T5, T6>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
-            q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, T4, T5, T6, EOT>(dbCmd.GetDialectProvider()));
+            q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, T4, T5, T6, EOT, EOT>(dbCmd.GetDialectProvider()));
             return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6>>(q.ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static List<Tuple<T, T2, T3, T4, T5, T6, T7>> SelectMulti<T, T2, T3, T4, T5, T6, T7>(this IDbCommand dbCmd, SqlExpression<T> q)
         {
-            q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, T4, T5, T6, T7>(dbCmd.GetDialectProvider()));
+            q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, T4, T5, T6, T7, EOT>(dbCmd.GetDialectProvider()));
             return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6, T7>>(q.ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
-        internal static string CreateMultiSelect<T, T2, T3, T4, T5, T6, T7>(this SqlExpression<T> q, IOrmLiteDialectProvider dialectProvider)
+        internal static List<Tuple<T, T2, T3, T4, T5, T6, T7, T8>> SelectMulti<T, T2, T3, T4, T5, T6, T7, T8>(this IDbCommand dbCmd, SqlExpression<T> q)
+        {
+            q.SelectIfDistinct(q.CreateMultiSelect<T, T2, T3, T4, T5, T6, T7, T8>(dbCmd.GetDialectProvider()));
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6, T7, T8>>(q.ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
+        }
+
+        internal static string CreateMultiSelect<T, T2, T3, T4, T5, T6, T7, T8>(this SqlExpression<T> q, IOrmLiteDialectProvider dialectProvider)
         {
             var sb = StringBuilderCache.Allocate()
                 .Append($"{dialectProvider.GetQuotedTableName(typeof(T).GetModelDefinition())}.*, {Sql.EOT}");
@@ -77,6 +83,8 @@ namespace ServiceStack.OrmLite
                 sb.Append($", {dialectProvider.GetQuotedTableName(typeof(T6).GetModelDefinition())}.*, {Sql.EOT}");
             if (typeof(T7) != typeof(EOT))
                 sb.Append($", {dialectProvider.GetQuotedTableName(typeof(T7).GetModelDefinition())}.*, {Sql.EOT}");
+            if (typeof(T8) != typeof(EOT))
+                sb.Append($", {dialectProvider.GetQuotedTableName(typeof(T8).GetModelDefinition())}.*, {Sql.EOT}");
 
             return StringBuilderCache.ReturnAndFree(sb);
         }
@@ -124,6 +132,11 @@ namespace ServiceStack.OrmLite
         internal static List<Tuple<T, T2, T3, T4, T5, T6, T7>> SelectMulti<T, T2, T3, T4, T5, T6, T7>(this IDbCommand dbCmd, SqlExpression<T> q, string[] tableSelects)
         {
             return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6, T7>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
+        }
+
+        internal static List<Tuple<T, T2, T3, T4, T5, T6, T7, T8>> SelectMulti<T, T2, T3, T4, T5, T6, T7, T8>(this IDbCommand dbCmd, SqlExpression<T> q, string[] tableSelects)
+        {
+            return dbCmd.ExprConvertToList<Tuple<T, T2, T3, T4, T5, T6, T7, T8>>(q.Select(q.CreateMultiSelect(tableSelects)).ToSelectStatement(QueryType.Select), q.Params, onlyFields: q.OnlyFields);
         }
 
         internal static T Single<T>(this IDbCommand dbCmd, Expression<Func<T, bool>> predicate)

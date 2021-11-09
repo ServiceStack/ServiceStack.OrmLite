@@ -50,7 +50,7 @@ namespace ServiceStack.OrmLite
         public static Task<List<Tuple<T, T2, T3, T4, T5>>> SelectMultiAsync<T, T2, T3, T4, T5>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5>(expression, token));
         public static Task<List<Tuple<T, T2, T3, T4, T5, T6>>> SelectMultiAsync<T, T2, T3, T4, T5, T6>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6>(expression, token));
         public static Task<List<Tuple<T, T2, T3, T4, T5, T6, T7>>> SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(expression, token));
-        public static Task<List<Tuple<T, T2, T3, T4, T5, T6, T7, T8>>> SelectMultiAsync<T, T2, T3, T4, T5, T6, T7, T8>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(expression, token));
+        public static Task<List<Tuple<T, T2, T3, T4, T5, T6, T7, T8>>> SelectMultiAsync<T, T2, T3, T4, T5, T6, T7, T8>(this IDbConnection dbConn, SqlExpression<T> expression, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6, T7, T8>(expression, token));
 
 
         public static Task<List<Tuple<T, T2>>> SelectMultiAsync<T, T2>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2>(expression, tableSelects, token));
@@ -64,7 +64,7 @@ namespace ServiceStack.OrmLite
         public static Task<List<Tuple<T, T2, T3, T4, T5, T6>>> SelectMultiAsync<T, T2, T3, T4, T5, T6>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6>(expression, tableSelects, token));
 
         public static Task<List<Tuple<T, T2, T3, T4, T5, T6, T7>>> SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(expression, tableSelects, token));
-        public static Task<List<Tuple<T, T2, T3, T4, T5, T6, T7, T8>>> SelectMultiAsync<T, T2, T3, T4, T5, T6, T7, T8>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6, T7>(expression, tableSelects, token));
+        public static Task<List<Tuple<T, T2, T3, T4, T5, T6, T7, T8>>> SelectMultiAsync<T, T2, T3, T4, T5, T6, T7, T8>(this IDbConnection dbConn, SqlExpression<T> expression, string[] tableSelects, CancellationToken token = default) => dbConn.Exec(dbCmd => dbCmd.SelectMultiAsync<T, T2, T3, T4, T5, T6, T7, T8>(expression, tableSelects, token));
 
         /// <summary>
         /// Returns a single result from using a LINQ Expression. E.g:
