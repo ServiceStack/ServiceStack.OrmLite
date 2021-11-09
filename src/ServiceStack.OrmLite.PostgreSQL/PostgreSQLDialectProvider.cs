@@ -633,7 +633,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
             [typeof(BitArray)] = NpgsqlDbType.Varbit,
             [typeof(IDictionary<string, string>)] = NpgsqlDbType.Hstore,
             [typeof(Guid)] = NpgsqlDbType.Uuid,
-            [typeof(NpgsqlInet)] = NpgsqlDbType.Cidr,
+            [typeof(ValueTuple<IPAddress, int>)] = NpgsqlDbType.Cidr,
             [typeof(ValueTuple<IPAddress,int>)] = NpgsqlDbType.Inet,
             [typeof(IPAddress)] = NpgsqlDbType.Inet,
             [typeof(PhysicalAddress)] = NpgsqlDbType.MacAddr,
