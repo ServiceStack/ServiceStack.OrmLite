@@ -167,7 +167,7 @@ namespace ServiceStack.OrmLite
 
         public IOrmLiteExecFilter ExecFilter { get; set; }
 
-        public Dictionary<Type, IOrmLiteConverter> Converters = new Dictionary<Type, IOrmLiteConverter>();
+        public Dictionary<Type, IOrmLiteConverter> Converters = new();
 
         public string AutoIncrementDefinition = "AUTOINCREMENT"; //SqlServer express limit
 
