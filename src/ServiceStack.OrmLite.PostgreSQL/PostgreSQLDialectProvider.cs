@@ -72,6 +72,10 @@ namespace ServiceStack.OrmLite.PostgreSQL
             RegisterConverter<DateTimeOffset[]>(new PostgreSqlDateTimeOffsetTimeStampTzArrayConverter());
             
             RegisterConverter<XmlValue>(new PostgreSqlXmlConverter());
+            
+#if NET6_0
+            RegisterConverter<DateOnly>(new PostgreSqlDateOnlyConverter());
+#endif
 
             this.Variables = new Dictionary<string, string>
             {

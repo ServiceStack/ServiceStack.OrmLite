@@ -34,7 +34,7 @@
   </ItemGroup>
 
   <PropertyGroup Condition=" '$(TargetFramework)' == 'net6.0' ">
-    <DefineConstants>$(DefineConstants);NETCORE_SUPPORT;NETCORE</DefineConstants>
+    <DefineConstants>$(DefineConstants);NETCORE;NET6_0</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>

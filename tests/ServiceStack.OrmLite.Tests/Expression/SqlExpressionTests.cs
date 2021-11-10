@@ -4,8 +4,6 @@ using System.Data;
 using System.Linq;
 using NUnit.Framework;
 using ServiceStack.DataAnnotations;
-#if !NETCORE_SUPPORT
-#endif
 using ServiceStack.OrmLite.Tests.UseCase;
 using ServiceStack.Text;
 
