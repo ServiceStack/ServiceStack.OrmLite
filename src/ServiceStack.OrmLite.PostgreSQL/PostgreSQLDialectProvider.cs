@@ -75,6 +75,7 @@ namespace ServiceStack.OrmLite.PostgreSQL
 
 #if NET6_0
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+            AppContext.SetSwitch("Npgsql.EnableLegacyCaseInsensitiveDbParameters", true);
             RegisterConverter<DateOnly>(new PostgreSqlDateOnlyConverter());
 #endif
 
