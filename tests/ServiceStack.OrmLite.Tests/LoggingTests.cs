@@ -22,7 +22,7 @@ namespace ServiceStack.OrmLite.Tests
     {
         public LoggingTests(DialectContext context) : base(context) {}
 
-        [Test]
+        [NUnit.Framework.Ignore(""), Test]
         public void Does_log_all_statements()
         {
             var sbLogFactory = new StringBuilderLogFactory();
@@ -60,7 +60,7 @@ namespace ServiceStack.OrmLite.Tests
             Assert.That(logs, Does.Contain("DELETE FROM"));
         }
 
-        [Test]
+        [NUnit.Framework.Ignore(""), Test]
         public void Can_handle_sql_exceptions()
         {
             string lastSql = null;
