@@ -48,6 +48,11 @@ namespace ServiceStack.OrmLite
             return DbCmd != null ? filter(DbCmd) : Db.Exec(filter);
         }
 
+        public Task<TReturn> Exec<TReturn>(Func<IDbCommand, Task<TReturn>> filter)
+        {
+            return DbCmd != null ? filter(DbCmd) : Db.Exec(filter);
+        }
+
         public void Exec(Action<IDbCommand> filter)
         {
             if (DbCmd != null)
