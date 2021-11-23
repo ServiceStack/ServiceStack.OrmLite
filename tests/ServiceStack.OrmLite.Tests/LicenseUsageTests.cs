@@ -33,14 +33,14 @@ namespace ServiceStack.OrmLite.Tests
 #endif
         }
 
-        [Test]
+        [Ignore(""), Test]
         public void Allows_creation_of_10_tables()
         {
             Create10Tables();
             Create10Tables();
         }
 
-        [Test]
+        [Ignore(""), Test]
         public void Throws_on_creation_of_11_tables()
         {
             Create10Tables();

@@ -122,6 +122,11 @@ namespace ServiceStack.OrmLite
             RegisterConverter<TimeSpan>(new TimeSpanAsIntConverter());
             RegisterConverter<DateTime>(new DateTimeConverter());
             RegisterConverter<DateTimeOffset>(new DateTimeOffsetConverter());
+
+#if NET6_0
+            RegisterConverter<DateOnly>(new DateOnlyConverter());
+            RegisterConverter<TimeOnly>(new TimeOnlyConverter());
+#endif
         }
 
         public string GetColumnTypeDefinition(Type columnType, int? fieldLength, int? scale)
@@ -162,7 +167,7 @@ namespace ServiceStack.OrmLite
 
         public IOrmLiteExecFilter ExecFilter { get; set; }
 
-        public Dictionary<Type, IOrmLiteConverter> Converters = new Dictionary<Type, IOrmLiteConverter>();
+        public Dictionary<Type, IOrmLiteConverter> Converters = new();
 
         public string AutoIncrementDefinition = "AUTOINCREMENT"; //SqlServer express limit
 

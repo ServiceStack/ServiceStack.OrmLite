@@ -934,7 +934,7 @@ namespace ServiceStack.OrmLite
             foreach (var field in fields)
             {
                 var tableDef = GetModelDefinition(field);
-                var qualifiedName = modelDef != null
+                var qualifiedName = tableDef != null
                     ? GetQuotedColumnName(tableDef, field.Name)
                     : DialectProvider.GetQuotedColumnName(field);
 
