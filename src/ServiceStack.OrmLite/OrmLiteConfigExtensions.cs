@@ -42,7 +42,7 @@ namespace ServiceStack.OrmLite
         }
 
         internal static ModelDefinition GetModelDefinition(this Type modelType)
-        {
+        {                            
             if (typeModelDefinitionMap.TryGetValue(modelType, out var modelDef))
                 return modelDef;
 
@@ -98,6 +98,7 @@ namespace ServiceStack.OrmLite
             var hasIdField = CheckForIdField(objProperties);
 
             var i = 0;
+            var propertyInfoIdx = 0;
             foreach (var propertyInfo in objProperties)
             {
                 if (propertyInfo.GetIndexParameters().Length > 0)
@@ -111,7 +112,7 @@ namespace ServiceStack.OrmLite
                 var decimalAttribute = propertyInfo.FirstAttribute<DecimalLengthAttribute>();
                 var belongToAttribute = propertyInfo.FirstAttribute<BelongToAttribute>();
                 var referenceAttr = propertyInfo.FirstAttribute<ReferenceAttribute>();
-                
+
                 var isRowVersion = propertyInfo.Name == ModelDefinition.RowVersionName
                     && (propertyInfo.PropertyType == typeof(ulong) || propertyInfo.PropertyType == typeof(byte[]));
 
@@ -124,7 +125,7 @@ namespace ServiceStack.OrmLite
                 var propertyType = isNullableType
                     ? Nullable.GetUnderlyingType(propertyInfo.PropertyType)
                     : propertyInfo.PropertyType;
-                
+
 
                 Type treatAsType = null;
 
@@ -149,13 +150,13 @@ namespace ServiceStack.OrmLite
                    || isAutoId;
 
                 var isAutoIncrement = isPrimaryKey && propertyInfo.HasAttributeCached<AutoIncrementAttribute>();
-                
+
                 if (isAutoIncrement && propertyInfo.PropertyType == typeof(Guid))
                     throw new NotSupportedException($"[AutoIncrement] is only valid for integer properties for {modelType.Name}.{propertyInfo.Name} Guid property use [AutoId] instead");
-                
+
                 if (isAutoId && (propertyInfo.PropertyType == typeof(int) || propertyInfo.PropertyType == typeof(long)))
                     throw new NotSupportedException($"[AutoId] is only valid for Guid properties for {modelType.Name}.{propertyInfo.Name} integer property use [AutoIncrement] instead");
-                
+
                 var aliasAttr = propertyInfo.FirstAttribute<AliasAttribute>();
 
                 var indexAttr = propertyInfo.FirstAttribute<IndexAttribute>();
@@ -170,6 +171,10 @@ namespace ServiceStack.OrmLite
                 var fkAttr = propertyInfo.FirstAttribute<ForeignKeyAttribute>();
                 var customFieldAttr = propertyInfo.FirstAttribute<CustomFieldAttribute>();
                 var chkConstraintAttr = propertyInfo.FirstAttribute<CheckConstraintAttribute>();
+
+                var customFieldOrderAttr = propertyInfo.FirstAttribute<CustomFieldOrderAttribute>();
+                var order = propertyInfoIdx++;
+                if (customFieldOrderAttr != null) order = customFieldOrderAttr.Order;
 
                 var fieldDefinition = new FieldDefinition
                 {
@@ -187,7 +192,7 @@ namespace ServiceStack.OrmLite
                     IsUniqueIndex = isUnique,
                     IsClustered = indexAttr?.Clustered == true,
                     IsNonClustered = indexAttr?.NonClustered == true,
-                    IndexName = indexAttr?.Name, 
+                    IndexName = indexAttr?.Name,
                     IsRowVersion = isRowVersion,
                     IgnoreOnInsert = propertyInfo.HasAttributeCached<IgnoreOnInsertAttribute>(),
                     IgnoreOnUpdate = propertyInfo.HasAttributeCached<IgnoreOnUpdateAttribute>(),
@@ -213,6 +218,7 @@ namespace ServiceStack.OrmLite
                     BelongToModelName = belongToAttribute?.BelongToTableType.GetModelDefinition().ModelName,
                     CustomFieldDefinition = customFieldAttr?.Sql,
                     IsRefType = propertyType.IsRefType(),
+                    Order = order
                 };
 
                 if (isIgnored)

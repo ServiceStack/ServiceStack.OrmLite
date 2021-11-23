@@ -1297,9 +1297,9 @@ namespace ServiceStack.OrmLite
 
         public virtual string GetAutoIdDefaultValue(FieldDefinition fieldDef) => null;
 
-        public Func<ModelDefinition, List<FieldDefinition>> CreateTableFieldsStrategy { get; set; } = GetFieldDefinitions;
+        public Func<ModelDefinition, IEnumerable<FieldDefinition>> CreateTableFieldsStrategy { get; set; } = GetFieldDefinitions;
 
-        public static List<FieldDefinition> GetFieldDefinitions(ModelDefinition modelDef) => modelDef.FieldDefinitions;
+        public static IEnumerable<FieldDefinition> GetFieldDefinitions(ModelDefinition modelDef) => modelDef.FieldDefinitions.OrderBy(fd=>fd.Order);
 
         public abstract string ToCreateSchemaStatement(string schemaName);
 
