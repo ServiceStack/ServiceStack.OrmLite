@@ -2,26 +2,27 @@ using System;
 using System.Globalization;
 
 #if NET6_0
-namespace ServiceStack.OrmLite.Converters;
-
-public class TimeOnlyConverter : TimeSpanAsIntConverter
+namespace ServiceStack.OrmLite.Converters
 {
-    public override string ToQuotedString(Type fieldType, object value)
+    public class TimeOnlyConverter : TimeSpanAsIntConverter
     {
-        return ((TimeOnly)value).Ticks.ToString(CultureInfo.InvariantCulture);
-    }
+        public override string ToQuotedString(Type fieldType, object value)
+        {
+            return ((TimeOnly)value).Ticks.ToString(CultureInfo.InvariantCulture);
+        }
 
-    public override object ToDbValue(Type fieldType, object value)
-    {
-        var timespan = (TimeOnly)value;
-        return timespan.Ticks;
-    }
+        public override object ToDbValue(Type fieldType, object value)
+        {
+            var timespan = (TimeOnly)value;
+            return timespan.Ticks;
+        }
 
-    public override object FromDbValue(Type fieldType, object value)
-    {
-        var ticks = (long)this.ConvertNumber(typeof(long), value);
-        var timeSpan = TimeSpan.FromTicks(ticks);
-        return TimeOnly.FromTimeSpan(timeSpan);
+        public override object FromDbValue(Type fieldType, object value)
+        {
+            var ticks = (long)this.ConvertNumber(typeof(long), value);
+            var timeSpan = TimeSpan.FromTicks(ticks);
+            return TimeOnly.FromTimeSpan(timeSpan);
+        }
     }
 }
 
