@@ -62,6 +62,8 @@ namespace ServiceStack.OrmLite
         public string CheckConstraint { get; set; }
 
         public bool IsUniqueConstraint { get; set; }
+
+        public int Order { get; set; }
         
         public ForeignKeyConstraint ForeignKey { get; set; }
 
