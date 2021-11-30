@@ -407,23 +407,23 @@ The second argument lets you specify a filter for updates:
 db.UpdateOnly(() => new Person { FirstName = "JJ" }, where: p => p.LastName == "Hendrix");
 ```
 
-Alternatively you can pass in a POCO directly, in which case the first expression in an `UpdateOnly` 
+Alternatively you can pass in a POCO directly, in which case the first expression in an `UpdateOnlyFields` 
 statement is used to specify which fields should be updated:
 
 ```csharp
-db.UpdateOnly(new Person { FirstName = "JJ" }, onlyFields: p => p.FirstName);
+db.UpdateOnlyFields(new Person { FirstName = "JJ" }, onlyFields: p => p.FirstName);
 
-db.UpdateOnly(new Person { FirstName = "JJ", Age = 12 }, 
+db.UpdateOnlyFields(new Person { FirstName = "JJ", Age = 12 }, 
     onlyFields: p => new { p.FirstName, p.Age });
 
-db.UpdateOnly(new Person { FirstName = "JJ", Age = 12 }, 
+db.UpdateOnlyFields(new Person { FirstName = "JJ", Age = 12 }, 
     onlyFields: p => new[] { "Name", "Age" });
 ```
 
 When present, the second expression is used as the where filter:
 
 ```csharp
-db.UpdateOnly(new Person { FirstName = "JJ" }, 
+db.UpdateOnlyFields(new Person { FirstName = "JJ" }, 
     onlyFields: p => p.FirstName, 
     where: p => p.LastName == "Hendrix");
 ```
@@ -433,7 +433,7 @@ Instead of using the expression filters above you can choose to use an SqlExpres
 var q = db.From<Person>()
     .Update(p => p.FirstName);
 
-db.UpdateOnly(new Person { FirstName = "JJ", LastName = "Hendo" }, onlyFields: q);
+db.UpdateOnlyFields(new Person { FirstName = "JJ", LastName = "Hendo" }, onlyFields: q);
 ```
 
 Using an Object Dictionary:
@@ -443,7 +443,7 @@ var updateFields = new Dictionary<string,object> {
     [nameof(Person.FirstName)] = "JJ",
 };
 
-db.UpdateOnly<Person>(updateFields, p => p.LastName == "Hendrix");
+db.UpdateOnlyFields<Person>(updateFields, p => p.LastName == "Hendrix");
 ```
 
 Using a typed SQL Expression:
@@ -453,7 +453,7 @@ var q = db.From<Person>()
     .Where(x => x.FirstName == "Jimi")
     .Update(p => p.FirstName);
           
-db.UpdateOnly(new Person { FirstName = "JJ" }, onlyFields: q);
+db.UpdateOnlyFields(new Person { FirstName = "JJ" }, onlyFields: q);
 ```
 
 ### Updating existing values
