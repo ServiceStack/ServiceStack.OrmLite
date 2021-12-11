@@ -31,6 +31,20 @@ namespace ServiceStack.OrmLite
             return allTableDefs;
         }
 
+        public SqlExpression<T> AddReferenceTableIfNotExists<Target>()
+        {
+            var tableDef = typeof(Target).GetModelDefinition();
+            if (!tableDefs.Contains(tableDef))
+                tableDefs.Add(tableDef);
+            return this;
+        }
+
+        public SqlExpression<T> CustomJoin<Target>(string joinString)
+        {
+            AddReferenceTableIfNotExists<Target>();
+            return CustomJoin(joinString);
+        }
+
         public bool IsJoinedTable(Type type)
         {
             return tableDefs.FirstOrDefault(x => x.ModelType == type) != null;
