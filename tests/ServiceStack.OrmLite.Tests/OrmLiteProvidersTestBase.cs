@@ -195,7 +195,6 @@ namespace ServiceStack.OrmLite.Tests
             AddTestDataVersions(Dialect.MySqlConnector, MySqlDb.MySqlConnectorVersions);
             AddTestDataVersions(Dialect.Oracle, OracleDb.Versions);
             AddTestDataVersions(Dialect.Firebird, FirebirdDb.Versions);
-            AddTestDataVersions(Dialect.VistaDb, VistaDb.Versions);
 
             foreach (var data in fixtureData)
             {

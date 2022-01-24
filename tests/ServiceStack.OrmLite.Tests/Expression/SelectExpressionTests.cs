@@ -180,9 +180,6 @@ namespace ServiceStack.OrmLite.Tests.Expression
                 Assert.That(db.Count<Text>(q => q.Name.StartsWith(@"a^b")), Is.EqualTo(2));
                 Assert.That(db.Count<Text>(q => q.Name.EndsWith(@"_cd")), Is.EqualTo(1));
                 Assert.That(db.Count<Text>(q => q.Name.Contains(@"abc")), Is.EqualTo(1));
-
-                if (Dialect != Dialect.VistaDb)
-                    Assert.That(db.Count<Text>(q => q.Name.StartsWith(@"a^")), Is.EqualTo(3));
             }
         }
 

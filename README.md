@@ -71,7 +71,6 @@ Unofficial Releases maintained by ServiceStack Community:
 
   - [ServiceStack.OrmLite.Oracle](http://nuget.org/packages/ServiceStack.OrmLite.Oracle)
   - [ServiceStack.OrmLite.Firebird](http://nuget.org/List/Packages/ServiceStack.OrmLite.Firebird)
-  - [ServiceStack.OrmLite.VistaDb](http://nuget.org/List/Packages/ServiceStack.OrmLite.VistaDb)
 
 _Latest v4+ on NuGet is a [commercial release](https://servicestack.net/ormlite) with [free quotas](https://servicestack.net/download#free-quotas)._
 
@@ -115,8 +114,7 @@ to support OrmLite features. The available Dialect Providers for each RDBMS is l
     MySqlDialect.Provider          // MySql
     OracleDialect.Provider         // Oracle
     FirebirdDialect.Provider       // Firebird
-    VistaDbDialect.Provider        // Vista DB
-
+    
 #### SQL Server Versions
 
 There are a number of different SQL Server dialects to take advantage of features available in each version. For any version before SQL Server 2008 please use `SqlServer2008Dialect.Provider`, for any other version please use the best matching version:

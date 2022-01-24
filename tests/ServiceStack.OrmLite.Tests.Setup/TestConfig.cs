@@ -42,8 +42,6 @@ namespace ServiceStack.OrmLite.Tests
         Firebird = 1 << 14,
         Firebird4 = 1 << 15,
         
-        VistaDb = 1 << 16,
-        
         // any versions
         AnyPostgreSql = PostgreSql9 | PostgreSql10 | PostgreSql11,
         AnyMySql = MySql | MySqlConnector, 
@@ -53,7 +51,7 @@ namespace ServiceStack.OrmLite.Tests
         // db groups
         BaseSupported = Sqlite | SqlServer | AnyPostgreSql | MySql | MySqlConnector,
         Supported = Sqlite | AnySqlServer | AnyMySql | AnyPostgreSql,
-        Community = Firebird | Oracle | VistaDb,
+        Community = Firebird | Oracle,
         
         // all
         All = Supported | Community
@@ -98,8 +96,6 @@ namespace ServiceStack.OrmLite.Tests
                 case Dialect.Firebird:
                 case Dialect.Firebird4:
                     return FirebirdDb.VersionString(Version); 
-                case Dialect.VistaDb:
-                    return VistaDb.VersionString(Version); 
             }
 
             return defaultLabel;
@@ -229,15 +225,6 @@ namespace ServiceStack.OrmLite.Tests
             ? "v4"
             : version.ToString());
     }
-    public static class VistaDb
-    {
-        public const int V5 = 5;
-        public static readonly int[] Versions = TestConfig.EnvironmentVariableInto("VISTADB_VERSION", new[]{ V5 });
-        public static readonly string DefaultConnection = TestConfig.GetConnection(Dialect.VistaDb, V5);
-        public static string VersionString(int version) => "VistaDB " + (version == V5
-            ? "v5"
-            : version.ToString());
-    }
 
     /// <summary>
     /// Primary config for all tests 
@@ -263,9 +250,6 @@ namespace ServiceStack.OrmLite.Tests
             [Dialect.Oracle] = OracleDialect.Provider,
             [Dialect.Firebird] = FirebirdDialect.Provider,
             [Dialect.Firebird4] = Firebird4Dialect.Provider,
-#if !NETCORE
-            [Dialect.VistaDb] = VistaDbDialect.Provider,
-#endif
         };
 
         public static string GetConnection(Dialect dialect, int version)
@@ -309,8 +293,6 @@ namespace ServiceStack.OrmLite.Tests
                     [Tuple.Create(Dialect.Firebird, FirebirdDb.V3)] = EnvironmentVariable(new[]{ "FIREBIRD3_CONNECTION", "FIREBIRD_CONNECTION" }, @"User=SYSDBA;Password=masterkey;Database=/firebird/data/test.gdb;DataSource=localhost;Port=48101;Dialect=3;charset=ISO8859_1;MinPoolSize=0;MaxPoolSize=100;"),
 
                     [Tuple.Create(Dialect.Firebird, FirebirdDb.V4)] = EnvironmentVariable(new[]{ "FIREBIRD4_CONNECTION", "FIREBIRD_CONNECTION" }, @"User=SYSDBA;Password=masterkey;Database=c:\ormlite-tests\firebird\test.fdb;DataSource=localhost;Dialect=3;charset=utf8;MinPoolSize=0;MaxPoolSize=100;"),
-                
-                    [Tuple.Create(Dialect.VistaDb, VistaDb.V5)] = EnvironmentVariable(new[]{ "VISTADB5_CONNECTION", "VISTADB_CONNECTION" }, @"Data Source='|DataDirectory|\Database.vdb5'"),
                 };
             }
             catch (Exception e)
@@ -337,7 +319,6 @@ namespace ServiceStack.OrmLite.Tests
             
             [Dialect.Oracle] = OracleDb.Versions,
             [Dialect.Firebird] = FirebirdDb.Versions,
-            [Dialect.VistaDb] = VistaDb.Versions,
         };
         
         public static IOrmLiteDialectProvider DefaultProvider = SqliteDialect.Provider;
@@ -374,37 +355,6 @@ namespace ServiceStack.OrmLite.Tests
                 var dialect = dialectConnection.Key.Item1;
                 if (!DialectProviders.TryGetValue(dialect, out var dialectProvider))
                     continue;
-
-                if (dialect != Dialect.VistaDb)
-                {
-                    
-                    dbFactory.RegisterConnection(DialectContext.Key(dialectConnection.Key), dialectConnection.Value, dialectProvider);
-                    continue;
-                }
-                
-#if !NETCORE
-                var version = dialectConnection.Key.Item2;
-                VistaDbDialect.Instance.UseLibraryFromGac = true;
-                var connectionString = VistaDb.DefaultConnection;
-                try
-                {
-                    var factory = DbProviderFactories.GetFactory("System.Data.VistaDB5;");
-                    using (var db = factory.CreateConnection())
-                    using (var cmd = db.CreateCommand())
-                    {
-                        db.ConnectionString = connectionString;
-                        var tmpFile = Path.GetTempPath().CombineWith($"{Guid.NewGuid():n}.vb5");
-                        cmd.CommandText =
-                            $"CREATE DATABASE '|DataDirectory|{tmpFile}', PAGE SIZE 4, LCID 1033, CASE SENSITIVE FALSE;";
-                        cmd.ExecuteNonQuery();
-                        dbFactory.RegisterConnection(DialectContext.Key(dialect,version),tmpFile,VistaDbDialect.Provider);
-                    }
-                }
-                catch
-                {
-                    // vista not installed.
-                }
-#endif
             }
 
             foreach (var provider in DialectProviders)

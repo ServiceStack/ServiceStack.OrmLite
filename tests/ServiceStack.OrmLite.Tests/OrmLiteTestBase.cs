@@ -165,22 +165,6 @@ namespace ServiceStack.OrmLite.Tests
                     return Init(FirebirdDb.DefaultConnection, FirebirdDialect.Provider);
                 case Dialect.Firebird4:
                     return Init(FirebirdDb.V4Connection, Firebird4Dialect.Provider);
-
-#if !NETCORE                    
-                case Dialect.VistaDb:
-                    VistaDbDialect.Instance.UseLibraryFromGac = true;
-                    var connectionString = System.Configuration.ConfigurationManager.ConnectionStrings["myVDBConnection"];
-                    var factory = DbProviderFactories.GetFactory(connectionString.ProviderName);
-                    using (var db = factory.CreateConnection())
-                    using (var cmd = db.CreateCommand())
-                    {
-                        var tmpFile = Path.GetTempPath().CombineWith(Guid.NewGuid().ToString("n") + ".vb5");
-                        cmd.CommandText = @"CREATE DATABASE '|DataDirectory|{0}', PAGE SIZE 4, LCID 1033, CASE SENSITIVE FALSE;"
-                            .Fmt(tmpFile);
-                        cmd.ExecuteNonQuery();
-                        return Init("Data Source={0};".Fmt(tmpFile), VistaDbDialect.Provider);
-                    }
-#endif
             }
 
             throw new NotImplementedException("{0}".Fmt(Dialect));
