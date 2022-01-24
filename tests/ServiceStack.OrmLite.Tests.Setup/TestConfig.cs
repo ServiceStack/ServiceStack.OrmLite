@@ -233,7 +233,7 @@ namespace ServiceStack.OrmLite.Tests
     {
         public const bool EnableDebugLogging = false;
 
-        public static Dictionary<Dialect, IOrmLiteDialectProvider> DialectProviders = new Dictionary<Dialect, IOrmLiteDialectProvider> 
+        public static Dictionary<Dialect, IOrmLiteDialectProvider> DialectProviders = new()
         {
             [Dialect.Sqlite] = SqliteDialect.Provider,
             [Dialect.SqlServer] = SqlServerDialect.Provider,
@@ -355,6 +355,8 @@ namespace ServiceStack.OrmLite.Tests
                 var dialect = dialectConnection.Key.Item1;
                 if (!DialectProviders.TryGetValue(dialect, out var dialectProvider))
                     continue;
+                
+                dbFactory.RegisterConnection(DialectContext.Key(dialectConnection.Key), dialectConnection.Value, dialectProvider);
             }
 
             foreach (var provider in DialectProviders)
